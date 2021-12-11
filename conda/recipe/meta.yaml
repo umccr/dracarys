@@ -1,0 +1,25 @@
+package:
+  name: woofy
+  version: 0.0.1
+
+source:
+  path: ../..
+
+build:
+  number: 0
+  noarch: python
+
+requirements:
+  host:
+    - python
+  run:
+    - click
+
+test:
+  commands:
+    - woofy --version
+
+about:
+  home: https://github.com/umccr/woofy
+  license: MIT
+  summary: Scripts for post-processing somatic workflows.
