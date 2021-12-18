@@ -1,10 +1,10 @@
 import click
-from woofy import dog, _version
+from dracarys import roar, _version
 
 @click.group(context_settings=dict(help_option_names=['-h', '--help']))
 @click.version_option(_version.__version__)
 def cli():
-    """Somatic Workflow Postprocessing"""
+    """Post-processing DRAGEN workflows."""
 
 
-cli.add_command(dog.woofy)
+cli.add_command(roar.roar)

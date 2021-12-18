@@ -1,5 +1,5 @@
 package:
-  name: woofy
+  name: dracarys
   version: 0.0.1
 
 source:
@@ -17,9 +17,9 @@ requirements:
 
 test:
   commands:
-    - woofy --version
+    - dracarys --version
 
 about:
-  home: https://github.com/umccr/woofy
+  home: https://github.com/umccr/dracarys
   license: MIT
   summary: Scripts for post-processing somatic workflows.
