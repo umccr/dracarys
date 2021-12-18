@@ -9,15 +9,6 @@ avail_colours = [
     'magenta',
     'cyan',
     'white',
-    'reset',
-    'bright_black',
-    'bright_red',
-    'bright_green',
-    'bright_yellow',
-    'bright_blue',
-    'bright_magenta',
-    'bright_cyan',
-    'bright_white'
     ]
 
 @click.command()
@@ -33,12 +24,12 @@ dragon = """
                   #/ \__   '._ 
   ,_#_#          #/  /=/`-. _")
    '-.`\#       #/  /=(_.. `-`.
-      \ `\#    #/  -.'`_\\\`_\\\
+      \ `\#    #/  -.'`_///`_///
        ;  \#  #/ '.__.'=\_.'
-       |   '-#;    _|====\_ 
-       ;      '  /`  `\==| \
+       |   '-#;    _|====\_
+       ;      '  /`  `\==| |
         \     .        \=| /
          '-.._         // /__
-              `)-.    `----._\
-              <_________\_\_\
+              `)-.    `----._|
+              <_________\_\_|
 """
