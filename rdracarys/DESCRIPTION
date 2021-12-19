@@ -1,0 +1,43 @@
+Package: dracarys
+Title: Playing with DRAGEN fire
+Version: 0.0.2
+Description: Post-processing DRAGEN workflows.
+Authors@R:
+    person(given = "Peter",
+           family = "Diakumis",
+           role = c("aut", "cre"),
+           email = "peterdiakumis@gmail.com",
+           comment = c(ORCID = "0000-0002-7502-7545"))
+URL: https://github.com/umccr/dracarys, https://umccr.github.io/dracarys/
+BugReports: https://github.com/umccr/dracarys/issues
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+ByteCompile: true
+Remotes: github::pdiakumis/rock
+Depends:
+    R (>= 4.1)
+Imports:
+    assertthat,
+    bedr,
+    dplyr,
+    ggplot2,
+    glue,
+    gtools,
+    jsonlite,
+    purrr,
+    readr,
+    rlang,
+    rock,
+    scales,
+    tibble,
+    tidyr,
+Roxygen: list(markdown = TRUE,
+              roclets = c("namespace", "rd", "roxytest::testthat_roclet"))
+RoxygenNote: 7.1.1
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat,
+VignetteBuilder: knitr
+
