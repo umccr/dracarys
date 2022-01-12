@@ -2,3 +2,5 @@
 *.egg
 __pycache__/
 *.py[cod]
+.Rproj.user
+nogit/
