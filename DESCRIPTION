@@ -1,5 +1,5 @@
 Package: dracarys
-Title: Post-processing DRAGEN workflows.
+Title: Post-processing DRAGEN workflows
 Version: 0.0.1
 Description: Post-processing DRAGEN workflows.
 Authors@R:

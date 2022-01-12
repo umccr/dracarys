@@ -2,7 +2,7 @@
 ^conda$
 ^docs$
 ^\.github$
-^rdracarys\.Rproj$
+^dracarys\.Rproj$
 ^inst/rmd$
 ^LICENSE\.md$
 ^nogit$
@@ -17,4 +17,5 @@
 ^pyproject\.toml$
 ^dracarys$
 ^Dockerfile$
-^.bumpversion\.cfg$
+^\.bumpversion\.cfg$
+^\.pre-commit-config\.yaml$
