@@ -2,17 +2,18 @@
 % Please edit documentation in R/File.R
 \name{File}
 \alias{File}
-\title{R6 Class Representing a File}
+\title{File R6 Class}
 \description{
-A File has a path and a basename.
-}
-\details{
-A File has a type and a default read method for its type.
+File is a base R6 class representing a TSV/CSV/JSON output from
+a DRAGEN workflow.
+
+A File has a path, a basename, a type, and a default read method for its type.
 }
 \examples{
 F1 <- File$new(readr::readr_example("mtcars.csv"))
-F1$bname()
 F1$read(col_types = readr::cols("double"))
+F1$bname()
+
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
@@ -81,9 +82,16 @@ String describing the type of file (CSV, TSV, JSON or OTHER).
 \subsection{Method \code{print()}}{
 Print details about the File.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{File$print()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{File$print(...)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-read"></a>}}
@@ -97,7 +105,7 @@ Read the file based on its type.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{Arguments passed on to appropriate read_* function}
+\item{\code{...}}{Arguments passed on to appropriate read_* function.}
 }
 \if{html}{\out{</div>}}
 }

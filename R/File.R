@@ -1,11 +1,15 @@
 #' File R6 Class
 #'
-#' @description A File has a path and a basename.
-#' @details A File has a type and a default read method for its type.
+#' @description File is a base R6 class representing a TSV/CSV/JSON output from
+#' a DRAGEN workflow.
+#'
+#' A File has a path, a basename, a type, and a default read method for its type.
+#'
 #' @examples
 #' F1 <- File$new(readr::readr_example("mtcars.csv"))
 #' F1$read(col_types = readr::cols("double"))
 #' F1$bname()
+#'
 #' @export
 File <- R6::R6Class("File", public = list(
   #' @field path Name or full path of the file.
@@ -37,7 +41,8 @@ File <- R6::R6Class("File", public = list(
   },
 
   #' @description Print details about the File.
-  print = function() {
+  #' @param ... (ignored).
+  print = function(...) {
     cat("#--- File ---#\n")
     cat(glue::glue("Path: {self$path}"), "\n")
     cat(glue::glue("Basename: {self$bname()}"), "\n")
@@ -46,7 +51,7 @@ File <- R6::R6Class("File", public = list(
   },
 
   #' @description Read the file based on its type.
-  #' @param ... Arguments passed on to appropriate read_* function
+  #' @param ... Arguments passed on to appropriate read_* function.
   read = function(...) {
     x <- self$path
     t <- self$type()
@@ -63,3 +68,15 @@ File <- R6::R6Class("File", public = list(
     }
   }
 ))
+
+#' Read File object
+#'
+#' @description Read the file based on its type.
+#'
+#' @param x Object of class `File`.
+#' @param ... Arguments passed on to appropriate read_* function.
+#' @export
+read.File <- function(x, ...) {
+  assertthat::assert_that(inherits(x, "File"))
+  x$read(...)
+}

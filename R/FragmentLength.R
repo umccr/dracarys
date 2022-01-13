@@ -2,11 +2,12 @@
 #'
 #' @description Contains methods for reading and plotting contents of
 #' the `fragment_length_hist.csv` file output from DRAGEN.
+#'
 #' @examples
 #' x <- system.file("extdata/SEQC-II.fragment_length_hist.csv", package = "dracarys")
 #' F1 <- FragmentLength$new(x)
-#' F1$read()
-#' F1$plot()
+#' F1$read() # or read(F1)
+#' F1$plot() # or plot(F1)
 #' @export
 FragmentLength <- R6::R6Class("FragmentLength", inherit = File, public = list(
   #' @description Reads the `fragment_length_hist.csv` file, which contains the
