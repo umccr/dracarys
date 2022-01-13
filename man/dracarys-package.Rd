@@ -4,7 +4,7 @@
 \name{dracarys-package}
 \alias{dracarys}
 \alias{dracarys-package}
-\title{dracarys: Post-processing DRAGEN workflows.}
+\title{dracarys: Post-processing DRAGEN workflows}
 \description{
 Post-processing DRAGEN workflows.
 }

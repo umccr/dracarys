@@ -20,10 +20,12 @@ Imports:
     ggplot2,
     glue,
     purrr,
+    R6,
     readr,
     tibble,
     tidyr,
 Suggests:
+    here,
     jsonlite,
     knitr,
     rlang,
