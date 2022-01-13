@@ -1,4 +1,4 @@
-#' FragmentLength R6 Class
+#' FragmentLengthFile R6 Class
 #'
 #' @description
 #' Contains methods for reading and plotting contents of
@@ -6,11 +6,11 @@
 #'
 #' @examples
 #' x <- system.file("extdata/SEQC-II.fragment_length_hist.csv", package = "dracarys")
-#' fl <- FragmentLength$new(x)
+#' fl <- FragmentLengthFile$new(x)
 #' fl$read() # or read(fl)
 #' fl$plot() # or plot(fl)
 #' @export
-FragmentLength <- R6::R6Class("FragmentLength", inherit = File, public = list(
+FragmentLengthFile <- R6::R6Class("FragmentLengthFile", inherit = File, public = list(
   #' @description Reads the `fragment_length_hist.csv` file, which contains the
   #' fragment length distribution for each sample.
   #' @return A tibble with the following columns:

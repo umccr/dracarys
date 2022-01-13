@@ -1,4 +1,4 @@
-#' PloidyEstimationMetrics R6 Class
+#' PloidyEstimationMetricsFile R6 Class
 #'
 #' @description
 #' Contains methods for reading contents of
@@ -6,11 +6,11 @@
 #'
 #' @examples
 #' x <- system.file("extdata/SEQC-II.ploidy_estimation_metrics.csv", package = "dracarys")
-#' pem <- PloidyEstimationMetrics$new(x)
+#' pem <- PloidyEstimationMetricsFile$new(x)
 #' pem$read() # or read(pem)
 #'
 #' @export
-PloidyEstimationMetrics <- R6::R6Class("PloidyEstimationMetrics", inherit = File, public = list(
+PloidyEstimationMetricsFile <- R6::R6Class("PloidyEstimationMetricsFile", inherit = File, public = list(
   #' @description
   #' Reads the `ploidy_estimation_metrics.csv` file output from DRAGEN.
   #'

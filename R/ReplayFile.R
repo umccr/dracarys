@@ -1,4 +1,4 @@
-#' Replay R6 Class
+#' ReplayFile R6 Class
 #'
 #' @description
 #' Contains methods for reading contents of
@@ -7,10 +7,10 @@
 #'
 #' @examples
 #' x <- system.file("extdata/SEQC-II-replay.json", package = "dracarys")
-#' r <- Replay$new(x)
+#' r <- ReplayFile$new(x)
 #' r$read() # or read(r)
 #' @export
-Replay <- R6::R6Class("Replay", inherit = File, public = list(
+ReplayFile <- R6::R6Class("ReplayFile", inherit = File, public = list(
   #' @description Reads the `replay.json` file.
   #' @return A list with the following elements:
   #'   - `command_line`: character of DRAGEN command line used.

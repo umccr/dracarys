@@ -1,4 +1,4 @@
-#' MappingMetrics R6 Class
+#' MappingMetricsFile R6 Class
 #'
 #' @description
 #' Contains methods for reading and displaying contents of
@@ -11,11 +11,11 @@
 #'
 #' @examples
 #' x <- system.file("extdata/SEQC-II.mapping_metrics.csv", package = "dracarys")
-#' mm <- MappingMetrics$new(x)
+#' mm <- MappingMetricsFile$new(x)
 #' mm$read() # or read(mm)
 #'
 #' @export
-MappingMetrics <- R6::R6Class("MappingMetrics", inherit = File, public = list(
+MappingMetricsFile <- R6::R6Class("MappingMetricsFile", inherit = File, public = list(
   #' @description
   #' Reads the `mapping_metrics.csv` file output from DRAGEN.
   #'
