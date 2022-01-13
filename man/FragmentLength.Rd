@@ -9,9 +9,9 @@ the \code{fragment_length_hist.csv} file output from DRAGEN.
 }
 \examples{
 x <- system.file("extdata/SEQC-II.fragment_length_hist.csv", package = "dracarys")
-F1 <- FragmentLength$new(x)
-F1$read() # or read(F1)
-F1$plot() # or plot(F1)
+fl <- FragmentLength$new(x)
+fl$read() # or read(fl)
+fl$plot() # or plot(fl)
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{FragmentLength}
