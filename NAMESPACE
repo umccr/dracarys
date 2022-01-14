@@ -2,6 +2,7 @@
 
 S3method(read,File)
 export(CoverageContigFile)
+export(CoverageHistFile)
 export(CoverageMetricsFile)
 export(File)
 export(FragmentLengthFile)

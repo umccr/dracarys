@@ -64,7 +64,7 @@ CoverageContigFile <- R6::R6Class("CoverageContigFile", inherit = File, public =
 
     cov_contig <- cov_contig |>
       dplyr::mutate(
-        panel = ifelse(.data$chrom %in% main_chrom, "main", "alt"),
+        panel = dplyr::if_else(.data$chrom %in% main_chrom, "main", "alt"),
         panel = factor(.data$panel, levels = c("main", "alt"))
       )
 
@@ -83,15 +83,15 @@ CoverageContigFile <- R6::R6Class("CoverageContigFile", inherit = File, public =
       unique()
 
     alt_panel2 <- alt_panel |>
-      dplyr::mutate(alt_group = ifelse(.data$chrom %in% top_alt, "top", "bottom"))
+      dplyr::mutate(alt_group = dplyr::if_else(.data$chrom %in% top_alt, "top", "bottom"))
 
     alt_panel_final <- alt_panel2 |>
       dplyr::group_by(.data$alt_group, .data$label) |>
       dplyr::summarise(mean_cov = mean(.data$coverage)) |>
       dplyr::inner_join(alt_panel2, by = c("alt_group", "label")) |>
       dplyr::mutate(
-        chrom = ifelse(.data$alt_group == "bottom", "OTHER", .data$chrom),
-        coverage = ifelse(.data$alt_group == "bottom", .data$mean_cov, .data$coverage)
+        chrom = dplyr::if_else(.data$alt_group == "bottom", "OTHER", .data$chrom),
+        coverage = dplyr::if_else(.data$alt_group == "bottom", .data$mean_cov, .data$coverage)
       ) |>
       dplyr::distinct() |>
       dplyr::ungroup() |>
