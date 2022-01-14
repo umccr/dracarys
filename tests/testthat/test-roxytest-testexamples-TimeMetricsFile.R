@@ -2,7 +2,7 @@
 
 # File R/TimeMetricsFile.R: @testexamples
 
-test_that("Function time_metrics_process() @ L56", {
+test_that("Function time_metrics_process() @ L58", {
   
   x <- system.file("extdata/SEQC-II.time_metrics.csv", package = "dracarys")
   x <- TimeMetricsFile$new(x)
