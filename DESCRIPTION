@@ -20,13 +20,15 @@ Imports:
     ggplot2,
     glue,
     purrr,
+    R6,
     readr,
+    rlang,
     tibble,
     tidyr,
 Suggests:
+    here,
     jsonlite,
     knitr,
-    rlang,
     rmarkdown,
     scales,
     testthat (>= 3.0.0)
