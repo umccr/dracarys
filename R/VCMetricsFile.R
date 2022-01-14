@@ -1,4 +1,4 @@
-#' VarcallMetricsFile R6 Class
+#' VCMetricsFile R6 Class
 #'
 #' @description
 #' Contains methods for reading and displaying contents of
@@ -14,11 +14,11 @@
 #'
 #' @examples
 #' x <- system.file("extdata/SEQC-II.vc_metrics.csv", package = "dracarys")
-#' vm <- VarcallMetricsFile$new(x)
+#' vm <- VCMetricsFile$new(x)
 #' vm$read() # or read(vm)
 #'
 #' @export
-VarcallMetricsFile <- R6::R6Class("VarcallMetricsFile", inherit = File, public = list(
+VCMetricsFile <- R6::R6Class("VCMetricsFile", inherit = File, public = list(
   #' @description
   #' Reads the `vc_metrics.csv` file output from DRAGEN.
   #'
