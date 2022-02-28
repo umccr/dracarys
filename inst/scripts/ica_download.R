@@ -1,10 +1,10 @@
 # Download DRAGEN qc metrics files from ICA
-require(tidyverse)
+require(fs)
 require(glue)
 require(here)
-require(fs)
-require(jsonlite)
 require(httr)
+require(jsonlite)
+require(tidyverse)
 
 # dragen wgs
 j <- here("nogit/seqcii/seqc_dragen_outputs.json")
@@ -73,6 +73,15 @@ samples <- c(
 d <- map_df(samples, tso_download_ica)
 outdir <- here::here("nogit/tso")
 d |>
+  mutate(out = file.path(outdir, sample, bname)) |>
+  rowwise() |>
+  mutate(
+    cmd = system(glue("ica files download {path} {out}")))
+
+# SBJ00705 will be used as a test example
+samples <- "SBJ00705"
+map_df(samples, tso_download_ica) |>
+  filter(dname == "PTC_ctTSO220118_L2200054") |>
   mutate(out = file.path(outdir, sample, bname)) |>
   rowwise() |>
   mutate(
