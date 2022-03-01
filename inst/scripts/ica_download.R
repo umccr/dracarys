@@ -1,4 +1,4 @@
-# Download DRAGEN qc metrics files from ICA
+# Download files from ICA
 require(fs)
 require(glue)
 require(here)
@@ -7,30 +7,38 @@ require(jsonlite)
 require(tidyverse)
 
 # dragen wgs
-j <- here("nogit/seqcii/seqc_dragen_outputs.json")
-l <- jsonlite::read_json(j)[["items"]]
-p <- c("replay.json", "fragment_length_hist.csv",
-       "mapping_metrics.csv", "ploidy_estimation_metrics.csv",
-       "time_metrics.csv", "vc_metrics.csv",
-       "wgs_contig_mean_cov_normal.csv", "wgs_contig_mean_cov_tumor.csv",
-       "wgs_coverage_metrics_normal.csv", "wgs_coverage_metrics_tumor.csv",
-       "wgs_fine_hist_normal.csv", "wgs_fine_hist_tumor.csv") |>
-  paste(collapse = "|")
-bind_rows(l) |>
-  mutate(gds = paste0("gds://", volumeName, path),
-         size = fs::as_fs_bytes(sizeInBytes)) |>
-  select(gds, name, size) |>
-  filter(grepl(p, gds)) |>
-  mutate(
-    dname = basename(dirname(gds)),
-    dname = sub("SEQC-II_dragen_", "", dname),
-    target = file.path(here("nogit/seqcii"), dname, name)) |>
-  select(gds, target) |>
-  rowwise() |>
-  mutate(cmd = system(glue("ica files download {gds} {target}")))
+ica_download_wgs <- function(sname) {
+  base_url <- "https://aps2.platform.illumina.com/v1"
+  path <- glue::glue("/validation_data/wgs/{sname}/analysis/somatic/*")
+  token <- Sys.getenv("ICA_ACCESS_TOKEN")
+  volname <- "development"
+  res <- httr::GET(glue::glue("{base_url}/files?volume.name={volname}&path={path}&pageSize=100"),
+                   httr::add_headers(Authorization = glue::glue("Bearer {token}")),
+                   httr::accept_json())
+  j <- jsonlite::fromJSON(httr::content(res, "text"), simplifyVector = FALSE)[["items"]]
+  d <- purrr::map_df(j, function(x) c(path = x[["path"]], size = x[["sizeInBytes"]]))
+  match_regex(d) |>
+    dplyr::filter(!is.na(.data$type)) |>
+    dplyr::mutate(
+      size = fs::as_fs_bytes(.data$size),
+      bname = basename(.data$path),
+      path = glue::glue("gds://{volname}{.data$path}"),
+      sample = sname) |>
+    dplyr::mutate(dname = basename(dirname(.data$path))) |>
+    dplyr::select(.data$sample, .data$dname, .data$type, .data$size, .data$path, .data$bname)
+}
+
+sname <- "SEQC50"
+d <- ica_download_wgs(sname)
+outdir <- here::here("nogit/wgs")
+d |>
+  dplyr::mutate(out = file.path(outdir, sample, bname)) |>
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    cmd = system(glue::glue("ica files download {path} {out}")))
 
 # tso
-tso_download_ica <- function(sname) {
+ica_download_tso <- function(sname) {
   base_url <- "https://aps2.platform.illumina.com/v1"
   path <- glue::glue("/analysis_data/{sname}/tso_ctdna_tumor_only/*")
   token <- Sys.getenv("ICA_ACCESS_TOKEN")
