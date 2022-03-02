@@ -6,7 +6,7 @@
 #' a breakdown of the run duration for each DRAGEN process.
 #'
 #' @examples
-#' x <- system.file("extdata/SEQC-II.time_metrics.csv", package = "dracarys")
+#' x <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
 #' tm <- TimeMetricsFile$new(x)
 #' tm$read() # or read(tm)
 #' @export
@@ -47,7 +47,7 @@ TimeMetricsFile <- R6::R6Class("TimeMetricsFile", inherit = File, public = list(
 #'   - Time: time in HH:MM
 #'
 #' @examples
-#' x <- system.file("extdata/SEQC-II.time_metrics.csv", package = "dracarys")
+#' x <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
 #' x <- TimeMetricsFile$new(x)
 #' (tm <- time_metrics_process(c(x, x), id = c("run1", "run2")))
 #'

@@ -5,7 +5,7 @@
 #' the `ploidy_estimation_metrics.csv` file output from DRAGEN.
 #'
 #' @examples
-#' x <- system.file("extdata/SEQC-II.ploidy_estimation_metrics.csv", package = "dracarys")
+#' x <- system.file("extdata/wgs/SEQC-II.ploidy_estimation_metrics.csv.gz", package = "dracarys")
 #' pem <- PloidyEstimationMetricsFile$new(x)
 #' pem$read() # or read(pem)
 #'

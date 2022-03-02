@@ -5,7 +5,7 @@
 #' the `fragment_length_hist.csv` file output from DRAGEN.
 #'
 #' @examples
-#' x <- system.file("extdata/SEQC-II.fragment_length_hist.csv", package = "dracarys")
+#' x <- system.file("extdata/wgs/SEQC-II.fragment_length_hist.csv.gz", package = "dracarys")
 #' fl <- FragmentLengthFile$new(x)
 #' fl$read() # or read(fl)
 #' fl$plot() # or plot(fl)

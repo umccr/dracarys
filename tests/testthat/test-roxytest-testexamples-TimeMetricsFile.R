@@ -4,7 +4,7 @@
 
 test_that("Function time_metrics_process() @ L58", {
   
-  x <- system.file("extdata/SEQC-II.time_metrics.csv", package = "dracarys")
+  x <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
   x <- TimeMetricsFile$new(x)
   (tm <- time_metrics_process(c(x, x), id = c("run1", "run2")))
   
