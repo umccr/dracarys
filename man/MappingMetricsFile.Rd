@@ -13,7 +13,7 @@ Unless explicitly stated, the metrics units are in reads (i.e., not in
 terms of pairs or alignments).
 }
 \examples{
-x <- system.file("extdata/SEQC-II.mapping_metrics.csv", package = "dracarys")
+x <- system.file("extdata/wgs/SEQC-II.mapping_metrics.csv.gz", package = "dracarys")
 mm <- MappingMetricsFile$new(x)
 mm$read() # or read(mm)
 

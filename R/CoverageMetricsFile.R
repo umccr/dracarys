@@ -6,8 +6,8 @@
 #' This file contains read depth of coverage metrics.
 #'
 #' @examples
-#' x1 <- system.file("extdata/SEQC-II.wgs_coverage_metrics_normal.csv", package = "dracarys")
-#' x2 <- system.file("extdata/SEQC-II.wgs_coverage_metrics_tumor.csv", package = "dracarys")
+#' x1 <- system.file("extdata/wgs/SEQC-II.wgs_coverage_metrics_normal.csv.gz", package = "dracarys")
+#' x2 <- system.file("extdata/wgs/SEQC-II.wgs_coverage_metrics_tumor.csv.gz", package = "dracarys")
 #' cm1 <- CoverageMetricsFile$new(x1)
 #' cm2 <- CoverageMetricsFile$new(x2)
 #' read(cm1)

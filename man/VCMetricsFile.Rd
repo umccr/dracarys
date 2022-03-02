@@ -16,7 +16,7 @@ which may result in higher than expected variant counts in the
 POSTFILTER VCF metrics.
 }
 \examples{
-x <- system.file("extdata/SEQC-II.vc_metrics.csv", package = "dracarys")
+x <- system.file("extdata/wgs/SEQC-II.vc_metrics.csv.gz", package = "dracarys")
 vm <- VCMetricsFile$new(x)
 vm$read() # or read(vm)
 

@@ -10,8 +10,8 @@ This file contains the estimated coverage for all contigs, and an autosomal
 estimated coverage.
 }
 \examples{
-x1 <- system.file("extdata/SEQC-II.wgs_contig_mean_cov_normal.csv", package = "dracarys")
-x2 <- system.file("extdata/SEQC-II.wgs_contig_mean_cov_tumor.csv", package = "dracarys")
+x1 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_normal.csv.gz", package = "dracarys")
+x2 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_tumor.csv.gz", package = "dracarys")
 cc1 <- CoverageContigFile$new(x1)
 cc2 <- CoverageContigFile$new(x2)
 read(cc1)

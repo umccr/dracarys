@@ -9,7 +9,7 @@ the \code{replay.json} file output from DRAGEN, which contains the DRAGEN comman
 line, parameters and version for the specific run.
 }
 \examples{
-x <- system.file("extdata/SEQC-II-replay.json", package = "dracarys")
+x <- system.file("extdata/wgs/SEQC-II-replay.json.gz", package = "dracarys")
 r <- ReplayFile$new(x)
 r$read() # or read(r)
 }

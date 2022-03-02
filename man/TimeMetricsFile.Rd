@@ -9,7 +9,7 @@ the \code{time_metrics.csv} file output from DRAGEN, which contains
 a breakdown of the run duration for each DRAGEN process.
 }
 \examples{
-x <- system.file("extdata/SEQC-II.time_metrics.csv", package = "dracarys")
+x <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
 tm <- TimeMetricsFile$new(x)
 tm$read() # or read(tm)
 }

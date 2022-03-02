@@ -8,8 +8,8 @@
 #' column indicates the number of loci covered at the corresponding depth.
 #'
 #' @examples
-#' x1 <- system.file("extdata/SEQC-II.wgs_fine_hist_normal.csv", package = "dracarys")
-#' x2 <- system.file("extdata/SEQC-II.wgs_fine_hist_tumor.csv", package = "dracarys")
+#' x1 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_normal.csv.gz", package = "dracarys")
+#' x2 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_tumor.csv.gz", package = "dracarys")
 #' ch1 <- CoverageHistFile$new(x1)
 #' ch2 <- CoverageHistFile$new(x2)
 #' read(ch1)
