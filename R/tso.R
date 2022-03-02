@@ -1,79 +1,137 @@
-#' Read TSO SampleAnalysisResults JSON
+#' TsoTmbFile R6 Class
 #'
-#' @param x Path to '_SampleAnalysisResults.json.gz' file.
-#'
-#' @return
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `tmb.json.gz` file output from TSO.
 #'
 #' @examples
-#' x <- here::here("nogit/tso/PRJ210016_L2100355_SampleAnalysisResults.json.gz")
-tso_read_sample_analysis_results <- function(x) {
-  d <- jsonlite::read_json(x)[["data"]]
-  # samp_info <- d[["sampleInformation"]] # leave as-is
-  # soft_conf <- d[["softwareConfiguration"]] # simplify nirvanaVersionList$dataSources
-  # soft_conf_nvl <- soft_conf$nirvanaVersionList[[1]]
-  # soft_conf_ds <- dplyr::bind_rows(soft_conf_nvl$dataSources)
-  # samp_met <- d[["sampleMetrics"]]
-  vsmall <- d[["variants"]][["smallVariants"]]
+#' x <- system.file("extdata/tso/sample705.tmb.json.gz", package = "dracarys")
+#' tmb <- TsoTmbFile$new(x)
+#' tmb$read() # or read(tmb)
+#' @export
+TsoTmbFile <- R6::R6Class("TsoTmbFile", inherit = File, public = list(
+  #' @description
+  #' Reads the `tmb.json.gz` file output from TSO.
+  #'
+  #' @return tibble with the following columns:
+  #'   - TmbPerMb
+  #'   - AdjustedTmbPerMb
+  #'   - NonsynonymousTmbPerMb
+  #'   - AdjustedNonsynonymousTmbPerMb
+  #'   - SomaticCodingVariantsCount
+  #'   - NonsynonymousSomaticCodingVariantsCount
+  #'   - TotalRegionSizeMb
+  #'   - CodingRegionSizeMb
+  read = function() {
+    x <- self$path
+    j <- jsonlite::read_json(x)
+    # not interested in Settings element
+    j[["Settings"]] <- NULL
+    tibble::as_tibble_row(j) |>
+      dplyr::mutate(dplyr::across(.cols = dplyr::everything(), as.numeric))
+  }
+))
 
-  # grab 3 elements from there
-  v <- tibble::tibble(v = vsmall[1:3])
-  v |>
-    unnest_wider(v) |>
-    unnest_longer(nirvana) |>
-    unnest_wider(nirvana) |>
-    unnest(transcripts) |>
-    unnest_wider(transcripts) |>
-    unnest_longer(consequence)
-
-  n <- purrr::map(v, function(el) {
-    l <- el[["nirvana"]][[1]]
-    if (length(l$transcripts) == 0) {
-      l$transcripts <- list(NA)
+#' TsoMsiFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `msi.json.gz` file output from TSO.
+#'
+#' @examples
+#' x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
+#' msi <- TsoMsiFile$new(x)
+#' msi$read() # or read(msi)
+#' @export
+TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
+  #' @description
+  #' Reads the `msi.json.gz` file output from TSO.
+  #'
+  #' @return tibble with the following columns:
+  #'   - label:
+  read = function() {
+    x <- self$path
+    j <- jsonlite::read_json(x)
+    # not interested in Settings element
+    j[["Settings"]] <- NULL
+    if (is.null(j[["ResultMessage"]])) {
+      j[["ResultMessage"]] <- NA_character_
     }
-    l
-  })
-}
+    tibble::as_tibble_row(j) |>
+      dplyr::mutate(ResultIsValid = as.character(.data$ResultIsValid))
+  }
+))
 
-#' Read TSO tmb JSON file
-#'
-#' @param x Path to 'tmb.json.gz' file.
-#'
-#' @return A tibble.
-#'
-#' @examples
-#' x <- here::here("nogit/tso/tmb/MDX200144_L2100176_rerun.tmb.json.gz")
-tso_read_tmb <- function(x) {
-  j <- jsonlite::read_json(x)
-  j$Settings <- NULL
-  tibble::as_tibble(j)
-}
-
-d <-
-  tibble(
-    x = list.files(here::here("nogit/tso/tmb"),
-                   pattern = "tmb\\.json\\.gz$",
-                   recursive = TRUE, full.names = TRUE)) |>
-  rowwise() |>
-  mutate(sample = sub(".tmb.json.gz", "", basename(x)),
-         y = list(tso_read_tmb(x))) |>
-  unnest(y) |>
-  select(-x) |>
-  pivot_longer(TmbPerMb:CodingRegionSizeMb)
-
-theme_set(theme_bw())
-d |>
-  ggplot(aes(x = "", y = value, label = sample, colour = sample)) +
-  geom_violin(fill = "transparent", colour = "grey80", alpha = 0.4) +
-  # geom_point() +
-  ggforce::geom_sina(aes(
-    group = name,
-    colour = sample,
-  ), seed = 42) +
-  facet_wrap(~name, scales = "free")
-
-d |>
-  ggplot(aes(x = value)) +
-  geom_histogram(fill = "purple", colour = "black") +
-  facet_wrap(~name, scales = "free")
+# d <-
+#   tibble(
+#     x = list.files(here::here("nogit/tso/tmb"),
+#                    pattern = "tmb\\.json\\.gz$",
+#                    recursive = TRUE, full.names = TRUE)) |>
+#   rowwise() |>
+#   mutate(sample = sub(".tmb.json.gz", "", basename(x)),
+#          y = list(tso_read_tmb(x))) |>
+#   unnest(y) |>
+#   select(-x) |>
+#   pivot_longer(TmbPerMb:CodingRegionSizeMb)
+#
+# theme_set(theme_bw())
+# d |>
+#   ggplot(aes(x = "", y = value, label = sample, colour = sample)) +
+#   geom_violin(fill = "transparent", colour = "grey80", alpha = 0.4) +
+#   # geom_point() +
+#   ggforce::geom_sina(aes(
+#     group = name,
+#     colour = sample,
+#   ), seed = 42) +
+#   facet_wrap(~name, scales = "free")
+#
+# d |>
+#   ggplot(aes(x = value)) +
+#   geom_histogram(fill = "purple", colour = "black") +
+#   facet_wrap(~name, scales = "free")
 
 # arrow::read_parquet(here::here("nogit/tso/tmb/56.TMB.parquet"))
+
+#' TsoSampleAnalysisResultsFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `SampleAnalysisResults.json.gz` file output from TSO.
+#'
+#' @examples
+#' x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
+#' res <- TsoSampleAnalysisResultsFile$new(x)
+#' res$read() # or read(res)
+#' @export
+TsoSampleAnalysisResultsFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
+  #' @description
+  #' Reads the `msi.json.gz` file output from TSO.
+  #'
+  #' @return tibble with the following columns:
+  #'         - TOTAL_PF_READS
+  #'         - MEAN_FAMILY_SIZE
+  #'         - MEDIAN_TARGET_COVERAGE,
+  #'         - PCT_CHIMERIC_READS
+  #'         - PCT_EXON_500X
+  #'         - PCT_EXON_1500X
+  #'         - PCT_READ_ENRICHMENT,
+  #'         - PCT_USABLE_UMI_READS
+  #'         - MEAN_TARGET_COVERAGE
+  #'         - PCT_ALIGNED_READS,
+  #'         - PCT_CONTAMINATION_EST
+  #'         - PCT_TARGET_0.4X_MEAN
+  #'         - PCT_TARGET_500X,
+  #'         - PCT_TARGET_1000X
+  #'         - PCT_TARGET_1500X
+  #'         - PCT_DUPLEXFAMILIES,
+  #'         - MEDIAN_INSERT_SIZE
+  #'         - MAX_SOMATIC_AF
+  read = function() {
+    x <- self$path
+    # just read sampleMetrics for now
+    d <- jsonlite::read_json(x)[["data"]][["sampleMetrics"]]
+    dplyr::bind_rows(d[["expandedMetrics"]][[1]][["metrics"]]) |>
+      dplyr::select(.data$name, .data$value) |>
+      tidyr::pivot_wider(.data$name)
+  }
+))
