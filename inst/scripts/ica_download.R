@@ -17,19 +17,21 @@ ica_download_wgs <- function(sname) {
                    httr::accept_json())
   j <- jsonlite::fromJSON(httr::content(res, "text"), simplifyVector = FALSE)[["items"]]
   d <- purrr::map_df(j, function(x) c(path = x[["path"]], size = x[["sizeInBytes"]]))
-  match_regex(d) |>
-    dplyr::filter(!is.na(.data$type)) |>
+  d |>
     dplyr::mutate(
       size = fs::as_fs_bytes(.data$size),
       bname = basename(.data$path),
+      type = purrr::map_chr(bname, match_regex),
       path = glue::glue("gds://{volname}{.data$path}"),
-      sample = sname) |>
-    dplyr::mutate(dname = basename(dirname(.data$path))) |>
-    dplyr::select(.data$sample, .data$dname, .data$type, .data$size, .data$path, .data$bname)
+      sample = sname,
+      dname = basename(dirname(.data$path))
+      ) |>
+    dplyr::select(.data$sample, .data$dname, .data$type, .data$size, .data$path, .data$bname) |>
+    dplyr::filter(!is.na(.data$type))
 }
 
-sname <- "SEQC50"
-d <- ica_download_wgs(sname)
+nm <- "SEQC50"
+d <- ica_download_wgs(nm)
 outdir <- here::here("nogit/wgs")
 d |>
   dplyr::mutate(out = file.path(outdir, sample, bname)) |>
