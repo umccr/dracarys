@@ -1,4 +1,4 @@
-#' CoverageContigFile R6 Class
+#' ContigMeanCovFile R6 Class
 #'
 #' @description
 #' Contains methods for reading and displaying contents of
@@ -9,14 +9,14 @@
 #' @examples
 #' x1 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_normal.csv.gz", package = "dracarys")
 #' x2 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_tumor.csv.gz", package = "dracarys")
-#' cc1 <- CoverageContigFile$new(x1)
-#' cc2 <- CoverageContigFile$new(x2)
+#' cc1 <- ContigMeanCovFile$new(x1)
+#' cc2 <- ContigMeanCovFile$new(x2)
 #' read(cc1)
 #' read(cc2, keep_alt = TRUE)
 #' plot(cc1)
 #'
 #' @export
-CoverageContigFile <- R6::R6Class("CoverageContigFile", inherit = File, public = list(
+ContigMeanCovFile <- R6::R6Class("ContigMeanCovFile", inherit = File, public = list(
   #' @description
   #' Reads the `wgs_contig_mean_cov_<phenotype>.csv` file output from DRAGEN.
   #'

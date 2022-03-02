@@ -1,4 +1,4 @@
-#' CoverageHistFile R6 Class
+#' FineHistFile R6 Class
 #'
 #' @description
 #' Contains methods for reading and displaying contents of
@@ -10,15 +10,15 @@
 #' @examples
 #' x1 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_normal.csv.gz", package = "dracarys")
 #' x2 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_tumor.csv.gz", package = "dracarys")
-#' ch1 <- CoverageHistFile$new(x1)
-#' ch2 <- CoverageHistFile$new(x2)
+#' ch1 <- FineHistFile$new(x1)
+#' ch2 <- FineHistFile$new(x2)
 #' read(ch1)
 #' read(ch2)
 #' plot(ch1)
 #' plot(ch2)
 #'
 #' @export
-CoverageHistFile <- R6::R6Class("CoverageHistFile", inherit = File, public = list(
+FineHistFile <- R6::R6Class("FineHistFile", inherit = File, public = list(
   #' @description
   #' Reads the `wgs_fine_hist_<phenotype>.csv` file output from DRAGEN.
   #' @return tibble with three columns:
