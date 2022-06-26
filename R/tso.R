@@ -105,9 +105,9 @@ TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
 #' res <- TsoSampleAnalysisResultsFile$new(x)
 #' res$read() # or read(res)
 #' @export
-TsoSampleAnalysisResultsFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
+TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inherit = File, public = list(
   #' @description
-  #' Reads the `msi.json.gz` file output from TSO.
+  #' Reads the `SampleAnalysisResults.json.gz` file output from TSO.
   #'
   #' @return tibble with the following columns:
   #'         - TOTAL_PF_READS
