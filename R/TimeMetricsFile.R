@@ -41,7 +41,7 @@ TimeMetricsFile <- R6::R6Class("TimeMetricsFile", inherit = File, public = list(
 #'
 #' @param x Atomic vector with one or more TimeMetricsFile objects.
 #' @param id ID for each input, which is used to disambiguate files
-#' generated from same samples). Default: index from 1 to length of `x`.
+#' generated from same samples. Default: index from 1 to length of `x`.
 #' @return tibble with the following columns:
 #'   - Step: DRAGEN step
 #'   - Time: time in HH:MM

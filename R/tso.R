@@ -64,14 +64,16 @@ TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
 
 # d <-
 #   tibble(
-#     x = list.files(here::here("nogit/tso/tmb"),
+#     x = list.files(here::here("nogit/tso"),
 #                    pattern = "tmb\\.json\\.gz$",
 #                    recursive = TRUE, full.names = TRUE)) |>
 #   rowwise() |>
-#   mutate(sample = sub(".tmb.json.gz", "", basename(x)),
-#          y = list(tso_read_tmb(x))) |>
+#   mutate(
+#     obj = list(TsoTmbFile$new(x)),
+#     sample = sub(".tmb.json.gz", "", obj$bname()),
+#     y = list(read(obj))) |>
 #   unnest(y) |>
-#   select(-x) |>
+#   select(-c(x, obj)) |>
 #   pivot_longer(TmbPerMb:CodingRegionSizeMb)
 #
 # theme_set(theme_bw())
@@ -132,6 +134,6 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoMsiFile", inherit = File, public
     d <- jsonlite::read_json(x)[["data"]][["sampleMetrics"]]
     dplyr::bind_rows(d[["expandedMetrics"]][[1]][["metrics"]]) |>
       dplyr::select(.data$name, .data$value) |>
-      tidyr::pivot_wider(.data$name)
+      tidyr::pivot_wider(names_from = .data$name, values_from = .data$value)
   }
 ))
