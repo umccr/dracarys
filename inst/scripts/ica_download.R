@@ -6,7 +6,7 @@ require(httr)
 require(jsonlite)
 require(tidyverse)
 
-# dragen wgs
+#---- dragen wgs ----#
 ica_download_wgs <- function(sname) {
   base_url <- "https://aps2.platform.illumina.com/v1"
   path <- glue::glue("/validation_data/wgs/{sname}/analysis/somatic/*")
@@ -39,7 +39,7 @@ d |>
   dplyr::mutate(
     cmd = system(glue::glue("ica files download {path} {out}")))
 
-# tso
+#---- tso ----#
 ica_download_tso <- function(sname) {
   base_url <- "https://aps2.platform.illumina.com/v1"
   path <- glue::glue("/analysis_data/{sname}/tso_ctdna_tumor_only/*")
@@ -96,3 +96,27 @@ map_df(samples, tso_download_ica) |>
   rowwise() |>
   mutate(
     cmd = system(glue("ica files download {path} {out}")))
+
+#---- dragen wts ----# (---TODO: CHECK THAT THIS WORKS AGAIN---)
+ica_download_wgs <- function(sname) {
+  base_url <- "https://aps2.platform.illumina.com/v1"
+  path <- glue::glue("/analysis_data/{sname}/dragen_wts/*")
+  token <- Sys.getenv("ICA_ACCESS_TOKEN")
+  volname <- "development"
+  res <- httr::GET(glue::glue("{base_url}/files?volume.name={volname}&path={path}&pageSize=100"),
+                   httr::add_headers(Authorization = glue::glue("Bearer {token}")),
+                   httr::accept_json())
+  j <- jsonlite::fromJSON(httr::content(res, "text"), simplifyVector = FALSE)[["items"]]
+  d <- purrr::map_df(j, function(x) c(path = x[["path"]], size = x[["sizeInBytes"]]))
+  d |>
+    dplyr::mutate(
+      size = fs::as_fs_bytes(.data$size),
+      bname = basename(.data$path),
+      type = purrr::map_chr(bname, match_regex),
+      path = glue::glue("gds://{volname}{.data$path}"),
+      sample = sname,
+      dname = basename(dirname(.data$path))
+      ) |>
+    dplyr::select(.data$sample, .data$dname, .data$type, .data$size, .data$path, .data$bname) |>
+    dplyr::filter(!is.na(.data$type))
+}
