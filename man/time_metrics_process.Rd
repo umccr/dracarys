@@ -10,7 +10,7 @@ time_metrics_process(x, id = seq_len(length(x)))
 \item{x}{Atomic vector with one or more TimeMetricsFile objects.}
 
 \item{id}{ID for each input, which is used to disambiguate files
-generated from same samples). Default: index from 1 to length of \code{x}.}
+generated from same samples. Default: index from 1 to length of \code{x}.}
 }
 \value{
 tibble with the following columns:
