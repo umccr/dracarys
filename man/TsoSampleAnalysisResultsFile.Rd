@@ -13,7 +13,7 @@ res <- TsoSampleAnalysisResultsFile$new(x)
 res$read() # or read(res)
 }
 \section{Super class}{
-\code{\link[dracarys:File]{dracarys::File}} -> \code{TsoMsiFile}
+\code{\link[dracarys:File]{dracarys::File}} -> \code{TsoSampleAnalysisResultsFile}
 }
 \section{Methods}{
 \subsection{Public methods}{
@@ -36,31 +36,31 @@ res$read() # or read(res)
 \if{html}{\out{<a id="method-read"></a>}}
 \if{latex}{\out{\hypertarget{method-read}{}}}
 \subsection{Method \code{read()}}{
-Reads the \code{msi.json.gz} file output from TSO.
+Reads the \code{SampleAnalysisResults.json.gz} file output from TSO.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{TsoSampleAnalysisResultsFile$read()}\if{html}{\out{</div>}}
 }
 
 \subsection{Returns}{
 tibble with the following columns:
-- TOTAL_PF_READS
-- MEAN_FAMILY_SIZE
-- MEDIAN_TARGET_COVERAGE,
-- PCT_CHIMERIC_READS
-- PCT_EXON_500X
-- PCT_EXON_1500X
-- PCT_READ_ENRICHMENT,
-- PCT_USABLE_UMI_READS
-- MEAN_TARGET_COVERAGE
-- PCT_ALIGNED_READS,
-- PCT_CONTAMINATION_EST
-- PCT_TARGET_0.4X_MEAN
-- PCT_TARGET_500X,
-- PCT_TARGET_1000X
-- PCT_TARGET_1500X
-- PCT_DUPLEXFAMILIES,
-- MEDIAN_INSERT_SIZE
-- MAX_SOMATIC_AF
+- \code{TOTAL_PF_READS}
+- \code{MEAN_FAMILY_SIZE}
+- \code{MEDIAN_TARGET_COVERAGE}
+- \code{PCT_CHIMERIC_READS}
+- \code{PCT_EXON_500X}
+- \code{PCT_EXON_1500X}
+- \code{PCT_READ_ENRICHMENT}
+- \code{PCT_USABLE_UMI_READS}
+- \code{MEAN_TARGET_COVERAGE}
+- \code{PCT_ALIGNED_READS}
+- \code{PCT_CONTAMINATION_EST}
+- \code{PCT_TARGET_0.4X_MEAN}
+- \code{PCT_TARGET_500X}
+- \code{PCT_TARGET_1000X}
+- \code{PCT_TARGET_1500X}
+- \code{PCT_DUPLEXFAMILIES}
+- \code{MEDIAN_INSERT_SIZE}
+- \code{MAX_SOMATIC_AF}
 }
 }
 \if{html}{\out{<hr>}}
