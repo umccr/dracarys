@@ -1,11 +1,9 @@
-#' Tidy eval helpers
-#'
-#' <https://www.tidyverse.org/blog/2019/06/rlang-0-4-0/>
-#'
-#' @name tidyeval
-#' @keywords internal
+#' @importFrom glue glue
+#' @importFrom readr cols col_time read_csv read_lines
 #' @importFrom rlang .data
-NULL
-
+#' @importFrom R6 R6Class
+#' @importFrom tibble as_tibble as_tibble_col as_tibble_row
+#'             enframe tibble tribble
+#' @import ggplot2
 #' @keywords internal
 "_PACKAGE"
