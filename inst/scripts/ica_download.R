@@ -1,18 +1,19 @@
-# Download files from ICA
+# List/Download files from ICA for testing
 require(fs)
 require(glue)
 require(here)
 require(httr)
 require(jsonlite)
 require(tidyverse)
+require(dracarys)
 
-#---- dragen wgs ----#
-ica_download_wgs <- function(sname) {
+ica_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+  assertthat::assert_that(grepl("^gds://", gdsdir), grepl("/$", gdsdir))
   base_url <- "https://aps2.platform.illumina.com/v1"
-  path <- glue::glue("/validation_data/wgs/{sname}/analysis/somatic/*")
-  token <- Sys.getenv("ICA_ACCESS_TOKEN")
-  volname <- "development"
-  res <- httr::GET(glue::glue("{base_url}/files?volume.name={volname}&path={path}&pageSize=100"),
+  volname <- sub("gds://(.*?)/.*", "\\1", gdsdir)
+  path2 <- sub("gds://(.*?)/(.*)", "\\2", gdsdir)
+
+  res <- httr::GET(glue::glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize=100"),
                    httr::add_headers(Authorization = glue::glue("Bearer {token}")),
                    httr::accept_json())
   j <- jsonlite::fromJSON(httr::content(res, "text"), simplifyVector = FALSE)[["items"]]
@@ -21,19 +22,28 @@ ica_download_wgs <- function(sname) {
     dplyr::mutate(
       size = fs::as_fs_bytes(.data$size),
       bname = basename(.data$path),
-      type = purrr::map_chr(bname, match_regex),
       path = glue::glue("gds://{volname}{.data$path}"),
-      sample = sname,
       dname = basename(dirname(.data$path))
-      ) |>
-    dplyr::select(.data$sample, .data$dname, .data$type, .data$size, .data$path, .data$bname) |>
-    dplyr::filter(!is.na(.data$type))
+    ) |>
+    dplyr::select(.data$path, .data$size, .data$bname, .data$dname)
 }
 
-nm <- "SEQC50"
-d <- ica_download_wgs(nm)
+wgs_validation_files <- function(sname) {
+  volname <- "development"
+  gdsdir <- glue::glue("gds://{volname}/validation_data/wgs/{sname}/analysis/dragen_somatic/")
+  d <- ica_files_list(gdsdir)
+  d |>
+    dplyr::mutate(type = purrr::map_chr(bname, dracarys::match_regex),
+                  sample = sname) |>
+    dplyr::select(.data$sample, .data$dname, .data$type, .data$size, .data$path, .data$bname)
+}
+
 outdir <- here::here("nogit/wgs")
+sname <- "SEQC50"
+d <- wgs_validation_files(sname = sname)
+
 d |>
+  dplyr::filter(!is.na(.data$type)) |>
   dplyr::mutate(out = file.path(outdir, sample, bname)) |>
   dplyr::rowwise() |>
   dplyr::mutate(
