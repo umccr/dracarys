@@ -20,6 +20,7 @@ Imports:
     glue,
     purrr,
     R6,
+    RJSONIO,
     readr,
     rlang,
     tibble,
