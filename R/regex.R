@@ -50,4 +50,5 @@ FILE_REGEX <- tibble::tribble(
   "replay\\.json$", "dragen/replay",
   "time_metrics\\.csv$", "dragen/time_metrics",
   "vc_metrics\\.csv$", "dragen/vc_metrics",
+  "multiqc_data\\.json", "multiqc",
 )
