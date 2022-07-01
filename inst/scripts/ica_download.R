@@ -7,6 +7,7 @@ require(jsonlite)
 require(tidyverse)
 require(dracarys)
 
+#---- functions ----#
 gds_file_download <- function(gds, out, token) {
   system(glue::glue("ica files download {gds} {out} --access-token {token}"))
 }
@@ -46,8 +47,22 @@ dr_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) 
     dplyr::mutate(cmd = gds_file_download(path, out, token))
 }
 
+dr_download_multiqc <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+  fs::dir_create(outdir)
+  d <- gds_files_list(gdsdir = gdsdir, token = token) |>
+    dplyr::mutate(type = purrr::map_chr(bname, dracarys::match_regex)) |>
+    dplyr::select(.data$dname, .data$type, .data$size, .data$path, .data$bname)
 
-#---- dragen wgs ----#
+  # download dracarys files to outdir/{dname}.json
+  d |>
+    dplyr::filter(.data$type == "multiqc") |>
+    dplyr::mutate(out = file.path(outdir, glue::glue("{dname}.json"))) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(cmd = gds_file_download(path, out, token))
+}
+
+#---- download ----#
+#---- dragen wgs validation ----#
 samples_wgs <- c("2016.249.18.WH.P025", "SBJ00303") # SEQC50
 for (sname in samples_wgs) {
   dr_download(
@@ -77,7 +92,7 @@ for (sname in samples_tso) {
   )
 }
 
-#---- dragen wts ----# (---TODO: CHECK THAT THIS WORKS AGAIN---)
+#---- dragen wts ----#
 samples_wts <- c(
   "SBJ02298", "SBJ02299", "SBJ02300"
 )
@@ -85,6 +100,52 @@ for (sname in samples_wts) {
   dr_download(
     gdsdir = glue("gds://production/analysis_data/{sname}/wts_tumor_only/"),
     outdir = here(glue("nogit/wts/dragen/{sname}")),
+    token = Sys.getenv("DRACARYS_TOKEN_PROD")
+  )
+}
+
+#---- multiqc ----#
+samples <- c(
+  "SBJ02402",
+  "SBJ02403",
+  "SBJ02404",
+  "SBJ02405",
+  "SBJ02406",
+  "SBJ02407"
+)
+
+for (sname in samples) {
+  workflow <- "wts_tumor_only"
+  dr_download_multiqc(
+    gdsdir = glue("gds://production/analysis_data/{sname}/{workflow}/"),
+    outdir = here(glue("nogit/multiqc/dragen/{workflow}/{sname}")),
+    token = Sys.getenv("DRACARYS_TOKEN_PROD")
+  )
+}
+
+for (sname in samples) {
+  workflow <- "wgs_alignment_qc"
+  dr_download_multiqc(
+    gdsdir = glue("gds://production/analysis_data/{sname}/{workflow}/"),
+    outdir = here(glue("nogit/multiqc/dragen/{workflow}/{sname}")),
+    token = Sys.getenv("DRACARYS_TOKEN_PROD")
+  )
+}
+
+for (sname in samples) {
+  workflow <- "wgs_tumor_normal"
+  dr_download_multiqc(
+    gdsdir = glue("gds://production/analysis_data/{sname}/{workflow}/"),
+    outdir = here(glue("nogit/multiqc/dragen/{workflow}/{sname}")),
+    token = Sys.getenv("DRACARYS_TOKEN_PROD")
+  )
+}
+
+for (sname in samples) {
+  workflow <- "umccrise"
+  dr_download_multiqc(
+    gdsdir = glue("gds://production/analysis_data/{sname}/{workflow}/"),
+    outdir = here(glue("nogit/multiqc/dragen/{workflow}/{sname}")),
     token = Sys.getenv("DRACARYS_TOKEN_PROD")
   )
 }
