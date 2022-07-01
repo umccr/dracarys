@@ -11,27 +11,45 @@ multiqc_tidy_json <- function(j) {
   config_creation_date <- sub(", ", "_", p$config_creation_date)
   config_title <- p$config_title
   # umccr_id is populated after binding rows, but can also be found directly
-  # via the config_title. Let's just get
+  # via the config_title. Let's stick to the bind.
   # umccr_id <- sub(".* Report for (.*)", "\\1", config_title)
-  umccr_workflow <- sub("UMCCR MultiQC (.*) Report for .*", "\\1", config_title) |>
+  # If we can't detect the workflow name from the config_title, default to
+  # umccrise which only has the sample ID.
+  dragen_workflows <- c("dragen_alignment", "dragen_transcriptome", "dragen_somatic")
+  workflow <- sub("UMCCR MultiQC (.*) Report for .*", "\\1", config_title) |>
     {
       \(x) gsub(" ", "_", x)
     }() |>
     tolower()
-  assertthat::assert_that(umccr_workflow %in% c("dragen_alignment", "dragen_transcriptome", "dragen_somatic"))
-  d <- dracarys::multiqc_parse_gen(p) |>
+  if (!workflow %in% dragen_workflows) {
+    workflow <- "umccrise"
+  }
+  d <- dracarys::multiqc_parse_gen(p)
+  if (workflow == "umccrise") {
+    # replace the "NA" strings with NA, else we get a column class error
+    # due to trying to bind string ('NA') with numeric.
+    # https://stackoverflow.com/questions/35292757/replace-values-in-list
+    d <- rapply(gen, function(x) ifelse(x == "NA", NA, x), how = "replace")
+  }
+  d <- d |>
     dplyr::bind_rows(.id = "umccr_id") |>
     dplyr::mutate(
       config_creation_date = config_creation_date,
-      umccr_workflow = umccr_workflow
+      umccr_workflow = workflow
     ) |>
     dplyr::select(.data$umccr_id, .data$umccr_workflow, .data$config_creation_date, dplyr::everything())
 
-  if (umccr_workflow == "dragen_transcriptome") {
+  if (workflow == "dragen_transcriptome") {
     # discard Ref_X control samples
     wts_ref_samples <- paste0("Ref_", 1:6)
     d <- d |>
       dplyr::filter(!.data$umccr_id %in% wts_ref_samples)
+  } else if (workflow == "umccrise") {
+    # discard Alice, Bob etc. control samples
+    um_ref_samples <- c("Alice", "Bob", "Chen", "Elon", "Dakota")
+    um_ref_samples <- paste0(um_ref_samples, rep(c("_T", ""), each = length(um_ref_samples)))
+    d <- d |>
+      dplyr::filter(!.data$umccr_id %in% um_ref_samples)
   }
   d
 }
