@@ -8,28 +8,33 @@
 #' @export
 multiqc_tidy_json <- function(j) {
   p <- RJSONIO::fromJSON(j)
+  dragen_workflows <- c("alignment", "transcriptome", "somatic", "umccrise")
   config_creation_date <- sub(", ", "_", p$config_creation_date)
   config_title <- p$config_title
-  # umccr_id is populated after binding rows, but can also be found directly
-  # via the config_title. Let's stick to the bind.
-  # umccr_id <- sub(".* Report for (.*)", "\\1", config_title)
-  # If we can't detect the workflow name from the config_title, default to
-  # umccrise which only has the sample ID.
-  dragen_workflows <- c("dragen_alignment", "dragen_transcriptome", "dragen_somatic")
-  workflow <- sub("UMCCR MultiQC (.*) Report for .*", "\\1", config_title) |>
-    {
-      \(x) gsub(" ", "_", x)
-    }() |>
-    tolower()
-  if (!workflow %in% dragen_workflows) {
-    workflow <- "umccrise"
+  get_workflow <- function(config_title) {
+    if (grepl("^SBJ[[:digit:]]+$", config_title)) {
+      return("dragen_umccrise")
+    } else if (grepl("^UMCCR MultiQC Dragen", config_title)) {
+      w <- tolower(sub("UMCCR MultiQC Dragen (.*) Report for .*", "\\1", config_title))
+      assertthat::assert_that(w %in% dragen_workflows)
+      return(paste0("dragen_", w))
+    } else if (grepl("[[:digit:]]+.*-merged$", config_title)) {
+      return("bcbio_umccrise")
+    } else {
+      warning(glue::glue(
+        "config_title: '{config_title}'.\n",
+        "Unknown which umccr workflow this MultiQC JSON was generated from",
+      ))
+      return("unknown")
+    }
   }
+  workflow <- get_workflow(config_title)
   d <- dracarys::multiqc_parse_gen(p)
-  if (workflow == "umccrise") {
+  if (workflow == "dragen_umccrise") {
     # replace the "NA" strings with NA, else we get a column class error
     # due to trying to bind string ('NA') with numeric.
     # https://stackoverflow.com/questions/35292757/replace-values-in-list
-    d <- rapply(gen, function(x) ifelse(x == "NA", NA, x), how = "replace")
+    d <- rapply(d, function(x) ifelse(x == "NA", NA, x), how = "replace")
   }
   d <- d |>
     dplyr::bind_rows(.id = "umccr_id") |>
@@ -44,10 +49,10 @@ multiqc_tidy_json <- function(j) {
     wts_ref_samples <- paste0("Ref_", 1:6)
     d <- d |>
       dplyr::filter(!.data$umccr_id %in% wts_ref_samples)
-  } else if (workflow == "umccrise") {
+  } else if (workflow %in% c("dragen_umccrise", "bcbio_umccrise")) {
     # discard Alice, Bob etc. control samples
     um_ref_samples <- c("Alice", "Bob", "Chen", "Elon", "Dakota")
-    um_ref_samples <- paste0(um_ref_samples, rep(c("_T", ""), each = length(um_ref_samples)))
+    um_ref_samples <- paste0(um_ref_samples, rep(c("_T", "_B", ""), each = length(um_ref_samples)))
     d <- d |>
       dplyr::filter(!.data$umccr_id %in% um_ref_samples)
   }

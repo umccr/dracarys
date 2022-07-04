@@ -1,0 +1,68 @@
+---
+author: "University of Melbourne Centre for Cancer Research"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    theme: cosmo
+    code_download: true
+  rmdformats::material:
+    highlight: kate
+description: "UMCCR MultiQC JSON Data Comparison"
+title: "MultiQC JSON Data Comparison"
+---
+
+```{r knitr_opts, include=F}
+knitr::opts_chunk$set(
+  collapse = TRUE, echo = TRUE,
+  warning = FALSE, message = FALSE
+)
+```
+
+```{r setup, message=FALSE, warning=FALSE}
+library(dracarys)
+library(dplyr)
+library(here)
+library(purrr)
+library(RJSONIO, include.only = "fromJSON")
+library(tidyr)
+```
+
+## Introduction
+
+Here we are comparing the contents of `multiqc_data.json` files generated from several UMCCR workflows:
+
+- [x] `dragen_wgs_alignment_qc`
+- [x] `dragen_wgs_tumor_normal`
+- [x] `dragen_wts_tumor_only`
+- [x] `dragen_umccrise`
+- [ ] `bcbio_wgs`
+- [ ] `bcbio_wts`
+- [x] `bcbio_umccrise`
+
+We are only interested in the following JSON elements:
+
+- `report_general_stats_data`: contains everything we need
+- `report_saved_raw_data`: contains everything from above, plus fragment
+  length data (which isn't needed for our purposes) and maybe other random stuff.
+- `config_creation_date`: useful for keeping an analysis timestamp.
+- `config_title`: contains sample name and workflow name (for the DRAGEN workflows)
+
+```{r}
+#multiqc_tidy_json(here("nogit/multiqc/dragen/wgs_alignment_qc/SBJ02402/MDX220189_dragen_alignment_multiqc_data.json"))
+#multiqc_tidy_json(here("nogit/multiqc/dragen/wgs_alignment_qc/SBJ02402/MDX220190_dragen_alignment_multiqc_data.json"))
+#multiqc_tidy_json(here("nogit/multiqc/dragen/wgs_tumor_normal/SBJ02402/MDX220190_dragen_somatic_multiqc_data.json"))
+#multiqc_tidy_json(here("nogit/multiqc/dragen/wts_tumor_only/SBJ02402/MDX220191_dragen_transcriptome_multiqc_data.json"))
+#multiqc_tidy_json(here("nogit/multiqc/dragen/umccrise/SBJ02403/SBJ02403__PRJ221333-multiqc_report_data.json"))
+#multiqc_tidy_json(here("nogit/multiqc/bcbio/umccrise/SBJ00665__SBJ00665_PRJ200639_L2100018_multiqc_data.json"))
+#multiqc_tidy_json(here("nogit/multiqc/bcbio/umccrise/SBJ02403__SBJ02403_PRJ221333_L2200722_multiqc_data.json"))
+x <- fs::dir_ls(here("nogit/multiqc"), glob = "*json", recurse = TRUE)
+x |>
+  purrr::map_df(function(fn) {
+    d <- multiqc_tidy_json(fn)
+    tibble::tibble(cols = ncol(d), rows = nrow(d), fname = fn)
+  }) |>
+  dplyr::arrange(cols, rows, fname) |>
+  dplyr::mutate(n = dplyr::row_number()) |>
+  dplyr::select(n, dplyr::everything()) |>
+  knitr::kable()
+```
