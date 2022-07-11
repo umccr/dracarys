@@ -1,25 +1,75 @@
 package:
   name: dracarys
-  version: 0.0.1
+  version: 0.0.1 # bump2version
 
 source:
   path: ../..
 
 build:
   number: 0
-  noarch: python
+  noarch: generic
+  rpaths:
+    - lib/R/lib/
+    - lib/
 
 requirements:
+  build:
+    - git
   host:
-    - python
+    # imports
+    - r-base
+    - r-assertthat
+    - r-dplyr
+    - r-ggplot2
+    - r-glue
+    - r-purrr
+    - r-r6
+    - r-rjsonio
+    - r-readr
+    - r-rlang
+    - r-tibble
+    - r-tidyr
+    # suggests
+    - r-argparse
+    - r-arrow
+    - r-cli
+    - r-here
+    - r-jsonlite
+    - r-knitr
+    - r-rmarkdown
+    - r-scales
+    - r-testthat
   run:
-    - click
+    # imports
+    - r-base
+    - r-assertthat
+    - r-dplyr
+    - r-ggplot2
+    - r-glue
+    - r-purrr
+    - r-r6
+    - r-rjsonio
+    - r-readr
+    - r-rlang
+    - r-tibble
+    - r-tidyr
+    # suggests
+    - r-argparse
+    - r-arrow
+    - r-cli
+    - r-here
+    - r-jsonlite
+    - r-knitr
+    - r-rmarkdown
+    - r-scales
+    - r-testthat
 
 test:
   commands:
-    - dracarys --version
+    - $R -e "library('dracarys')"
+    - dracarys.R --version
 
 about:
   home: https://github.com/umccr/dracarys
   license: MIT
-  summary: Scripts for post-processing somatic workflows.
+  summary: DRAGEN workflow post-processing
