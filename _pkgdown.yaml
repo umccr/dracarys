@@ -1,0 +1,11 @@
+template:
+  bootstrap: 5
+  bootswatch: vapor
+  theme: breeze-light
+url: https://umccr.github.io/dracarys/
+authors:
+  Peter Diakumis:
+    href: https://github.com/pdiakumis
+
+news:
+  one_page: true
