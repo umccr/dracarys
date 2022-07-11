@@ -1,0 +1,77 @@
+---
+output:
+  github_document:
+    toc: true
+
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = FALSE,
+  comment = "",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
+
+# 🐲 dracarys - DRAGEN Workflow Post-Processing 🔥
+
+- Docs: <https://umccr.github.io/dracarys/>
+
+[![Conda install](https://anaconda.org/umccr/r-dracarys/badges/installer/conda.svg)](https://anaconda.org/umccr/r-dracarys)
+
+## Installation
+
+```r
+remotes::install_github("umccr/dracarys")
+```
+
+- Or if used inside a conda environment:
+
+```bash
+conda install r-dracarys -c umccr -c conda-forge -c bioconda
+```
+
+## Main modules
+
+### ✨ Tidy {#id_-tidy}
+
+- Generate a 'tidier' form of the `multiqc_data.json` MultiQC summary file.
+  TSV and Parquet outputs are generated. For the TSV file, each row corresponds
+  to a single sample, and each column corresponds to a single quality metric/variable.
+  See the [CLI](#cli) section below for options.
+
+## 💻 CLI {#id_-cli}
+
+A `dracarys` command line interface is available for convenience.
+
+- If you're using the conda package, the `dracarys.R` command will already be set up
+  inside an activated conda environment.
+- If you're _not_ using the conda package, you need to export the
+  `dracarys/inst/cli/` directory to your `PATH` in order to use `dracarys.R`.
+
+```{bash echo=TRUE, eval=FALSE}
+dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, "\n")' | xargs)
+export PATH="${dracarys_cli}:${PATH}"
+```
+
+```{bash echo=FALSE}
+dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, "\n")' | xargs)
+export PATH="${dracarys_cli}:${PATH}"
+
+echo "$ dracarys.R --version"
+echo "dracarys.R 0.0.1"
+echo ""
+echo "$ dracarys.R --help"
+dracarys.R --help
+echo ""
+echo ""
+echo ""
+echo "#------- Tidy -------#"
+echo ""
+echo ""
+echo "$ dracarys.R tidy --help"
+dracarys.R tidy --help
+```
