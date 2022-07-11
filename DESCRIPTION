@@ -26,6 +26,9 @@ Imports:
     tibble,
     tidyr,
 Suggests:
+    argparse,
+    arrow,
+    cli,
     here,
     jsonlite,
     knitr,
