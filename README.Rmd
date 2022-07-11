@@ -62,12 +62,7 @@ dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, 
 export PATH="${dracarys_cli}:${PATH}"
 
 echo "$ dracarys.R --version"
-echo "dracarys.R 0.0.1"
-echo ""
-echo "$ dracarys.R --help"
-dracarys.R --help
-echo ""
-echo ""
+echo "dracarys.R 0.1.0"
 echo ""
 echo "#------- Tidy -------#"
 echo ""

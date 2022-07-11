@@ -54,22 +54,7 @@ export PATH="${dracarys_cli}:${PATH}"
 ```
 
     $ dracarys.R --version
-    dracarys.R 0.0.1
-
-    $ dracarys.R --help
-    usage: dracarys.R [-h] [-v] {tidy} ...
-
-    DRAGEN Output Tidying
-
-    positional arguments:
-      {tidy}         sub-command help
-        tidy         DRAGEN Output Tidying
-
-    optional arguments:
-      -h, --help     show this help message and exit
-      -v, --version  show program's version number and exit
-
-
+    dracarys.R 0.1.0
 
     #------- Tidy -------#
 
