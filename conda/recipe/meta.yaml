@@ -33,6 +33,7 @@ requirements:
     - r-argparse
     - r-arrow
     - r-cli
+    - r-emojifont
     - r-here
     - r-jsonlite
     - r-knitr
@@ -57,6 +58,7 @@ requirements:
     - r-argparse
     - r-arrow
     - r-cli
+    - r-emojifont
     - r-here
     - r-jsonlite
     - r-knitr
