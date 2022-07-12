@@ -3,7 +3,7 @@
 #' @return Current timestamp as character.
 #' @export
 date_log <- function() {
-  as.character(paste0("[", as.POSIXct(Sys.time()), "]"))
+  as.character(glue::glue('[{format(Sys.time(), "%Y-%m-%dT%H:%M:%S%Z")}]'))
 }
 
 #' Create directory
