@@ -7,7 +7,7 @@
 ^LICENSE\.md$
 ^nogit$
 ^outputs$
-^_pkgdown\.yml$
+^_pkgdown\.yaml$
 ^pkgdown$
 ^README\.Rmd$
 ^\.Rproj\.user$

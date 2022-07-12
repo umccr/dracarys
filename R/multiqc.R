@@ -1,3 +1,31 @@
+#' Dracarys Tidy MultiQC
+#'
+#' Generate tidier representations of MultiQC JSON output
+#' @param json Path to `multiqc_data.json`.
+#' @param prefix Prefix for output files.
+#' @param outdir Path to output results.
+#' @return Generates TSV and Parquet representations of the input
+#' MultiQC JSON file.
+#' @export
+dracarys_tidy_multiqc <- function(json, prefix, outdir) {
+  e <- emojifont::emoji
+  cli::cli_div(theme = list(
+    span.file = list(color = "lightblue"),
+    span.emph = list(color = "orange")
+  ))
+  cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying {.file {json}} {e('fire')}")
+  # main dracarys function
+  d1 <- multiqc_tidy_json(json)
+  ## d2 <- select_column_subset_alignmentqc(d1)
+  tsv_out <- file.path(outdir, glue::glue("{prefix}.tsv"))
+  parquet_out <- file.path(outdir, glue::glue("{prefix}.parquet"))
+  readr::write_tsv(d1, tsv_out)
+  arrow::write_parquet(d1, parquet_out)
+
+  cli::cli_alert_success("{date_log()} {e('rocket')} End tidying {.file {json}} {e('comet')}!")
+  cli::cli_alert_info("{date_log()} {e('tada')} Path to output directory with results for {.emph {prefix}}: {.file {outdir}}")
+}
+
 #' Tidy MultiQC JSON
 #'
 #' Tidies 'multiqc_data.json' output from MultiQC.

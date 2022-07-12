@@ -29,6 +29,7 @@ Suggests:
     argparse,
     arrow,
     cli,
+    emojifont,
     here,
     jsonlite,
     knitr,
