@@ -1,16 +1,18 @@
 #!/usr/bin/env Rscript
 
 suppressPackageStartupMessages(require(argparse, include.only = "ArgumentParser"))
+suppressPackageStartupMessages(require(arrow, include.only = "write_parquet"))
+suppressPackageStartupMessages(require(assertthat, include.only = "assert_that"))
 suppressPackageStartupMessages(require(cli))
 suppressPackageStartupMessages(require(dracarys))
+suppressPackageStartupMessages(require(emojifont, include.only = "emoji"))
 suppressPackageStartupMessages(require(glue, include.only = "glue"))
-suppressPackageStartupMessages(require(arrow, include.only = "write_parquet"))
 suppressPackageStartupMessages(require(readr, include.only = "write_tsv"))
 
 pkg <- "dracarys"
 prog_nm <- paste0(pkg, ".R")
 version <- as.character(packageVersion(pkg))
-p <- ArgumentParser(description = "DRAGEN Output Tidying", prog = prog_nm)
+p <- ArgumentParser(description = glue("{emoji('dragon')} DRAGEN Output Post-Processing {emoji('fire')}"), prog = prog_nm)
 p$add_argument("-v", "--version", action = "version", version = glue("{prog_nm} {version}"))
 subparser_name <- "subparser_name"
 subp <- p$add_subparsers(help = "sub-command help", dest = subparser_name)
