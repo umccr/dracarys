@@ -36,27 +36,8 @@ dracarys_tidy_multiqc <- function(json, prefix, outdir) {
 #' @export
 multiqc_tidy_json <- function(j) {
   p <- RJSONIO::fromJSON(j)
-  dragen_workflows <- c("alignment", "transcriptome", "somatic", "umccrise")
   config_creation_date <- sub(", ", "_", p$config_creation_date)
-  config_title <- p$config_title
-  get_workflow <- function(config_title) {
-    if (grepl("^SBJ[[:digit:]]+$", config_title)) {
-      return("dragen_umccrise")
-    } else if (grepl("^UMCCR MultiQC Dragen", config_title)) {
-      w <- tolower(sub("UMCCR MultiQC Dragen (.*) Report for .*", "\\1", config_title))
-      assertthat::assert_that(w %in% dragen_workflows)
-      return(paste0("dragen_", w))
-    } else if (grepl("[[:digit:]]+.*-merged$", config_title)) {
-      return("bcbio_umccrise")
-    } else {
-      warning(glue::glue(
-        "config_title: '{config_title}'.\n",
-        "Unknown which umccr workflow this MultiQC JSON was generated from",
-      ))
-      return("unknown")
-    }
-  }
-  workflow <- get_workflow(config_title)
+  workflow <- .multiqc_guess_workflow(p)
   d <- dracarys::multiqc_parse_gen(p)
   if (workflow == "dragen_umccrise") {
     # replace the "NA" strings with NA, else we get a column class error
@@ -85,6 +66,47 @@ multiqc_tidy_json <- function(j) {
       dplyr::filter(!.data$umccr_id %in% um_ref_samples)
   }
   d
+}
+
+.multiqc_guess_workflow <- function(p) {
+  assertthat::assert_that(all(c("config_title", "report_data_sources") %in% names(p)))
+  config_title <- dplyr::if_else(is.null(p[["config_title"]]), "Unknown", p[["config_title"]])
+  ds <- names(p[["report_data_sources"]])
+  # bcbio
+  if ("bcbio" %in% ds) {
+    # wgs, wts, or umccrise?
+    if (all(c("Salmon", "STAR") %in% ds)) {
+      return("bcbio_wts")
+    } else if (all(c("PURPLE", "Conpair", "mosdepth", "SnpEff") %in% ds)) {
+      return("bcbio_umccrise")
+    } else if (all(c("Samtools", "Bcftools (somatic)", "Bcftools (germline)") %in% ds)) {
+      return("bcbio_wgs")
+    } else {
+      warning(glue::glue(
+        "Unknown which bcbio workflow this MultiQC JSON was generated from",
+      ))
+      return("bcbio_unknown")
+    }
+  }
+
+  # dragen
+  if ("DRAGEN" %in% ds) {
+    dragen_workflows <- c("alignment", "transcriptome", "somatic")
+    if (all(c("PURPLE", "Conpair", "mosdepth") %in% ds)) {
+      return("dragen_umccrise")
+    } else if (grepl("^UMCCR MultiQC Dragen", config_title)) {
+      w <- tolower(sub("UMCCR MultiQC Dragen (.*) Report for .*", "\\1", config_title))
+      assertthat::assert_that(w %in% dragen_workflows)
+      return(paste0("dragen_", w))
+    } else {
+      warning(glue::glue(
+        "config_title: '{config_title}'.\n",
+        "Unknown which DRAGEN workflow this MultiQC JSON was generated from",
+      ))
+      return("dragen_unknown")
+    }
+  }
+  return("UNKNOWN")
 }
 
 #' Parse MultiQC 'report_general_stats_data' JSON Element
