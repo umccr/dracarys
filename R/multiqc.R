@@ -68,6 +68,9 @@ multiqc_tidy_json <- function(j) {
   d
 }
 
+.multiqc_check_cols <- function(d) {
+}
+
 .multiqc_guess_workflow <- function(p) {
   assertthat::assert_that(all(c("config_title", "report_data_sources") %in% names(p)))
   config_title <- dplyr::if_else(is.null(p[["config_title"]]), "Unknown", p[["config_title"]])
@@ -75,7 +78,7 @@ multiqc_tidy_json <- function(j) {
   # bcbio
   if ("bcbio" %in% ds) {
     # wgs, wts, or umccrise?
-    if (all(c("Salmon", "STAR") %in% ds)) {
+    if (all(c("Salmon", "STAR", "QualiMap") %in% ds)) {
       return("bcbio_wts")
     } else if (all(c("PURPLE", "Conpair", "mosdepth", "SnpEff") %in% ds)) {
       return("bcbio_umccrise")
@@ -145,9 +148,6 @@ multiqc_parse_raw <- function(p, tools2delete = NULL) {
   # For each tool
   p[[el]] |>
     purrr::imap(function(samples, tool) {
-      # Remove the superflous "multiqc_" from the start of the tool name
-      # tool <- sub("multiqc_", "", tool)
-
       # For each sample
       samples |> multiqc_kv_map(function(metrics, sample) {
         # For each metric in the above tool
@@ -448,7 +448,7 @@ MULTIQC_COLUMNS <- tibble::tribble(
   "dragen_umccrise", "total_first_fragment_length", "samtools_total_first_fragment_length",
   "dragen_umccrise", "total_last_fragment_length", "samtools_total_last_fragment_length",
   "dragen_umccrise", "bases_mapped", "samtools_bases_mapped",
-  "dragen_umccrise", "bases_mapped_(cigar)", "samtools_bases_mapped_(cigar)",
+  "dragen_umccrise", "bases_mapped_(cigar)", "samtools_bases_mapped_cigar",
   "dragen_umccrise", "bases_trimmed", "samtools_bases_trimmed",
   "dragen_umccrise", "bases_duplicated", "samtools_bases_duplicated",
   "dragen_umccrise", "mismatches", "samtools_mismatches",
@@ -672,5 +672,40 @@ MULTIQC_COLUMNS <- tibble::tribble(
   "bcbio_umccrise", "stop_retained_variant", "snpeff_stop_retained_variant",
   "bcbio_umccrise", "stop_retained_variant_percent", "snpeff_stop_retained_variant_pct",
   "bcbio_umccrise", "GENE", "snpeff_gene",
-  "bcbio_umccrise", "GENE_percent", "snpeff_gene_pct"
+  "bcbio_umccrise", "GENE_percent", "snpeff_gene_pct",
+  "bcbio_wts", "rRNA", "rrna_qualimap",
+  "bcbio_wts", "rRNA_rate", "rrna_rate_qualimap",
+  "bcbio_wts", "5'-3'_bias", "5_3_bias_qualimap1",
+  "bcbio_wts", "5_3_bias", "5_3_bias_qualimap2",
+  "bcbio_wts", "Intergenic_Rate", "intergenic_rate_qualimap",
+  "bcbio_wts", "Intronic_Rate", "intronic_rate_qualimap",
+  "bcbio_wts", "Exonic_Rate", "exonic_rate_qualimap",
+  "bcbio_wts", "Duplication_Rate_of_Mapped", "mapped_dup_rate_qualimap",
+  "bcbio_wts", "total_reads", "total_reads_star",
+  "bcbio_wts", "avg_input_read_length", "avg_input_read_length_star",
+  "bcbio_wts", "uniquely_mapped", "uniquely_mapped_star",
+  "bcbio_wts", "uniquely_mapped_percent", "uniquely_mapped_percent_star",
+  "bcbio_wts", "avg_mapped_read_length", "avg_mapped_read_length_star",
+  "bcbio_wts", "num_splices", "num_splices_star",
+  "bcbio_wts", "num_annotated_splices", "num_annotated_splices_star",
+  "bcbio_wts", "num_GTAG_splices", "num_gtag_splices_star",
+  "bcbio_wts", "num_GCAG_splices", "num_gcag_splices_star",
+  "bcbio_wts", "num_ATAC_splices", "num_atac_splices_star",
+  "bcbio_wts", "num_noncanonical_splices", "num_noncanonical_splices_star",
+  "bcbio_wts", "mismatch_rate", "mismatch_rate_star",
+  "bcbio_wts", "deletion_rate", "deletion_rate_star",
+  "bcbio_wts", "deletion_length", "deletion_length_star",
+  "bcbio_wts", "insertion_rate", "insertion_rate_star",
+  "bcbio_wts", "insertion_length", "insertion_length_star",
+  "bcbio_wts", "multimapped", "multimapped_star",
+  "bcbio_wts", "multimapped_percent", "multimapped_percent_star",
+  "bcbio_wts", "multimapped_toomany", "multimapped_toomany_star",
+  "bcbio_wts", "multimapped_toomany_percent", "multimapped_toomany_percent_star",
+  "bcbio_wts", "unmapped_mismatches_percent", "unmapped_mismatches_percent_star",
+  "bcbio_wts", "unmapped_tooshort_percent", "unmapped_tooshort_percent_star",
+  "bcbio_wts", "unmapped_other_percent", "unmapped_other_percent_star",
+  "bcbio_wts", "unmapped_mismatches", "unmapped_mismatches_star",
+  "bcbio_wts", "unmapped_tooshort", "unmapped_tooshort_star",
+  "bcbio_wts", "unmapped_other", "unmapped_other_star",
+  "bcbio_wts", "reads_aligned", "reads_aligned_qualimap"
 )
