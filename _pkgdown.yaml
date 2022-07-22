@@ -1,7 +1,7 @@
 template:
   bootstrap: 5
   bootswatch: vapor
-  theme: breeze-light
+  theme: arrow-dark
 url: https://umccr.github.io/dracarys/
 authors:
   Peter Diakumis:

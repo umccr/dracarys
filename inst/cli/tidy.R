@@ -1,8 +1,8 @@
 tidy_add_args <- function(subp) {
   tidy <- subp$add_parser("tidy", help = "Tidying MultiQC Output")
   tidy$add_argument("-j", "--json", help = glue("{emoji('poop')} Path to 'multiqc_data.json'."), required = TRUE)
-  tidy$add_argument("-o", "--outdir", help = glue("{emoji('gift')} Output directory for results."), required = TRUE)
-  tidy$add_argument("-p", "--prefix", help = glue("{emoji('sparkles')} Prefix name for output files."), required = TRUE)
+  tidy$add_argument("-o", "--outdir", help = glue("{emoji('gift')} Output results to this directory."), required = TRUE)
+  tidy$add_argument("-p", "--prefix", help = glue("{emoji('sparkles')} Prefix output files with this string."), required = TRUE)
   tidy$add_argument("-q", "--quiet", help = glue("{emoji('sleeping')} Shush all the logs."), action = "store_true")
 }
 
