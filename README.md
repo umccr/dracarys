@@ -66,7 +66,7 @@ export PATH="${dracarys_cli}:${PATH}"
       -h, --help            show this help message and exit
       -j JSON, --json JSON  💩 Path to 'multiqc_data.json'.
       -o OUTDIR, --outdir OUTDIR
-                            🎁 Output directory for results.
+                            🎁 Output results to this directory.
       -p PREFIX, --prefix PREFIX
-                            ✨ Prefix name for output files.
+                            ✨ Prefix output files with this string.
       -q, --quiet           😴 Shush all the logs.
