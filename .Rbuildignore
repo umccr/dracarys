@@ -19,5 +19,6 @@
 ^Dockerfile$
 ^\.bumpversion\.cfg$
 ^\.pre-commit-config\.yaml$
-.dvc
-.dvcignore
+^\.dvc$
+^\.dvcignore$
+^\.dockerignore$
