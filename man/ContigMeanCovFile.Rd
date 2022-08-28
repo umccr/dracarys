@@ -25,24 +25,24 @@ plot(cc1)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-read}{\code{ContigMeanCovFile$read()}}
-\item \href{#method-plot}{\code{ContigMeanCovFile$plot()}}
-\item \href{#method-clone}{\code{ContigMeanCovFile$clone()}}
+\item \href{#method-ContigMeanCovFile-read}{\code{ContigMeanCovFile$read()}}
+\item \href{#method-ContigMeanCovFile-plot}{\code{ContigMeanCovFile$plot()}}
+\item \href{#method-ContigMeanCovFile-clone}{\code{ContigMeanCovFile$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname">}\href{../../dracarys/html/File.html#method-bname}{\code{dracarys::File$bname()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize">}\href{../../dracarys/html/File.html#method-initialize}{\code{dracarys::File$initialize()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print">}\href{../../dracarys/html/File.html#method-print}{\code{dracarys::File$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type">}\href{../../dracarys/html/File.html#method-type}{\code{dracarys::File$type()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname"><a href='../../dracarys/html/File.html#method-File-bname'><code>dracarys::File$bname()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize"><a href='../../dracarys/html/File.html#method-File-initialize'><code>dracarys::File$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print"><a href='../../dracarys/html/File.html#method-File-print'><code>dracarys::File$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type"><a href='../../dracarys/html/File.html#method-File-type'><code>dracarys::File$type()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-read"></a>}}
-\if{latex}{\out{\hypertarget{method-read}{}}}
+\if{html}{\out{<a id="method-ContigMeanCovFile-read"></a>}}
+\if{latex}{\out{\hypertarget{method-ContigMeanCovFile-read}{}}}
 \subsection{Method \code{read()}}{
 Reads the \verb{wgs_contig_mean_cov_<phenotype>.csv} file output from DRAGEN.
 \subsection{Usage}{
@@ -68,8 +68,8 @@ duplicate marked reads, reads with MAPQ=0, and clipped bases).
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-plot}{}}}
+\if{html}{\out{<a id="method-ContigMeanCovFile-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-ContigMeanCovFile-plot}{}}}
 \subsection{Method \code{plot()}}{
 Plots the \verb{wgs_contig_mean_cov_<phenotype>.csv} files.
 \subsection{Usage}{
@@ -88,8 +88,8 @@ A ggplot2 object with chromosomes on X axis, and coverage on Y axis.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-ContigMeanCovFile-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-ContigMeanCovFile-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

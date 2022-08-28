@@ -23,23 +23,23 @@ read(cm2)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-read}{\code{CoverageMetricsFile$read()}}
-\item \href{#method-clone}{\code{CoverageMetricsFile$clone()}}
+\item \href{#method-CoverageMetricsFile-read}{\code{CoverageMetricsFile$read()}}
+\item \href{#method-CoverageMetricsFile-clone}{\code{CoverageMetricsFile$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname">}\href{../../dracarys/html/File.html#method-bname}{\code{dracarys::File$bname()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize">}\href{../../dracarys/html/File.html#method-initialize}{\code{dracarys::File$initialize()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print">}\href{../../dracarys/html/File.html#method-print}{\code{dracarys::File$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type">}\href{../../dracarys/html/File.html#method-type}{\code{dracarys::File$type()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname"><a href='../../dracarys/html/File.html#method-File-bname'><code>dracarys::File$bname()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize"><a href='../../dracarys/html/File.html#method-File-initialize'><code>dracarys::File$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print"><a href='../../dracarys/html/File.html#method-File-print'><code>dracarys::File$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type"><a href='../../dracarys/html/File.html#method-File-type'><code>dracarys::File$type()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-read"></a>}}
-\if{latex}{\out{\hypertarget{method-read}{}}}
+\if{html}{\out{<a id="method-CoverageMetricsFile-read"></a>}}
+\if{latex}{\out{\hypertarget{method-CoverageMetricsFile-read}{}}}
 \subsection{Method \code{read()}}{
 Reads the \verb{wgs_coverage_metrics_<phenotype>.csv} file output from DRAGEN.
 \subsection{Usage}{
@@ -58,8 +58,8 @@ tibble with the following columns:
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-CoverageMetricsFile-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-CoverageMetricsFile-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

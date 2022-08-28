@@ -25,17 +25,17 @@ F1$bname()
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-new}{\code{File$new()}}
-\item \href{#method-bname}{\code{File$bname()}}
-\item \href{#method-type}{\code{File$type()}}
-\item \href{#method-print}{\code{File$print()}}
-\item \href{#method-read}{\code{File$read()}}
-\item \href{#method-clone}{\code{File$clone()}}
+\item \href{#method-File-new}{\code{File$new()}}
+\item \href{#method-File-bname}{\code{File$bname()}}
+\item \href{#method-File-type}{\code{File$type()}}
+\item \href{#method-File-print}{\code{File$print()}}
+\item \href{#method-File-read}{\code{File$read()}}
+\item \href{#method-File-clone}{\code{File$clone()}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-new"></a>}}
-\if{latex}{\out{\hypertarget{method-new}{}}}
+\if{html}{\out{<a id="method-File-new"></a>}}
+\if{latex}{\out{\hypertarget{method-File-new}{}}}
 \subsection{Method \code{new()}}{
 Create a new File object.
 \subsection{Usage}{
@@ -51,8 +51,8 @@ Create a new File object.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-bname"></a>}}
-\if{latex}{\out{\hypertarget{method-bname}{}}}
+\if{html}{\out{<a id="method-File-bname"></a>}}
+\if{latex}{\out{\hypertarget{method-File-bname}{}}}
 \subsection{Method \code{bname()}}{
 Basename of the file.
 \subsection{Usage}{
@@ -64,8 +64,8 @@ Basename of the file as a character vector.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-type"></a>}}
-\if{latex}{\out{\hypertarget{method-type}{}}}
+\if{html}{\out{<a id="method-File-type"></a>}}
+\if{latex}{\out{\hypertarget{method-File-type}{}}}
 \subsection{Method \code{type()}}{
 Get the type of file.
 \subsection{Usage}{
@@ -77,8 +77,8 @@ String describing the type of file (CSV, TSV, JSON or OTHER).
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-print"></a>}}
-\if{latex}{\out{\hypertarget{method-print}{}}}
+\if{html}{\out{<a id="method-File-print"></a>}}
+\if{latex}{\out{\hypertarget{method-File-print}{}}}
 \subsection{Method \code{print()}}{
 Print details about the File.
 \subsection{Usage}{
@@ -94,8 +94,8 @@ Print details about the File.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-read"></a>}}
-\if{latex}{\out{\hypertarget{method-read}{}}}
+\if{html}{\out{<a id="method-File-read"></a>}}
+\if{latex}{\out{\hypertarget{method-File-read}{}}}
 \subsection{Method \code{read()}}{
 Read the file based on its type.
 \subsection{Usage}{
@@ -111,8 +111,8 @@ Read the file based on its type.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-File-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-File-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

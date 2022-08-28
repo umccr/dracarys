@@ -27,24 +27,24 @@ plot(ch2)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-read}{\code{FineHistFile$read()}}
-\item \href{#method-plot}{\code{FineHistFile$plot()}}
-\item \href{#method-clone}{\code{FineHistFile$clone()}}
+\item \href{#method-FineHistFile-read}{\code{FineHistFile$read()}}
+\item \href{#method-FineHistFile-plot}{\code{FineHistFile$plot()}}
+\item \href{#method-FineHistFile-clone}{\code{FineHistFile$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname">}\href{../../dracarys/html/File.html#method-bname}{\code{dracarys::File$bname()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize">}\href{../../dracarys/html/File.html#method-initialize}{\code{dracarys::File$initialize()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print">}\href{../../dracarys/html/File.html#method-print}{\code{dracarys::File$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type">}\href{../../dracarys/html/File.html#method-type}{\code{dracarys::File$type()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname"><a href='../../dracarys/html/File.html#method-File-bname'><code>dracarys::File$bname()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize"><a href='../../dracarys/html/File.html#method-File-initialize'><code>dracarys::File$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print"><a href='../../dracarys/html/File.html#method-File-print'><code>dracarys::File$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type"><a href='../../dracarys/html/File.html#method-File-type'><code>dracarys::File$type()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-read"></a>}}
-\if{latex}{\out{\hypertarget{method-read}{}}}
+\if{html}{\out{<a id="method-FineHistFile-read"></a>}}
+\if{latex}{\out{\hypertarget{method-FineHistFile-read}{}}}
 \subsection{Method \code{read()}}{
 Reads the \verb{wgs_fine_hist_<phenotype>.csv} file output from DRAGEN.
 \subsection{Usage}{
@@ -61,8 +61,8 @@ tibble with three columns:
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-plot}{}}}
+\if{html}{\out{<a id="method-FineHistFile-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-FineHistFile-plot}{}}}
 \subsection{Method \code{plot()}}{
 Plots the \verb{wgs_fine_hist_<phenotype>.csv} files.
 \subsection{Usage}{
@@ -82,8 +82,8 @@ and number of loci with that depth on Y axis.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-FineHistFile-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-FineHistFile-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{

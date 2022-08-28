@@ -27,23 +27,23 @@ vm$read() # or read(vm)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-read}{\code{VCMetricsFile$read()}}
-\item \href{#method-clone}{\code{VCMetricsFile$clone()}}
+\item \href{#method-VCMetricsFile-read}{\code{VCMetricsFile$read()}}
+\item \href{#method-VCMetricsFile-clone}{\code{VCMetricsFile$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname">}\href{../../dracarys/html/File.html#method-bname}{\code{dracarys::File$bname()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize">}\href{../../dracarys/html/File.html#method-initialize}{\code{dracarys::File$initialize()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print">}\href{../../dracarys/html/File.html#method-print}{\code{dracarys::File$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type">}\href{../../dracarys/html/File.html#method-type}{\code{dracarys::File$type()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname"><a href='../../dracarys/html/File.html#method-File-bname'><code>dracarys::File$bname()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize"><a href='../../dracarys/html/File.html#method-File-initialize'><code>dracarys::File$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print"><a href='../../dracarys/html/File.html#method-File-print'><code>dracarys::File$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type"><a href='../../dracarys/html/File.html#method-File-type'><code>dracarys::File$type()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-read"></a>}}
-\if{latex}{\out{\hypertarget{method-read}{}}}
+\if{html}{\out{<a id="method-VCMetricsFile-read"></a>}}
+\if{latex}{\out{\hypertarget{method-VCMetricsFile-read}{}}}
 \subsection{Method \code{read()}}{
 Reads the \code{vc_metrics.csv} file output from DRAGEN.
 \subsection{Usage}{
@@ -62,8 +62,8 @@ tibble with the following columns:
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-VCMetricsFile-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-VCMetricsFile-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
