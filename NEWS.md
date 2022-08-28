@@ -1,3 +1,7 @@
+# dracarys 0.2.1 (2022-08-28)
+
+- :star: multiqc: support for dragen ctdna output ([pr13](https://github.com/umccr/dracarys/pull/13)).
+
 # dracarys 0.2.0 (2022-07-23)
 
 - Add `MULTIQC_COLUMNS` tibble that maps the raw metric name to a cleaner name
