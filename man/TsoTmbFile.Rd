@@ -18,23 +18,23 @@ tmb$read() # or read(tmb)
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
-\item \href{#method-read}{\code{TsoTmbFile$read()}}
-\item \href{#method-clone}{\code{TsoTmbFile$clone()}}
+\item \href{#method-TsoTmbFile-read}{\code{TsoTmbFile$read()}}
+\item \href{#method-TsoTmbFile-clone}{\code{TsoTmbFile$clone()}}
 }
 }
-\if{html}{
-\out{<details open ><summary>Inherited methods</summary>}
-\itemize{
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname">}\href{../../dracarys/html/File.html#method-bname}{\code{dracarys::File$bname()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize">}\href{../../dracarys/html/File.html#method-initialize}{\code{dracarys::File$initialize()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print">}\href{../../dracarys/html/File.html#method-print}{\code{dracarys::File$print()}}\out{</span>}
-\item \out{<span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type">}\href{../../dracarys/html/File.html#method-type}{\code{dracarys::File$type()}}\out{</span>}
-}
-\out{</details>}
-}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname"><a href='../../dracarys/html/File.html#method-File-bname'><code>dracarys::File$bname()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize"><a href='../../dracarys/html/File.html#method-File-initialize'><code>dracarys::File$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print"><a href='../../dracarys/html/File.html#method-File-print'><code>dracarys::File$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type"><a href='../../dracarys/html/File.html#method-File-type'><code>dracarys::File$type()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-read"></a>}}
-\if{latex}{\out{\hypertarget{method-read}{}}}
+\if{html}{\out{<a id="method-TsoTmbFile-read"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoTmbFile-read}{}}}
 \subsection{Method \code{read()}}{
 Reads the \code{tmb.json.gz} file output from TSO.
 \subsection{Usage}{
@@ -56,8 +56,8 @@ tibble with the following columns:
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-clone"></a>}}
-\if{latex}{\out{\hypertarget{method-clone}{}}}
+\if{html}{\out{<a id="method-TsoTmbFile-clone"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoTmbFile-clone}{}}}
 \subsection{Method \code{clone()}}{
 The objects of this class are cloneable with this method.
 \subsection{Usage}{
