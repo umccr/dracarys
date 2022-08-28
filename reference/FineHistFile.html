@@ -18,7 +18,7 @@ column indicates the number of loci covered at the corresponding depth."><!-- ma
     
     <a class="navbar-brand me-2" href="../index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -72,14 +72,14 @@ column indicates the number of loci covered at the corresponding depth.</p>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
-<ul><li><p><a href="#method-read"><code>FineHistFile$read()</code></a></p></li>
-<li><p><a href="#method-plot"><code>FineHistFile$plot()</code></a></p></li>
-<li><p><a href="#method-clone"><code>FineHistFile$clone()</code></a></p></li>
-</ul></div><p><details open><summary>Inherited methods</summary><ul><li><p><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname"><a href="File.html#method-bname"><code>dracarys::File$bname()</code></a></span></p></li>
-<li><p><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize"><a href="File.html#method-initialize"><code>dracarys::File$initialize()</code></a></span></p></li>
-<li><p><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print"><a href="File.html#method-print"><code>dracarys::File$print()</code></a></span></p></li>
-<li><p><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type"><a href="File.html#method-type"><code>dracarys::File$type()</code></a></span></p></li>
-</ul></details></p><hr><a id="method-read"></a><div class="section">
+<ul><li><p><a href="#method-FineHistFile-read"><code>FineHistFile$read()</code></a></p></li>
+<li><p><a href="#method-FineHistFile-plot"><code>FineHistFile$plot()</code></a></p></li>
+<li><p><a href="#method-FineHistFile-clone"><code>FineHistFile$clone()</code></a></p></li>
+</ul></div><p><details open><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname"><a href="File.html#method-bname"><code>dracarys::File$bname()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize"><a href="File.html#method-initialize"><code>dracarys::File$initialize()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print"><a href="File.html#method-print"><code>dracarys::File$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type"><a href="File.html#method-type"><code>dracarys::File$type()</code></a></span></li>
+</ul></details></p><hr><a id="method-FineHistFile-read"></a><div class="section">
 <h3 id="method-read-">Method <code><a href="read.html">read()</a></code><a class="anchor" aria-label="anchor" href="#method-read-"></a></h3>
 <p>Reads the <code>wgs_fine_hist_&lt;phenotype&gt;.csv</code> file output from DRAGEN.</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
@@ -93,7 +93,7 @@ column indicates the number of loci covered at the corresponding depth.</p>
 <li><p>number of loci with given depth</p></li>
 </ul></div>
 
-</div><p></p><hr><a id="method-plot"></a><div class="section">
+</div><p></p><hr><a id="method-FineHistFile-plot"></a><div class="section">
 <h3 id="method-plot-">Method <code><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot()</a></code><a class="anchor" aria-label="anchor" href="#method-plot-"></a></h3>
 <p>Plots the <code>wgs_fine_hist_&lt;phenotype&gt;.csv</code> files.</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
@@ -114,7 +114,7 @@ column indicates the number of loci covered at the corresponding depth.</p>
 and number of loci with that depth on Y axis.</p>
 </div>
 
-</div><p></p><hr><a id="method-clone"></a><div class="section">
+</div><p></p><hr><a id="method-FineHistFile-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
@@ -155,7 +155,6 @@ and number of loci with that depth on Y axis.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> SEQC-II_N     8  3<span style="text-decoration: underline;">788</span>680</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> SEQC-II_N     9  4<span style="text-decoration: underline;">050</span>997</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 1,991 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span>
 <span class="r-in"><span><span class="fu"><a href="read.html">read</a></span><span class="op">(</span><span class="va">ch2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,001 × 3</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>    label     depth   n_loci</span>
@@ -171,7 +170,6 @@ and number of loci with that depth on Y axis.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> SEQC-II_T     8  1<span style="text-decoration: underline;">885</span>489</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> SEQC-II_T     9  1<span style="text-decoration: underline;">779</span>691</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 1,991 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ch1</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="FineHistFile-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">ch2</span><span class="op">)</span></span></span>

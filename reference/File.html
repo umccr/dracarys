@@ -14,7 +14,7 @@ A File has a path, a basename, a type, and a default read method for its type.">
     
     <a class="navbar-brand me-2" href="../index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -70,13 +70,13 @@ a DRAGEN workflow.</p>
 <div class="section">
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
-<ul><li><p><a href="#method-new"><code>File$new()</code></a></p></li>
-<li><p><a href="#method-bname"><code>File$bname()</code></a></p></li>
-<li><p><a href="#method-type"><code>File$type()</code></a></p></li>
-<li><p><a href="#method-print"><code>File$print()</code></a></p></li>
-<li><p><a href="#method-read"><code>File$read()</code></a></p></li>
-<li><p><a href="#method-clone"><code>File$clone()</code></a></p></li>
-</ul></div><p></p><hr><a id="method-new"></a><div class="section">
+<ul><li><p><a href="#method-File-new"><code>File$new()</code></a></p></li>
+<li><p><a href="#method-File-bname"><code>File$bname()</code></a></p></li>
+<li><p><a href="#method-File-type"><code>File$type()</code></a></p></li>
+<li><p><a href="#method-File-print"><code>File$print()</code></a></p></li>
+<li><p><a href="#method-File-read"><code>File$read()</code></a></p></li>
+<li><p><a href="#method-File-clone"><code>File$clone()</code></a></p></li>
+</ul></div><p></p><hr><a id="method-File-new"></a><div class="section">
 <h3 id="method-new-">Method <code>new()</code><a class="anchor" aria-label="anchor" href="#method-new-"></a></h3>
 <p>Create a new File object.</p><div class="section">
 <h4 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a></h4>
@@ -92,7 +92,7 @@ a DRAGEN workflow.</p>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-bname"></a><div class="section">
+</div><p></p><hr><a id="method-File-bname"></a><div class="section">
 <h3 id="method-bname-">Method <code>bname()</code><a class="anchor" aria-label="anchor" href="#method-bname-"></a></h3>
 <p>Basename of the file.</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
@@ -104,7 +104,7 @@ a DRAGEN workflow.</p>
 <p>Basename of the file as a character vector.</p>
 </div>
 
-</div><p></p><hr><a id="method-type"></a><div class="section">
+</div><p></p><hr><a id="method-File-type"></a><div class="section">
 <h3 id="method-type-">Method <code>type()</code><a class="anchor" aria-label="anchor" href="#method-type-"></a></h3>
 <p>Get the type of file.</p><div class="section">
 <h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
@@ -116,7 +116,7 @@ a DRAGEN workflow.</p>
 <p>String describing the type of file (CSV, TSV, JSON or OTHER).</p>
 </div>
 
-</div><p></p><hr><a id="method-print"></a><div class="section">
+</div><p></p><hr><a id="method-File-print"></a><div class="section">
 <h3 id="method-print-">Method <code><a href="https://rdrr.io/r/base/print.html" class="external-link">print()</a></code><a class="anchor" aria-label="anchor" href="#method-print-"></a></h3>
 <p>Print details about the File.</p><div class="section">
 <h4 id="usage-3">Usage<a class="anchor" aria-label="anchor" href="#usage-3"></a></h4>
@@ -132,7 +132,7 @@ a DRAGEN workflow.</p>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-read"></a><div class="section">
+</div><p></p><hr><a id="method-File-read"></a><div class="section">
 <h3 id="method-read-">Method <code><a href="read.html">read()</a></code><a class="anchor" aria-label="anchor" href="#method-read-"></a></h3>
 <p>Read the file based on its type.</p><div class="section">
 <h4 id="usage-4">Usage<a class="anchor" aria-label="anchor" href="#usage-4"></a></h4>
@@ -148,7 +148,7 @@ a DRAGEN workflow.</p>
 </dl><p></p></div>
 </div>
 
-</div><p></p><hr><a id="method-clone"></a><div class="section">
+</div><p></p><hr><a id="method-File-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
 <h4 id="usage-5">Usage<a class="anchor" aria-label="anchor" href="#usage-5"></a></h4>
@@ -186,7 +186,6 @@ a DRAGEN workflow.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>  22.8     4  141.    95  3.92  3.15  22.9     1     0     4     2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>  19.2     6  168.   123  3.92  3.44  18.3     1     0     4     4</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 22 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span>
 <span class="r-in"><span><span class="va">F1</span><span class="op">$</span><span class="fu">bname</span><span class="op">(</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "mtcars.csv"</span>
 <span class="r-in"><span></span></span>
