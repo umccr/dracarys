@@ -55,6 +55,7 @@ We are only interested in the following JSON elements:
 # multiqc_tidy_json(here("nogit/multiqc/bcbio/umccrise/SBJ02403__SBJ02403_PRJ221333_L2200722_multiqc_data.json"))
 # multiqc_tidy_json(here("nogit/multiqc/bcbio/wts/SBJ02400_multiqc_data.json"))
 # multiqc_tidy_json(here("nogit/multiqc/bcbio/wgs/SBJ02400_multiqc_data.json"))
+# multiqc_tidy_json(here("nogit/multiqc/tso/PTC_TSOctDNA200901VD_L2000754/multiqc_data.json"))
 
 
 
