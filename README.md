@@ -1,17 +1,17 @@
 
--   <a href="#-dracarys---dragen-workflow-post-processing-"
-    id="toc--dracarys---dragen-workflow-post-processing-">🐲 dracarys -
-    DRAGEN Workflow Post-Processing 🔥</a>
-    -   <a href="#installation" id="toc-installation">Installation</a>
-    -   <a href="#main-modules" id="toc-main-modules">Main modules</a>
-        -   <a href="#id_-tidy" id="toc-id_-tidy">✨ Tidy</a>
-    -   <a href="#id_-cli" id="toc-id_-cli">💻 CLI</a>
+- <a href="#-dracarys---dragen-workflow-post-processing-"
+  id="toc--dracarys---dragen-workflow-post-processing-">🐲 dracarys -
+  DRAGEN Workflow Post-Processing 🔥</a>
+  - <a href="#installation" id="toc-installation">Installation</a>
+  - <a href="#main-modules" id="toc-main-modules">Main modules</a>
+    - <a href="#id_-tidy" id="toc-id_-tidy">✨ Tidy</a>
+  - <a href="#id_-cli" id="toc-id_-cli">💻 CLI</a>
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 # 🐲 dracarys - DRAGEN Workflow Post-Processing 🔥
 
--   Docs: <https://umccr.github.io/dracarys/>
+- Docs: <https://umccr.github.io/dracarys/>
 
 [![Conda
 install](https://anaconda.org/umccr/r-dracarys/badges/installer/conda.svg)](https://anaconda.org/umccr/r-dracarys)
@@ -22,7 +22,7 @@ install](https://anaconda.org/umccr/r-dracarys/badges/installer/conda.svg)](http
 remotes::install_github("umccr/dracarys")
 ```
 
--   Or if used inside a conda environment:
+- Or if used inside a conda environment:
 
 ``` bash
 conda install r-dracarys -c umccr -c conda-forge -c bioconda
@@ -32,21 +32,21 @@ conda install r-dracarys -c umccr -c conda-forge -c bioconda
 
 ### ✨ Tidy
 
--   Generate a ‘tidier’ form of the `multiqc_data.json` MultiQC summary
-    file. TSV and Parquet outputs are generated. For the TSV file, each
-    row corresponds to a single sample, and each column corresponds to a
-    single quality metric/variable. See the [CLI](#cli) section below
-    for options.
+- Generate a ‘tidier’ form of the `multiqc_data.json` MultiQC summary
+  file. TSV and Parquet outputs are generated. For the TSV file, each
+  row corresponds to a single sample, and each column corresponds to a
+  single quality metric/variable. See the [CLI](#cli) section below for
+  options.
 
 ## 💻 CLI
 
 A `dracarys` command line interface is available for convenience.
 
--   If you’re using the conda package, the `dracarys.R` command will
-    already be set up inside an activated conda environment.
--   If you’re *not* using the conda package, you need to export the
-    `dracarys/inst/cli/` directory to your `PATH` in order to use
-    `dracarys.R`.
+- If you’re using the conda package, the `dracarys.R` command will
+  already be set up inside an activated conda environment.
+- If you’re *not* using the conda package, you need to export the
+  `dracarys/inst/cli/` directory to your `PATH` in order to use
+  `dracarys.R`.
 
 ``` bash
 dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, "\n")' | xargs)
