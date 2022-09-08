@@ -18,9 +18,11 @@ gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
   volname <- sub("gds://(.*?)/.*", "\\1", gdsdir)
   path2 <- sub("gds://(.*?)/(.*)", "\\2", gdsdir)
 
-  res <- httr::GET(glue::glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize=100"),
-                   httr::add_headers(Authorization = glue::glue("Bearer {token}")),
-                   httr::accept_json())
+  res <- httr::GET(
+    glue::glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize=100"),
+    httr::add_headers(Authorization = glue::glue("Bearer {token}")),
+    httr::accept_json()
+  )
   j <- jsonlite::fromJSON(httr::content(res, "text"), simplifyVector = FALSE)[["items"]]
   d <- purrr::map_df(j, function(x) c(path = x[["path"]], size = x[["sizeInBytes"]]))
   d |>
@@ -33,7 +35,7 @@ gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
     dplyr::select(.data$bname, .data$size, .data$path, .data$dname)
 }
 
-dr_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+dr_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_TOKEN_PROD")) {
   fs::dir_create(outdir)
   d <- gds_files_list(gdsdir = gdsdir, token = token) |>
     dplyr::mutate(type = purrr::map_chr(bname, dracarys::match_regex)) |>
@@ -47,7 +49,7 @@ dr_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) 
     dplyr::mutate(cmd = gds_file_download(path, out, token))
 }
 
-dr_download_multiqc <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+dr_download_multiqc <- function(gdsdir, outdir, token = Sys.getenv("ICA_TOKEN_PROD")) {
   fs::dir_create(outdir)
   d <- gds_files_list(gdsdir = gdsdir, token = token) |>
     dplyr::mutate(type = purrr::map_chr(bname, dracarys::match_regex)) |>
@@ -68,13 +70,14 @@ for (sname in samples_wgs) {
   dr_download(
     gdsdir = glue("gds://development/validation_data/wgs/{sname}/analysis/dragen_somatic/"),
     outdir = here(glue("nogit/wgs/dragen/{sname}")),
-    token = Sys.getenv("DRACARYS_TOKEN_DEV")
+    token = Sys.getenv("ICA_TOKEN_PROD")
   )
 }
 
 #---- tso ----#
 samples_tso <- c(
-  "SBJ00998", "SBJ00999" #,"SBJ01001", "SBJ01003", "SBJ01032", "SBJ01040",
+  # "SBJ00595", "SBJ02679"
+  # "SBJ00998", "SBJ00999" ,"SBJ01001", "SBJ01003", "SBJ01032", "SBJ01040",
   # "SBJ01043", "SBJ01046", "SBJ01059", "SBJ01131", "SBJ01132", "SBJ01133",
   # "SBJ01134", "SBJ01135", "SBJ01136", "SBJ01137", "SBJ01138", "SBJ01139",
   # "SBJ01140", "SBJ01141", "SBJ01142", "SBJ01143", "SBJ01144", "SBJ01146",
@@ -88,7 +91,7 @@ for (sname in samples_tso) {
   dr_download(
     gdsdir = glue("gds://production/analysis_data/{sname}/tso_ctdna_tumor_only/"),
     outdir = here(glue("nogit/tso/{sname}")),
-    token = Sys.getenv("DRACARYS_TOKEN_PROD")
+    token = Sys.getenv("ICA_TOKEN_PROD")
   )
 }
 
