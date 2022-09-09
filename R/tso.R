@@ -1,3 +1,37 @@
+#' TsoTargetRegionCoverageFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `TargetRegionCoverage.json.gz` file output from TSO.
+#'
+#' @examples
+#' x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package = "dracarys")
+#' trc <- TsoTargetRegionCoverageFile$new(x)
+#' trc$read() # or read(trc)
+#' @export
+TsoTargetRegionCoverageFile <- R6::R6Class("TsoTargetRegionCoverageFile",
+  inherit = File, public = list(
+    #' @description
+    #' Reads the `TargetRegionCoverage.json.gz` file output from TSO.
+    #'
+    #' @return tibble with the following columns:
+    #' * ConsensusReadDepth
+    #' * BasePair
+    #' * Percentage
+    read = function() {
+      x <- self$path
+      l2tib <- function(l) {
+        tibble::as_tibble(l) |>
+          dplyr::mutate(dplyr::across(dplyr::everything(), ~ as.character(.)))
+      }
+      j <- jsonlite::read_json(x)
+      j |>
+        purrr::map(l2tib) |>
+        dplyr::bind_rows()
+    }
+  )
+)
+
 #' TsoAlignCollapseFusionCallerMetricsFile R6 Class
 #'
 #' @description
@@ -5,7 +39,9 @@
 #' `AlignCollapseFusionCaller_metrics.json.gz` file output from TSO.
 #'
 #' @examples
-#' x <- system.file("sample705.AlignCollapseFusionCaller_metrics.json.gz", package = "dracarys")
+#' x <- system.file("extdata/tso/sample705.AlignCollapseFusionCaller_metrics.json.gz",
+#'   package = "dracarys"
+#' )
 #' m <- TsoAlignCollapseFusionCallerMetricsFile$new(x)
 #' m$read() # or read(m)
 #' @export
