@@ -43,24 +43,26 @@ Reads the \code{SampleAnalysisResults.json.gz} file output from TSO.
 
 \subsection{Returns}{
 tibble with the following columns:
-- \code{TOTAL_PF_READS}
-- \code{MEAN_FAMILY_SIZE}
-- \code{MEDIAN_TARGET_COVERAGE}
-- \code{PCT_CHIMERIC_READS}
-- \code{PCT_EXON_500X}
-- \code{PCT_EXON_1500X}
-- \code{PCT_READ_ENRICHMENT}
-- \code{PCT_USABLE_UMI_READS}
-- \code{MEAN_TARGET_COVERAGE}
-- \code{PCT_ALIGNED_READS}
-- \code{PCT_CONTAMINATION_EST}
-- \code{PCT_TARGET_0.4X_MEAN}
-- \code{PCT_TARGET_500X}
-- \code{PCT_TARGET_1000X}
-- \code{PCT_TARGET_1500X}
-- \code{PCT_DUPLEXFAMILIES}
-- \code{MEDIAN_INSERT_SIZE}
-- \code{MAX_SOMATIC_AF}
+\itemize{
+\item \code{TOTAL_PF_READS}
+\item \code{MEAN_FAMILY_SIZE}
+\item \code{MEDIAN_TARGET_COVERAGE}
+\item \code{PCT_CHIMERIC_READS}
+\item \code{PCT_EXON_500X}
+\item \code{PCT_EXON_1500X}
+\item \code{PCT_READ_ENRICHMENT}
+\item \code{PCT_USABLE_UMI_READS}
+\item \code{MEAN_TARGET_COVERAGE}
+\item \code{PCT_ALIGNED_READS}
+\item \code{PCT_CONTAMINATION_EST}
+\item \code{PCT_TARGET_0.4X_MEAN}
+\item \code{PCT_TARGET_500X}
+\item \code{PCT_TARGET_1000X}
+\item \code{PCT_TARGET_1500X}
+\item \code{PCT_DUPLEXFAMILIES}
+\item \code{MEDIAN_INSERT_SIZE}
+\item \code{MAX_SOMATIC_AF}
+}
 }
 }
 \if{html}{\out{<hr>}}
