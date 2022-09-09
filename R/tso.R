@@ -1,3 +1,51 @@
+#' TsoTmbTraceTsvFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `TMB_Trace.tsv` file output from TSO.
+#'
+#' @examples
+#' x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
+#' d <- TsoTmbTraceTsvFile$new(x)
+#' d$read() # or read(d)
+#' @export
+TsoTmbTraceTsvFile <- R6::R6Class("TsoTmbTraceTsvFile",
+  inherit = File, public = list(
+    #' @description
+    #' Reads the `TMB_Trace.tsv` file output from TSO.
+    #'
+    #' @return tibble with the following columns:
+    #' * FragmentLength
+    #' * Count
+    read = function() {
+      x <- self$path
+      ct <- readr::cols(
+        Chromosome = "c",
+        Position = "i",
+        RefCall = "c",
+        AltCall = "c",
+        VAF = "d",
+        Depth = "d",
+        CytoBand = "c",
+        GeneName = "c",
+        VariantType = "c",
+        CosmicIDs = "c",
+        MaxCosmicCount = "d",
+        AlleleCountsGnomadExome = "d",
+        AlleleCountsGnomadGenome = "d",
+        AlleleCounts1000Genomes = "d",
+        MaxDatabaseAlleleCounts = "d",
+        GermlineFilterDatabase = "l",
+        GermlineFilterProxi = "l",
+        CodingVariant = "l",
+        Nonsynonymous = "l",
+        IncludedInTMBNumerator = "l"
+      )
+      readr::read_tsv(x, col_types = ct)
+    }
+  )
+)
+
 #' TsoFragmentLengthHistFile R6 Class
 #'
 #' @description
@@ -25,7 +73,8 @@ TsoFragmentLengthHistFile <- R6::R6Class("TsoFragmentLengthHistFile",
       )
       j |>
         purrr::map(tibble::as_tibble) |>
-        dplyr::bind_rows()
+        dplyr::bind_rows() |>
+        dplyr::mutate(FragmentLength = as.character(.data$FragmentLength))
     }
   )
 )
