@@ -1,3 +1,35 @@
+#' TsoFragmentLengthHistFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `fragment_length_hist.json.gz` file output from TSO.
+#'
+#' @examples
+#' x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
+#' fl <- TsoFragmentLengthHistFile$new(x)
+#' fl$read() # or read(fl)
+#' @export
+TsoFragmentLengthHistFile <- R6::R6Class("TsoFragmentLengthHistFile",
+  inherit = File, public = list(
+    #' @description
+    #' Reads the `fragment_length_hist.json.gz` file output from TSO.
+    #'
+    #' @return tibble with the following columns:
+    #' * FragmentLength
+    #' * Count
+    read = function() {
+      x <- self$path
+      j <- jsonlite::read_json(x)
+      assertthat::assert_that(
+        all(names(j[[1]] %in% c("FragmentLength", "Count")))
+      )
+      j |>
+        purrr::map(tibble::as_tibble) |>
+        dplyr::bind_rows()
+    }
+  )
+)
+
 #' TsoTargetRegionCoverageFile R6 Class
 #'
 #' @description
@@ -25,6 +57,9 @@ TsoTargetRegionCoverageFile <- R6::R6Class("TsoTargetRegionCoverageFile",
           dplyr::mutate(dplyr::across(dplyr::everything(), ~ as.character(.)))
       }
       j <- jsonlite::read_json(x)
+      assertthat::assert_that(
+        all(names(j[[1]] %in% c("ConsensusReadDepth", "BasePair", "Percentage")))
+      )
       j |>
         purrr::map(l2tib) |>
         dplyr::bind_rows()
@@ -105,7 +140,7 @@ TsoTmbFile <- R6::R6Class("TsoTmbFile", inherit = File, public = list(
     # not interested in Settings element
     j[["Settings"]] <- NULL
     tibble::as_tibble_row(j) |>
-      dplyr::mutate(dplyr::across(.cols = dplyr::everything(), as.numeric))
+      dplyr::mutate(dplyr::across(dplyr::everything(), as.numeric))
   }
 ))
 
