@@ -1,3 +1,78 @@
+#' TsoCombinedVariantOutputFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `CombinedVariantOutput.tsv` file output from TSO.
+#'
+#' @examples
+#' x <- system.file("extdata/tso/sample705_CombinedVariantOutput.tsv", package = "dracarys")
+#' d <- TsoCombinedVariantOutputFile$new(x)
+#' d$read() # or read(d)
+#' @export
+TsoCombinedVariantOutputFile <- R6::R6Class("TsoCombinedVariantOutputFile",
+  inherit = File, public = list(
+    #' @description
+    #' Reads the `CombinedVariantOutput.tsv` file output from TSO.
+    #'
+    #' @return list of following tibbles:
+    #' * FragmentLength
+    #' * Count
+    read = function() {
+      x <- self$path
+      .read_section <- function(section, start, end, lines) {
+        snms <- c(
+          "Analysis Details", "Sequencing Run Details", "TMB", "MSI",
+          "Copy Number Variants", "DNA Fusions", "Small Variants"
+        )
+        assertthat::assert_that(section %in% snms)
+        chunk <- lines[start:end]
+        s <- paste(chunk, collapse = "\n")
+        d <- tibble::tibble() # empty tibble by default
+        if (section %in% c("Analysis Details", "TMB", "MSI")) {
+          if (section == "MSI") {
+            # single row (as far as I've seen), so the collapse above doesn't touch it
+            s <- paste0(s, "\n")
+          }
+          d <- s |>
+            readr::read_tsv(
+              col_types = readr::cols(.default = "c"),
+              col_names = c("variable", "value", "empty")
+            ) |>
+            dplyr::select(.data$variable, .data$value)
+        } else if (section %in% c("Copy Number Variants", "DNA Fusions", "Small Variants")) {
+          if (length(chunk) > 2) {
+            d <- s |>
+              readr::read_tsv(
+                col_types = readr::cols(.default = "c"),
+                col_names = TRUE
+              )
+          }
+        }
+        return(d)
+      } # read_section end
+      regx <- list(blank = "^\\s*$", na = "NA\t\t", header = "^\\[(.*)\\]\t\t$")
+      lines <- readr::read_lines(x)
+      empty_lines <- grepl(regx$blank, lines)
+      lines <- lines[!empty_lines]
+      headers <- base::which(grepl(regx$header, lines))
+      headers_names <- sub(regx$header, "\\1", lines[headers])
+      tsv_chunks <- tibble::tibble(
+        start = c(headers, length(lines) + 1),
+        nm = c(headers_names, "BLANK")
+      ) |>
+        dplyr::mutate(end = dplyr::lead(.data$start) - 1) |>
+        dplyr::filter(!is.na(.data$end)) |>
+        dplyr::mutate(start = .data$start + 1) |>
+        dplyr::rowwise() |>
+        dplyr::mutate(d = list(.read_section(.data$nm, .data$start, .data$end, lines))) |>
+        dplyr::select(nm, d)
+
+      tsv_chunks[["d"]] |>
+        purrr::set_names(tsv_chunks[["nm"]])
+    }
+  )
+)
+
 #' TsoTmbTraceTsvFile R6 Class
 #'
 #' @description
