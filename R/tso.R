@@ -313,31 +313,83 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inhe
   #' @description
   #' Reads the `SampleAnalysisResults.json.gz` file output from TSO.
   #'
-  #' @return tibble with the following columns:
-  #' * `TOTAL_PF_READS`
-  #' * `MEAN_FAMILY_SIZE`
-  #' * `MEDIAN_TARGET_COVERAGE`
-  #' * `PCT_CHIMERIC_READS`
-  #' * `PCT_EXON_500X`
-  #' * `PCT_EXON_1500X`
-  #' * `PCT_READ_ENRICHMENT`
-  #' * `PCT_USABLE_UMI_READS`
-  #' * `MEAN_TARGET_COVERAGE`
-  #' * `PCT_ALIGNED_READS`
-  #' * `PCT_CONTAMINATION_EST`
-  #' * `PCT_TARGET_0.4X_MEAN`
-  #' * `PCT_TARGET_500X`
-  #' * `PCT_TARGET_1000X`
-  #' * `PCT_TARGET_1500X`
-  #' * `PCT_DUPLEXFAMILIES`
-  #' * `MEDIAN_INSERT_SIZE`
-  #' * `MAX_SOMATIC_AF`
+  #' @return list of tibbles
   read = function() {
     x <- self$path
-    # just read sampleMetrics for now
-    d <- jsonlite::read_json(x)[["data"]][["sampleMetrics"]]
-    dplyr::bind_rows(d[["expandedMetrics"]][[1]][["metrics"]]) |>
+    j <- jsonlite::read_json(x)
+    dat <- j[["data"]]
+    ## sampleInformation
+    sample_info <- dat[["sampleInformation"]] |>
+      tibble::as_tibble_row()
+    ## softwareConfiguration
+    # just tidy the nirvanaVersionList
+    sw_conf <- dat[["softwareConfiguration"]]
+    sw_conf[["nirvanaVersionList"]] <- sw_conf[["nirvanaVersionList"]][[1]]
+    data_sources <- sw_conf[["nirvanaVersionList"]][["dataSources"]] |>
+      purrr::map(tibble::as_tibble_row) |>
+      dplyr::bind_rows()
+    sw_conf[["nirvanaVersionList"]][["dataSources"]] <- data_sources
+
+    ## biomarkers
+    biom <- dat[["biomarkers"]]
+    biom_list <- list()
+    if ("microsatelliteInstability" %in% names(biom)) {
+      msi <- biom[["microsatelliteInstability"]]
+      amet <- msi[["additionalMetrics"]] |>
+        purrr::map(tibble::as_tibble_row) |>
+        dplyr::bind_rows()
+      biom_list[["msi"]] <- list(
+        msi_pct_unstable_sites = msi[["msiPercentUnstableSites"]],
+        additional_metrics = amet
+      )
+    }
+    if ("tumorMutationalBurden" %in% names(biom)) {
+      tmb <- biom[["tumorMutationalBurden"]]
+      amet <- tmb[["additionalMetrics"]] |>
+        purrr::map(tibble::as_tibble_row) |>
+        dplyr::bind_rows()
+      biom_list[["tmb"]] <- list(
+        tmb_per_mb = tmb[["tumorMutationalBurdenPerMegabase"]],
+        additional_metrics = amet
+      )
+    }
+
+    ## sampleMetrics
+    smet <- dat[["sampleMetrics"]]
+    smet_em <- smet[["expandedMetrics"]][[1]][["metrics"]] |>
+      purrr::map(tibble::as_tibble_row) |>
+      dplyr::bind_rows() |>
       dplyr::select(.data$name, .data$value) |>
       tidyr::pivot_wider(names_from = .data$name, values_from = .data$value)
+
+    qc2tib <- function(el) {
+      el[["metrics"]] |>
+        purrr::map(tibble::as_tibble) |>
+        dplyr::bind_rows()
+    }
+
+    smet_qc <- smet[["qualityControlMetrics"]]
+    smet_nms <- purrr::map_chr(smet_qc, "name")
+    smet_qc <- smet_qc |>
+      purrr::map(qc2tib) |>
+      purrr::set_names(smet_nms) |>
+      dplyr::bind_rows(.id = "metric")
+
+    v <- dat[["variants"]]
+    get_vars <- function(v) {
+      snvs <- tso_snv(v[["smallVariants"]])
+      cnvs <- v[["copyNumberVariants"]]
+      fuss <- v[["dnaFusions"]]
+    }
+
+
+    res <- list(
+      sample_info = sample_info,
+      software_config = sw_conf,
+      biomarkers = biom_list,
+      sample_metrics_qc = smet_qc,
+      sample_metrics_expanded = smet_em
+    )
+    res
   }
 ))
