@@ -1,0 +1,342 @@
+---
+title: "dracarys TSO500"
+format:
+  html:
+    embed-resources: true
+    standalone: true
+    code-fold: true
+    toc: true
+    page-layout: custom
+editor: source
+---
+
+```{r knitr_opts, include=F}
+knitr::opts_chunk$set(
+  collapse = TRUE, echo = TRUE,
+  warning = FALSE, message = FALSE
+)
+```
+
+```{r load_pkgs}
+require(tidyverse)
+require(dracarys)
+require(ggrepel)
+require(glue)
+require(here)
+require(knitr)
+require(DT)
+```
+
+```{r data_setup}
+options(scipen=999)
+data_dir <- here("nogit/tso", "SBJ02067")
+pref <- glue("{data_dir}/PRJ221877_L2201127")
+
+combinedvars <- glue("{pref}_CombinedVariantOutput.tsv") |>
+  TsoCombinedVariantOutputFile$new() |> read()
+trace <- glue("{pref}_TMB_Trace.tsv") |>
+  TsoTmbTraceTsvFile$new() |> read()
+fraglenhist <- glue("{pref}.fragment_length_hist.json.gz") |>
+  TsoFragmentLengthHistFile$new()
+cov <- glue("{pref}.TargetRegionCoverage.json.gz") |>
+  TsoTargetRegionCoverageFile$new() |> read()
+alcolfus <- glue("{pref}.AlignCollapseFusionCaller_metrics.json.gz") |>
+  TsoAlignCollapseFusionCallerMetricsFile$new() |> read()
+tmb <- glue("{pref}.tmb.json.gz") |> TsoTmbFile$new() |> read()
+msi <- glue("{pref}.msi.json.gz") |> TsoMsiFile$new() |> read()
+fus <- glue("{pref}_Fusions.csv") |> TsoFusionsCsvFile$new() |> read()
+res <- glue("{pref}_SampleAnalysisResults.json.gz") |>
+  TsoSampleAnalysisResultsFile$new() |> read()
+```
+
+```{r funcs, echo=F}
+dt_view <- function(x, caption = NULL, scroll_y = 200) {
+  x |>
+    DT::datatable(
+      filter = list(position = "top", clear = FALSE, plain = TRUE),
+      class = "cell-border display compact",
+      rownames = FALSE,
+      extensions = c("Scroller", "Buttons", "KeyTable"),
+      options = list(
+        scroller = TRUE, scrollY = scroll_y, scrollX = TRUE,
+        autoWidth = FALSE, keys = TRUE,
+        buttons = c("csv", "excel"), dom = "Blfrtip"
+      ),
+      caption = caption
+    )
+}
+```
+
+## `SampleAnalysisResults.json.gz`
+
+::: {.panel-tabset}
+
+### SNVs
+
+```{r}
+res$vars$snvs |>
+  dt_view()
+```
+
+### CNVs
+
+```{r}
+res$vars$cnvs |>
+  dt_view()
+```
+
+
+### SampleInfo
+
+```{r res_sample_info}
+res$sample_info |>
+  tidyr::pivot_longer(dplyr::everything(), names_to = "metric", values_to = "value") |>
+  knitr::kable()
+```
+
+### SoftwareConfig
+
+```{r res_sw_config}
+res$software_config$data_sources |>
+  knitr::kable()
+res$software_config$other |>
+  tidyr::pivot_longer(dplyr::everything(), names_to = "metric", values_to = "value") |>
+  knitr::kable()
+```
+
+### Biomarkers (MSI/TMB)
+
+- MSI Percentage of unstable sites: `r res$biomarkers$msi$msi_pct_unstable_sites`
+- TMB per MB: `r res$biomarkers$tmb$tmb_per_mb`
+
+```{r res_biom}
+res$biomarkers$msi$additional_metrics |>
+  knitr::kable(caption = "MSI additional metrics")
+res$biomarkers$tmb$additional_metrics |>
+  knitr::kable(caption = "TMB additional metrics")
+```
+
+### QC1
+
+```{r}
+res$sample_metrics_qc |>
+  knitr::kable()
+```
+
+### QC2
+
+```{r}
+res$sample_metrics_expanded |>
+  tidyr::pivot_longer(dplyr::everything(), names_to = "metric", values_to = "value") |>
+  knitr::kable()
+```
+
+
+:::
+
+## `tmb.json.gz`
+
+```{r tmb}
+tmb |>
+  tidyr::pivot_longer(dplyr::everything(), names_to = "metric", values_to = "value") |>
+  knitr::kable()
+```
+
+## `msi.json.gz`
+
+```{r msi}
+msi |>
+  dplyr::mutate(dplyr::across(.fns = as.character)) |>
+  tidyr::pivot_longer(dplyr::everything(), names_to = "metric", values_to = "value") |>
+  knitr::kable()
+```
+
+## `CombinedVariantOutput.tsv`
+
+::: {.panel-tabset}
+
+### SNVs
+
+```{r cv_snvs}
+combinedvars[["Small Variants"]] |>
+  dt_view()
+```
+
+### CNVs
+
+```{r cv_cnvs}
+combinedvars[["Copy Number Variants"]] |>
+  dplyr::select(Gene, "Fold Change") |>
+  dt_view()
+```
+
+### Fusions
+
+```{r cv_fusions}
+combinedvars[["DNA Fusions"]] |>
+  dt_view()
+```
+
+### Analysis Details
+
+```{r cv_adet}
+combinedvars[["Analysis Details"]] |>
+  knitr::kable()
+```
+
+### TMB
+
+```{r cv_tmb}
+combinedvars[["TMB"]] |>
+  knitr::kable()
+```
+
+### MSI
+
+```{r cv_msi}
+combinedvars[["MSI"]] |>
+  knitr::kable()
+```
+
+:::
+
+## `TMB_Trace.tsv`
+
+
+```{r}
+trace |>
+  dplyr::mutate(Position = as.integer(Position),
+                VAF = as.numeric(VAF),
+                Depth = as.numeric(Depth),
+                GermlineFilterDatabase = as.logical(GermlineFilterDatabase),
+                GermlineFilterProxi = as.logical(GermlineFilterProxi),
+                CodingVariant = as.logical(CodingVariant),
+                Nonsynonymous = as.logical(Nonsynonymous),
+                IncludedInTMBNumerator = as.logical(IncludedInTMBNumerator)
+  ) |>
+  dplyr::select(
+    chrom = Chromosome, pos = Position, ref = RefCall, alt = AltCall, VAF,
+    dp = Depth, GermlineFilterProxi, IncludedInTMBNumerator, dplyr::everything()
+  ) |>
+  dt_view()
+```
+
+## `fragment_length_hist.json.gz`
+
+```{r fraglenhist_plot}
+#| panel: input
+#| layout-ncol: 2
+
+plot(fraglenhist)
+read(fraglenhist) |> dt_view()
+```
+
+## `TargetRegionCoverage.json.gz`
+
+```{r cov}
+#| panel: input
+#| layout-ncol: 2
+
+cov |>
+  dplyr::filter(!.data$ConsensusReadDepth == "TargetRegion") |>
+  dplyr::mutate(dp = as.integer(sub("X", "", .data$ConsensusReadDepth)),
+                pct = as.numeric(.data$Percentage),
+                dp_lab = ifelse(dp < 5000, dp, "")) |>
+  dplyr::filter(.data$pct > 1) |>
+  dplyr::select(dp, pct, dp_lab) |>
+  ggplot2::ggplot(aes(x = dp, y = pct, label = dp_lab)) +
+  ggplot2::geom_point() +
+  ggplot2::geom_line() +
+  ggrepel::geom_text_repel() +
+  ggplot2::labs(title = "Percentage of Target Region Covered by Given Read Depth") +
+  ggplot2::xlab("Depth") +
+  ggplot2::ylab("Percentage") +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    legend.position = c(0.9, 0.9),
+    legend.justification = c(1, 1),
+    panel.grid.minor = ggplot2::element_blank(),
+    plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
+  )
+
+dt_view(cov)
+```
+
+## `AlignCollapseFusionCaller_metrics.json.gz`
+
+::: {.panel-tabset}
+
+### CoverageSummary
+
+```{r}
+alcolfus |>
+  dplyr::filter(section == "CoverageSummary") |>
+  dplyr::select(-section) |>
+  dt_view()
+```
+
+### MappingAligningPerRg
+
+```{r}
+alcolfus |>
+  dplyr::filter(section == "MappingAligningPerRg") |>
+  dplyr::select(-section) |>
+  dt_view()
+```
+
+
+### MappingAligningSummary
+
+```{r}
+alcolfus |>
+  dplyr::filter(section == "MappingAligningSummary") |>
+  dplyr::select(-section) |>
+  dt_view()
+```
+
+### RunTime
+
+```{r}
+alcolfus |>
+  dplyr::filter(section == "RunTime") |>
+  dplyr::select(-section) |>
+  dt_view()
+```
+
+### SvSummary
+
+```{r}
+alcolfus |>
+  dplyr::filter(section == "SvSummary") |>
+  dplyr::select(-section) |>
+  dt_view()
+```
+
+### TrimmerStatistics
+
+```{r}
+alcolfus |>
+  dplyr::filter(section == "TrimmerStatistics") |>
+  dplyr::select(-section) |>
+  dt_view()
+```
+
+### UmiStatistics
+
+```{r}
+alcolfus |>
+  dplyr::filter(section == "UmiStatistics") |>
+  dplyr::select(-section) |>
+  dt_view()
+```
+
+:::
+
+## `Fusions.csv`
+
+```{r}
+fus |>
+  dplyr::select(-Contig) |>
+  dt_view()
+```
+
