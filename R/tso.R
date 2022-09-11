@@ -268,6 +268,29 @@ TsoTmbFile <- R6::R6Class("TsoTmbFile", inherit = File, public = list(
   }
 ))
 
+#' TsoFusionsCsvFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `Fusions.csv` file output from TSO.
+#'
+#' @examples
+#' x <- system.file("extdata/tso/sample705_Fusions.csv", package = "dracarys")
+#' fus <- TsoFusionsCsvFile$new(x)
+#' fus$read() # or read(fus)
+#' @export
+TsoFusionsCsvFile <- R6::R6Class("TsoFusionsCsvFile", inherit = File, public = list(
+  #' @description
+  #' Reads the `Fusions.csv` file output from TSO.
+  #'
+  #' @return tibble with the following columns:
+  #'   - label:
+  read = function() {
+    x <- self$path
+    readr::read_csv(x, col_types = readr::cols(.default = "c"), comment = "#")
+  }
+))
+
 #' TsoMsiFile R6 Class
 #'
 #' @description
@@ -322,13 +345,21 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inhe
     sample_info <- dat[["sampleInformation"]] |>
       tibble::as_tibble_row()
     ## softwareConfiguration
-    # just tidy the nirvanaVersionList
     sw_conf <- dat[["softwareConfiguration"]]
-    sw_conf[["nirvanaVersionList"]] <- sw_conf[["nirvanaVersionList"]][[1]]
-    data_sources <- sw_conf[["nirvanaVersionList"]][["dataSources"]] |>
+    sw_nl_data_sources <- sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] |>
       purrr::map(tibble::as_tibble_row) |>
       dplyr::bind_rows()
-    sw_conf[["nirvanaVersionList"]][["dataSources"]] <- data_sources
+    # get rid of it to grab the remaining elements
+    sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] <- NULL
+    sw_nl_rest <- sw_conf[["nirvanaVersionList"]][[1]] |>
+      tibble::as_tibble()
+    sw_conf[["nirvanaVersionList"]] <- NULL
+    sw_rest <- tibble::as_tibble(sw_conf)
+    sw_all <- dplyr::bind_cols(sw_rest, sw_nl_rest)
+    sw <- list(
+      data_sources = sw_nl_data_sources,
+      other = sw_all
+    )
 
     ## biomarkers
     biom <- dat[["biomarkers"]]
@@ -376,19 +407,19 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inhe
       dplyr::bind_rows(.id = "metric")
 
     v <- dat[["variants"]]
-    get_vars <- function(v) {
-      snvs <- tso_snv(v[["smallVariants"]])
-      cnvs <- v[["copyNumberVariants"]]
-      fuss <- v[["dnaFusions"]]
-    }
-
+    vars <- list(
+      # fusions are more comprehensive in the Fusions.csv file
+      snvs = tso_snv(v[["smallVariants"]]),
+      cnvs = tso_cnv(v[["copyNumberVariants"]])
+    )
 
     res <- list(
       sample_info = sample_info,
-      software_config = sw_conf,
+      software_config = sw,
       biomarkers = biom_list,
       sample_metrics_qc = smet_qc,
-      sample_metrics_expanded = smet_em
+      sample_metrics_expanded = smet_em,
+      vars = vars
     )
     res
   }
