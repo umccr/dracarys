@@ -32,3 +32,7 @@ tso_snv <- function(snvs) {
   }
   purrr::map_dfr(snvs, snv_info)
 }
+
+tso_cnv <- function(cnvs) {
+  purrr::map_dfr(cnvs, tibble::as_tibble)
+}
