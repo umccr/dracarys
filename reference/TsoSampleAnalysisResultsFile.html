@@ -12,7 +12,7 @@ SampleAnalysisResults.json.gz file output from TSO."><!-- mathjax --><script src
     
     <a class="navbar-brand me-2" href="../index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,25 +78,7 @@ SampleAnalysisResults.json.gz file output from TSO."><!-- mathjax --><script src
 
 <div class="section">
 <h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
-<p>tibble with the following columns:
-- <code>TOTAL_PF_READS</code>
-- <code>MEAN_FAMILY_SIZE</code>
-- <code>MEDIAN_TARGET_COVERAGE</code>
-- <code>PCT_CHIMERIC_READS</code>
-- <code>PCT_EXON_500X</code>
-- <code>PCT_EXON_1500X</code>
-- <code>PCT_READ_ENRICHMENT</code>
-- <code>PCT_USABLE_UMI_READS</code>
-- <code>MEAN_TARGET_COVERAGE</code>
-- <code>PCT_ALIGNED_READS</code>
-- <code>PCT_CONTAMINATION_EST</code>
-- <code>PCT_TARGET_0.4X_MEAN</code>
-- <code>PCT_TARGET_500X</code>
-- <code>PCT_TARGET_1000X</code>
-- <code>PCT_TARGET_1500X</code>
-- <code>PCT_DUPLEXFAMILIES</code>
-- <code>MEDIAN_INSERT_SIZE</code>
-- <code>MAX_SOMATIC_AF</code></p>
+<p>list of tibbles</p>
 </div>
 
 </div><p></p><hr><a id="method-TsoSampleAnalysisResultsFile-clone"></a><div class="section">
@@ -124,6 +106,73 @@ SampleAnalysisResults.json.gz file output from TSO."><!-- mathjax --><script src
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/tso/sample705_SampleAnalysisResults.json.gz"</span>, package <span class="op">=</span> <span class="st">"dracarys"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span> <span class="op">&lt;-</span> <span class="va">TsoSampleAnalysisResultsFile</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">res</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span> <span class="co"># or read(res)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $sample_info</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   sampleId                 analysisDate analysisTime analysisName              </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> PTC_ctTSO220118_L2200054 2022-02-19   21:49:55     ctTSO220118-220207_18Feb22</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $software_config</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $software_config$data_sources</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 7 × 4</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   name                 version     description                           relea…¹</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> VEP                  91          BothRefSeqAndEnsembl                  2018-0…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> 1000 Genomes Project Phase 3 v5a A public catalogue of human variatio… 2013-0…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> ClinVar              20190204    A freely accessible, public archive … 2019-0…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> COSMIC               84          somatic mutation and related details… 2018-0…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> dbSNP                151         Identifiers for observed variants     2018-0…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> gnomAD               2.1         Whole genome allele frequencies from… 2018-1…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> gnomAD_exome         2.1         Exome allele frequencies from Genome… 2018-1…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with abbreviated variable name ¹​releaseDate</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $software_config$other</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   analysisSoftwareName analysisSoftwar…¹ genom…² insta…³ nirva…⁴ genom…⁵ refse…⁶</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> TSO500_ctDNA_RnD     0.0.0.1           hg19_d… CDxNir… 3.2.3   GRCh37  2015-01</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with abbreviated variable names ¹​analysisSoftwareVersion, ²​genomeBuild,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ³​instanceName, ⁴​nirvanaSoftwareVersion, ⁵​genomeAssembly, ⁶​refseqVersion</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $biomarkers</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $biomarkers$msi</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $biomarkers$msi$msi_pct_unstable_sites</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 2.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $biomarkers$msi$additional_metrics</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   name   value   RAD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> SumJsd  1.40     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $biomarkers$tmb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $biomarkers$tmb$tmb_per_mb</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> [1] 143.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $biomarkers$tmb$additional_metrics</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 3</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   name                        value   RAD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> CodingRegionSizeMb           1.22     2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> SomaticCodingVariantsCount 176        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $sample_metrics_qc</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 7 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   metric                                name    value   LSL      USL UOM     RAD</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                 <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> DNA Library QC Metrics                CONT… 6.64<span style="color: #949494;">e</span>+2     0 <span style="text-decoration: underline;">1</span>672     NA        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> DNA Library QC Metrics                CONT… 1   <span style="color: #949494;">e</span>+0     0    0.049 NA        3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> DNA Library QC Metrics for Small Var… MEDI… 6.13<span style="color: #949494;">e</span>+3  <span style="text-decoration: underline;">1</span>300   <span style="color: #BB0000;">NA</span>     count     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> DNA Library QC Metrics for Small Var… PCT_… 9.73<span style="color: #949494;">e</span>+1    80   <span style="color: #BB0000;">NA</span>     %         1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> DNA Library QC Metrics for Copy Numb… GENE… 8.8 <span style="color: #949494;">e</span><span style="color: #BB0000;">-2</span>     0    0.059 count     3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">6</span> DNA Library QC Metrics for Copy Numb… MEDI… 5.31<span style="color: #949494;">e</span>+1     6   <span style="color: #BB0000;">NA</span>     count     1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">7</span> DNA Library QC Metrics for MSI and F… MEDI… 6.13<span style="color: #949494;">e</span>+3  <span style="text-decoration: underline;">1</span>300   <span style="color: #BB0000;">NA</span>     count     0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $sample_metrics_expanded</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 18</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   TOTAL_PF_READS MEAN_…¹ MEDIA…² PCT_C…³ PCT_E…⁴ PCT_E…⁵ PCT_R…⁶ PCT_U…⁷ MEAN_…⁸</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
@@ -135,6 +184,36 @@ SampleAnalysisResults.json.gz file output from TSO."><!-- mathjax --><script src
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   and abbreviated variable names ¹​MEAN_FAMILY_SIZE, ²​MEDIAN_TARGET_COVERAGE,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ³​PCT_CHIMERIC_READS, ⁴​PCT_EXON_500X, ⁵​PCT_EXON_1500X, ⁶​PCT_READ_ENRICHMENT,</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ⁷​PCT_USABLE_UMI_READS, ⁸​MEAN_TARGET_COVERAGE</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $vars</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $vars$snvs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1,980 × 29</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    chrom      pos ref   alt       af  qual dp_tot dp_alt transc…¹ source bioType</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> chr1   2<span style="text-decoration: underline;">488</span>153 A     G     0.488    100   <span style="text-decoration: underline;">4</span>917   <span style="text-decoration: underline;">2</span>402 NM_0038… RefSeq protei…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> chr1   4<span style="text-decoration: underline;">367</span>323 G     A     1.00     100   <span style="text-decoration: underline;">5</span>272   <span style="text-decoration: underline;">5</span>271 <span style="color: #BB0000;">NA</span>       <span style="color: #BB0000;">NA</span>     <span style="color: #BB0000;">NA</span>     </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> chr1   9<span style="text-decoration: underline;">778</span>888 G     A     0.001<span style="text-decoration: underline;">6</span>   100   <span style="text-decoration: underline;">7</span>923     13 NM_0050… RefSeq protei…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> chr1   9<span style="text-decoration: underline;">781</span>605 G     A     0.001<span style="text-decoration: underline;">7</span>   100   <span style="text-decoration: underline;">7</span>471     13 NM_0050… RefSeq protei…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> chr1   9<span style="text-decoration: underline;">781</span>637 G     A     0.001<span style="text-decoration: underline;">3</span>   100   <span style="text-decoration: underline;">6</span>136      8 NM_0050… RefSeq protei…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> chr1   9<span style="text-decoration: underline;">784</span>354 C     T     0.001<span style="text-decoration: underline;">9</span>   100   <span style="text-decoration: underline;">4</span>699      9 NM_0050… RefSeq protei…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> chr1  11<span style="text-decoration: underline;">205</span>058 C     T     1.00     100   <span style="text-decoration: underline;">5</span>856   <span style="text-decoration: underline;">5</span>854 NM_0049… RefSeq protei…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> chr1  11<span style="text-decoration: underline;">276</span>255 C     G     0.003<span style="text-decoration: underline;">2</span>   100    950      3 NM_0049… RefSeq protei…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> chr1  11<span style="text-decoration: underline;">288</span>758 G     A     1.00     100   <span style="text-decoration: underline;">8</span>997   <span style="text-decoration: underline;">8</span>995 NM_0049… RefSeq protei…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> chr1  11<span style="text-decoration: underline;">292</span>504 C     T     0.002<span style="text-decoration: underline;">1</span>   100   <span style="text-decoration: underline;">3</span>809      8 NM_0049… RefSeq protei…</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 1,970 more rows, 18 more variables: aminoAcids &lt;chr&gt;, cdnaPos &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   codons &lt;chr&gt;, cdsPos &lt;chr&gt;, exons &lt;chr&gt;, geneId &lt;chr&gt;, hgnc &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   hgvsc &lt;chr&gt;, hgvsp &lt;chr&gt;, isCanonical &lt;lgl&gt;, polyPhenScore &lt;dbl&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   polyPhenPrediction &lt;chr&gt;, proteinId &lt;chr&gt;, proteinPos &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   siftScore &lt;dbl&gt;, siftPrediction &lt;chr&gt;, consequence &lt;chr&gt;, introns &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   and abbreviated variable name ¹​transcript</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $vars$cnvs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 1 × 7</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   foldChange  qual copyNumberType gene  chromosome startPosition endPosition</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>       0.86    57 &lt;DEL&gt;          ATM   chr11          108<span style="text-decoration: underline;">098</span>348   108<span style="text-decoration: underline;">236</span>237</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>

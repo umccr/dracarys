@@ -43,13 +43,31 @@
     <loc>https://umccr.github.io/dracarys/reference/TimeMetricsFile.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/TsoAlignCollapseFusionCallerMetricsFile.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/TsoCombinedVariantOutputFile.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/TsoFragmentLengthHistFile.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/TsoFusionsCsvFile.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/TsoMsiFile.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/TsoSampleAnalysisResultsFile.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/TsoTargetRegionCoverageFile.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/TsoTmbFile.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/TsoTmbTraceTsvFile.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/VCMetricsFile.html</loc>
