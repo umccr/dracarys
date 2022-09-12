@@ -54,7 +54,7 @@ export PATH="${dracarys_cli}:${PATH}"
 ```
 
     $ dracarys.R --version
-    dracarys.R 0.3.0
+    dracarys.R 0.4.0
 
     #------- Tidy -------#
 

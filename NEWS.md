@@ -1,6 +1,11 @@
-# dracarys 0.2.1 (2022-08-28)
+# dracarys 0.4.0 (2022-09-12)
 
-- :star: multiqc: support for dragen ctdna output ([pr13](https://github.com/umccr/dracarys/pull/13)).
+- :star: support for DRAGEN TSO500 ctdna output ([pr14](https://github.com/umccr/dracarys/pull/14)).
+  - also add Quarto HTML report template
+
+# dracarys 0.3.0 (2022-08-28)
+
+- :star: MultiQC: support for DRAGEN ctdna output ([pr13](https://github.com/umccr/dracarys/pull/13)).
 
 # dracarys 0.2.0 (2022-07-23)
 
