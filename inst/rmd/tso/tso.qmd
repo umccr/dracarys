@@ -1,5 +1,6 @@
 ---
 title: "dracarys TSO500"
+editor: source
 format:
   html:
     embed-resources: true
@@ -7,7 +8,8 @@ format:
     code-fold: true
     toc: true
     page-layout: custom
-editor: source
+params:
+  prefix: NULL
 ---
 
 ```{r knitr_opts, include=F}
@@ -20,7 +22,6 @@ knitr::opts_chunk$set(
 ```{r load_pkgs}
 require(tidyverse)
 require(dracarys)
-require(ggrepel)
 require(glue)
 require(here)
 require(knitr)
@@ -28,10 +29,8 @@ require(DT)
 ```
 
 ```{r data_setup}
-options(scipen=999)
-data_dir <- here("nogit/tso", "SBJ02067")
-pref <- glue("{data_dir}/PRJ221877_L2201127")
-
+options(scipen=999) # disable scientific notation
+pref <- params$prefix
 combinedvars <- glue("{pref}_CombinedVariantOutput.tsv") |>
   TsoCombinedVariantOutputFile$new() |> read()
 trace <- glue("{pref}_TMB_Trace.tsv") |>
@@ -39,7 +38,7 @@ trace <- glue("{pref}_TMB_Trace.tsv") |>
 fraglenhist <- glue("{pref}.fragment_length_hist.json.gz") |>
   TsoFragmentLengthHistFile$new()
 cov <- glue("{pref}.TargetRegionCoverage.json.gz") |>
-  TsoTargetRegionCoverageFile$new() |> read()
+  TsoTargetRegionCoverageFile$new()
 alcolfus <- glue("{pref}.AlignCollapseFusionCaller_metrics.json.gz") |>
   TsoAlignCollapseFusionCallerMetricsFile$new() |> read()
 tmb <- glue("{pref}.tmb.json.gz") |> TsoTmbFile$new() |> read()
@@ -73,14 +72,14 @@ dt_view <- function(x, caption = NULL, scroll_y = 200) {
 
 ### SNVs
 
-```{r}
+```{r res_snvs}
 res$vars$snvs |>
   dt_view()
 ```
 
 ### CNVs
 
-```{r}
+```{r res_cnvs}
 res$vars$cnvs |>
   dt_view()
 ```
@@ -118,21 +117,29 @@ res$biomarkers$tmb$additional_metrics |>
 
 ### QC1
 
-```{r}
+```{r res_qc1}
 res$sample_metrics_qc |>
   knitr::kable()
 ```
 
 ### QC2
 
-```{r}
+```{r res_qc2}
 res$sample_metrics_expanded |>
   tidyr::pivot_longer(dplyr::everything(), names_to = "metric", values_to = "value") |>
   knitr::kable()
 ```
 
-
 :::
+
+## `Fusions.csv`
+
+```{r fusions}
+fus |>
+  dplyr::select(-Contig) |>
+  dt_view()
+```
+
 
 ## `tmb.json.gz`
 
@@ -166,7 +173,7 @@ combinedvars[["Small Variants"]] |>
 
 ```{r cv_cnvs}
 combinedvars[["Copy Number Variants"]] |>
-  dplyr::select(Gene, "Fold Change") |>
+  # dplyr::select(Gene, "Fold Change") |>
   dt_view()
 ```
 
@@ -203,7 +210,7 @@ combinedvars[["MSI"]] |>
 ## `TMB_Trace.tsv`
 
 
-```{r}
+```{r tmb_trace}
 trace |>
   dplyr::mutate(Position = as.integer(Position),
                 VAF = as.numeric(VAF),
@@ -237,29 +244,8 @@ read(fraglenhist) |> dt_view()
 #| panel: input
 #| layout-ncol: 2
 
-cov |>
-  dplyr::filter(!.data$ConsensusReadDepth == "TargetRegion") |>
-  dplyr::mutate(dp = as.integer(sub("X", "", .data$ConsensusReadDepth)),
-                pct = as.numeric(.data$Percentage),
-                dp_lab = ifelse(dp < 5000, dp, "")) |>
-  dplyr::filter(.data$pct > 1) |>
-  dplyr::select(dp, pct, dp_lab) |>
-  ggplot2::ggplot(aes(x = dp, y = pct, label = dp_lab)) +
-  ggplot2::geom_point() +
-  ggplot2::geom_line() +
-  ggrepel::geom_text_repel() +
-  ggplot2::labs(title = "Percentage of Target Region Covered by Given Read Depth") +
-  ggplot2::xlab("Depth") +
-  ggplot2::ylab("Percentage") +
-  ggplot2::theme_minimal() +
-  ggplot2::theme(
-    legend.position = c(0.9, 0.9),
-    legend.justification = c(1, 1),
-    panel.grid.minor = ggplot2::element_blank(),
-    plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
-  )
-
-dt_view(cov)
+plot(cov)
+read(cov) |> dt_view()
 ```
 
 ## `AlignCollapseFusionCaller_metrics.json.gz`
@@ -268,7 +254,7 @@ dt_view(cov)
 
 ### CoverageSummary
 
-```{r}
+```{r met1}
 alcolfus |>
   dplyr::filter(section == "CoverageSummary") |>
   dplyr::select(-section) |>
@@ -277,7 +263,7 @@ alcolfus |>
 
 ### MappingAligningPerRg
 
-```{r}
+```{r met2}
 alcolfus |>
   dplyr::filter(section == "MappingAligningPerRg") |>
   dplyr::select(-section) |>
@@ -287,7 +273,7 @@ alcolfus |>
 
 ### MappingAligningSummary
 
-```{r}
+```{r met3}
 alcolfus |>
   dplyr::filter(section == "MappingAligningSummary") |>
   dplyr::select(-section) |>
@@ -296,7 +282,7 @@ alcolfus |>
 
 ### RunTime
 
-```{r}
+```{r met4}
 alcolfus |>
   dplyr::filter(section == "RunTime") |>
   dplyr::select(-section) |>
@@ -305,7 +291,7 @@ alcolfus |>
 
 ### SvSummary
 
-```{r}
+```{r met5}
 alcolfus |>
   dplyr::filter(section == "SvSummary") |>
   dplyr::select(-section) |>
@@ -314,7 +300,7 @@ alcolfus |>
 
 ### TrimmerStatistics
 
-```{r}
+```{r met6}
 alcolfus |>
   dplyr::filter(section == "TrimmerStatistics") |>
   dplyr::select(-section) |>
@@ -323,7 +309,7 @@ alcolfus |>
 
 ### UmiStatistics
 
-```{r}
+```{r met7}
 alcolfus |>
   dplyr::filter(section == "UmiStatistics") |>
   dplyr::select(-section) |>
@@ -331,12 +317,4 @@ alcolfus |>
 ```
 
 :::
-
-## `Fusions.csv`
-
-```{r}
-fus |>
-  dplyr::select(-Contig) |>
-  dt_view()
-```
 

@@ -11,6 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
 fl <- TsoFragmentLengthHistFile$new(x)
 fl$read() # or read(fl)
+fl$plot(5)
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoFragmentLengthHistFile}
@@ -19,6 +20,7 @@ fl$read() # or read(fl)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TsoFragmentLengthHistFile-read}{\code{TsoFragmentLengthHistFile$read()}}
+\item \href{#method-TsoFragmentLengthHistFile-plot}{\code{TsoFragmentLengthHistFile$plot()}}
 \item \href{#method-TsoFragmentLengthHistFile-clone}{\code{TsoFragmentLengthHistFile$clone()}}
 }
 }
@@ -47,6 +49,28 @@ tibble with the following columns:
 \item FragmentLength
 \item Count
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TsoFragmentLengthHistFile-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoFragmentLengthHistFile-plot}{}}}
+\subsection{Method \code{plot()}}{
+Plots the fragment length distributions as given in the
+\code{fragment_length_hist.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TsoFragmentLengthHistFile$plot(min_count = 10)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{min_count}}{Minimum read count to be plotted (Default: 10).}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A ggplot2 plot containing fragment lengths on X axis and read counts
+on Y axis for each sample.
 }
 }
 \if{html}{\out{<hr>}}

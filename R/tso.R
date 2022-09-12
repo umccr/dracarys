@@ -192,6 +192,7 @@ TsoFragmentLengthHistFile <- R6::R6Class("TsoFragmentLengthHistFile",
 #' x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package = "dracarys")
 #' trc <- TsoTargetRegionCoverageFile$new(x)
 #' trc$read() # or read(trc)
+#' trc$plot(90) # or plot(trc, 90)
 #' @export
 TsoTargetRegionCoverageFile <- R6::R6Class("TsoTargetRegionCoverageFile",
   inherit = File, public = list(
@@ -215,6 +216,38 @@ TsoTargetRegionCoverageFile <- R6::R6Class("TsoTargetRegionCoverageFile",
       j |>
         purrr::map(l2tib) |>
         dplyr::bind_rows()
+    },
+
+    #' @description Plots the `TargetRegionCoverage.json.gz` file.
+    #'
+    #' @param min_pct Minimum percentage to be plotted (Default: 2).
+    #' @return A ggplot2 plot containing read depth on X axis and percentage
+    #'   covered on Y axis.
+    plot = function(min_pct = 2) {
+      assertthat::assert_that(is.numeric(min_pct), min_pct >= 0)
+      d <- self$read() |>
+        dplyr::filter(!.data$ConsensusReadDepth == "TargetRegion") |>
+        dplyr::mutate(
+          dp = as.integer(sub("X", "", .data$ConsensusReadDepth)),
+          pct = as.numeric(.data$Percentage)
+        ) |>
+        dplyr::filter(.data$pct >= min_pct) |>
+        dplyr::select(.data$dp, .data$pct)
+      d |>
+        ggplot2::ggplot(aes(x = dp, y = pct, label = dp)) +
+        ggplot2::geom_point() +
+        ggplot2::geom_line() +
+        ggrepel::geom_text_repel() +
+        ggplot2::labs(title = "Percentage of Target Region Covered by Given Read Depth") +
+        ggplot2::xlab("Depth") +
+        ggplot2::ylab("Percentage") +
+        ggplot2::theme_minimal() +
+        ggplot2::theme(
+          legend.position = c(0.9, 0.9),
+          legend.justification = c(1, 1),
+          panel.grid.minor = ggplot2::element_blank(),
+          plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
+        )
     }
   )
 )
