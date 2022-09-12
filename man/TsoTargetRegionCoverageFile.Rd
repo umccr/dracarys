@@ -11,6 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package = "dracarys")
 trc <- TsoTargetRegionCoverageFile$new(x)
 trc$read() # or read(trc)
+trc$plot(90) # or plot(trc, 90)
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTargetRegionCoverageFile}
@@ -19,6 +20,7 @@ trc$read() # or read(trc)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TsoTargetRegionCoverageFile-read}{\code{TsoTargetRegionCoverageFile$read()}}
+\item \href{#method-TsoTargetRegionCoverageFile-plot}{\code{TsoTargetRegionCoverageFile$plot()}}
 \item \href{#method-TsoTargetRegionCoverageFile-clone}{\code{TsoTargetRegionCoverageFile$clone()}}
 }
 }
@@ -48,6 +50,27 @@ tibble with the following columns:
 \item BasePair
 \item Percentage
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TsoTargetRegionCoverageFile-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoTargetRegionCoverageFile-plot}{}}}
+\subsection{Method \code{plot()}}{
+Plots the \code{TargetRegionCoverage.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TsoTargetRegionCoverageFile$plot(min_pct = 2)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{min_pct}}{Minimum percentage to be plotted (Default: 2).}
+}
+\if{html}{\out{</div>}}
+}
+\subsection{Returns}{
+A ggplot2 plot containing read depth on X axis and percentage
+covered on Y axis.
 }
 }
 \if{html}{\out{<hr>}}
