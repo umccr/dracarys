@@ -1,0 +1,1479 @@
+workflow	raw	clean
+dragen_alignment	umccr_id	umccr_id
+dragen_alignment	umccr_workflow	umccr_workflow
+dragen_alignment	config_creation_date	date
+dragen_alignment	Total input reads	reads_tot_input_dragen
+dragen_alignment	Total input reads pct	reads_tot_input_pct_dragen
+dragen_alignment	Number of duplicate marked reads	reads_num_dupmarked_dragen
+dragen_alignment	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
+dragen_alignment	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
+dragen_alignment	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_alignment	Reads with mate sequenced	reads_w_mate_seq_dragen
+dragen_alignment	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
+dragen_alignment	Reads without mate sequenced	reads_wo_mate_seq_dragen
+dragen_alignment	Reads without mate sequenced pct	reads_wo_mate_seq_pct_dragen
+dragen_alignment	QC-failed reads	reads_qcfail_dragen
+dragen_alignment	QC-failed reads pct	reads_qcfail_pct_dragen
+dragen_alignment	Mapped reads	reads_mapped_dragen
+dragen_alignment	Mapped reads pct	reads_mapped_pct_dragen
+dragen_alignment	Mapped reads adjusted for filtered mapping	reads_mapped_adjfilt_dragen
+dragen_alignment	Mapped reads adjusted for filtered mapping pct	reads_mapped_adjfilt_pct_dragen
+dragen_alignment	Mapped reads R1	reads_mapped_r1_dragen
+dragen_alignment	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
+dragen_alignment	Mapped reads R2	reads_mapped_r2_dragen
+dragen_alignment	Mapped reads R2 pct	reads_mapped_r2_pct_dragen
+dragen_alignment	Number of unique & mapped reads (excl. duplicate marked reads)	reads_num_uniq_mapped_dragen
+dragen_alignment	Number of unique & mapped reads (excl. duplicate marked reads) pct	reads_num_uniq_mapped_pct_dragen
+dragen_alignment	Unmapped reads	reads_unmapped_dragen
+dragen_alignment	Unmapped reads pct	reads_unmapped_pct_dragen
+dragen_alignment	Unmapped reads adjusted for filtered mapping	reads_unmapped_adjfilt_dragen
+dragen_alignment	Unmapped reads adjusted for filtered mapping pct	reads_unmapped_adjfilt_pct_dragen
+dragen_alignment	Adjustment of reads matching non-reference decoys	reads_match_nonref_decoys_adj_dragen
+dragen_alignment	Adjustment of reads matching non-reference decoys pct	reads_match_nonref_decoys_adj_pct_dragen
+dragen_alignment	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
+dragen_alignment	Singleton reads (itself mapped; mate unmapped) pct	reads_singleton_pct_dragen
+dragen_alignment	Paired reads (itself & mate mapped)	reads_paired_dragen
+dragen_alignment	Paired reads (itself & mate mapped) pct	reads_paired_pct_dragen
+dragen_alignment	Properly paired reads	reads_paired_proper_dragen
+dragen_alignment	Properly paired reads pct	reads_paired_proper_pct_dragen
+dragen_alignment	Not properly paired reads (discordant)	reads_discordant_dragen
+dragen_alignment	Not properly paired reads (discordant) pct	reads_discordant_pct_dragen
+dragen_alignment	Paired reads mapped to different chromosomes	reads_paired_mapped_diff_chrom_dragen
+dragen_alignment	Paired reads mapped to different chromosomes pct	reads_paired_mapped_diff_chrom_pct_dragen
+dragen_alignment	Paired reads mapped to different chromosomes (MAPQ>=10)	reads_paired_mapped_diff_chrom_mapq10_dragen
+dragen_alignment	Paired reads mapped to different chromosomes (MAPQ>=10) pct	reads_paired_mapped_diff_chrom_mapq10_pct_dragen
+dragen_alignment	Reads with MAPQ [40:inf)	reads_mapq_40_inf_dragen
+dragen_alignment	Reads with MAPQ [40:inf) pct	reads_mapq_40_inf_pct_dragen
+dragen_alignment	Reads with MAPQ [30:40)	reads_mapq_30_40_dragen
+dragen_alignment	Reads with MAPQ [30:40) pct	reads_mapq_30_40_pct_dragen
+dragen_alignment	Reads with MAPQ [20:30)	reads_mapq_20_30_dragen
+dragen_alignment	Reads with MAPQ [20:30) pct	reads_mapq_20_30_pct_dragen
+dragen_alignment	Reads with MAPQ [10:20)	reads_mapq_10_20_dragen
+dragen_alignment	Reads with MAPQ [10:20) pct	reads_mapq_10_20_pct_dragen
+dragen_alignment	Reads with MAPQ [ 0:10)	reads_mapq_0_10_dragen
+dragen_alignment	Reads with MAPQ [ 0:10) pct	reads_mapq_0_10_pct_dragen
+dragen_alignment	Reads with MAPQ NA (Unmapped reads)	reads_mapq_na_unmapped_dragen
+dragen_alignment	Reads with MAPQ NA (Unmapped reads) pct	reads_mapq_na_unmapped_pct_dragen
+dragen_alignment	Reads with indel R1	reads_indel_r1_dragen
+dragen_alignment	Reads with indel R1 pct	reads_indel_r1_pct_dragen
+dragen_alignment	Reads with indel R2	reads_indel_r2_dragen
+dragen_alignment	Reads with indel R2 pct	reads_indel_r2_pct_dragen
+dragen_alignment	Total bases	bases_tot_dragen
+dragen_alignment	Total bases R1	bases_tot_r1_dragen
+dragen_alignment	Total bases R2	bases_tot_r2_dragen
+dragen_alignment	Mapped bases R1	bases_mapped_r1_dragen
+dragen_alignment	Mapped bases R1 pct	bases_mapped_r1_pct_dragen
+dragen_alignment	Mapped bases R2	bases_mapped_r2_dragen
+dragen_alignment	Mapped bases R2 pct	bases_mapped_r2_pct_dragen
+dragen_alignment	Soft-clipped bases R1	bases_softclip_r1_dragen
+dragen_alignment	Soft-clipped bases R2	bases_softclip_r2_dragen
+dragen_alignment	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
+dragen_alignment	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_alignment	Mismatched bases R1	bases_mismatched_r1_dragen
+dragen_alignment	Mismatched bases R2	bases_mismatched_r2_dragen
+dragen_alignment	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
+dragen_alignment	Mismatched bases R2 pct	bases_mismatched_r2_pct_dragen
+dragen_alignment	Mismatched bases R1 (excl. indels)	bases_mismatched_r1_noindels_dragen
+dragen_alignment	Mismatched bases R2 (excl. indels)	bases_mismatched_r2_noindels_dragen
+dragen_alignment	Mismatched bases R1 (excl. indels) pct	bases_mismatched_r1_noindels_pct_dragen
+dragen_alignment	Mismatched bases R2 (excl. indels) pct	bases_mismatched_r2_noindels_pct_dragen
+dragen_alignment	Q30 bases	bases_q30_dragen
+dragen_alignment	Q30 bases pct	bases_q30_pct_dragen
+dragen_alignment	Q30 bases R1	bases_q30_r1_dragen
+dragen_alignment	Q30 bases R1 pct	bases_q30_r1_pct_dragen
+dragen_alignment	Q30 bases R2	bases_q30_r2_dragen
+dragen_alignment	Q30 bases R2 pct	bases_q30_r2_pct_dragen
+dragen_alignment	Q30 bases (excl. dups & clipped bases)	bases_q30_nodups_noclipped_dragen
+dragen_alignment	Q30 bases (excl. dups & clipped bases) pct	bases_q30_nodups_noclipped_pct_dragen
+dragen_alignment	Total alignments	alignments_tot_dragen
+dragen_alignment	Secondary alignments	alignments_secondary_dragen
+dragen_alignment	Secondary alignments pct	alignments_secondary_pct_dragen
+dragen_alignment	Supplementary (chimeric) alignments	alignments_chimeric_dragen
+dragen_alignment	Estimated read length	read_len_dragen
+dragen_alignment	Bases in reference genome	bases_in_ref_genome_dragen
+dragen_alignment	Bases in target bed [% of genome]	bases_in_target_bed_genome_pct_dragen
+dragen_alignment	Average sequenced coverage over genome	cov_avg_seq_over_genome_dragen
+dragen_alignment	Insert length: mean	insert_len_mean_dragen
+dragen_alignment	Insert length: median	insert_len_median_dragen
+dragen_alignment	Insert length: standard deviation	insert_len_std_dev_dragen
+dragen_alignment	Provided sex chromosome ploidy	ploidy_sex_chrom_provided_dragen
+dragen_alignment	Estimated sample contamination	contamination_est_dragen
+dragen_alignment	DRAGEN mapping rate [mil. reads/second]	mapping_rate_dragen_milreads_per_sec_dragen
+dragen_alignment	Autosomal median coverage	cov_auto_median_dragen
+dragen_alignment	X median coverage	cov_x_median_dragen
+dragen_alignment	Y median coverage	cov_y_median_dragen
+dragen_alignment	1 median / Autosomal median	cov_1_div_auto_medians_dragen
+dragen_alignment	2 median / Autosomal median	cov_2_div_auto_medians_dragen
+dragen_alignment	3 median / Autosomal median	cov_3_div_auto_medians_dragen
+dragen_alignment	4 median / Autosomal median	cov_4_div_auto_medians_dragen
+dragen_alignment	5 median / Autosomal median	cov_5_div_auto_medians_dragen
+dragen_alignment	6 median / Autosomal median	cov_6_div_auto_medians_dragen
+dragen_alignment	7 median / Autosomal median	cov_7_div_auto_medians_dragen
+dragen_alignment	8 median / Autosomal median	cov_8_div_auto_medians_dragen
+dragen_alignment	9 median / Autosomal median	cov_9_div_auto_medians_dragen
+dragen_alignment	10 median / Autosomal median	cov_10_div_auto_median_dragen
+dragen_alignment	11 median / Autosomal median	cov_11_div_auto_median_dragen
+dragen_alignment	12 median / Autosomal median	cov_12_div_auto_median_dragen
+dragen_alignment	13 median / Autosomal median	cov_13_div_auto_median_dragen
+dragen_alignment	14 median / Autosomal median	cov_14_div_auto_median_dragen
+dragen_alignment	15 median / Autosomal median	cov_15_div_auto_median_dragen
+dragen_alignment	16 median / Autosomal median	cov_16_div_auto_median_dragen
+dragen_alignment	17 median / Autosomal median	cov_17_div_auto_median_dragen
+dragen_alignment	18 median / Autosomal median	cov_18_div_auto_median_dragen
+dragen_alignment	19 median / Autosomal median	cov_19_div_auto_median_dragen
+dragen_alignment	20 median / Autosomal median	cov_20_div_auto_median_dragen
+dragen_alignment	21 median / Autosomal median	cov_21_div_auto_median_dragen
+dragen_alignment	22 median / Autosomal median	cov_22_div_auto_median_dragen
+dragen_alignment	X median / Autosomal median	cov_x_div_auto_median_dragen
+dragen_alignment	Y median / Autosomal median	cov_y_div_auto_median_dragen
+dragen_alignment	Ploidy estimation	ploidy_est_dragen
+dragen_alignment	Aligned bases	bases_aligned_dragen
+dragen_alignment	Aligned bases in genome	bases_aligned_in_genome_dragen
+dragen_alignment	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
+dragen_alignment	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
+dragen_alignment	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_alignment	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_alignment	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_alignment	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_alignment	PCT of genome with coverage [ 15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_alignment	PCT of genome with coverage [ 10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_alignment	PCT of genome with coverage [  3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_alignment	PCT of genome with coverage [  1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_alignment	PCT of genome with coverage [  0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_alignment	PCT of genome with coverage [ 50x:100x)	cov_genome_pct_50x_100x_dragen
+dragen_alignment	PCT of genome with coverage [ 20x: 50x)	cov_genome_pct_20x_50x_dragen
+dragen_alignment	PCT of genome with coverage [ 15x: 20x)	cov_genome_pct_15x_20x_dragen
+dragen_alignment	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_15x_dragen
+dragen_alignment	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
+dragen_alignment	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
+dragen_alignment	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_alignment	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
+dragen_alignment	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
+dragen_alignment	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
+dragen_alignment	Average autosomal coverage over genome	cov_avg_auto_over_genome_dragen
+dragen_alignment	Median autosomal coverage over genome	cov_median_auto_over_genome_dragen
+dragen_alignment	Mean/Median autosomal coverage ratio over genome	cov_mean_median_auto_ratio_over_genome_dragen
+dragen_alignment	Aligned reads	reads_aligned_dragen
+dragen_alignment	Aligned reads in genome	reads_aligned_in_genome_dragen
+dragen_alignment	Aligned reads in genome pct	reads_aligned_in_genome_pct_dragen
+dragen_alignment	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
+dragen_somatic	umccr_id	umccr_id
+dragen_somatic	umccr_workflow	umccr_workflow
+dragen_somatic	config_creation_date	date
+dragen_somatic	Total input reads	reads_tot_input_dragen
+dragen_somatic	Total input reads pct	reads_tot_input_pct_dragen
+dragen_somatic	Number of duplicate marked reads	reads_num_dupmarked_dragen
+dragen_somatic	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
+dragen_somatic	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
+dragen_somatic	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_somatic	Reads with mate sequenced	reads_w_mate_seq_dragen
+dragen_somatic	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
+dragen_somatic	Reads without mate sequenced	reads_wo_mate_seq_dragen
+dragen_somatic	Reads without mate sequenced pct	reads_wo_mate_seq_pct_dragen
+dragen_somatic	QC-failed reads	reads_qcfail_dragen
+dragen_somatic	QC-failed reads pct	reads_qcfail_pct_dragen
+dragen_somatic	Mapped reads	reads_mapped_dragen
+dragen_somatic	Mapped reads pct	reads_mapped_pct_dragen
+dragen_somatic	Mapped reads adjusted for filtered mapping	reads_mapped_adjfilt_dragen
+dragen_somatic	Mapped reads adjusted for filtered mapping pct	reads_mapped_adjfilt_pct_dragen
+dragen_somatic	Mapped reads R1	reads_mapped_r1_dragen
+dragen_somatic	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
+dragen_somatic	Mapped reads R2	reads_mapped_r2_dragen
+dragen_somatic	Mapped reads R2 pct	reads_mapped_r2_pct_dragen
+dragen_somatic	Number of unique & mapped reads (excl. duplicate marked reads)	reads_num_uniq_mapped_dragen
+dragen_somatic	Number of unique & mapped reads (excl. duplicate marked reads) pct	reads_num_uniq_mapped_pct_dragen
+dragen_somatic	Unmapped reads	reads_unmapped_dragen
+dragen_somatic	Unmapped reads pct	reads_unmapped_pct_dragen
+dragen_somatic	Unmapped reads adjusted for filtered mapping	reads_unmapped_adjfilt_dragen
+dragen_somatic	Unmapped reads adjusted for filtered mapping pct	reads_unmapped_adjfilt_pct_dragen
+dragen_somatic	Adjustment of reads matching non-reference decoys	reads_match_nonref_decoys_adj_dragen
+dragen_somatic	Adjustment of reads matching non-reference decoys pct	reads_match_nonref_decoys_adj_pct_dragen
+dragen_somatic	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
+dragen_somatic	Singleton reads (itself mapped; mate unmapped) pct	reads_singleton_pct_dragen
+dragen_somatic	Paired reads (itself & mate mapped)	reads_paired_dragen
+dragen_somatic	Paired reads (itself & mate mapped) pct	reads_paired_pct_dragen
+dragen_somatic	Properly paired reads	reads_paired_proper_dragen
+dragen_somatic	Properly paired reads pct	reads_paired_proper_pct_dragen
+dragen_somatic	Not properly paired reads (discordant)	reads_discordant_dragen
+dragen_somatic	Not properly paired reads (discordant) pct	reads_discordant_pct_dragen
+dragen_somatic	Paired reads mapped to different chromosomes	reads_paired_mapped_diff_chrom_dragen
+dragen_somatic	Paired reads mapped to different chromosomes pct	reads_paired_mapped_diff_chrom_pct_dragen
+dragen_somatic	Paired reads mapped to different chromosomes (MAPQ>=10)	reads_paired_mapped_diff_chrom_mapq10_dragen
+dragen_somatic	Paired reads mapped to different chromosomes (MAPQ>=10) pct	reads_paired_mapped_diff_chrom_mapq10_pct_dragen
+dragen_somatic	Reads with MAPQ [40:inf)	reads_mapq_40_inf_dragen
+dragen_somatic	Reads with MAPQ [40:inf) pct	reads_mapq_40_inf_pct_dragen
+dragen_somatic	Reads with MAPQ [30:40)	reads_mapq_30_40_dragen
+dragen_somatic	Reads with MAPQ [30:40) pct	reads_mapq_30_40_pct_dragen
+dragen_somatic	Reads with MAPQ [20:30)	reads_mapq_20_30_dragen
+dragen_somatic	Reads with MAPQ [20:30) pct	reads_mapq_20_30_pct_dragen
+dragen_somatic	Reads with MAPQ [10:20)	reads_mapq_10_20_dragen
+dragen_somatic	Reads with MAPQ [10:20) pct	reads_mapq_10_20_pct_dragen
+dragen_somatic	Reads with MAPQ [ 0:10)	reads_mapq_0_10_dragen
+dragen_somatic	Reads with MAPQ [ 0:10) pct	reads_mapq_0_10_pct_dragen
+dragen_somatic	Reads with MAPQ NA (Unmapped reads)	reads_mapq_na_unmapped_dragen
+dragen_somatic	Reads with MAPQ NA (Unmapped reads) pct	reads_mapq_na_unmapped_pct_dragen
+dragen_somatic	Reads with indel R1	reads_indel_r1_dragen
+dragen_somatic	Reads with indel R1 pct	reads_indel_r1_pct_dragen
+dragen_somatic	Reads with indel R2	reads_indel_r2_dragen
+dragen_somatic	Reads with indel R2 pct	reads_indel_r2_pct_dragen
+dragen_somatic	Total bases	bases_tot_dragen
+dragen_somatic	Total bases R1	bases_tot_r1_dragen
+dragen_somatic	Total bases R2	bases_tot_r2_dragen
+dragen_somatic	Mapped bases R1	bases_mapped_r1_dragen
+dragen_somatic	Mapped bases R1 pct	bases_mapped_r1_pct_dragen
+dragen_somatic	Mapped bases R2	bases_mapped_r2_dragen
+dragen_somatic	Mapped bases R2 pct	bases_mapped_r2_pct_dragen
+dragen_somatic	Soft-clipped bases R1	bases_softclip_r1_dragen
+dragen_somatic	Soft-clipped bases R2	bases_softclip_r2_dragen
+dragen_somatic	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
+dragen_somatic	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_somatic	Mismatched bases R1	bases_mismatched_r1_dragen
+dragen_somatic	Mismatched bases R2	bases_mismatched_r2_dragen
+dragen_somatic	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
+dragen_somatic	Mismatched bases R2 pct	bases_mismatched_r2_pct_dragen
+dragen_somatic	Mismatched bases R1 (excl. indels)	bases_mismatched_r1_noindels_dragen
+dragen_somatic	Mismatched bases R2 (excl. indels)	bases_mismatched_r2_noindels_dragen
+dragen_somatic	Mismatched bases R1 (excl. indels) pct	bases_mismatched_r1_noindels_pct_dragen
+dragen_somatic	Mismatched bases R2 (excl. indels) pct	bases_mismatched_r2_noindels_pct_dragen
+dragen_somatic	Q30 bases	bases_q30_dragen
+dragen_somatic	Q30 bases pct	bases_q30_pct_dragen
+dragen_somatic	Q30 bases R1	bases_q30_r1_dragen
+dragen_somatic	Q30 bases R1 pct	bases_q30_r1_pct_dragen
+dragen_somatic	Q30 bases R2	bases_q30_r2_dragen
+dragen_somatic	Q30 bases R2 pct	bases_q30_r2_pct_dragen
+dragen_somatic	Q30 bases (excl. dups & clipped bases)	bases_q30_nodups_noclipped_dragen
+dragen_somatic	Q30 bases (excl. dups & clipped bases) pct	bases_q30_nodups_noclipped_pct_dragen
+dragen_somatic	Total alignments	alignments_tot_dragen
+dragen_somatic	Secondary alignments	alignments_secondary_dragen
+dragen_somatic	Secondary alignments pct	alignments_secondary_pct_dragen
+dragen_somatic	Supplementary (chimeric) alignments	alignments_chimeric_dragen
+dragen_somatic	Estimated read length	read_len_dragen
+dragen_somatic	Bases in reference genome	bases_in_ref_genome_dragen
+dragen_somatic	Bases in target bed [% of genome]	bases_in_target_bed_genome_pct_dragen
+dragen_somatic	Average sequenced coverage over genome	cov_avg_seq_over_genome_dragen
+dragen_somatic	Insert length: mean	insert_len_mean_dragen
+dragen_somatic	Insert length: median	insert_len_median_dragen
+dragen_somatic	Insert length: standard deviation	insert_len_std_dev_dragen
+dragen_somatic	Provided sex chromosome ploidy	ploidy_sex_chrom_provided_dragen
+dragen_somatic	Estimated sample contamination	contamination_est_dragen
+dragen_somatic	DRAGEN mapping rate [mil. reads/second]	mapping_rate_dragen_milreads_per_sec_dragen
+dragen_somatic	Autosomal median coverage	cov_auto_median_dragen
+dragen_somatic	X median coverage	cov_x_median_dragen
+dragen_somatic	Y median coverage	cov_y_median_dragen
+dragen_somatic	1 median / Autosomal median	cov_1_div_auto_medians_dragen
+dragen_somatic	2 median / Autosomal median	cov_2_div_auto_medians_dragen
+dragen_somatic	3 median / Autosomal median	cov_3_div_auto_medians_dragen
+dragen_somatic	4 median / Autosomal median	cov_4_div_auto_medians_dragen
+dragen_somatic	5 median / Autosomal median	cov_5_div_auto_medians_dragen
+dragen_somatic	6 median / Autosomal median	cov_6_div_auto_medians_dragen
+dragen_somatic	7 median / Autosomal median	cov_7_div_auto_medians_dragen
+dragen_somatic	8 median / Autosomal median	cov_8_div_auto_medians_dragen
+dragen_somatic	9 median / Autosomal median	cov_9_div_auto_medians_dragen
+dragen_somatic	10 median / Autosomal median	cov_10_div_auto_median_dragen
+dragen_somatic	11 median / Autosomal median	cov_11_div_auto_median_dragen
+dragen_somatic	12 median / Autosomal median	cov_12_div_auto_median_dragen
+dragen_somatic	13 median / Autosomal median	cov_13_div_auto_median_dragen
+dragen_somatic	14 median / Autosomal median	cov_14_div_auto_median_dragen
+dragen_somatic	15 median / Autosomal median	cov_15_div_auto_median_dragen
+dragen_somatic	16 median / Autosomal median	cov_16_div_auto_median_dragen
+dragen_somatic	17 median / Autosomal median	cov_17_div_auto_median_dragen
+dragen_somatic	18 median / Autosomal median	cov_18_div_auto_median_dragen
+dragen_somatic	19 median / Autosomal median	cov_19_div_auto_median_dragen
+dragen_somatic	20 median / Autosomal median	cov_20_div_auto_median_dragen
+dragen_somatic	21 median / Autosomal median	cov_21_div_auto_median_dragen
+dragen_somatic	22 median / Autosomal median	cov_22_div_auto_median_dragen
+dragen_somatic	X median / Autosomal median	cov_x_div_auto_median_dragen
+dragen_somatic	Y median / Autosomal median	cov_y_div_auto_median_dragen
+dragen_somatic	Ploidy estimation	ploidy_est_dragen
+dragen_somatic	Aligned bases	bases_aligned_dragen
+dragen_somatic	Aligned bases in genome	bases_aligned_in_genome_dragen
+dragen_somatic	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
+dragen_somatic	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
+dragen_somatic	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_somatic	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_somatic	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_somatic	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_somatic	PCT of genome with coverage [ 15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_somatic	PCT of genome with coverage [ 10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_somatic	PCT of genome with coverage [  3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_somatic	PCT of genome with coverage [  1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_somatic	PCT of genome with coverage [  0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_somatic	PCT of genome with coverage [ 50x:100x)	cov_genome_pct_50x_100x_dragen
+dragen_somatic	PCT of genome with coverage [ 20x: 50x)	cov_genome_pct_20x_50x_dragen
+dragen_somatic	PCT of genome with coverage [ 15x: 20x)	cov_genome_pct_15x_20x_dragen
+dragen_somatic	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_15x_dragen
+dragen_somatic	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
+dragen_somatic	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
+dragen_somatic	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_somatic	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
+dragen_somatic	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
+dragen_somatic	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
+dragen_somatic	Average autosomal coverage over genome	cov_avg_auto_over_genome_dragen
+dragen_somatic	Median autosomal coverage over genome	cov_median_auto_over_genome_dragen
+dragen_somatic	Mean/Median autosomal coverage ratio over genome	cov_mean_median_auto_ratio_over_genome_dragen
+dragen_somatic	Aligned reads	reads_aligned_dragen
+dragen_somatic	Aligned reads in genome	reads_aligned_in_genome_dragen
+dragen_somatic	Aligned reads in genome pct	reads_aligned_in_genome_pct_dragen
+dragen_somatic	Total	var_tot_dragen
+dragen_somatic	Total pct	var_tot_pct_dragen
+dragen_somatic	Biallelic	var_biallelic_dragen
+dragen_somatic	Biallelic pct	var_biallelic_pct_dragen
+dragen_somatic	Multiallelic	var_multiallelic_dragen
+dragen_somatic	Multiallelic pct	var_multiallelic_pct_dragen
+dragen_somatic	SNPs	var_snp_dragen
+dragen_somatic	SNPs pct	var_snp_pct_dragen
+dragen_somatic	Insertions (Hom)	var_ins_hom_dragen
+dragen_somatic	Insertions (Hom) pct	var_ins_hom_pct_dragen
+dragen_somatic	Insertions (Het)	var_ins_het_dragen
+dragen_somatic	Insertions (Het) pct	var_ins_het_pct_dragen
+dragen_somatic	Deletions (Hom)	var_del_hom_dragen
+dragen_somatic	Deletions (Hom) pct	var_del_hom_pct_dragen
+dragen_somatic	Deletions (Het)	var_del_het_dragen
+dragen_somatic	Deletions (Het) pct	var_del_het_pct_dragen
+dragen_somatic	Indels (Het)	var_indel_het_dragen
+dragen_somatic	Indels (Het) pct	var_indel_het_pct_dragen
+dragen_somatic	Chr X number of SNPs over genome	var_snp_x_over_genome_dragen
+dragen_somatic	Chr Y number of SNPs over genome	var_snp_y_over_genome_dragen
+dragen_somatic	(Chr X SNPs)/(chr Y SNPs) ratio over genome	var_x_over_y_snp_ratio_over_genome_dragen
+dragen_somatic	SNP Transitions	var_snp_transitions_dragen
+dragen_somatic	SNP Transversions	var_snp_transversions_dragen
+dragen_somatic	Ti/Tv ratio	var_ti_tv_ratio_dragen
+dragen_somatic	Heterozygous	var_heterozygous_dragen
+dragen_somatic	Homozygous	var_homozygous_dragen
+dragen_somatic	Het/Hom ratio	var_het_hom_ratio_dragen
+dragen_somatic	In dbSNP	var_in_dbsnp_dragen
+dragen_somatic	In dbSNP pct	var_in_dbsnp_pct_dragen
+dragen_somatic	Not in dbSNP	var_nin_dbsnp_dragen
+dragen_somatic	Not in dbSNP pct	var_nin_dbsnp_pct_dragen
+dragen_somatic	Percent Callability	callability_pct_dragen
+dragen_somatic	Percent Autosome Callability	callability_auto_pct_dragen
+dragen_somatic	Insertions	var_ins_tot_dragen
+dragen_somatic	Insertions pct	var_ins_tot_pct_dragen
+dragen_somatic	Deletions	var_del_tot_dragen
+dragen_somatic	Deletions pct	var_del_tot_pct_dragen
+dragen_somatic	Indels	var_indel_tot_dragen
+dragen_somatic	Indels pct	var_indel_tot_pct_dragen
+dragen_somatic	Number of samples	sample_num_dragen
+dragen_somatic	Reads Processed	reads_processed_dragen
+dragen_somatic	Child Sample	sample_child_dragen
+dragen_somatic	Filtered vars	vars_tot_filt_dragen
+dragen_somatic	Filtered vars pct	vars_tot_filt_pct_dragen
+dragen_somatic	Filtered SNPs	vars_snp_filt_dragen
+dragen_somatic	Filtered SNPs pct	vars_snp_filt_pct_dragen
+dragen_somatic	Filtered indels	vars_indel_filt_dragen
+dragen_somatic	Filtered indels pct	vars_indel_filt_pct_dragen
+dragen_somatic	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
+dragen_transcriptome	umccr_id	umccr_id
+dragen_transcriptome	umccr_workflow	umccr_workflow
+dragen_transcriptome	config_creation_date	date
+dragen_transcriptome	Total input reads	reads_tot_input_dragen
+dragen_transcriptome	Total input reads pct	reads_tot_input_pct_dragen
+dragen_transcriptome	Number of duplicate marked reads	reads_num_dupmarked_dragen
+dragen_transcriptome	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
+dragen_transcriptome	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
+dragen_transcriptome	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_transcriptome	Reads with mate sequenced	reads_w_mate_seq_dragen
+dragen_transcriptome	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
+dragen_transcriptome	Reads without mate sequenced	reads_wo_mate_seq_dragen
+dragen_transcriptome	Reads without mate sequenced pct	reads_wo_mate_seq_pct_dragen
+dragen_transcriptome	QC-failed reads	reads_qcfail_dragen
+dragen_transcriptome	QC-failed reads pct	reads_qcfail_pct_dragen
+dragen_transcriptome	Mapped reads	reads_mapped_dragen
+dragen_transcriptome	Mapped reads pct	reads_mapped_pct_dragen
+dragen_transcriptome	Mapped reads adjusted for filtered mapping	reads_mapped_adjfilt_dragen
+dragen_transcriptome	Mapped reads adjusted for filtered mapping pct	reads_mapped_adjfilt_pct_dragen
+dragen_transcriptome	Mapped reads R1	reads_mapped_r1_dragen
+dragen_transcriptome	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
+dragen_transcriptome	Mapped reads R2	reads_mapped_r2_dragen
+dragen_transcriptome	Mapped reads R2 pct	reads_mapped_r2_pct_dragen
+dragen_transcriptome	Number of unique & mapped reads (excl. duplicate marked reads)	reads_num_uniq_mapped_dragen
+dragen_transcriptome	Number of unique & mapped reads (excl. duplicate marked reads) pct	reads_num_uniq_mapped_pct_dragen
+dragen_transcriptome	Unmapped reads	reads_unmapped_dragen
+dragen_transcriptome	Unmapped reads pct	reads_unmapped_pct_dragen
+dragen_transcriptome	Unmapped reads adjusted for filtered mapping	reads_unmapped_adjfilt_dragen
+dragen_transcriptome	Unmapped reads adjusted for filtered mapping pct	reads_unmapped_adjfilt_pct_dragen
+dragen_transcriptome	Adjustment of reads matching non-reference decoys	reads_match_nonref_decoys_adj_dragen
+dragen_transcriptome	Adjustment of reads matching non-reference decoys pct	reads_match_nonref_decoys_adj_pct_dragen
+dragen_transcriptome	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
+dragen_transcriptome	Singleton reads (itself mapped; mate unmapped) pct	reads_singleton_pct_dragen
+dragen_transcriptome	Paired reads (itself & mate mapped)	reads_paired_dragen
+dragen_transcriptome	Paired reads (itself & mate mapped) pct	reads_paired_pct_dragen
+dragen_transcriptome	Properly paired reads	reads_paired_proper_dragen
+dragen_transcriptome	Properly paired reads pct	reads_paired_proper_pct_dragen
+dragen_transcriptome	Not properly paired reads (discordant)	reads_discordant_dragen
+dragen_transcriptome	Not properly paired reads (discordant) pct	reads_discordant_pct_dragen
+dragen_transcriptome	Paired reads mapped to different chromosomes	reads_paired_mapped_diff_chrom_dragen
+dragen_transcriptome	Paired reads mapped to different chromosomes pct	reads_paired_mapped_diff_chrom_pct_dragen
+dragen_transcriptome	Paired reads mapped to different chromosomes (MAPQ>=10)	reads_paired_mapped_diff_chrom_mapq10_dragen
+dragen_transcriptome	Paired reads mapped to different chromosomes (MAPQ>=10) pct	reads_paired_mapped_diff_chrom_mapq10_pct_dragen
+dragen_transcriptome	Reads with MAPQ [40:inf)	reads_mapq_40_inf_dragen
+dragen_transcriptome	Reads with MAPQ [40:inf) pct	reads_mapq_40_inf_pct_dragen
+dragen_transcriptome	Reads with MAPQ [30:40)	reads_mapq_30_40_dragen
+dragen_transcriptome	Reads with MAPQ [30:40) pct	reads_mapq_30_40_pct_dragen
+dragen_transcriptome	Reads with MAPQ [20:30)	reads_mapq_20_30_dragen
+dragen_transcriptome	Reads with MAPQ [20:30) pct	reads_mapq_20_30_pct_dragen
+dragen_transcriptome	Reads with MAPQ [10:20)	reads_mapq_10_20_dragen
+dragen_transcriptome	Reads with MAPQ [10:20) pct	reads_mapq_10_20_pct_dragen
+dragen_transcriptome	Reads with MAPQ [ 0:10)	reads_mapq_0_10_dragen
+dragen_transcriptome	Reads with MAPQ [ 0:10) pct	reads_mapq_0_10_pct_dragen
+dragen_transcriptome	Reads with MAPQ NA (Unmapped reads)	reads_mapq_na_unmapped_dragen
+dragen_transcriptome	Reads with MAPQ NA (Unmapped reads) pct	reads_mapq_na_unmapped_pct_dragen
+dragen_transcriptome	Reads with indel R1	reads_indel_r1_dragen
+dragen_transcriptome	Reads with indel R1 pct	reads_indel_r1_pct_dragen
+dragen_transcriptome	Reads with indel R2	reads_indel_r2_dragen
+dragen_transcriptome	Reads with indel R2 pct	reads_indel_r2_pct_dragen
+dragen_transcriptome	Total bases	bases_tot_dragen
+dragen_transcriptome	Total bases R1	bases_tot_r1_dragen
+dragen_transcriptome	Total bases R2	bases_tot_r2_dragen
+dragen_transcriptome	Mapped bases R1	bases_mapped_r1_dragen
+dragen_transcriptome	Mapped bases R1 pct	bases_mapped_r1_pct_dragen
+dragen_transcriptome	Mapped bases R2	bases_mapped_r2_dragen
+dragen_transcriptome	Mapped bases R2 pct	bases_mapped_r2_pct_dragen
+dragen_transcriptome	Soft-clipped bases R1	bases_softclip_r1_dragen
+dragen_transcriptome	Soft-clipped bases R2	bases_softclip_r2_dragen
+dragen_transcriptome	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
+dragen_transcriptome	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_transcriptome	Mismatched bases R1	bases_mismatched_r1_dragen
+dragen_transcriptome	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
+dragen_transcriptome	Mismatched bases R2 pct	bases_mismatched_r2_pct_dragen
+dragen_transcriptome	Mismatched bases R1 (excl. indels)	bases_mismatched_r1_noindels_dragen
+dragen_transcriptome	Mismatched bases R2 (excl. indels)	bases_mismatched_r2_noindels_dragen
+dragen_transcriptome	Mismatched bases R1 (excl. indels) pct	bases_mismatched_r1_noindels_pct_dragen
+dragen_transcriptome	Mismatched bases R2 (excl. indels) pct	bases_mismatched_r2_noindels_pct_dragen
+dragen_transcriptome	Q30 bases	bases_q30_dragen
+dragen_transcriptome	Q30 bases pct	bases_q30_pct_dragen
+dragen_transcriptome	Q30 bases R1	bases_q30_r1_dragen
+dragen_transcriptome	Q30 bases R1 pct	bases_q30_r1_pct_dragen
+dragen_transcriptome	Q30 bases R2	bases_q30_r2_dragen
+dragen_transcriptome	Q30 bases R2 pct	bases_q30_r2_pct_dragen
+dragen_transcriptome	Q30 bases (excl. dups & clipped bases)	bases_q30_nodups_noclipped_dragen
+dragen_transcriptome	Q30 bases (excl. dups & clipped bases) pct	bases_q30_nodups_noclipped_pct_dragen
+dragen_transcriptome	Total alignments	alignments_tot_dragen
+dragen_transcriptome	Secondary alignments	alignments_secondary_dragen
+dragen_transcriptome	Secondary alignments pct	alignments_secondary_pct_dragen
+dragen_transcriptome	Supplementary (chimeric) alignments	alignments_chimeric_dragen
+dragen_transcriptome	Estimated read length	read_len_dragen
+dragen_transcriptome	Bases in reference genome	bases_in_ref_genome_dragen
+dragen_transcriptome	Bases in target bed [% of genome]	bases_in_target_bed_genome_pct_dragen
+dragen_transcriptome	Average sequenced coverage over genome	cov_avg_seq_over_genome_dragen
+dragen_transcriptome	Insert length: mean	insert_len_mean_dragen
+dragen_transcriptome	Insert length: median	insert_len_median_dragen
+dragen_transcriptome	Insert length: standard deviation	insert_len_std_dev_dragen
+dragen_transcriptome	Provided sex chromosome ploidy	ploidy_sex_chrom_provided_dragen
+dragen_transcriptome	Estimated sample contamination	contamination_est_dragen
+dragen_transcriptome	DRAGEN mapping rate [mil. reads/second]	mapping_rate_dragen_milreads_per_sec_dragen
+dragen_transcriptome	Aligned bases	bases_aligned_dragen
+dragen_transcriptome	Aligned bases in genome	bases_aligned_in_genome_dragen
+dragen_transcriptome	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
+dragen_transcriptome	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
+dragen_transcriptome	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_transcriptome	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [ 15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [ 10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [  3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [  1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [  0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [ 50x:100x)	cov_genome_pct_50x_100x_dragen
+dragen_transcriptome	PCT of genome with coverage [ 20x: 50x)	cov_genome_pct_20x_50x_dragen
+dragen_transcriptome	PCT of genome with coverage [ 15x: 20x)	cov_genome_pct_15x_20x_dragen
+dragen_transcriptome	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_15x_dragen
+dragen_transcriptome	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
+dragen_transcriptome	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
+dragen_transcriptome	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_transcriptome	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
+dragen_transcriptome	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
+dragen_transcriptome	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
+dragen_transcriptome	Average autosomal coverage over genome	cov_avg_auto_over_genome_dragen
+dragen_transcriptome	Median autosomal coverage over genome	cov_median_auto_over_genome_dragen
+dragen_transcriptome	Aligned reads	reads_aligned_dragen
+dragen_transcriptome	Aligned reads in genome	reads_aligned_in_genome_dragen
+dragen_transcriptome	Aligned reads in genome pct	reads_aligned_in_genome_pct_dragen
+dragen_transcriptome	Adjustment of reads matching filter contigs	reads_match_filter_contigs_adj_dragen
+dragen_transcriptome	Adjustment of reads matching filter contigs pct	reads_match_filter_contigs_adj_pct_dragen
+dragen_transcriptome	Reads with splice junction	reads_splice_junction_dragen
+dragen_transcriptome	Reads with splice junction pct	reads_splice_junction_pct_dragen
+dragen_transcriptome	5_3_bias	bias_5_3_qualimap2
+dragen_transcriptome	reads_aligned	reads_aligned_qualimap
+dragen_transcriptome	avg_gc_content_percent	gc_pct_qualimap
+dragen_transcriptome	Mean/Median autosomal coverage ratio over genome	cov_mean_median_auto_ratio_over_genome_dragen
+dragen_umccrise	umccr_id	umccr_id
+dragen_umccrise	umccr_workflow	umccr_workflow
+dragen_umccrise	config_creation_date	date
+dragen_umccrise	Total input reads	reads_tot_input_dragen
+dragen_umccrise	Total input reads pct	reads_tot_input_pct_dragen
+dragen_umccrise	Number of duplicate marked reads	reads_num_dupmarked_dragen
+dragen_umccrise	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
+dragen_umccrise	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
+dragen_umccrise	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_umccrise	Reads with mate sequenced	reads_w_mate_seq_dragen
+dragen_umccrise	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
+dragen_umccrise	Reads without mate sequenced	reads_wo_mate_seq_dragen
+dragen_umccrise	Reads without mate sequenced pct	reads_wo_mate_seq_pct_dragen
+dragen_umccrise	QC-failed reads	reads_qcfail_dragen
+dragen_umccrise	QC-failed reads pct	reads_qcfail_pct_dragen
+dragen_umccrise	Mapped reads	reads_mapped_dragen
+dragen_umccrise	Mapped reads pct	reads_mapped_pct_dragen
+dragen_umccrise	Mapped reads adjusted for filtered mapping	reads_mapped_adjfilt_dragen
+dragen_umccrise	Mapped reads adjusted for filtered mapping pct	reads_mapped_adjfilt_pct_dragen
+dragen_umccrise	Mapped reads R1	reads_mapped_r1_dragen
+dragen_umccrise	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
+dragen_umccrise	Mapped reads R2	reads_mapped_r2_dragen
+dragen_umccrise	Mapped reads R2 pct	reads_mapped_r2_pct_dragen
+dragen_umccrise	Number of unique & mapped reads (excl. duplicate marked reads)	reads_num_uniq_mapped_dragen
+dragen_umccrise	Number of unique & mapped reads (excl. duplicate marked reads) pct	reads_num_uniq_mapped_pct_dragen
+dragen_umccrise	Unmapped reads	reads_unmapped_dragen
+dragen_umccrise	Unmapped reads pct	reads_unmapped_pct_dragen
+dragen_umccrise	Unmapped reads adjusted for filtered mapping	reads_unmapped_adjfilt_dragen
+dragen_umccrise	Unmapped reads adjusted for filtered mapping pct	reads_unmapped_adjfilt_pct_dragen
+dragen_umccrise	Adjustment of reads matching non-reference decoys	reads_match_nonref_decoys_adj_dragen
+dragen_umccrise	Adjustment of reads matching non-reference decoys pct	reads_match_nonref_decoys_adj_pct_dragen
+dragen_umccrise	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
+dragen_umccrise	Singleton reads (itself mapped; mate unmapped) pct	reads_singleton_pct_dragen
+dragen_umccrise	Paired reads (itself & mate mapped)	reads_paired_dragen
+dragen_umccrise	Paired reads (itself & mate mapped) pct	reads_paired_pct_dragen
+dragen_umccrise	Properly paired reads	reads_paired_proper_dragen
+dragen_umccrise	Properly paired reads pct	reads_paired_proper_pct_dragen
+dragen_umccrise	Not properly paired reads (discordant)	reads_discordant_dragen
+dragen_umccrise	Not properly paired reads (discordant) pct	reads_discordant_pct_dragen
+dragen_umccrise	Paired reads mapped to different chromosomes	reads_paired_mapped_diff_chrom_dragen
+dragen_umccrise	Paired reads mapped to different chromosomes pct	reads_paired_mapped_diff_chrom_pct_dragen
+dragen_umccrise	Paired reads mapped to different chromosomes (MAPQ>=10)	reads_paired_mapped_diff_chrom_mapq10_dragen
+dragen_umccrise	Paired reads mapped to different chromosomes (MAPQ>=10) pct	reads_paired_mapped_diff_chrom_mapq10_pct_dragen
+dragen_umccrise	Reads with MAPQ [40:inf)	reads_mapq_40_inf_dragen
+dragen_umccrise	Reads with MAPQ [40:inf) pct	reads_mapq_40_inf_pct_dragen
+dragen_umccrise	Reads with MAPQ [30:40)	reads_mapq_30_40_dragen
+dragen_umccrise	Reads with MAPQ [30:40) pct	reads_mapq_30_40_pct_dragen
+dragen_umccrise	Reads with MAPQ [20:30)	reads_mapq_20_30_dragen
+dragen_umccrise	Reads with MAPQ [20:30) pct	reads_mapq_20_30_pct_dragen
+dragen_umccrise	Reads with MAPQ [10:20)	reads_mapq_10_20_dragen
+dragen_umccrise	Reads with MAPQ [10:20) pct	reads_mapq_10_20_pct_dragen
+dragen_umccrise	Reads with MAPQ [ 0:10)	reads_mapq_0_10_dragen
+dragen_umccrise	Reads with MAPQ [ 0:10) pct	reads_mapq_0_10_pct_dragen
+dragen_umccrise	Reads with MAPQ NA (Unmapped reads)	reads_mapq_na_unmapped_dragen
+dragen_umccrise	Reads with MAPQ NA (Unmapped reads) pct	reads_mapq_na_unmapped_pct_dragen
+dragen_umccrise	Reads with indel R1	reads_indel_r1_dragen
+dragen_umccrise	Reads with indel R1 pct	reads_indel_r1_pct_dragen
+dragen_umccrise	Reads with indel R2	reads_indel_r2_dragen
+dragen_umccrise	Reads with indel R2 pct	reads_indel_r2_pct_dragen
+dragen_umccrise	Total bases	bases_tot_dragen
+dragen_umccrise	Total bases R1	bases_tot_r1_dragen
+dragen_umccrise	Total bases R2	bases_tot_r2_dragen
+dragen_umccrise	Mapped bases R1	bases_mapped_r1_dragen
+dragen_umccrise	Mapped bases R1 pct	bases_mapped_r1_pct_dragen
+dragen_umccrise	Mapped bases R2	bases_mapped_r2_dragen
+dragen_umccrise	Mapped bases R2 pct	bases_mapped_r2_pct_dragen
+dragen_umccrise	Soft-clipped bases R1	bases_softclip_r1_dragen
+dragen_umccrise	Soft-clipped bases R2	bases_softclip_r2_dragen
+dragen_umccrise	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
+dragen_umccrise	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_umccrise	Mismatched bases R1	bases_mismatched_r1_dragen
+dragen_umccrise	Mismatched bases R2	bases_mismatched_r2_dragen
+dragen_umccrise	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
+dragen_umccrise	Mismatched bases R2 pct	bases_mismatched_r2_pct_dragen
+dragen_umccrise	Mismatched bases R1 (excl. indels)	bases_mismatched_r1_noindels_dragen
+dragen_umccrise	Mismatched bases R2 (excl. indels)	bases_mismatched_r2_noindels_dragen
+dragen_umccrise	Mismatched bases R1 (excl. indels) pct	bases_mismatched_r1_noindels_pct_dragen
+dragen_umccrise	Mismatched bases R2 (excl. indels) pct	bases_mismatched_r2_noindels_pct_dragen
+dragen_umccrise	Q30 bases	bases_q30_dragen
+dragen_umccrise	Q30 bases pct	bases_q30_pct_dragen
+dragen_umccrise	Q30 bases R1	bases_q30_r1_dragen
+dragen_umccrise	Q30 bases R1 pct	bases_q30_r1_pct_dragen
+dragen_umccrise	Q30 bases R2	bases_q30_r2_dragen
+dragen_umccrise	Q30 bases R2 pct	bases_q30_r2_pct_dragen
+dragen_umccrise	Q30 bases (excl. dups & clipped bases)	bases_q30_nodups_noclipped_dragen
+dragen_umccrise	Q30 bases (excl. dups & clipped bases) pct	bases_q30_nodups_noclipped_pct_dragen
+dragen_umccrise	Total alignments	alignments_tot_dragen
+dragen_umccrise	Secondary alignments	alignments_secondary_dragen
+dragen_umccrise	Secondary alignments pct	alignments_secondary_pct_dragen
+dragen_umccrise	Supplementary (chimeric) alignments	alignments_chimeric_dragen
+dragen_umccrise	Estimated read length	read_len_dragen
+dragen_umccrise	Bases in reference genome	bases_in_ref_genome_dragen
+dragen_umccrise	Bases in target bed [% of genome]	bases_in_target_bed_genome_pct_dragen
+dragen_umccrise	Average sequenced coverage over genome	cov_avg_seq_over_genome_dragen
+dragen_umccrise	Insert length: mean	insert_len_mean_dragen
+dragen_umccrise	Insert length: median	insert_len_median_dragen
+dragen_umccrise	Insert length: standard deviation	insert_len_std_dev_dragen
+dragen_umccrise	Provided sex chromosome ploidy	ploidy_sex_chrom_provided_dragen
+dragen_umccrise	Estimated sample contamination	contamination_est_dragen
+dragen_umccrise	DRAGEN mapping rate [mil. reads/second]	mapping_rate_dragen_milreads_per_sec_dragen
+dragen_umccrise	Autosomal median coverage	cov_auto_median_dragen
+dragen_umccrise	X median coverage	cov_x_median_dragen
+dragen_umccrise	Y median coverage	cov_y_median_dragen
+dragen_umccrise	1 median / Autosomal median	cov_1_div_auto_medians_dragen
+dragen_umccrise	2 median / Autosomal median	cov_2_div_auto_medians_dragen
+dragen_umccrise	3 median / Autosomal median	cov_3_div_auto_medians_dragen
+dragen_umccrise	4 median / Autosomal median	cov_4_div_auto_medians_dragen
+dragen_umccrise	5 median / Autosomal median	cov_5_div_auto_medians_dragen
+dragen_umccrise	6 median / Autosomal median	cov_6_div_auto_medians_dragen
+dragen_umccrise	7 median / Autosomal median	cov_7_div_auto_medians_dragen
+dragen_umccrise	8 median / Autosomal median	cov_8_div_auto_medians_dragen
+dragen_umccrise	9 median / Autosomal median	cov_9_div_auto_medians_dragen
+dragen_umccrise	10 median / Autosomal median	cov_10_div_auto_median_dragen
+dragen_umccrise	11 median / Autosomal median	cov_11_div_auto_median_dragen
+dragen_umccrise	12 median / Autosomal median	cov_12_div_auto_median_dragen
+dragen_umccrise	13 median / Autosomal median	cov_13_div_auto_median_dragen
+dragen_umccrise	14 median / Autosomal median	cov_14_div_auto_median_dragen
+dragen_umccrise	15 median / Autosomal median	cov_15_div_auto_median_dragen
+dragen_umccrise	16 median / Autosomal median	cov_16_div_auto_median_dragen
+dragen_umccrise	17 median / Autosomal median	cov_17_div_auto_median_dragen
+dragen_umccrise	18 median / Autosomal median	cov_18_div_auto_median_dragen
+dragen_umccrise	19 median / Autosomal median	cov_19_div_auto_median_dragen
+dragen_umccrise	20 median / Autosomal median	cov_20_div_auto_median_dragen
+dragen_umccrise	21 median / Autosomal median	cov_21_div_auto_median_dragen
+dragen_umccrise	22 median / Autosomal median	cov_22_div_auto_median_dragen
+dragen_umccrise	X median / Autosomal median	cov_x_div_auto_median_dragen
+dragen_umccrise	Y median / Autosomal median	cov_y_div_auto_median_dragen
+dragen_umccrise	Ploidy estimation	ploidy_est_dragen
+dragen_umccrise	Aligned bases	bases_aligned_dragen
+dragen_umccrise	Aligned bases in genome	bases_aligned_in_genome_dragen
+dragen_umccrise	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
+dragen_umccrise	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
+dragen_umccrise	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_umccrise	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [ 15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [ 10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [  3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [  1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [  0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [ 50x:100x)	cov_genome_pct_50x_100x_dragen
+dragen_umccrise	PCT of genome with coverage [ 20x: 50x)	cov_genome_pct_20x_50x_dragen
+dragen_umccrise	PCT of genome with coverage [ 15x: 20x)	cov_genome_pct_15x_20x_dragen
+dragen_umccrise	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_15x_dragen
+dragen_umccrise	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
+dragen_umccrise	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
+dragen_umccrise	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_umccrise	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
+dragen_umccrise	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
+dragen_umccrise	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
+dragen_umccrise	Average autosomal coverage over genome	cov_avg_auto_over_genome_dragen
+dragen_umccrise	Median autosomal coverage over genome	cov_median_auto_over_genome_dragen
+dragen_umccrise	Mean/Median autosomal coverage ratio over genome	cov_mean_median_auto_ratio_over_genome_dragen
+dragen_umccrise	Aligned reads	reads_aligned_dragen
+dragen_umccrise	Aligned reads in genome	reads_aligned_in_genome_dragen
+dragen_umccrise	Aligned reads in genome pct	reads_aligned_in_genome_pct_dragen
+dragen_umccrise	Total	var_tot_dragen
+dragen_umccrise	Total pct	var_tot_pct_dragen
+dragen_umccrise	Biallelic	var_biallelic_dragen
+dragen_umccrise	Biallelic pct	var_biallelic_pct_dragen
+dragen_umccrise	Multiallelic	var_multiallelic_dragen
+dragen_umccrise	Multiallelic pct	var_multiallelic_pct_dragen
+dragen_umccrise	SNPs	var_snp_dragen
+dragen_umccrise	SNPs pct	var_snp_pct_dragen
+dragen_umccrise	Insertions (Hom)	var_ins_hom_dragen
+dragen_umccrise	Insertions (Hom) pct	var_ins_hom_pct_dragen
+dragen_umccrise	Insertions (Het)	var_ins_het_dragen
+dragen_umccrise	Insertions (Het) pct	var_ins_het_pct_dragen
+dragen_umccrise	Deletions (Hom)	var_del_hom_dragen
+dragen_umccrise	Deletions (Hom) pct	var_del_hom_pct_dragen
+dragen_umccrise	Deletions (Het)	var_del_het_dragen
+dragen_umccrise	Deletions (Het) pct	var_del_het_pct_dragen
+dragen_umccrise	Indels (Het)	var_indel_het_dragen
+dragen_umccrise	Indels (Het) pct	var_indel_het_pct_dragen
+dragen_umccrise	Chr X number of SNPs over genome	var_snp_x_over_genome_dragen
+dragen_umccrise	Chr Y number of SNPs over genome	var_snp_y_over_genome_dragen
+dragen_umccrise	(Chr X SNPs)/(chr Y SNPs) ratio over genome	var_x_over_y_snp_ratio_over_genome_dragen
+dragen_umccrise	SNP Transitions	var_snp_transitions_dragen
+dragen_umccrise	SNP Transversions	var_snp_transversions_dragen
+dragen_umccrise	Ti/Tv ratio	var_ti_tv_ratio_dragen
+dragen_umccrise	Heterozygous	var_heterozygous_dragen
+dragen_umccrise	Homozygous	var_homozygous_dragen
+dragen_umccrise	Het/Hom ratio	var_het_hom_ratio_dragen
+dragen_umccrise	In dbSNP	var_in_dbsnp_dragen
+dragen_umccrise	In dbSNP pct	var_in_dbsnp_pct_dragen
+dragen_umccrise	Not in dbSNP	var_nin_dbsnp_dragen
+dragen_umccrise	Not in dbSNP pct	var_nin_dbsnp_pct_dragen
+dragen_umccrise	Percent Callability	callability_pct_dragen
+dragen_umccrise	Percent Autosome Callability	callability_auto_pct_dragen
+dragen_umccrise	Insertions	var_ins_tot_dragen
+dragen_umccrise	Insertions pct	var_ins_tot_pct_dragen
+dragen_umccrise	Deletions	var_del_tot_dragen
+dragen_umccrise	Deletions pct	var_del_tot_pct_dragen
+dragen_umccrise	Indels	var_indel_tot_dragen
+dragen_umccrise	Indels pct	var_indel_tot_pct_dragen
+dragen_umccrise	Number of samples	sample_num_dragen
+dragen_umccrise	Reads Processed	reads_processed_dragen
+dragen_umccrise	Child Sample	sample_child_dragen
+dragen_umccrise	Filtered vars	vars_tot_filt_dragen
+dragen_umccrise	Filtered vars pct	vars_tot_filt_pct_dragen
+dragen_umccrise	Filtered SNPs	vars_snp_filt_dragen
+dragen_umccrise	Filtered SNPs pct	vars_snp_filt_pct_dragen
+dragen_umccrise	Filtered indels	vars_indel_filt_dragen
+dragen_umccrise	concordance_concordance	concordance_conpair
+dragen_umccrise	concordance_used_markers	concordance_used_markers_conpair
+dragen_umccrise	concordance_total_markers	concordance_total_markers_conpair
+dragen_umccrise	concordance_marker_threshold	concordance_marker_threshold_conpair
+dragen_umccrise	concordance_min_mapping_quality	concordance_min_mapping_quality_conpair
+dragen_umccrise	concordance_min_base_quality	concordance_min_base_quality_conpair
+dragen_umccrise	contamination	contamination_conpair
+dragen_umccrise	QCStatus	qc_status_purple
+dragen_umccrise	Method	method_purple
+dragen_umccrise	CopyNumberSegments	cn_segs_purple
+dragen_umccrise	UnsupportedCopyNumberSegments	unsupported_cn_segs_purple
+dragen_umccrise	Purity	purity_purple1
+dragen_umccrise	AmberGender	gender_amber
+dragen_umccrise	CobaltGender	gender_cobalt
+dragen_umccrise	DeletedGenes	deleted_genes_purple
+dragen_umccrise	Contamination	contamination_purple
+dragen_umccrise	GermlineAberrations	germline_aberrations_purple
+dragen_umccrise	purity	purity_purple2
+dragen_umccrise	normFactor	normfactor_purple
+dragen_umccrise	score	score_purple
+dragen_umccrise	diploidProportion	diploid_prop_purple
+dragen_umccrise	ploidy	ploidy_purple1
+dragen_umccrise	gender	gender_purple
+dragen_umccrise	status	status_purple
+dragen_umccrise	polyclonalProportion	polyclonal_prop_purple
+dragen_umccrise	minPurity	min_purity_purple
+dragen_umccrise	maxPurity	max_purity_purple
+dragen_umccrise	minPloidy	min_ploidy_purple
+dragen_umccrise	maxPloidy	max_ploidy_purple
+dragen_umccrise	minDiploidProportion	min_diploid_prop_purple
+dragen_umccrise	maxDiploidProportion	max_diploid_prop_purple
+dragen_umccrise	version	version_purple
+dragen_umccrise	somaticPenalty	somatic_penalty_purple
+dragen_umccrise	wholeGenomeDuplication	whole_genome_dup_purple
+dragen_umccrise	msIndelsPerMb	ms_indels_permb_purple
+dragen_umccrise	msStatus	ms_status_purple
+dragen_umccrise	tml	tml_purple
+dragen_umccrise	tmlStatus	tml_status_purple
+dragen_umccrise	tmbPerMb	tmb_permb_purple
+dragen_umccrise	tmbStatus	tmb_status_purple
+dragen_umccrise	svTumorMutationalBurden	tmb_sv_purple
+dragen_umccrise	1_x_pc	cov_1x_pc_mosdepth
+dragen_umccrise	5_x_pc	cov_5x_pc_mosdepth
+dragen_umccrise	10_x_pc	cov_10x_pc_mosdepth
+dragen_umccrise	30_x_pc	cov_30x_pc_mosdepth
+dragen_umccrise	50_x_pc	cov_50x_pc_mosdepth
+dragen_umccrise	median_coverage	cov_median_mosdepth
+dragen_umccrise	raw_total_sequences	raw_total_sequences_samtools
+dragen_umccrise	filtered_sequences	filtered_sequences_samtools
+dragen_umccrise	sequences	sequences_samtools
+dragen_umccrise	is_sorted	is_sorted_samtools
+dragen_umccrise	1st_fragments	1st_fragments_samtools
+dragen_umccrise	last_fragments	last_fragments_samtools
+dragen_umccrise	reads_mapped	reads_mapped_samtools
+dragen_umccrise	reads_mapped_and_paired	reads_mapped_and_paired_samtools
+dragen_umccrise	reads_unmapped	reads_unmapped_samtools
+dragen_umccrise	reads_properly_paired	reads_properly_paired_samtools
+dragen_umccrise	reads_paired	reads_paired_samtools
+dragen_umccrise	reads_duplicated	reads_num_dupmarked_samtools
+dragen_umccrise	reads_duplicated_percent	reads_num_dupmarked_pct_samtools
+dragen_umccrise	reads_MQ0	reads_mq0_samtools
+dragen_umccrise	reads_QC_failed	reads_qc_failed_samtools
+dragen_umccrise	non-primary_alignments	non_primary_alignments_samtools
+dragen_umccrise	total_length	total_length_samtools
+dragen_umccrise	total_first_fragment_length	total_first_fragment_length_samtools
+dragen_umccrise	total_last_fragment_length	total_last_fragment_length_samtools
+dragen_umccrise	bases_mapped	bases_mapped_samtools
+dragen_umccrise	bases_mapped_(cigar)	bases_mapped_cigar_samtools
+dragen_umccrise	bases_trimmed	bases_trimmed_samtools
+dragen_umccrise	bases_duplicated	bases_duplicated_samtools
+dragen_umccrise	mismatches	mismatches_samtools
+dragen_umccrise	error_rate	error_rate_samtools
+dragen_umccrise	average_length	avg_length_samtools
+dragen_umccrise	average_first_fragment_length	avg_first_fragment_length_samtools
+dragen_umccrise	average_last_fragment_length	avg_last_fragment_length_samtools
+dragen_umccrise	maximum_length	max_length_samtools
+dragen_umccrise	maximum_first_fragment_length	max_first_fragment_length_samtools
+dragen_umccrise	maximum_last_fragment_length	max_last_fragment_length_samtools
+dragen_umccrise	average_quality	avg_quality_samtools
+dragen_umccrise	insert_size_average	insert_size_avg_samtools
+dragen_umccrise	insert_size_standard_deviation	insert_size_stddev_samtools
+dragen_umccrise	inward_oriented_pairs	inward_oriented_pairs_samtools
+dragen_umccrise	outward_oriented_pairs	outward_oriented_pairs_samtools
+dragen_umccrise	pairs_with_other_orientation	pairs_with_other_orientation_samtools
+dragen_umccrise	pairs_on_different_chromosomes	pairs_on_different_chromosomes_samtools
+dragen_umccrise	percentage_of_properly_paired_reads_(%)	reads_properly_paired_pct_round_samtools
+dragen_umccrise	reads_properly_paired_percent	reads_properly_paired_pct_samtools
+dragen_umccrise	reads_mapped_percent	reads_mapped_pct_samtools
+dragen_umccrise	reads_mapped_and_paired_percent	reads_mapped_and_paired_pct_samtools
+dragen_umccrise	reads_unmapped_percent	reads_unmapped_pct_samtools
+dragen_umccrise	reads_paired_percent	reads_paired_pct_samtools
+dragen_umccrise	reads_MQ0_percent	reads_mq0_pct_samtools
+dragen_umccrise	reads_QC_failed_percent	reads_qc_failed_pct_samtools
+dragen_umccrise	filt_indels	filt_indels_umccrise
+dragen_umccrise	filt_snps	filt_snps_umccrise
+dragen_umccrise	filt_vars	filt_vars_umccrise
+dragen_umccrise	indels	indel_umccrise
+dragen_umccrise	snps	snp_umccrise
+dragen_umccrise	viral_content	viral_content_umccrise
+dragen_umccrise	viral_integration_sites	viral_integration_sites_umccrise
+dragen_umccrise	germline	germline_umccrise
+dragen_umccrise	germline_predispose	germline_predispose_umccrise
+dragen_ctdna	umccr_id	umccr_id
+dragen_ctdna	umccr_workflow	umccr_workflow
+dragen_ctdna	config_creation_date	date
+dragen_ctdna	Total input reads	reads_tot_input_dragen
+dragen_ctdna	Total input reads pct	reads_tot_input_pct_dragen
+dragen_ctdna	Number of duplicate marked reads	reads_num_dupmarked_dragen
+dragen_ctdna	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
+dragen_ctdna	Number of duplicate marked and mate reads removed pct	reads_num_dupmarked_mate_reads_removed_pct_dragen
+dragen_ctdna	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
+dragen_ctdna	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_ctdna	Reads with mate sequenced	reads_w_mate_seq_dragen
+dragen_ctdna	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
+dragen_ctdna	Reads without mate sequenced	reads_wo_mate_seq_dragen
+dragen_ctdna	Reads without mate sequenced pct	reads_wo_mate_seq_pct_dragen
+dragen_ctdna	QC-failed reads	reads_qcfail_dragen
+dragen_ctdna	QC-failed reads pct	reads_qcfail_pct_dragen
+dragen_ctdna	Mapped reads	reads_mapped_dragen
+dragen_ctdna	Mapped reads pct	reads_mapped_pct_dragen
+dragen_ctdna	Mapped reads R1	reads_mapped_r1_dragen
+dragen_ctdna	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
+dragen_ctdna	Mapped reads R2	reads_mapped_r2_dragen
+dragen_ctdna	Mapped reads R2 pct	reads_mapped_r2_pct_dragen
+dragen_ctdna	Number of unique & mapped reads (excl. duplicate marked reads)	reads_num_uniq_mapped_dragen
+dragen_ctdna	Number of unique & mapped reads (excl. duplicate marked reads) pct	reads_num_uniq_mapped_pct_dragen
+dragen_ctdna	Unmapped reads	reads_unmapped_dragen
+dragen_ctdna	Unmapped reads pct	reads_unmapped_pct_dragen
+dragen_ctdna	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
+dragen_ctdna	Singleton reads (itself mapped; mate unmapped) pct	reads_singleton_pct_dragen
+dragen_ctdna	Paired reads (itself & mate mapped)	reads_paired_dragen
+dragen_ctdna	Paired reads (itself & mate mapped) pct	reads_paired_pct_dragen
+dragen_ctdna	Properly paired reads	reads_paired_proper_dragen
+dragen_ctdna	Properly paired reads pct	reads_paired_proper_pct_dragen
+dragen_ctdna	Not properly paired reads (discordant)	reads_discordant_dragen
+dragen_ctdna	Not properly paired reads (discordant) pct	reads_discordant_pct_dragen
+dragen_ctdna	Paired reads mapped to different chromosomes	reads_paired_mapped_diff_chrom_dragen
+dragen_ctdna	Paired reads mapped to different chromosomes pct	reads_paired_mapped_diff_chrom_pct_dragen
+dragen_ctdna	Paired reads mapped to different chromosomes (MAPQ>=10)	reads_paired_mapped_diff_chrom_mapq10_dragen
+dragen_ctdna	Paired reads mapped to different chromosomes (MAPQ>=10) pct	reads_paired_mapped_diff_chrom_mapq10_pct_dragen
+dragen_ctdna	Reads with MAPQ [40:inf)	reads_mapq_40_inf_dragen
+dragen_ctdna	Reads with MAPQ [40:inf) pct	reads_mapq_40_inf_pct_dragen
+dragen_ctdna	Reads with MAPQ [30:40)	reads_mapq_30_40_dragen
+dragen_ctdna	Reads with MAPQ [30:40) pct	reads_mapq_30_40_pct_dragen
+dragen_ctdna	Reads with MAPQ [20:30)	reads_mapq_20_30_dragen
+dragen_ctdna	Reads with MAPQ [20:30) pct	reads_mapq_20_30_pct_dragen
+dragen_ctdna	Reads with MAPQ [10:20)	reads_mapq_10_20_dragen
+dragen_ctdna	Reads with MAPQ [10:20) pct	reads_mapq_10_20_pct_dragen
+dragen_ctdna	Reads with MAPQ [ 0:10)	reads_mapq_0_10_dragen
+dragen_ctdna	Reads with MAPQ [ 0:10) pct	reads_mapq_0_10_pct_dragen
+dragen_ctdna	Reads with MAPQ NA (Unmapped reads)	reads_mapq_na_unmapped_dragen
+dragen_ctdna	Reads with MAPQ NA (Unmapped reads) pct	reads_mapq_na_unmapped_pct_dragen
+dragen_ctdna	Reads with indel R1	reads_indel_r1_dragen
+dragen_ctdna	Reads with indel R1 pct	reads_indel_r1_pct_dragen
+dragen_ctdna	Reads with indel R2	reads_indel_r2_dragen
+dragen_ctdna	Reads with indel R2 pct	reads_indel_r2_pct_dragen
+dragen_ctdna	Total bases	bases_tot_dragen
+dragen_ctdna	Total bases R1	bases_tot_r1_dragen
+dragen_ctdna	Total bases R2	bases_tot_r2_dragen
+dragen_ctdna	Mapped bases R1	bases_mapped_r1_dragen
+dragen_ctdna	Mapped bases R1 pct	bases_mapped_r1_pct_dragen
+dragen_ctdna	Mapped bases R2	bases_mapped_r2_dragen
+dragen_ctdna	Mapped bases R2 pct	bases_mapped_r2_pct_dragen
+dragen_ctdna	Q30 bases	bases_q30_dragen
+dragen_ctdna	Q30 bases pct	bases_q30_pct_dragen
+dragen_ctdna	Q30 bases R1	bases_q30_r1_dragen
+dragen_ctdna	Q30 bases R1 pct	bases_q30_r1_pct_dragen
+dragen_ctdna	Q30 bases R2	bases_q30_r2_dragen
+dragen_ctdna	Q30 bases R2 pct	bases_q30_r2_pct_dragen
+dragen_ctdna	Q30 bases (excl. dups & clipped bases)	bases_q30_nodups_noclipped_dragen
+dragen_ctdna	Q30 bases (excl. dups & clipped bases) pct	bases_q30_nodups_noclipped_pct_dragen
+dragen_ctdna	Total alignments	alignments_tot_dragen
+dragen_ctdna	Secondary alignments	alignments_secondary_dragen
+dragen_ctdna	Secondary alignments pct	alignments_secondary_pct_dragen
+dragen_ctdna	Supplementary (chimeric) alignments	alignments_chimeric_dragen
+dragen_ctdna	Estimated read length	read_len_dragen
+dragen_ctdna	Bases in reference genome	bases_in_ref_genome_dragen
+dragen_ctdna	Bases in target bed [% of genome]	bases_in_target_bed_genome_pct_dragen
+dragen_ctdna	Average sequenced coverage over genome	cov_avg_seq_over_genome_dragen
+dragen_ctdna	Insert length: mean	insert_len_mean_dragen
+dragen_ctdna	Insert length: median	insert_len_median_dragen
+dragen_ctdna	Insert length: standard deviation	insert_len_std_dev_dragen
+dragen_ctdna	Provided sex chromosome ploidy	ploidy_sex_chrom_provided_dragen
+dragen_ctdna	DRAGEN mapping rate [mil. reads/second]	mapping_rate_dragen_milreads_per_sec_dragen
+dragen_ctdna	Aligned bases	bases_aligned_dragen
+dragen_ctdna	Aligned bases in genome	bases_aligned_in_genome_dragen
+dragen_ctdna	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
+dragen_ctdna	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
+dragen_ctdna	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_ctdna	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [ 15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [ 10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [  3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [  1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [  0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [ 50x:100x)	cov_genome_pct_50x_100x_dragen
+dragen_ctdna	PCT of genome with coverage [ 20x: 50x)	cov_genome_pct_20x_50x_dragen
+dragen_ctdna	PCT of genome with coverage [ 15x: 20x)	cov_genome_pct_15x_20x_dragen
+dragen_ctdna	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_15x_dragen
+dragen_ctdna	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
+dragen_ctdna	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
+dragen_ctdna	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_ctdna	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
+dragen_ctdna	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
+dragen_ctdna	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
+dragen_ctdna	Average autosomal coverage over genome	cov_avg_auto_over_genome_dragen
+dragen_ctdna	Median autosomal coverage over genome	cov_median_auto_over_genome_dragen
+dragen_ctdna	Mean/Median autosomal coverage ratio over genome	cov_mean_median_auto_ratio_over_genome_dragen
+dragen_ctdna	Aligned reads	reads_aligned_dragen
+dragen_ctdna	Aligned reads in genome	reads_aligned_in_genome_dragen
+dragen_ctdna	Aligned reads in genome pct	reads_aligned_in_genome_pct_dragen
+dragen_ctdna	Mismatched bases R1	bases_mismatched_r1_dragen
+dragen_ctdna	Mismatched bases R2	bases_mismatched_r2_dragen
+dragen_ctdna	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
+dragen_ctdna	Mismatched bases R2 pct	bases_mismatched_r2_pct_dragen
+dragen_ctdna	Mismatched bases R1 (excl. indels)	bases_mismatched_r1_noindels_dragen
+dragen_ctdna	Mismatched bases R2 (excl. indels)	bases_mismatched_r2_noindels_dragen
+dragen_ctdna	Mismatched bases R1 (excl. indels) pct	bases_mismatched_r1_noindels_pct_dragen
+dragen_ctdna	Mismatched bases R2 (excl. indels) pct	bases_mismatched_r2_noindels_pct_dragen
+dragen_ctdna	Soft-clipped bases R1	bases_softclip_r1_dragen
+dragen_ctdna	Soft-clipped bases R2	bases_softclip_r2_dragen
+dragen_ctdna	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
+dragen_ctdna	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+bcbio_umccrise	umccr_id	umccr_id
+bcbio_umccrise	umccr_workflow	umccr_workflow
+bcbio_umccrise	config_creation_date	date
+bcbio_umccrise	concordance_used_markers	concordance_used_markers_conpair
+bcbio_umccrise	concordance_total_markers	concordance_total_markers_conpair
+bcbio_umccrise	concordance_marker_threshold	concordance_marker_threshold_conpair
+bcbio_umccrise	concordance_min_mapping_quality	concordance_min_mapping_quality_conpair
+bcbio_umccrise	concordance_min_base_quality	concordance_min_base_quality_conpair
+bcbio_umccrise	contamination	contamination_conpair
+bcbio_umccrise	QCStatus	qc_status_purple
+bcbio_umccrise	Method	method_purple
+bcbio_umccrise	CopyNumberSegments	cn_segs_purple
+bcbio_umccrise	UnsupportedCopyNumberSegments	unsupported_cn_segs_purple
+bcbio_umccrise	Purity	purity_purple1
+bcbio_umccrise	AmberGender	gender_amber
+bcbio_umccrise	CobaltGender	gender_cobalt
+bcbio_umccrise	DeletedGenes	deleted_genes_purple
+bcbio_umccrise	Contamination	contamination_purple
+bcbio_umccrise	GermlineAberrations	germline_aberrations_purple
+bcbio_umccrise	purity	purity_purple2
+bcbio_umccrise	normFactor	normfactor_purple
+bcbio_umccrise	score	score_purple
+bcbio_umccrise	diploidProportion	diploid_prop_purple
+bcbio_umccrise	ploidy	ploidy_purple1
+bcbio_umccrise	gender	gender_purple
+bcbio_umccrise	status	status_purple
+bcbio_umccrise	polyclonalProportion	polyclonal_prop_purple
+bcbio_umccrise	minPurity	min_purity_purple
+bcbio_umccrise	maxPurity	max_purity_purple
+bcbio_umccrise	minPloidy	min_ploidy_purple
+bcbio_umccrise	maxPloidy	max_ploidy_purple
+bcbio_umccrise	minDiploidProportion	min_diploid_prop_purple
+bcbio_umccrise	maxDiploidProportion	max_diploid_prop_purple
+bcbio_umccrise	version	version_purple
+bcbio_umccrise	somaticPenalty	somatic_penalty_purple
+bcbio_umccrise	wholeGenomeDuplication	whole_genome_dup_purple
+bcbio_umccrise	msIndelsPerMb	ms_indels_permb_purple
+bcbio_umccrise	msStatus	ms_status_purple
+bcbio_umccrise	tml	tml_purple
+bcbio_umccrise	tmlStatus	tml_status_purple
+bcbio_umccrise	tmbPerMb	tmb_permb_purple
+bcbio_umccrise	tmbStatus	tmb_status_purple
+bcbio_umccrise	svTumorMutationalBurden	tmb_sv_purple
+bcbio_umccrise	1_x_pc	cov_1x_pc_mosdepth
+bcbio_umccrise	5_x_pc	cov_5x_pc_mosdepth
+bcbio_umccrise	10_x_pc	cov_10x_pc_mosdepth
+bcbio_umccrise	30_x_pc	cov_30x_pc_mosdepth
+bcbio_umccrise	50_x_pc	cov_50x_pc_mosdepth
+bcbio_umccrise	median_coverage	cov_median_mosdepth
+bcbio_umccrise	raw_total_sequences	raw_total_sequences_samtools
+bcbio_umccrise	filtered_sequences	filtered_sequences_samtools
+bcbio_umccrise	sequences	sequences_samtools
+bcbio_umccrise	is_sorted	is_sorted_samtools
+bcbio_umccrise	1st_fragments	1st_fragments_samtools
+bcbio_umccrise	last_fragments	last_fragments_samtools
+bcbio_umccrise	reads_mapped	reads_mapped_samtools
+bcbio_umccrise	reads_mapped_and_paired	reads_mapped_and_paired_samtools
+bcbio_umccrise	reads_unmapped	reads_unmapped_samtools
+bcbio_umccrise	reads_properly_paired	reads_properly_paired_samtools
+bcbio_umccrise	reads_paired	reads_paired_samtools
+bcbio_umccrise	reads_duplicated	reads_num_dupmarked_samtools
+bcbio_umccrise	reads_duplicated_percent	reads_num_dupmarked_pct_samtools
+bcbio_umccrise	reads_MQ0	reads_mq0_samtools
+bcbio_umccrise	reads_QC_failed	reads_qc_failed_samtools
+bcbio_umccrise	non-primary_alignments	non_primary_alignments_samtools
+bcbio_umccrise	total_length	total_length_samtools
+bcbio_umccrise	total_first_fragment_length	total_first_fragment_length_samtools
+bcbio_umccrise	total_last_fragment_length	total_last_fragment_length_samtools
+bcbio_umccrise	bases_mapped	bases_mapped_samtools
+bcbio_umccrise	bases_mapped_(cigar)	bases_mapped_cigar_samtools
+bcbio_umccrise	bases_trimmed	bases_trimmed_samtools
+bcbio_umccrise	bases_duplicated	bases_duplicated_samtools
+bcbio_umccrise	mismatches	mismatches_samtools
+bcbio_umccrise	error_rate	error_rate_samtools
+bcbio_umccrise	average_length	avg_length_samtools
+bcbio_umccrise	average_first_fragment_length	avg_first_fragment_length_samtools
+bcbio_umccrise	average_last_fragment_length	avg_last_fragment_length_samtools
+bcbio_umccrise	maximum_length	max_length_samtools
+bcbio_umccrise	maximum_first_fragment_length	max_first_fragment_length_samtools
+bcbio_umccrise	maximum_last_fragment_length	max_last_fragment_length_samtools
+bcbio_umccrise	average_quality	avg_quality_samtools
+bcbio_umccrise	insert_size_average	insert_size_avg_samtools
+bcbio_umccrise	insert_size_standard_deviation	insert_size_stddev_samtools
+bcbio_umccrise	inward_oriented_pairs	inward_oriented_pairs_samtools
+bcbio_umccrise	outward_oriented_pairs	outward_oriented_pairs_samtools
+bcbio_umccrise	pairs_with_other_orientation	pairs_with_other_orientation_samtools
+bcbio_umccrise	pairs_on_different_chromosomes	pairs_on_different_chromosomes_samtools
+bcbio_umccrise	percentage_of_properly_paired_reads_(%)	reads_properly_paired_pct_round_samtools
+bcbio_umccrise	reads_properly_paired_percent	reads_properly_paired_pct_samtools
+bcbio_umccrise	reads_mapped_percent	reads_mapped_pct_samtools
+bcbio_umccrise	reads_mapped_and_paired_percent	reads_mapped_and_paired_pct_samtools
+bcbio_umccrise	reads_unmapped_percent	reads_unmapped_pct_samtools
+bcbio_umccrise	reads_paired_percent	reads_paired_pct_samtools
+bcbio_umccrise	reads_MQ0_percent	reads_mq0_pct_samtools
+bcbio_umccrise	reads_QC_failed_percent	reads_qc_failed_pct_samtools
+bcbio_umccrise	filt_indels	filt_indels_umccrise
+bcbio_umccrise	filt_snps	filt_snps_umccrise
+bcbio_umccrise	filt_vars	filt_vars_umccrise
+bcbio_umccrise	indels	indel_umccrise
+bcbio_umccrise	snps	snp_umccrise
+bcbio_umccrise	viral_content	viral_content_umccrise
+bcbio_umccrise	viral_integration_sites	viral_integration_sites_umccrise
+bcbio_umccrise	germline	germline_umccrise
+bcbio_umccrise	germline_predispose	germline_predispose_umccrise
+bcbio_umccrise	concordance	concordance_conpair
+bcbio_umccrise	concordance_markers	concordance_used_over_tot_markers_conpair
+bcbio_umccrise	SegmentPass	segment_pass_purple
+bcbio_umccrise	GenderPass	gender_pass_purple
+bcbio_umccrise	DeletedGenesPass	deleted_genes_pass_purple
+bcbio_umccrise	SegmentScore	segment_score_purple
+bcbio_umccrise	UnsupportedSegments	unsupported_segs_purple
+bcbio_umccrise	Ploidy	ploidy_purple2
+bcbio_umccrise	%GC	gc_pct_bcbio
+bcbio_umccrise	Average_insert_size	insert_size_avg_bcbio
+bcbio_umccrise	Average_read_length	read_len_avg_bcbio
+bcbio_umccrise	Avg_coverage	cov_avg_bcbio
+bcbio_umccrise	Duplicates	reads_num_dupmarked_bcbio
+bcbio_umccrise	Duplicates_pct	reads_num_dupmarked_pct_bcbio
+bcbio_umccrise	Mapped_paired_reads	reads_paired_bcbio
+bcbio_umccrise	Mapped_reads	reads_mapped_bcbio
+bcbio_umccrise	Mapped_reads_pct	reads_mapped_pct_bcbio
+bcbio_umccrise	Mapped_unique_reads	reads_num_uniq_mapped_bcbio
+bcbio_umccrise	Offtarget_pct	reads_offtarget_pct_bcbio
+bcbio_umccrise	Ontarget_pct	reads_ontarget_pct_bcbio
+bcbio_umccrise	Ontarget_unique_reads	reads_ontarget_unique_bcbio
+bcbio_umccrise	Sequences_flagged_as_poor_quality	sequences_poor_quality_bcbio
+bcbio_umccrise	Total_reads	reads_tot_bcbio
+bcbio_umccrise	Usable_pct	reads_usable_pct_bcbio
+bcbio_umccrise	RiP_pct	reads_rip_pct_bcbio
+bcbio_umccrise	non-primary_alignments_percent	alignments_secondary_pct_samtools
+bcbio_umccrise	family_id	family_id_peddy
+bcbio_umccrise	paternal_id	paternal_id_peddy
+bcbio_umccrise	maternal_id	maternal_id_peddy
+bcbio_umccrise	sex	sex_peddy
+bcbio_umccrise	phenotype	phenotype_peddy
+bcbio_umccrise	Ethnicity	ethnicity_peddy
+bcbio_umccrise	duplicates	duplicates_peddy
+bcbio_umccrise	het_call_rate	het_call_rate_peddy
+bcbio_umccrise	het_ratio	het_ratio_peddy
+bcbio_umccrise	het_mean_depth	het_mean_depth_peddy
+bcbio_umccrise	het_idr_baf	het_idr_baf_peddy
+bcbio_umccrise	ancestry-prediction	ancestry_prediction_peddy
+bcbio_umccrise	PC1	pc1_peddy
+bcbio_umccrise	PC2	pc2_peddy
+bcbio_umccrise	PC3	pc3_peddy
+bcbio_umccrise	sex_het_ratio	sex_het_ratio_peddy
+bcbio_umccrise	sex_fixed	sex_fixed_peddy
+bcbio_umccrise	depth_outlier_het_check	depth_outlier_het_check_peddy
+bcbio_umccrise	het_count_het_check	het_count_het_check_peddy
+bcbio_umccrise	het_ratio_het_check	het_ratio_het_check_peddy
+bcbio_umccrise	idr_baf_het_check	idr_baf_het_check_peddy
+bcbio_umccrise	mean_depth_het_check	mean_depth_het_check_peddy
+bcbio_umccrise	median_depth_het_check	median_depth_het_check_peddy
+bcbio_umccrise	p10_het_check	p10_het_check_peddy
+bcbio_umccrise	p90_het_check	p90_het_check_peddy
+bcbio_umccrise	sampled_sites_het_check	sampled_sites_het_check_peddy
+bcbio_umccrise	call_rate_het_check	call_rate_het_check_peddy
+bcbio_umccrise	PC1_het_check	pc1_het_check_peddy
+bcbio_umccrise	PC2_het_check	pc2_het_check_peddy
+bcbio_umccrise	PC3_het_check	pc3_het_check_peddy
+bcbio_umccrise	PC4_het_check	pc4_het_check_peddy
+bcbio_umccrise	ancestry-prediction_het_check	ancestry_prediction_het_check_peddy
+bcbio_umccrise	ancestry-prob_het_check	ancestry_prob_het_check_peddy
+bcbio_umccrise	error_sex_check	error_sex_check_peddy
+bcbio_umccrise	het_count_sex_check	het_count_sex_check_peddy
+bcbio_umccrise	het_ratio_sex_check	het_ratio_sex_check_peddy
+bcbio_umccrise	hom_alt_count_sex_check	hom_alt_count_sex_check_peddy
+bcbio_umccrise	hom_ref_count_sex_check	hom_ref_count_sex_check_peddy
+bcbio_umccrise	ped_sex_sex_check	ped_sex_sex_check_peddy
+bcbio_umccrise	predicted_sex_sex_check	predicted_sex_sex_check_peddy
+bcbio_umccrise	percent_gc	gc_pct_fastqc
+bcbio_umccrise	avg_sequence_length	avg_sequence_length_fastqc
+bcbio_umccrise	total_sequences	sequences_tot_fastqc
+bcbio_umccrise	percent_duplicates	reads_num_dupmarked_pct_fastqc
+bcbio_umccrise	percent_fails	fails_pct_fastqc
+bcbio_umccrise	Genome	genome_snpeff
+bcbio_umccrise	Number_of_variants_before_filter	var_num_before_filter_snpeff
+bcbio_umccrise	Number_of_known_variants (i.e. non-empty ID)	var_num_known_snpeff
+bcbio_umccrise	Number_of_known_variants (i.e. non-empty ID)_percent	var_num_known_pct_snpeff
+bcbio_umccrise	Number_of_effects	effects_num_snpeff
+bcbio_umccrise	Genome_total_length	genome_tot_len_snpeff
+bcbio_umccrise	Genome_effective_length	genome_eff_len_snpeff
+bcbio_umccrise	Change_rate	change_rate_snpeff
+bcbio_umccrise	HIGH	high_snpeff
+bcbio_umccrise	HIGH_percent	high_pct_snpeff
+bcbio_umccrise	LOW	low_snpeff
+bcbio_umccrise	LOW_percent	low_pct_snpeff
+bcbio_umccrise	MODERATE	moderate_snpeff
+bcbio_umccrise	MODERATE_percent	moderate_pct_snpeff
+bcbio_umccrise	MODIFIER	modifier_snpeff
+bcbio_umccrise	MODIFIER_percent	modifier_pct_snpeff
+bcbio_umccrise	MISSENSE	missense_snpeff
+bcbio_umccrise	MISSENSE_percent	missense_pct_snpeff
+bcbio_umccrise	NONSENSE	nonsense_snpeff
+bcbio_umccrise	NONSENSE_percent	nonsense_pct_snpeff
+bcbio_umccrise	SILENT	silent_snpeff
+bcbio_umccrise	SILENT_percent	silent_pct_snpeff
+bcbio_umccrise	Missense_Silent_ratio	missense_silent_ratio_snpeff
+bcbio_umccrise	Type	type_snpeff
+bcbio_umccrise	3_prime_UTR_variant	utr3_snpeff1
+bcbio_umccrise	3_prime_UTR_variant_percent	utr3_pct_snpeff1
+bcbio_umccrise	5_prime_UTR_premature_start_codon_gain_variant	utr5_premature_start_codon_gain_snpeff
+bcbio_umccrise	5_prime_UTR_premature_start_codon_gain_variant_percent	utr5_premature_start_codon_gain_pct_snpeff
+bcbio_umccrise	5_prime_UTR_variant	utr5_snpeff1
+bcbio_umccrise	5_prime_UTR_variant_percent	utr5_pct_snpeff1
+bcbio_umccrise	5_prime_UTR_truncation	utr5_truncation_snpeff
+bcbio_umccrise	5_prime_UTR_truncation_percent	utr5_truncation_pct_snpeff
+bcbio_umccrise	exon_loss_variant	exon_loss_variant_snpeff
+bcbio_umccrise	exon_loss_variant_percent	exon_loss_variant_pct_snpeff
+bcbio_umccrise	TF_binding_site_variant	tf_binding_site_variant_snpeff
+bcbio_umccrise	TF_binding_site_variant_percent	tf_binding_site_variant_pct_snpeff
+bcbio_umccrise	conservative_inframe_deletion	conservative_inframe_deletion_snpeff
+bcbio_umccrise	conservative_inframe_deletion_percent	conservative_inframe_deletion_pct_snpeff
+bcbio_umccrise	conservative_inframe_insertion	conservative_inframe_insertion_snpeff
+bcbio_umccrise	conservative_inframe_insertion_percent	conservative_inframe_insertion_pct_snpeff
+bcbio_umccrise	disruptive_inframe_deletion	disruptive_inframe_deletion_snpeff
+bcbio_umccrise	disruptive_inframe_deletion_percent	disruptive_inframe_deletion_pct_snpeff
+bcbio_umccrise	disruptive_inframe_insertion	disruptive_inframe_insertion_snpeff
+bcbio_umccrise	disruptive_inframe_insertion_percent	disruptive_inframe_insertion_pct_snpeff
+bcbio_umccrise	downstream_gene_variant	downstream_gene_variant_snpeff
+bcbio_umccrise	downstream_gene_variant_percent	downstream_gene_variant_pct_snpeff
+bcbio_umccrise	frameshift_variant	frameshift_variant_snpeff
+bcbio_umccrise	frameshift_variant_percent	frameshift_variant_pct_snpeff
+bcbio_umccrise	initiator_codon_variant	initiator_codon_variant_snpeff
+bcbio_umccrise	initiator_codon_variant_percent	initiator_codon_variant_pct_snpeff
+bcbio_umccrise	intergenic_region	intergenic_region_snpeff
+bcbio_umccrise	intergenic_region_percent	intergenic_region_pct_snpeff
+bcbio_umccrise	intragenic_variant	intragenic_variant_snpeff
+bcbio_umccrise	intragenic_variant_percent	intragenic_variant_pct_snpeff
+bcbio_umccrise	intron_variant	intron_variant_snpeff
+bcbio_umccrise	intron_variant_percent	intron_variant_pct_snpeff
+bcbio_umccrise	missense_variant	missense_variant_snpeff
+bcbio_umccrise	missense_variant_percent	missense_variant_pct_snpeff
+bcbio_umccrise	non_coding_transcript_exon_variant	non_coding_transcript_exon_variant_snpeff
+bcbio_umccrise	non_coding_transcript_exon_variant_percent	non_coding_transcript_exon_variant_pct_snpeff
+bcbio_umccrise	non_coding_transcript_variant	non_coding_transcript_variant_snpeff
+bcbio_umccrise	non_coding_transcript_variant_percent	non_coding_transcript_variant_pct_snpeff
+bcbio_umccrise	protein_protein_contact	protein_protein_contact_snpeff
+bcbio_umccrise	protein_protein_contact_percent	protein_protein_contact_pct_snpeff
+bcbio_umccrise	sequence_feature	sequence_feature_snpeff
+bcbio_umccrise	sequence_feature_percent	sequence_feature_pct_snpeff
+bcbio_umccrise	splice_acceptor_variant	splice_acceptor_variant_snpeff
+bcbio_umccrise	splice_acceptor_variant_percent	splice_acceptor_variant_pct_snpeff
+bcbio_umccrise	splice_donor_variant	splice_donor_variant_snpeff
+bcbio_umccrise	splice_donor_variant_percent	splice_donor_variant_pct_snpeff
+bcbio_umccrise	splice_region_variant	splice_region_variant_snpeff
+bcbio_umccrise	splice_region_variant_percent	splice_region_variant_pct_snpeff
+bcbio_umccrise	start_lost	start_lost_snpeff
+bcbio_umccrise	start_lost_percent	start_lost_pct_snpeff
+bcbio_umccrise	stop_gained	stop_gained_snpeff
+bcbio_umccrise	stop_gained_percent	stop_gained_pct_snpeff
+bcbio_umccrise	stop_lost	stop_lost_snpeff
+bcbio_umccrise	stop_lost_percent	stop_lost_pct_snpeff
+bcbio_umccrise	structural_interaction_variant	structural_interaction_variant_snpeff
+bcbio_umccrise	structural_interaction_variant_percent	structural_interaction_variant_pct_snpeff
+bcbio_umccrise	synonymous_variant	synonymous_variant_snpeff
+bcbio_umccrise	synonymous_variant_percent	synonymous_variant_pct_snpeff
+bcbio_umccrise	upstream_gene_variant	upstream_gene_variant_snpeff
+bcbio_umccrise	upstream_gene_variant_percent	upstream_gene_variant_pct_snpeff
+bcbio_umccrise	DOWNSTREAM	downstream_snpeff
+bcbio_umccrise	DOWNSTREAM_percent	downstream_pct_snpeff
+bcbio_umccrise	EXON	exon_snpeff
+bcbio_umccrise	EXON_percent	exon_pct_snpeff
+bcbio_umccrise	INTERGENIC	intergenic_snpeff
+bcbio_umccrise	INTERGENIC_percent	intergenic_pct_snpeff
+bcbio_umccrise	INTRON	intron_snpeff
+bcbio_umccrise	INTRON_percent	intron_pct_snpeff
+bcbio_umccrise	MOTIF	motif_snpeff
+bcbio_umccrise	MOTIF_percent	motif_pct_snpeff
+bcbio_umccrise	SPLICE_SITE_ACCEPTOR	splice_site_acceptor_snpeff
+bcbio_umccrise	SPLICE_SITE_ACCEPTOR_percent	splice_site_acceptor_pct_snpeff
+bcbio_umccrise	SPLICE_SITE_DONOR	splice_site_donor_snpeff
+bcbio_umccrise	SPLICE_SITE_DONOR_percent	splice_site_donor_pct_snpeff
+bcbio_umccrise	SPLICE_SITE_REGION	splice_site_region_snpeff
+bcbio_umccrise	SPLICE_SITE_REGION_percent	splice_site_region_pct_snpeff
+bcbio_umccrise	TRANSCRIPT	transcript_snpeff
+bcbio_umccrise	TRANSCRIPT_percent	transcript_pct_snpeff
+bcbio_umccrise	UPSTREAM	upstream_snpeff
+bcbio_umccrise	UPSTREAM_percent	upstream_pct_snpeff
+bcbio_umccrise	UTR_3_PRIME	utr3_snpeff2
+bcbio_umccrise	UTR_3_PRIME_percent	utr3_pct_snpeff2
+bcbio_umccrise	UTR_5_PRIME	utr5_snpeff2
+bcbio_umccrise	UTR_5_PRIME_percent	utr5_pct_snpeff2
+bcbio_umccrise	Transitions	transitions_snpeff
+bcbio_umccrise	Transversions	transversions_snpeff
+bcbio_umccrise	Ts_Tv_ratio	ts_tv_ratio_snpeff
+bcbio_umccrise	Het	het_snpeff
+bcbio_umccrise	Hom	hom_snpeff
+bcbio_umccrise	Missing	missing_snpeff
+bcbio_umccrise	TFBS_ablation	tfbs_ablation_snpeff
+bcbio_umccrise	TFBS_ablation_percent	tfbs_ablation_pct_snpeff
+bcbio_umccrise	bidirectional_gene_fusion	bidirectional_gene_fusion_snpeff
+bcbio_umccrise	bidirectional_gene_fusion_percent	bidirectional_gene_fusion_pct_snpeff
+bcbio_umccrise	gene_fusion	gene_fusion_snpeff
+bcbio_umccrise	gene_fusion_percent	gene_fusion_pct_snpeff
+bcbio_umccrise	stop_retained_variant	stop_retained_variant_snpeff
+bcbio_umccrise	stop_retained_variant_percent	stop_retained_variant_pct_snpeff
+bcbio_umccrise	GENE	gene_snpeff
+bcbio_umccrise	GENE_percent	gene_pct_snpeff
+bcbio_wts	umccr_id	umccr_id
+bcbio_wts	umccr_workflow	umccr_workflow
+bcbio_wts	config_creation_date	date
+bcbio_wts	raw_total_sequences	raw_total_sequences_samtools
+bcbio_wts	filtered_sequences	filtered_sequences_samtools
+bcbio_wts	sequences	sequences_samtools
+bcbio_wts	is_sorted	is_sorted_samtools
+bcbio_wts	1st_fragments	1st_fragments_samtools
+bcbio_wts	last_fragments	last_fragments_samtools
+bcbio_wts	reads_mapped	reads_mapped_samtools
+bcbio_wts	reads_mapped_and_paired	reads_mapped_and_paired_samtools
+bcbio_wts	reads_unmapped	reads_unmapped_samtools
+bcbio_wts	reads_properly_paired	reads_properly_paired_samtools
+bcbio_wts	reads_paired	reads_paired_samtools
+bcbio_wts	reads_duplicated	reads_num_dupmarked_samtools
+bcbio_wts	reads_duplicated_percent	reads_num_dupmarked_pct_samtools
+bcbio_wts	reads_MQ0	reads_mq0_samtools
+bcbio_wts	reads_QC_failed	reads_qc_failed_samtools
+bcbio_wts	non-primary_alignments	non_primary_alignments_samtools
+bcbio_wts	total_length	total_length_samtools
+bcbio_wts	total_first_fragment_length	total_first_fragment_length_samtools
+bcbio_wts	total_last_fragment_length	total_last_fragment_length_samtools
+bcbio_wts	bases_mapped	bases_mapped_samtools
+bcbio_wts	bases_mapped_(cigar)	bases_mapped_cigar_samtools
+bcbio_wts	bases_trimmed	bases_trimmed_samtools
+bcbio_wts	bases_duplicated	bases_duplicated_samtools
+bcbio_wts	mismatches	mismatches_samtools
+bcbio_wts	error_rate	error_rate_samtools
+bcbio_wts	average_length	avg_length_samtools
+bcbio_wts	average_first_fragment_length	avg_first_fragment_length_samtools
+bcbio_wts	average_last_fragment_length	avg_last_fragment_length_samtools
+bcbio_wts	maximum_length	max_length_samtools
+bcbio_wts	maximum_first_fragment_length	max_first_fragment_length_samtools
+bcbio_wts	maximum_last_fragment_length	max_last_fragment_length_samtools
+bcbio_wts	average_quality	avg_quality_samtools
+bcbio_wts	insert_size_average	insert_size_avg_samtools
+bcbio_wts	insert_size_standard_deviation	insert_size_stddev_samtools
+bcbio_wts	inward_oriented_pairs	inward_oriented_pairs_samtools
+bcbio_wts	outward_oriented_pairs	outward_oriented_pairs_samtools
+bcbio_wts	pairs_with_other_orientation	pairs_with_other_orientation_samtools
+bcbio_wts	pairs_on_different_chromosomes	pairs_on_different_chromosomes_samtools
+bcbio_wts	percentage_of_properly_paired_reads_(%)	reads_properly_paired_pct_round_samtools
+bcbio_wts	reads_properly_paired_percent	reads_properly_paired_pct_samtools
+bcbio_wts	reads_mapped_percent	reads_mapped_pct_samtools
+bcbio_wts	reads_mapped_and_paired_percent	reads_mapped_and_paired_pct_samtools
+bcbio_wts	reads_unmapped_percent	reads_unmapped_pct_samtools
+bcbio_wts	reads_paired_percent	reads_paired_pct_samtools
+bcbio_wts	reads_MQ0_percent	reads_mq0_pct_samtools
+bcbio_wts	reads_QC_failed_percent	reads_qc_failed_pct_samtools
+bcbio_wts	%GC	gc_pct_bcbio
+bcbio_wts	Average_insert_size	insert_size_avg_bcbio
+bcbio_wts	Average_read_length	read_len_avg_bcbio
+bcbio_wts	Duplicates	reads_num_dupmarked_bcbio
+bcbio_wts	Duplicates_pct	reads_num_dupmarked_pct_bcbio
+bcbio_wts	Mapped_paired_reads	reads_paired_bcbio
+bcbio_wts	Mapped_reads	reads_mapped_bcbio
+bcbio_wts	Sequences_flagged_as_poor_quality	sequences_poor_quality_bcbio
+bcbio_wts	Total_reads	reads_tot_bcbio
+bcbio_wts	percent_gc	gc_pct_fastqc
+bcbio_wts	avg_sequence_length	avg_sequence_length_fastqc
+bcbio_wts	total_sequences	sequences_tot_fastqc
+bcbio_wts	percent_duplicates	reads_num_dupmarked_pct_fastqc
+bcbio_wts	percent_fails	fails_pct_fastqc
+bcbio_wts	rRNA	rrna_qualimap
+bcbio_wts	rRNA_rate	rrna_rate_qualimap
+bcbio_wts	5'-3'_bias	bias_5_3_qualimap1
+bcbio_wts	5_3_bias	bias_5_3_qualimap2
+bcbio_wts	Intergenic_Rate	intergenic_rate_qualimap
+bcbio_wts	Intronic_Rate	intronic_rate_qualimap
+bcbio_wts	Exonic_Rate	exonic_rate_qualimap
+bcbio_wts	Duplication_Rate_of_Mapped	mapped_dup_rate_qualimap
+bcbio_wts	total_reads	total_reads_star
+bcbio_wts	avg_input_read_length	avg_input_read_length_star
+bcbio_wts	uniquely_mapped	uniquely_mapped_star
+bcbio_wts	uniquely_mapped_percent	uniquely_mapped_percent_star
+bcbio_wts	avg_mapped_read_length	avg_mapped_read_length_star
+bcbio_wts	num_splices	num_splices_star
+bcbio_wts	num_annotated_splices	num_annotated_splices_star
+bcbio_wts	num_GTAG_splices	num_gtag_splices_star
+bcbio_wts	num_GCAG_splices	num_gcag_splices_star
+bcbio_wts	num_ATAC_splices	num_atac_splices_star
+bcbio_wts	num_noncanonical_splices	num_noncanonical_splices_star
+bcbio_wts	mismatch_rate	mismatch_rate_star
+bcbio_wts	deletion_rate	deletion_rate_star
+bcbio_wts	deletion_length	deletion_length_star
+bcbio_wts	insertion_rate	insertion_rate_star
+bcbio_wts	insertion_length	insertion_length_star
+bcbio_wts	multimapped	multimapped_star
+bcbio_wts	multimapped_percent	multimapped_percent_star
+bcbio_wts	multimapped_toomany	multimapped_toomany_star
+bcbio_wts	multimapped_toomany_percent	multimapped_toomany_percent_star
+bcbio_wts	unmapped_mismatches_percent	unmapped_mismatches_percent_star
+bcbio_wts	unmapped_tooshort_percent	unmapped_tooshort_percent_star
+bcbio_wts	unmapped_other_percent	unmapped_other_percent_star
+bcbio_wts	unmapped_mismatches	unmapped_mismatches_star
+bcbio_wts	unmapped_tooshort	unmapped_tooshort_star
+bcbio_wts	unmapped_other	unmapped_other_star
+bcbio_wts	reads_aligned	reads_aligned_qualimap
+bcbio_wgs	umccr_id	umccr_id
+bcbio_wgs	umccr_workflow	umccr_workflow
+bcbio_wgs	config_creation_date	date
+bcbio_wgs	raw_total_sequences	raw_total_sequences_samtools
+bcbio_wgs	filtered_sequences	filtered_sequences_samtools
+bcbio_wgs	sequences	sequences_samtools
+bcbio_wgs	is_sorted	is_sorted_samtools
+bcbio_wgs	1st_fragments	1st_fragments_samtools
+bcbio_wgs	last_fragments	last_fragments_samtools
+bcbio_wgs	reads_mapped	reads_mapped_samtools
+bcbio_wgs	reads_mapped_and_paired	reads_mapped_and_paired_samtools
+bcbio_wgs	reads_unmapped	reads_unmapped_samtools
+bcbio_wgs	reads_properly_paired	reads_properly_paired_samtools
+bcbio_wgs	reads_paired	reads_paired_samtools
+bcbio_wgs	reads_duplicated	reads_num_dupmarked_samtools
+bcbio_wgs	reads_duplicated_percent	reads_num_dupmarked_pct_samtools
+bcbio_wgs	reads_MQ0	reads_mq0_samtools
+bcbio_wgs	reads_QC_failed	reads_qc_failed_samtools
+bcbio_wgs	non-primary_alignments	non_primary_alignments_samtools
+bcbio_wgs	total_length	total_length_samtools
+bcbio_wgs	total_first_fragment_length	total_first_fragment_length_samtools
+bcbio_wgs	total_last_fragment_length	total_last_fragment_length_samtools
+bcbio_wgs	bases_mapped	bases_mapped_samtools
+bcbio_wgs	bases_mapped_(cigar)	bases_mapped_cigar_samtools
+bcbio_wgs	bases_trimmed	bases_trimmed_samtools
+bcbio_wgs	bases_duplicated	bases_duplicated_samtools
+bcbio_wgs	mismatches	mismatches_samtools
+bcbio_wgs	error_rate	error_rate_samtools
+bcbio_wgs	average_length	avg_length_samtools
+bcbio_wgs	average_first_fragment_length	avg_first_fragment_length_samtools
+bcbio_wgs	average_last_fragment_length	avg_last_fragment_length_samtools
+bcbio_wgs	maximum_length	max_length_samtools
+bcbio_wgs	maximum_first_fragment_length	max_first_fragment_length_samtools
+bcbio_wgs	maximum_last_fragment_length	max_last_fragment_length_samtools
+bcbio_wgs	average_quality	avg_quality_samtools
+bcbio_wgs	insert_size_average	insert_size_avg_samtools
+bcbio_wgs	insert_size_standard_deviation	insert_size_stddev_samtools
+bcbio_wgs	inward_oriented_pairs	inward_oriented_pairs_samtools
+bcbio_wgs	outward_oriented_pairs	outward_oriented_pairs_samtools
+bcbio_wgs	pairs_with_other_orientation	pairs_with_other_orientation_samtools
+bcbio_wgs	pairs_on_different_chromosomes	pairs_on_different_chromosomes_samtools
+bcbio_wgs	percentage_of_properly_paired_reads_(%)	reads_properly_paired_pct_round_samtools
+bcbio_wgs	reads_properly_paired_percent	reads_properly_paired_pct_samtools
+bcbio_wgs	reads_mapped_percent	reads_mapped_pct_samtools
+bcbio_wgs	reads_mapped_and_paired_percent	reads_mapped_and_paired_pct_samtools
+bcbio_wgs	reads_unmapped_percent	reads_unmapped_pct_samtools
+bcbio_wgs	reads_paired_percent	reads_paired_pct_samtools
+bcbio_wgs	reads_MQ0_percent	reads_mq0_pct_samtools
+bcbio_wgs	reads_QC_failed_percent	reads_qc_failed_pct_samtools
+bcbio_wgs	%GC	gc_pct_bcbio
+bcbio_wgs	Average_insert_size	insert_size_avg_bcbio
+bcbio_wgs	Average_read_length	read_len_avg_bcbio
+bcbio_wgs	Avg_coverage	cov_avg_bcbio
+bcbio_wgs	Duplicates	reads_num_dupmarked_bcbio
+bcbio_wgs	Duplicates_pct	reads_num_dupmarked_pct_bcbio
+bcbio_wgs	Mapped_paired_reads	reads_paired_bcbio
+bcbio_wgs	Mapped_reads	reads_mapped_bcbio
+bcbio_wgs	Mapped_reads_pct	reads_mapped_pct_bcbio
+bcbio_wgs	Mapped_unique_reads	reads_num_uniq_mapped_bcbio
+bcbio_wgs	Offtarget_pct	reads_offtarget_pct_bcbio
+bcbio_wgs	Ontarget_pct	reads_ontarget_pct_bcbio
+bcbio_wgs	Ontarget_unique_reads	reads_ontarget_unique_bcbio
+bcbio_wgs	Sequences_flagged_as_poor_quality	sequences_poor_quality_bcbio
+bcbio_wgs	Total_reads	reads_tot_bcbio
+bcbio_wgs	Usable_pct	reads_usable_pct_bcbio
+bcbio_wgs	RiP_pct	reads_rip_pct_bcbio
+bcbio_wgs	family_id	family_id_peddy
+bcbio_wgs	paternal_id	paternal_id_peddy
+bcbio_wgs	maternal_id	maternal_id_peddy
+bcbio_wgs	sex	sex_peddy
+bcbio_wgs	phenotype	phenotype_peddy
+bcbio_wgs	Ethnicity	ethnicity_peddy
+bcbio_wgs	duplicates	duplicates_peddy
+bcbio_wgs	het_call_rate	het_call_rate_peddy
+bcbio_wgs	het_ratio	het_ratio_peddy
+bcbio_wgs	het_mean_depth	het_mean_depth_peddy
+bcbio_wgs	het_idr_baf	het_idr_baf_peddy
+bcbio_wgs	ancestry-prediction	ancestry_prediction_peddy
+bcbio_wgs	PC1	pc1_peddy
+bcbio_wgs	PC2	pc2_peddy
+bcbio_wgs	PC3	pc3_peddy
+bcbio_wgs	sex_het_ratio	sex_het_ratio_peddy
+bcbio_wgs	sex_fixed	sex_fixed_peddy
+bcbio_wgs	depth_outlier_het_check	depth_outlier_het_check_peddy
+bcbio_wgs	het_count_het_check	het_count_het_check_peddy
+bcbio_wgs	het_ratio_het_check	het_ratio_het_check_peddy
+bcbio_wgs	idr_baf_het_check	idr_baf_het_check_peddy
+bcbio_wgs	mean_depth_het_check	mean_depth_het_check_peddy
+bcbio_wgs	median_depth_het_check	median_depth_het_check_peddy
+bcbio_wgs	p10_het_check	p10_het_check_peddy
+bcbio_wgs	p90_het_check	p90_het_check_peddy
+bcbio_wgs	sampled_sites_het_check	sampled_sites_het_check_peddy
+bcbio_wgs	call_rate_het_check	call_rate_het_check_peddy
+bcbio_wgs	PC1_het_check	pc1_het_check_peddy
+bcbio_wgs	PC2_het_check	pc2_het_check_peddy
+bcbio_wgs	PC3_het_check	pc3_het_check_peddy
+bcbio_wgs	PC4_het_check	pc4_het_check_peddy
+bcbio_wgs	ancestry-prediction_het_check	ancestry_prediction_het_check_peddy
+bcbio_wgs	ancestry-prob_het_check	ancestry_prob_het_check_peddy
+bcbio_wgs	error_sex_check	error_sex_check_peddy
+bcbio_wgs	het_count_sex_check	het_count_sex_check_peddy
+bcbio_wgs	het_ratio_sex_check	het_ratio_sex_check_peddy
+bcbio_wgs	hom_alt_count_sex_check	hom_alt_count_sex_check_peddy
+bcbio_wgs	hom_ref_count_sex_check	hom_ref_count_sex_check_peddy
+bcbio_wgs	ped_sex_sex_check	ped_sex_sex_check_peddy
+bcbio_wgs	predicted_sex_sex_check	predicted_sex_sex_check_peddy
+bcbio_wgs	percent_gc	gc_pct_fastqc
+bcbio_wgs	avg_sequence_length	avg_sequence_length_fastqc
+bcbio_wgs	total_sequences	sequences_tot_fastqc
+bcbio_wgs	percent_duplicates	reads_num_dupmarked_pct_fastqc
+bcbio_wgs	percent_fails	fails_pct_fastqc
+bcbio_wgs	number_of_samples	num_samples_bcftools
+bcbio_wgs	number_of_records	num_records_bcftools
+bcbio_wgs	number_of_no-ALTs	num_noalts_bcftools
+bcbio_wgs	number_of_SNPs	num_snps_bcftools
+bcbio_wgs	number_of_MNPs	num_mnps_bcftools
+bcbio_wgs	number_of_indels	num_indels_bcftools
+bcbio_wgs	number_of_others	num_others_bcftools
+bcbio_wgs	number_of_multiallelic_sites	num_multiallelic_sites_bcftools
+bcbio_wgs	number_of_multiallelic_SNP_sites	num_multiallelic_snp_sites_bcftools
+bcbio_wgs	ts	ts_bcftools
+bcbio_wgs	tv	tv_bcftools
+bcbio_wgs	tstv	tstv_bcftools
+bcbio_wgs	ts_1st_ALT	ts_1st_alt_bcftools
+bcbio_wgs	tv_1st_ALT	tv_1st_alt_bcftools
+bcbio_wgs	tstv_1st_ALT	tstv_1st_alt_bcftools
+bcbio_wgs	substitution_type_A>C	subst_type_a_c_bcftools
+bcbio_wgs	substitution_type_A>G	subst_type_a_g_bcftools
+bcbio_wgs	substitution_type_A>T	subst_type_a_t_bcftools
+bcbio_wgs	substitution_type_C>A	subst_type_c_a_bcftools
+bcbio_wgs	substitution_type_C>G	subst_type_c_g_bcftools
+bcbio_wgs	substitution_type_C>T	subst_type_c_t_bcftools
+bcbio_wgs	substitution_type_G>A	subst_type_g_a_bcftools
+bcbio_wgs	substitution_type_G>C	subst_type_g_c_bcftools
+bcbio_wgs	substitution_type_G>T	subst_type_g_t_bcftools
+bcbio_wgs	substitution_type_T>A	subst_type_t_a_bcftools
+bcbio_wgs	substitution_type_T>C	subst_type_t_c_bcftools
+bcbio_wgs	substitution_type_T>G	subst_type_t_g_bcftools
+bcbio_wgs	variations_hom	variations_hom_bcftools
+bcbio_wgs	variations_het	variations_het_bcftools
+bcbio_wgs	shared_hets_ped_check	shared_hets_ped_check_peddy
+bcbio_wgs	hets_a_ped_check	hets_a_ped_check_peddy
+bcbio_wgs	ibs2_ped_check	ibs2_ped_check_peddy
+bcbio_wgs	rel_ped_check	rel_ped_check_peddy
+bcbio_wgs	hets_b_ped_check	hets_b_ped_check_peddy
+bcbio_wgs	ibs0_ped_check	ibs0_ped_check_peddy
+bcbio_wgs	n_ped_check	n_ped_check_peddy
+bcbio_wgs	pedigree_parents_ped_check	pedigree_parents_ped_check_peddy
+bcbio_wgs	pedigree_relatedness_ped_check	pedigree_relatedness_ped_check_peddy
+bcbio_wgs	predicted_parents_ped_check	predicted_parents_ped_check_peddy
+bcbio_wgs	parent_error_ped_check	parent_error_ped_check_peddy
+bcbio_wgs	sample_duplication_error_ped_check	sample_duplication_error_ped_check_peddy
+bcbio_wgs	rel_difference_ped_check	rel_difference_ped_check_peddy
