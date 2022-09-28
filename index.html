@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.4.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.5.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,22 +114,25 @@
 <div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">dracarys_cli</span><span class="op">=</span><span class="va">$(</span><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'x = system.file("cli", package = "dracarys"); cat(x, "\n")'</span> <span class="kw">|</span> <span class="fu">xargs</span><span class="va">)</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="st">"</span><span class="va">${dracarys_cli}</span><span class="st">:</span><span class="va">${PATH}</span><span class="st">"</span></span></code></pre></div>
 <div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span> dracarys.R <span class="sc">--</span>version</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>dracarys.R <span class="dv">0</span>.<span class="fl">4.0</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>dracarys.R <span class="dv">0</span>.<span class="fl">5.0</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#------- Tidy -------#</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span> dracarys.R tidy <span class="sc">--</span>help</span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>usage<span class="sc">:</span> dracarys.R tidy [<span class="sc">-</span>h] <span class="sc">-</span>j JSON <span class="sc">-</span>o OUTDIR <span class="sc">-</span>p PREFIX [<span class="sc">-</span>q]</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>optional arguments<span class="sc">:</span></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>h, <span class="sc">--</span>help            show this help message and exit</span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>j JSON, <span class="sc">--</span>json JSON  💩 Path to <span class="st">'multiqc_data.json'</span>.</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>o OUTDIR, <span class="sc">--</span>outdir OUTDIR</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                        🎁 Output results to this directory.</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>p PREFIX, <span class="sc">--</span>prefix PREFIX</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>                        ✨ Prefix output files with this string.</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>q, <span class="sc">--</span>quiet           😴 Shush all the logs.</span></code></pre></div>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                       [<span class="sc">-</span>f {tsv,parquet,both}]</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>optional arguments<span class="sc">:</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>h, <span class="sc">--</span>help            show this help message and exit</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>j JSON, <span class="sc">--</span>json JSON  💩 Path to <span class="st">'multiqc_data.json'</span>.</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>o OUTDIR, <span class="sc">--</span>outdir OUTDIR</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                        🎁 Output results to this directory.</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>p PREFIX, <span class="sc">--</span>prefix PREFIX</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                        ✨ Prefix output files with this string.</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>q, <span class="sc">--</span>quiet           😴 Shush all the logs.</span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>f {tsv,parquet,both}, <span class="sc">--</span>format {tsv,parquet,both}</span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>                        🍦 Format of <span class="fu">output</span> (default<span class="sc">:</span> tsv).</span></code></pre></div>
 </div>
 </div>
 
@@ -163,6 +166,7 @@
 <ul class="list-unstyled">
 <li>
 <a href="https://github.com/pdiakumis" class="external-link">Peter Diakumis</a> <br><small class="roles"> Author, maintainer </small> <a href="https://orcid.org/0000-0002-7502-7545" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
+<li>Victor San Kho Lin <br><small class="roles"> Author, contributor </small> <a href="https://orcid.org/0000-0002-3940-4729" target="orcid.widget" aria-label="ORCID" class="external-link"><span class="fab fa-orcid orcid" aria-hidden="true"></span></a> </li>
 </ul>
 </div>
 
@@ -179,7 +183,7 @@
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by <a href="https://github.com/pdiakumis" class="external-link">Peter Diakumis</a>.</p>
+<p>Developed by <a href="https://github.com/pdiakumis" class="external-link">Peter Diakumis</a>, Victor San Kho Lin.</p>
 </div>
 
 <div class="pkgdown-footer-right">
