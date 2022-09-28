@@ -1,3 +1,10 @@
+# dracarys 0.5.0 (2022-09-28)
+
+- MultiQC: update column mappings ([pr15](https://github.com/umccr/dracarys/pull/15), [pr16](https://github.com/umccr/dracarys/pull/16)).
+  - move map to separate TSV
+- CLI: add option for output format (tsv, parquet, or both) ([pr17](https://github.com/umccr/dracarys/pull/17)).
+- contributors: @victorskl
+
 # dracarys 0.4.0 (2022-09-12)
 
 - :star: support for DRAGEN TSO500 ctdna output ([pr14](https://github.com/umccr/dracarys/pull/14)).

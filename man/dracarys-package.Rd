@@ -20,5 +20,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Peter Diakumis \email{peterdiakumis@gmail.com} (\href{https://orcid.org/0000-0002-7502-7545}{ORCID})
 
+Authors:
+\itemize{
+  \item Victor San Kho Lin (\href{https://orcid.org/0000-0002-3940-4729}{ORCID}) [contributor]
+}
+
 }
 \keyword{internal}
