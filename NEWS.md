@@ -2,7 +2,7 @@
 
 - MultiQC: update column mappings ([pr15](https://github.com/umccr/dracarys/pull/15), [pr16](https://github.com/umccr/dracarys/pull/16)).
   - move map to separate TSV
-- CLI: add option for output format (tsv, parquet, or both) ([pr17](https://github.com/umccr/dracarys/pull/17)).
+- CLI: add option for output format (tsv, parquet, or both) ([pr18](https://github.com/umccr/dracarys/pull/18)).
 - contributors: [@victorskl](https://github.com/victorskl)
 
 # dracarys 0.4.0 (2022-09-12)
