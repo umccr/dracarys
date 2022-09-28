@@ -4,7 +4,7 @@
 \alias{dracarys_tidy_multiqc}
 \title{Dracarys Tidy MultiQC}
 \usage{
-dracarys_tidy_multiqc(json, prefix, outdir)
+dracarys_tidy_multiqc(json, prefix, outdir, out_format = "tsv")
 }
 \arguments{
 \item{json}{Path to \code{multiqc_data.json}.}
@@ -12,9 +12,11 @@ dracarys_tidy_multiqc(json, prefix, outdir)
 \item{prefix}{Prefix for output files.}
 
 \item{outdir}{Path to output results.}
+
+\item{out_format}{Format of output (tsv, parquet, both) (def: tsv).}
 }
 \value{
-Generates TSV and Parquet representations of the input
+Generates TSV and/or Parquet representations of the input
 MultiQC JSON file.
 }
 \description{

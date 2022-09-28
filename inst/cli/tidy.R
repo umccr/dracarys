@@ -4,6 +4,7 @@ tidy_add_args <- function(subp) {
   tidy$add_argument("-o", "--outdir", help = glue("{emoji('gift')} Output results to this directory."), required = TRUE)
   tidy$add_argument("-p", "--prefix", help = glue("{emoji('sparkles')} Prefix output files with this string."), required = TRUE)
   tidy$add_argument("-q", "--quiet", help = glue("{emoji('sleeping')} Shush all the logs."), action = "store_true")
+  tidy$add_argument("-f", "--format", help = glue("{emoji('icecream')} Format of output (default: %(default)s)."), default = "tsv", choices = c("tsv", "parquet", "both"))
 }
 
 tidy_parse_args <- function(args) {
@@ -17,11 +18,12 @@ tidy_parse_args <- function(args) {
   mkdir(args$outdir)
   outdir <- normalizePath(args$outdir)
   quiet <- args$quiet
+  out_format <- args$format
 
 
   if (quiet) {
-    suppressMessages(dracarys_tidy_multiqc(json, prefix, outdir))
+    suppressMessages(dracarys_tidy_multiqc(json, prefix, outdir, out_format))
   } else {
-    dracarys_tidy_multiqc(json, prefix, outdir)
+    dracarys_tidy_multiqc(json, prefix, outdir, out_format)
   }
 }

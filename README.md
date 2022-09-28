@@ -61,6 +61,7 @@ export PATH="${dracarys_cli}:${PATH}"
 
     $ dracarys.R tidy --help
     usage: dracarys.R tidy [-h] -j JSON -o OUTDIR -p PREFIX [-q]
+                           [-f {tsv,parquet,both}]
 
     optional arguments:
       -h, --help            show this help message and exit
@@ -70,3 +71,5 @@ export PATH="${dracarys_cli}:${PATH}"
       -p PREFIX, --prefix PREFIX
                             ✨ Prefix output files with this string.
       -q, --quiet           😴 Shush all the logs.
+      -f {tsv,parquet,both}, --format {tsv,parquet,both}
+                            🍦 Format of output (default: tsv).

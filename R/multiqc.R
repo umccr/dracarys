@@ -4,10 +4,16 @@
 #' @param json Path to `multiqc_data.json`.
 #' @param prefix Prefix for output files.
 #' @param outdir Path to output results.
-#' @return Generates TSV and Parquet representations of the input
+#' @param out_format Format of output (tsv, parquet, both) (def: tsv).
+#' @return Generates TSV and/or Parquet representations of the input
 #' MultiQC JSON file.
 #' @export
-dracarys_tidy_multiqc <- function(json, prefix, outdir) {
+dracarys_tidy_multiqc <- function(json, prefix, outdir, out_format = "tsv") {
+  format_choices <- c("tsv", "parquet", "both")
+  assertthat::assert_that(
+    length(out_format) == 1,
+    out_format %in% format_choices
+  )
   e <- emojifont::emoji
   cli::cli_div(theme = list(
     span.file = list(color = "lightblue"),
@@ -16,11 +22,14 @@ dracarys_tidy_multiqc <- function(json, prefix, outdir) {
   cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying {.file {json}} {e('fire')}")
   # main dracarys function
   d1 <- multiqc_tidy_json(json)
-  ## d2 <- select_column_subset_alignmentqc(d1)
-  tsv_out <- file.path(outdir, glue::glue("{prefix}.tsv"))
-  parquet_out <- file.path(outdir, glue::glue("{prefix}.parquet"))
-  readr::write_tsv(d1, tsv_out)
-  arrow::write_parquet(d1, parquet_out)
+  if (out_format %in% c("tsv", "both")) {
+    tsv_out <- file.path(outdir, glue::glue("{prefix}.tsv"))
+    readr::write_tsv(d1, tsv_out)
+  }
+  if (out_format %in% c("parquet", "both")) {
+    parquet_out <- file.path(outdir, glue::glue("{prefix}.parquet"))
+    arrow::write_parquet(d1, parquet_out)
+  }
 
   cli::cli_alert_success("{date_log()} {e('rocket')} End tidying {.file {json}} {e('comet')}!")
   cli::cli_alert_info("{date_log()} {e('tada')} Path to output directory with results for {.emph {prefix}}: {.file {outdir}}")
