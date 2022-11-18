@@ -46,7 +46,7 @@ ContigMeanCovFile <- R6::R6Class("ContigMeanCovFile", inherit = File, public = l
         }
       ) |>
       dplyr::mutate(label = tidyselect::all_of(label)) |>
-      dplyr::select(.data$label, .data$chrom, .data$n_bases, .data$coverage)
+      dplyr::select("label", "chrom", "n_bases", "coverage")
   },
 
   #' @description Plots the `wgs_contig_mean_cov_<phenotype>.csv` files.
@@ -70,10 +70,10 @@ ContigMeanCovFile <- R6::R6Class("ContigMeanCovFile", inherit = File, public = l
 
     main_panel <- cov_contig |>
       dplyr::filter(.data$panel == "main") |>
-      dplyr::select(.data$label, .data$chrom, .data$coverage, .data$panel)
+      dplyr::select("label", "chrom", "coverage", "panel")
     alt_panel <- cov_contig |>
       dplyr::filter(.data$panel == "alt") |>
-      dplyr::select(.data$label, .data$chrom, .data$coverage, .data$panel)
+      dplyr::select("label", "chrom", "coverage", "panel")
 
     top_alt <- alt_panel |>
       dplyr::group_by(.data$label) |>
@@ -95,7 +95,7 @@ ContigMeanCovFile <- R6::R6Class("ContigMeanCovFile", inherit = File, public = l
       ) |>
       dplyr::distinct() |>
       dplyr::ungroup() |>
-      dplyr::select(.data$label, .data$chrom, .data$coverage, .data$panel)
+      dplyr::select("label", "chrom", "coverage", "panel")
 
     chrom_fac_levels <- c(main_chrom, "chrM", "MT", top_alt[!top_alt %in% c("chrM", "MT")], "OTHER")
     d <- dplyr::bind_rows(main_panel, alt_panel_final) |>
@@ -201,13 +201,13 @@ CoverageMetricsFile <- R6::R6Class("CoverageMetricsFile", inherit = File, public
           TRUE ~ "FOO"
         )
       ) |>
-      dplyr::select(.data$label, .data$var, .data$var_abbrev, pct = .data$value)
+      dplyr::select("label", "var", "var_abbrev", pct = "value")
 
     cnt <- d |>
       dplyr::filter(!grepl("PCT", .data$var)) |>
       tidyr::separate(.data$value, into = c("count", "pct"), sep = ",", fill = "right", convert = TRUE) |>
       dplyr::mutate(var_abbrev = dplyr::recode(.data$var, !!!abbrev_nm)) |>
-      dplyr::select(.data$label, .data$var, .data$var_abbrev, .data$count, .data$pct)
+      dplyr::select("label", "var", "var_abbrev", "count", "pct")
 
     dplyr::bind_rows(pct, cnt)
   }
@@ -259,7 +259,7 @@ FineHistFile <- R6::R6Class("FineHistFile", inherit = File, public = list(
         Depth = ifelse(grepl("+", .data$Depth), sub("(\\d*)\\+", "\\1", .data$Depth), .data$Depth),
         Depth = as.integer(.data$Depth)
       ) |>
-      dplyr::select(.data$label, depth = .data$Depth, n_loci = .data$Overall)
+      dplyr::select("label", depth = "Depth", n_loci = "Overall")
   },
 
   #' @description Plots the `wgs_fine_hist_<phenotype>.csv` files.
@@ -331,7 +331,7 @@ FragmentLengthHistFile <- R6::R6Class("FragmentLengthHistFile", inherit = File, 
       tidyr::fill(.data$sample, .direction = "down") |>
       dplyr::filter(!grepl("#Sample: |FragmentLength,Count", .data$value)) |>
       tidyr::separate(.data$value, c("fragmentLength", "count"), convert = TRUE) |>
-      dplyr::select(-.data$name)
+      dplyr::select(-"name")
   },
 
 
@@ -475,8 +475,8 @@ MappingMetricsFile <- R6::R6Class("MappingMetricsFile", inherit = File, public =
         var_abbrev = dplyr::recode(.data$var, !!!abbrev_nm)
       ) |>
       dplyr::select(
-        .data$category, .data$Phenotype, .data$RG,
-        .data$var, .data$var_abbrev, .data$count, .data$pct
+        "category", "Phenotype", "RG",
+        "var", "var_abbrev", "count", "pct"
       )
   }
 ))
@@ -514,7 +514,7 @@ PloidyEstimationMetricsFile <- R6::R6Class("PloidyEstimationMetricsFile", inheri
       tibble::as_tibble_col(column_name = "value") |>
       tidyr::separate(.data$value, into = c("dummy1", "dummy2", "var", "value"), sep = ",", convert = FALSE) |>
       dplyr::mutate(label = tidyselect::all_of(label)) |>
-      dplyr::select(.data$label, .data$var, .data$value)
+      dplyr::select("label", "var", "value")
   }
 ))
 
@@ -592,7 +592,7 @@ TimeMetricsFile <- R6::R6Class("TimeMetricsFile", inherit = File, public = list(
         Label = label,
         Time = substr(.data$time_hrs, 1, 5)
       ) |>
-      dplyr::select(.data$Label, .data$Step, .data$Time)
+      dplyr::select("Label", "Step", "Time")
   }
 ))
 
@@ -680,6 +680,6 @@ VCMetricsFile <- R6::R6Class("VCMetricsFile", inherit = File, public = list(
           TRUE ~ "unknown"
         )
       ) |>
-      dplyr::select(.data$category, .data$sample, .data$var, .data$count, .data$pct)
+      dplyr::select("category", "sample", "var", "count", "pct")
   }
 ))

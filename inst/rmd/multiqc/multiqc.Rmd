@@ -67,6 +67,6 @@ x |>
   }) |>
   dplyr::arrange(cols, rows, fname) |>
   dplyr::mutate(n = dplyr::row_number()) |>
-  dplyr::select(n, dplyr::everything()) |>
+  dplyr::select("n", dplyr::everything()) |>
   knitr::kable()
 ```

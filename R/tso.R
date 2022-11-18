@@ -38,7 +38,7 @@ TsoCombinedVariantOutputFile <- R6::R6Class("TsoCombinedVariantOutputFile",
               col_types = readr::cols(.default = "c"),
               col_names = c("variable", "value", "empty")
             ) |>
-            dplyr::select(.data$variable, .data$value)
+            dplyr::select("variable", "value")
         } else if (section %in% c("Copy Number Variants", "DNA Fusions", "Small Variants")) {
           if (length(chunk) > 2) {
             d <- s |>
@@ -65,7 +65,7 @@ TsoCombinedVariantOutputFile <- R6::R6Class("TsoCombinedVariantOutputFile",
         dplyr::mutate(start = .data$start + 1) |>
         dplyr::rowwise() |>
         dplyr::mutate(d = list(.read_section(.data$nm, .data$start, .data$end, lines))) |>
-        dplyr::select(nm, d)
+        dplyr::select("nm", "d")
 
       tsv_chunks[["d"]] |>
         purrr::set_names(tsv_chunks[["nm"]])
@@ -232,7 +232,7 @@ TsoTargetRegionCoverageFile <- R6::R6Class("TsoTargetRegionCoverageFile",
           pct = as.numeric(.data$Percentage)
         ) |>
         dplyr::filter(.data$pct >= min_pct) |>
-        dplyr::select(.data$dp, .data$pct)
+        dplyr::select("dp", "pct")
       d |>
         ggplot2::ggplot(aes(x = dp, y = pct, label = dp)) +
         ggplot2::geom_point() +
@@ -451,7 +451,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inhe
     smet_em <- smet[["expandedMetrics"]][[1]][["metrics"]] |>
       purrr::map(tibble::as_tibble_row) |>
       dplyr::bind_rows() |>
-      dplyr::select(.data$name, .data$value) |>
+      dplyr::select("name", "value") |>
       tidyr::pivot_wider(names_from = .data$name, values_from = .data$value)
 
     qc2tib <- function(el) {

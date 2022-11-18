@@ -62,7 +62,7 @@ multiqc_tidy_json <- function(j) {
       config_creation_date = cdate,
       umccr_workflow = workflow
     ) |>
-    dplyr::select(.data$umccr_id, .data$umccr_workflow, .data$config_creation_date, dplyr::everything())
+    dplyr::select("umccr_id", "umccr_workflow", "config_creation_date", dplyr::everything())
 
   if (workflow == "dragen_transcriptome") {
     # discard Ref_X control samples

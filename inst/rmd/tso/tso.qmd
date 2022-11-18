@@ -136,7 +136,7 @@ res$sample_metrics_expanded |>
 
 ```{r fusions}
 fus |>
-  dplyr::select(-Contig) |>
+  dplyr::select(-"Contig") |>
   dt_view()
 ```
 
@@ -173,7 +173,7 @@ combinedvars[["Small Variants"]] |>
 
 ```{r cv_cnvs}
 combinedvars[["Copy Number Variants"]] |>
-  # dplyr::select(Gene, "Fold Change") |>
+  # dplyr::select("Gene", "Fold Change") |>
   dt_view()
 ```
 
@@ -222,8 +222,8 @@ trace |>
                 IncludedInTMBNumerator = as.logical(IncludedInTMBNumerator)
   ) |>
   dplyr::select(
-    chrom = Chromosome, pos = Position, ref = RefCall, alt = AltCall, VAF,
-    dp = Depth, GermlineFilterProxi, IncludedInTMBNumerator, dplyr::everything()
+    chrom = "Chromosome", pos = "Position", ref = "RefCall", alt = "AltCall", "VAF",
+    dp = "Depth", "GermlineFilterProxi", "IncludedInTMBNumerator", dplyr::everything()
   ) |>
   dt_view()
 ```
@@ -257,7 +257,7 @@ read(cov) |> dt_view()
 ```{r met1}
 alcolfus |>
   dplyr::filter(section == "CoverageSummary") |>
-  dplyr::select(-section) |>
+  dplyr::select(-"section") |>
   dt_view()
 ```
 
@@ -266,7 +266,7 @@ alcolfus |>
 ```{r met2}
 alcolfus |>
   dplyr::filter(section == "MappingAligningPerRg") |>
-  dplyr::select(-section) |>
+  dplyr::select(-"section") |>
   dt_view()
 ```
 
@@ -276,7 +276,7 @@ alcolfus |>
 ```{r met3}
 alcolfus |>
   dplyr::filter(section == "MappingAligningSummary") |>
-  dplyr::select(-section) |>
+  dplyr::select(-"section") |>
   dt_view()
 ```
 
@@ -285,7 +285,7 @@ alcolfus |>
 ```{r met4}
 alcolfus |>
   dplyr::filter(section == "RunTime") |>
-  dplyr::select(-section) |>
+  dplyr::select(-"section") |>
   dt_view()
 ```
 
@@ -294,7 +294,7 @@ alcolfus |>
 ```{r met5}
 alcolfus |>
   dplyr::filter(section == "SvSummary") |>
-  dplyr::select(-section) |>
+  dplyr::select(-"section") |>
   dt_view()
 ```
 
@@ -303,7 +303,7 @@ alcolfus |>
 ```{r met6}
 alcolfus |>
   dplyr::filter(section == "TrimmerStatistics") |>
-  dplyr::select(-section) |>
+  dplyr::select(-"section") |>
   dt_view()
 ```
 
@@ -312,7 +312,7 @@ alcolfus |>
 ```{r met7}
 alcolfus |>
   dplyr::filter(section == "UmiStatistics") |>
-  dplyr::select(-section) |>
+  dplyr::select(-"section") |>
   dt_view()
 ```
 
