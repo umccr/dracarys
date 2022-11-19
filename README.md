@@ -1,20 +1,14 @@
 
-- <a href="#-dracarys---dragen-workflow-post-processing-"
-  id="toc--dracarys---dragen-workflow-post-processing-">🐲 dracarys -
-  DRAGEN Workflow Post-Processing 🔥</a>
-  - <a href="#installation" id="toc-installation">Installation</a>
-  - <a href="#main-modules" id="toc-main-modules">Main modules</a>
-    - <a href="#id_-tidy" id="toc-id_-tidy">✨ Tidy</a>
-  - <a href="#id_-cli" id="toc-id_-cli">💻 CLI</a>
-
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# 🐲 dracarys - DRAGEN Workflow Post-Processing 🔥
+# 🔥 dracarys - DRAGEN Workflow Post-Processing
+
+![](https://emojis.slackmojis.com/emojis/images/1643517245/32837/dragon_wiggle.gif?1643517245 "Dragon Dance")
 
 - Docs: <https://umccr.github.io/dracarys/>
 
 [![Conda
-install](https://anaconda.org/umccr/r-dracarys/badges/installer/conda.svg)](https://anaconda.org/umccr/r-dracarys)
+install](https://anaconda.org/umccr/r-dracarys/badges/latest_release_date.svg)](https://anaconda.org/umccr/r-dracarys)
 
 ## Installation
 

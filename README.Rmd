@@ -1,8 +1,7 @@
 ---
 output:
   github_document:
-    toc: true
-
+    toc: false
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
@@ -16,11 +15,14 @@ knitr::opts_chunk$set(
 )
 ```
 
-# 🐲 dracarys - DRAGEN Workflow Post-Processing 🔥
+# 🔥 dracarys - DRAGEN Workflow Post-Processing
+
+![](https://emojis.slackmojis.com/emojis/images/1643517245/32837/dragon_wiggle.gif?1643517245 "Dragon Dance")
+
 
 - Docs: <https://umccr.github.io/dracarys/>
 
-[![Conda install](https://anaconda.org/umccr/r-dracarys/badges/installer/conda.svg)](https://anaconda.org/umccr/r-dracarys)
+[![Conda install](https://anaconda.org/umccr/r-dracarys/badges/latest_release_date.svg)](https://anaconda.org/umccr/r-dracarys)
 
 ## Installation
 
