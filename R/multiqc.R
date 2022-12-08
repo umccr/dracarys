@@ -1,4 +1,4 @@
-#' Dracarys Tidy MultiQC
+#' Dracarys MultiQC Tidy
 #'
 #' Generate tidier representations of MultiQC JSON output
 #' @param json Path to `multiqc_data.json`.
@@ -8,7 +8,7 @@
 #' @return Generates TSV and/or Parquet representations of the input
 #' MultiQC JSON file.
 #' @export
-dracarys_tidy_multiqc <- function(json, prefix, outdir, out_format = "tsv") {
+dracarys_multiqc <- function(json, prefix, outdir, out_format = "tsv") {
   format_choices <- c("tsv", "parquet", "both")
   assertthat::assert_that(
     length(out_format) == 1,

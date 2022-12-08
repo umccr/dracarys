@@ -38,7 +38,7 @@ conda install r-dracarys -c umccr -c conda-forge -c bioconda
 
 ## Main modules
 
-### ✨ Tidy {#id_-tidy}
+### ✨ multiqc {#id_-multiqc}
 
 - Generate a 'tidier' form of the `multiqc_data.json` MultiQC summary file.
   TSV and Parquet outputs are generated. For the TSV file, each row corresponds
@@ -66,9 +66,9 @@ export PATH="${dracarys_cli}:${PATH}"
 echo "$ dracarys.R --version"
 echo "dracarys.R 0.5.0"
 echo ""
-echo "#------- Tidy -------#"
+echo "#------- multiqc -------#"
 echo ""
 echo ""
-echo "$ dracarys.R tidy --help"
-dracarys.R tidy --help
+echo "$ dracarys.R multiqc --help"
+dracarys.R multiqc --help
 ```

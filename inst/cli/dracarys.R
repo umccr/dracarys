@@ -18,15 +18,15 @@ subparser_name <- "subparser_name"
 subp <- p$add_subparsers(help = "sub-command help", dest = subparser_name)
 
 
-source(system.file("cli/tidy.R", package = pkg))
+source(system.file("cli/multiqc.R", package = pkg))
 
-tidy_add_args(subp)
+multiqc_add_args(subp)
 
 args <- p$parse_args()
 if (length(args$subparser_name) == 0) {
   p$print_help()
-} else if (args$subparser_name == "tidy") {
-  tidy_parse_args(args)
+} else if (args$subparser_name == "multiqc") {
+  multiqc_parse_args(args)
 } else {
-  cli_alert_danger("Need to specify 'tidy' in the cli...")
+  cli_alert_danger("Need to specify 'multiqc' in the cli...")
 }
