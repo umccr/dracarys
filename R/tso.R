@@ -1,3 +1,104 @@
+#' Dracarys Tso Tidy
+#'
+#' Generate tidier representations of TSO500 ctDNA workflow outputs.
+#' @param indir Path to TSO500 ctDNA workflow results.
+#' @param outdir Path to output dracarys results.
+#' @param out_format Format of output (tsv, parquet, both) (def: tsv).
+#' @return Generates tidy TSV and/or Parquet representations of the workflow results.
+#' @export
+dracarys_tso <- function(indir, outdir, out_format = "tsv") {
+  format_choices <- c("tsv", "parquet", "both")
+  assertthat::assert_that(
+    length(out_format) == 1,
+    out_format %in% format_choices
+  )
+  e <- emojifont::emoji
+  cli::cli_div(theme = list(
+    span.file = list(color = "lightblue"),
+    span.emph = list(color = "orange")
+  ))
+  cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying {.file {indir}} {e('fire')}")
+  # main dracarys function
+  d <- tso_tidy(indir = indir, gds_local_dir = gds_local_dir, dryrun = dryrun)
+  # if (out_format %in% c("tsv", "both")) {
+  #   tsv_out <- file.path(outdir, glue::glue("{prefix}.tsv"))
+  #   readr::write_tsv(d1, tsv_out)
+  # }
+  # if (out_format %in% c("parquet", "both")) {
+  #   parquet_out <- file.path(outdir, glue::glue("{prefix}.parquet"))
+  #   arrow::write_parquet(d1, parquet_out)
+  # }
+
+  cli::cli_alert_success("{date_log()} {e('rocket')} End tidying {.file {indir}} {e('comet')}!")
+  cli::cli_alert_info("{date_log()} {e('tada')} Path to output directory with results for {.emph {indir}}: {.file {outdir}}")
+}
+
+
+#' Tidy TSO ctDNA Results
+#'
+#' Tidies TSO ctDNA results into a list of tibbles.
+#'
+#' @param indir Directory path to TSO500 ctDNA workflow results (must end
+#' with `/`).
+#' @param gds_local_dir If `indir` is a GDS directory, 'recognisable' files
+#' will be first downloaded to this directory.
+#' @param dryrun Just list the files that will be downloaded?
+#'
+#' @return List of tibbles.
+#' @examples
+#' \dontrun{
+#' indir <- "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+#' gds_local_dir <- here::here(glue("nogit/tso/SBJ02858"))
+#' dryrun <- TRUE
+#' tso_tidy(indir, gds_local_dir, dryrun)
+#' }
+#' @export
+tso_tidy <- function(indir, gds_local_dir = NULL, dryrun = FALSE) {
+  # - List indir files
+  # - If GDS, download locally to gdslocaldir
+  #   - Grab only the 'recognisable' ones
+  # - Apply the tidy functions to each
+  # - Export as list of tibbles
+  pat <- "tso\\/"
+  if (grepl("^gds://", indir)) {
+    assertthat::assert_that(
+      !is.null(gds_local_dir),
+      msg = "You need to specify a local directory to download the GDS files."
+    )
+    (dr_gds_download(indir, gds_local_dir, token = Sys.getenv("ICA_TOKEN_PROD"), pattern = pat, dryrun = dryrun))
+    # Use the downloaded results
+    indir <- gds_local_dir
+  }
+  d <- fs::dir_ls(indir) |>
+    tibble::as_tibble_col(column_name = "path") |>
+    dplyr::mutate(
+      bname = basename(.data$path),
+      type = purrr::map_chr(.data$bname, match_regex)
+    ) |>
+    dplyr::filter(!is.na(.data$type), grepl(pat, .data$type)) |>
+    dplyr::select("type", "path", "bname") |>
+    dplyr::rowwise() |>
+    dplyr::mutate(res = list(tso_funcall(.data$type)$new(.data$path)$read()) |> purrr::set_names(.data$type))
+
+  d[["res"]]
+}
+
+tso_funcall <- function(x) {
+  l <- list(
+    "tso/align_collapse_fusion_caller_metrics" = TsoAlignCollapseFusionCallerMetricsFile,
+    "tso/target_region_coverage" = TsoTargetRegionCoverageFile,
+    "tso/fragment_length_hist" = TsoFragmentLengthHistFile,
+    "tso/msi" = TsoMsiFile,
+    "tso/tmb" = TsoTmbFile,
+    "tso/tmb_trace_tsv" = TsoTmbTraceTsvFile,
+    "tso/combined_variant_output" = TsoCombinedVariantOutputFile,
+    "tso/fusions_csv" = TsoFusionsCsvFile,
+    "tso/sample_analysis_results" = TsoSampleAnalysisResultsFile
+  )
+  assertthat::assert_that(x %in% names(l))
+  l[[x]]
+}
+
 #' TsoCombinedVariantOutputFile R6 Class
 #'
 #' @description

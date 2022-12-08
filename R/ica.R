@@ -39,3 +39,36 @@ gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
     ) |>
     dplyr::select(.data$bname, .data$size, .data$path, .data$dname)
 }
+
+
+#' dracarys GDS Download
+#'
+#' Download only GDS files that can be processed by dracarys.
+#'
+#' @param gdsdir Full path to GDS directory, must end with `/`.
+#' @param outdir Path to output directory.
+#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#' @param pattern Pattern to further filter the returned file type tibble.
+#' @param dryrun Just list the files that will be downloaded?
+#' @export
+dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN"), pattern = NULL, dryrun = FALSE) {
+  fs::dir_create(outdir)
+  d <- gds_files_list(gdsdir = gdsdir, token = token) |>
+    dplyr::mutate(type = purrr::map_chr(.data$bname, match_regex)) |>
+    dplyr::select("dname", "type", "size", "path", "bname")
+
+  # download recognisable dracarys files to outdir/{bname}
+  if (is.null(pattern)) {
+    pattern <- ".*" # keep all recognisable files
+  }
+  d_filt <- d |>
+    dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
+    dplyr::mutate(out = file.path(outdir, .data$bname))
+  if (!dryrun) {
+    d_filt |>
+      dplyr::rowwise() |>
+      dplyr::mutate(cmd = gds_file_download(.data$path, .data$out, token))
+  } else {
+    d_filt
+  }
+}

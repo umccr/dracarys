@@ -8,46 +8,6 @@ require(tidyverse)
 require(dracarys)
 
 #---- functions ----#
-gds_file_download <- function(gds, out, token) {
-  system(glue::glue("ica files download {gds} {out} --access-token {token}"))
-}
-
-gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
-  assertthat::assert_that(grepl("^gds://", gdsdir), grepl("/$", gdsdir))
-  base_url <- "https://aps2.platform.illumina.com/v1"
-  volname <- sub("gds://(.*?)/.*", "\\1", gdsdir)
-  path2 <- sub("gds://(.*?)/(.*)", "\\2", gdsdir)
-
-  res <- httr::GET(
-    glue::glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize=100"),
-    httr::add_headers(Authorization = glue::glue("Bearer {token}")),
-    httr::accept_json()
-  )
-  j <- jsonlite::fromJSON(httr::content(res, "text"), simplifyVector = FALSE)[["items"]]
-  d <- purrr::map_df(j, function(x) c(path = x[["path"]], size = x[["sizeInBytes"]]))
-  d |>
-    dplyr::mutate(
-      size = fs::as_fs_bytes(.data$size),
-      bname = basename(.data$path),
-      path = glue::glue("gds://{volname}{.data$path}"),
-      dname = basename(dirname(.data$path))
-    ) |>
-    dplyr::select(.data$bname, .data$size, .data$path, .data$dname)
-}
-
-dr_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_TOKEN_PROD")) {
-  fs::dir_create(outdir)
-  d <- gds_files_list(gdsdir = gdsdir, token = token) |>
-    dplyr::mutate(type = purrr::map_chr(bname, dracarys::match_regex)) |>
-    dplyr::select(.data$dname, .data$type, .data$size, .data$path, .data$bname)
-
-  # download dracarys files to outdir/{bname}
-  d |>
-    dplyr::filter(!is.na(.data$type)) |>
-    dplyr::mutate(out = file.path(outdir, bname)) |>
-    dplyr::rowwise() |>
-    dplyr::mutate(cmd = gds_file_download(path, out, token))
-}
 
 dr_download_multiqc <- function(gdsdir, outdir, token = Sys.getenv("ICA_TOKEN_PROD")) {
   fs::dir_create(outdir)
