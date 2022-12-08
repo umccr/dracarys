@@ -6,6 +6,7 @@ suppressPackageStartupMessages(require(assertthat, include.only = "assert_that")
 suppressPackageStartupMessages(require(cli))
 suppressPackageStartupMessages(require(dracarys))
 suppressPackageStartupMessages(require(emojifont, include.only = "emoji"))
+suppressPackageStartupMessages(require(fs, include.only = c("dir_create")))
 suppressPackageStartupMessages(require(glue, include.only = "glue"))
 suppressPackageStartupMessages(require(readr, include.only = "write_tsv"))
 

@@ -33,7 +33,7 @@ FILE_REGEX <- tibble::tribble(
   "tmb\\.json\\.gz$", "tso/tmb",
   "TMB_Trace\\.tsv$", "tso/tmb_trace_tsv",
   "_CombinedVariantOutput\\.tsv$", "tso/combined_variant_output",
-  "_Fusions\\.json\\.gz$", "tso/fusions_json",
+  # "_Fusions\\.json\\.gz$", "tso/fusions_json",
   "_Fusions\\.csv$", "tso/fusions_csv",
   "SampleAnalysisResults\\.json\\.gz$", "tso/sample_analysis_results",
   "fastqc_metrics\\.csv$", "dragen/fastqc_metrics",

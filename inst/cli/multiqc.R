@@ -15,7 +15,7 @@ multiqc_parse_args <- function(args) {
 
   prefix <- args$prefix
   json <- normalizePath(args$json)
-  mkdir(args$outdir)
+  create_dir(args$outdir)
   outdir <- normalizePath(args$outdir)
   quiet <- args$quiet
   out_format <- args$format
