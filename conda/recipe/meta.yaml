@@ -34,7 +34,9 @@ requirements:
     - r-arrow
     - r-cli
     - r-emojifont
+    - r-fs
     - r-here
+    - r-httr
     - r-jsonlite
     - r-knitr
     - r-rmarkdown
@@ -59,7 +61,9 @@ requirements:
     - r-arrow
     - r-cli
     - r-emojifont
+    - r-fs
     - r-here
+    - r-httr
     - r-jsonlite
     - r-knitr
     - r-rmarkdown
