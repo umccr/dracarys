@@ -1,12 +1,25 @@
 #' Dracarys Tso Tidy
 #'
 #' Generate tidier representations of TSO500 ctDNA workflow outputs.
+#'
 #' @param indir Path to TSO500 ctDNA workflow results.
 #' @param outdir Path to output dracarys results.
+#' @param dryrun Just list the files that will be downloaded?
 #' @param out_format Format of output (tsv, parquet, both) (def: tsv).
+#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#'
 #' @return Generates tidy TSV and/or Parquet representations of the workflow results.
+#' @examples
+#' \dontrun{
+#' indir <- "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+#' outdir <- here::here(glue("nogit/tso/SBJ00476"))
+#' dryrun <- TRUE
+#' tok <- Sys.getenv("ICA_TOKEN_PROD")
+#' dracarys_tso(indir, outdir, dryrun = TRUE)
+#' }
 #' @export
-dracarys_tso <- function(indir, outdir, out_format = "tsv") {
+dracarys_tso <- function(indir, outdir, out_format = "tsv", dryrun = FALSE,
+                         token = Sys.getenv("ICA_ACCESS_TOKEN")) {
   format_choices <- c("tsv", "parquet", "both")
   assertthat::assert_that(
     length(out_format) == 1,
@@ -19,7 +32,9 @@ dracarys_tso <- function(indir, outdir, out_format = "tsv") {
   ))
   cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying {.file {indir}} {e('fire')}")
   # main dracarys function
-  d <- tso_tidy(indir = indir, gds_local_dir = gds_local_dir, dryrun = dryrun)
+  gds_local_dir <- file.path(outdir, "dracarys_gds_sync")
+  d <- tso_tidy(indir = indir, gds_local_dir = gds_local_dir, dryrun = dryrun, token = token)
+  readr::write_rds(d, file.path(outdir, "res.rds"))
   # if (out_format %in% c("tsv", "both")) {
   #   tsv_out <- file.path(outdir, glue::glue("{prefix}.tsv"))
   #   readr::write_tsv(d1, tsv_out)
@@ -43,31 +58,44 @@ dracarys_tso <- function(indir, outdir, out_format = "tsv") {
 #' @param gds_local_dir If `indir` is a GDS directory, 'recognisable' files
 #' will be first downloaded to this directory.
 #' @param dryrun Just list the files that will be downloaded?
+#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
 #'
 #' @return List of tibbles.
 #' @examples
 #' \dontrun{
 #' indir <- "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
 #' gds_local_dir <- here::here(glue("nogit/tso/SBJ02858"))
-#' dryrun <- TRUE
+#' dryrun <- F
 #' tso_tidy(indir, gds_local_dir, dryrun)
 #' }
 #' @export
-tso_tidy <- function(indir, gds_local_dir = NULL, dryrun = FALSE) {
+tso_tidy <- function(indir, gds_local_dir = NULL, dryrun = FALSE,
+                     token = Sys.getenv("ICA_ACCESS_TOKEN")) {
   # - List indir files
   # - If GDS, download locally to gdslocaldir
   #   - Grab only the 'recognisable' ones
   # - Apply the tidy functions to each
   # - Export as list of tibbles
-  pat <- "tso\\/"
+  pat <- "tso__"
+  e <- emojifont::emoji
   if (grepl("^gds://", indir)) {
     assertthat::assert_that(
       !is.null(gds_local_dir),
       msg = "You need to specify a local directory to download the GDS files."
     )
-    (dr_gds_download(indir, gds_local_dir, token = Sys.getenv("ICA_TOKEN_PROD"), pattern = pat, dryrun = dryrun))
+    dr_gds_download(indir, gds_local_dir, token = token, pattern = pat, dryrun = dryrun)
     # Use the downloaded results
     indir <- gds_local_dir
+  } else {
+    if (!is.null(gds_local_dir)) {
+      cli::cli_warn(glue(
+        "You have specified 'gds_local_dir' to download GDS results,\n",
+        "but your input directory is local - ignoring {gds_local_dir}"
+      ))
+    }
+    if (dryrun) {
+      cli::cli_warn(glue("You have specified 'dryrun' even though the data is local {e('ghost')}."))
+    }
   }
   d <- fs::dir_ls(indir) |>
     tibble::as_tibble_col(column_name = "path") |>
@@ -75,27 +103,45 @@ tso_tidy <- function(indir, gds_local_dir = NULL, dryrun = FALSE) {
       bname = basename(.data$path),
       type = purrr::map_chr(.data$bname, match_regex)
     ) |>
-    dplyr::filter(!is.na(.data$type), grepl(pat, .data$type)) |>
+    dplyr::filter(!is.na(.data$type), grepl(pat, .data$type))
+
+  if (nrow(d) == 0) {
+    regex <- FILE_REGEX |>
+      dplyr::filter(grepl("tso__", .data$name)) |>
+      dplyr::pull("regex")
+    msg <- paste(
+      "No TSO files for dracarys were found in {.file {indir}}.",
+      "See current supported regexes for TSO: {regex}."
+    )
+    cli::cli_abort(msg)
+  }
+
+  d |>
     dplyr::select("type", "path", "bname") |>
     dplyr::rowwise() |>
-    dplyr::mutate(res = list(tso_funcall(.data$type)$new(.data$path)$read()) |> purrr::set_names(.data$type))
+    dplyr::mutate(
+      res = list(tso_funcall(.data$type)$new(.data$path)$read()) |>
+        purrr::set_names(.data$type)
+    )
 
   d[["res"]]
 }
 
 tso_funcall <- function(x) {
   l <- list(
-    "tso/align_collapse_fusion_caller_metrics" = TsoAlignCollapseFusionCallerMetricsFile,
-    "tso/target_region_coverage" = TsoTargetRegionCoverageFile,
-    "tso/fragment_length_hist" = TsoFragmentLengthHistFile,
-    "tso/msi" = TsoMsiFile,
-    "tso/tmb" = TsoTmbFile,
-    "tso/tmb_trace_tsv" = TsoTmbTraceTsvFile,
-    "tso/combined_variant_output" = TsoCombinedVariantOutputFile,
-    "tso/fusions_csv" = TsoFusionsCsvFile,
-    "tso/sample_analysis_results" = TsoSampleAnalysisResultsFile
+    "tso__align_collapse_fusion_caller_metrics" = TsoAlignCollapseFusionCallerMetricsFile,
+    "tso__target_region_coverage" = TsoTargetRegionCoverageFile,
+    "tso__fragment_length_hist" = TsoFragmentLengthHistFile,
+    "tso__msi" = TsoMsiFile,
+    "tso__tmb" = TsoTmbFile,
+    "tso__tmb_trace_tsv" = TsoTmbTraceTsvFile,
+    "tso__combined_variant_output" = TsoCombinedVariantOutputFile,
+    "tso__fusions_csv" = TsoFusionsCsvFile,
+    "tso__sample_analysis_results" = TsoSampleAnalysisResultsFile
   )
-  assertthat::assert_that(x %in% names(l))
+  if (!x %in% names(l)) {
+    return(NULL)
+  }
   l[[x]]
 }
 

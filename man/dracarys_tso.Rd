@@ -4,7 +4,13 @@
 \alias{dracarys_tso}
 \title{Dracarys Tso Tidy}
 \usage{
-dracarys_tso(indir, outdir, out_format = "tsv")
+dracarys_tso(
+  indir,
+  outdir,
+  out_format = "tsv",
+  dryrun = FALSE,
+  token = Sys.getenv("ICA_ACCESS_TOKEN")
+)
 }
 \arguments{
 \item{indir}{Path to TSO500 ctDNA workflow results.}
@@ -12,10 +18,23 @@ dracarys_tso(indir, outdir, out_format = "tsv")
 \item{outdir}{Path to output dracarys results.}
 
 \item{out_format}{Format of output (tsv, parquet, both) (def: tsv).}
+
+\item{dryrun}{Just list the files that will be downloaded?}
+
+\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 }
 \value{
 Generates tidy TSV and/or Parquet representations of the workflow results.
 }
 \description{
 Generate tidier representations of TSO500 ctDNA workflow outputs.
+}
+\examples{
+\dontrun{
+indir <- "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+outdir <- here::here(glue("nogit/tso/SBJ02858_2"))
+dryrun <- TRUE
+tok <- Sys.getenv("ICA_TOKEN_PROD")
+dracarys_tso(indir, outdir)
+}
 }
