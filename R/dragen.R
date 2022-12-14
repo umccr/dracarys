@@ -623,7 +623,7 @@ time_metrics_process <- function(x, id = seq_len(length(x))) {
     purrr::set_names(id) |>
     dplyr::bind_rows(.id = "ID") |>
     tidyr::pivot_wider(id_cols = c("ID", "Label"), names_from = "Step", values_from = "Time") |>
-    dplyr::relocate(.data$`Total Runtime`, .after = .data$Label)
+    dplyr::relocate("Total Runtime", .after = "Label")
 }
 
 #' VCMetricsFile R6 Class

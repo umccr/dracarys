@@ -4,7 +4,12 @@
 \alias{tso_tidy}
 \title{Tidy TSO ctDNA Results}
 \usage{
-tso_tidy(indir, gds_local_dir = NULL, dryrun = FALSE)
+tso_tidy(
+  indir,
+  gds_local_dir = NULL,
+  dryrun = FALSE,
+  token = Sys.getenv("ICA_ACCESS_TOKEN")
+)
 }
 \arguments{
 \item{indir}{Directory path to TSO500 ctDNA workflow results (must end
@@ -14,6 +19,8 @@ with \code{/}).}
 will be first downloaded to this directory.}
 
 \item{dryrun}{Just list the files that will be downloaded?}
+
+\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 }
 \value{
 List of tibbles.
@@ -25,7 +32,7 @@ Tidies TSO ctDNA results into a list of tibbles.
 \dontrun{
 indir <- "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
 gds_local_dir <- here::here(glue("nogit/tso/SBJ02858"))
-dryrun <- TRUE
+dryrun <- F
 tso_tidy(indir, gds_local_dir, dryrun)
 }
 }
