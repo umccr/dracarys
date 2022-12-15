@@ -12,10 +12,13 @@
 #' @examples
 #' \dontrun{
 #' indir <- "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+#' indir <- "gds://production/analysis_data/SBJ00476/tso_ctdna_tumor_only/20211217c0a5d1f8/L2100345/Results/PRJ200603_L2100345/"
+#' indir <- "gds://production/analysis_data/SBJ00006/tso_ctdna_tumor_only/202210111b001d7f/L2201499/Results/NTC_ctTSO221004_L2201499/"
 #' outdir <- here::here(glue("nogit/tso/SBJ00476"))
+#' outdir <- here::here(glue("nogit/tso/SBJ00006"))
 #' dryrun <- TRUE
-#' tok <- Sys.getenv("ICA_TOKEN_PROD")
-#' dracarys_tso(indir, outdir, dryrun = TRUE)
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
+#' dracarys_tso(indir, outdir, dryrun = F, token = token)
 #' }
 #' @export
 dracarys_tso <- function(indir, outdir, out_format = "tsv", dryrun = FALSE,
@@ -26,26 +29,29 @@ dracarys_tso <- function(indir, outdir, out_format = "tsv", dryrun = FALSE,
     out_format %in% format_choices
   )
   e <- emojifont::emoji
-  cli::cli_div(theme = list(
-    span.file = list(color = "lightblue"),
-    span.emph = list(color = "orange")
-  ))
+  # cli::cli_div(theme = list(
+  #   span.file = list(color = "blue"),
+  #   span.emph = list(color = "orange")
+  # ))
   cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying {.file {indir}} {e('fire')}")
   # main dracarys function
   gds_local_dir <- file.path(outdir, "dracarys_gds_sync")
   d <- tso_tidy(indir = indir, gds_local_dir = gds_local_dir, dryrun = dryrun, token = token)
-  readr::write_rds(d, file.path(outdir, "res.rds"))
-  # if (out_format %in% c("tsv", "both")) {
-  #   tsv_out <- file.path(outdir, glue::glue("{prefix}.tsv"))
-  #   readr::write_tsv(d1, tsv_out)
-  # }
-  # if (out_format %in% c("parquet", "both")) {
-  #   parquet_out <- file.path(outdir, glue::glue("{prefix}.parquet"))
-  #   arrow::write_parquet(d1, parquet_out)
-  # }
+  if (!dryrun) {
+    readr::write_rds(d, file.path(outdir, "res.rds"))
 
-  cli::cli_alert_success("{date_log()} {e('rocket')} End tidying {.file {indir}} {e('comet')}!")
-  cli::cli_alert_info("{date_log()} {e('tada')} Path to output directory with results for {.emph {indir}}: {.file {outdir}}")
+    # if (out_format %in% c("tsv", "both")) {
+    #   tsv_out <- file.path(outdir, glue::glue("{prefix}.tsv"))
+    #   readr::write_tsv(d1, tsv_out)
+    # }
+    # if (out_format %in% c("parquet", "both")) {
+    #   parquet_out <- file.path(outdir, glue::glue("{prefix}.parquet"))
+    #   arrow::write_parquet(d1, parquet_out)
+    # }
+
+    cli::cli_alert_success("{date_log()} {e('rocket')} End tidying {.file {indir}} {e('comet')}!")
+    cli::cli_alert_info("{date_log()} {e('tada')} Path to output directory with results for {.emph {indir}}: {.file {outdir}}")
+  }
 }
 
 
@@ -83,7 +89,10 @@ tso_tidy <- function(indir, gds_local_dir = NULL, dryrun = FALSE,
       !is.null(gds_local_dir),
       msg = "You need to specify a local directory to download the GDS files."
     )
-    dr_gds_download(indir, gds_local_dir, token = token, pattern = pat, dryrun = dryrun)
+    print(dr_gds_download(
+      gdsdir = indir, outdir = gds_local_dir, token = token,
+      pattern = pat, dryrun = dryrun
+    ))
     # Use the downloaded results
     indir <- gds_local_dir
   } else {
@@ -93,38 +102,40 @@ tso_tidy <- function(indir, gds_local_dir = NULL, dryrun = FALSE,
         "but your input directory is local - ignoring {gds_local_dir}"
       ))
     }
-    if (dryrun) {
-      cli::cli_warn(glue("You have specified 'dryrun' even though the data is local {e('ghost')}."))
+  }
+  if (dryrun) {
+    cli::cli_inform("You have specified 'dryrun' - terminating {e('ghost')}!")
+    return(NULL)
+  } else {
+    d <- fs::dir_ls(indir) |>
+      tibble::as_tibble_col(column_name = "path") |>
+      dplyr::mutate(
+        bname = basename(.data$path),
+        type = purrr::map_chr(.data$bname, match_regex)
+      ) |>
+      dplyr::filter(!is.na(.data$type), grepl(pat, .data$type))
+
+    if (nrow(d) == 0) {
+      regex <- FILE_REGEX |>
+        dplyr::filter(grepl("tso__", .data$name)) |>
+        dplyr::pull("regex")
+      msg <- paste(
+        "No TSO files for dracarys were found in {.file {indir}}.",
+        "See current supported regexes for TSO: {regex}."
+      )
+      cli::cli_abort(msg)
     }
+
+    d <- d |>
+      dplyr::select("type", "path", "bname") |>
+      dplyr::rowwise() |>
+      dplyr::mutate(
+        res = list(tso_funcall(.data$type)$new(.data$path)$read()) #|>
+        # purrr::set_names(.data$type)
+      )
+
+    d[["res"]]
   }
-  d <- fs::dir_ls(indir) |>
-    tibble::as_tibble_col(column_name = "path") |>
-    dplyr::mutate(
-      bname = basename(.data$path),
-      type = purrr::map_chr(.data$bname, match_regex)
-    ) |>
-    dplyr::filter(!is.na(.data$type), grepl(pat, .data$type))
-
-  if (nrow(d) == 0) {
-    regex <- FILE_REGEX |>
-      dplyr::filter(grepl("tso__", .data$name)) |>
-      dplyr::pull("regex")
-    msg <- paste(
-      "No TSO files for dracarys were found in {.file {indir}}.",
-      "See current supported regexes for TSO: {regex}."
-    )
-    cli::cli_abort(msg)
-  }
-
-  d |>
-    dplyr::select("type", "path", "bname") |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
-      res = list(tso_funcall(.data$type)$new(.data$path)$read()) |>
-        purrr::set_names(.data$type)
-    )
-
-  d[["res"]]
 }
 
 tso_funcall <- function(x) {
@@ -427,6 +438,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class("TsoAlignCollapseFusionCa
       l2tib <- function(el) {
         # list to tibble and turn cols to char
         fun1 <- function(l) {
+          # handle silly NULLs..
+          if (l[["value"]] |> is.null()) {
+            l[["value"]] <- NA
+          }
           tibble::as_tibble(l) |>
             dplyr::mutate(dplyr::across(dplyr::everything(), ~ as.character(.)))
         }
@@ -434,7 +449,8 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class("TsoAlignCollapseFusionCa
           purrr::map(fun1) |>
           dplyr::bind_rows()
       }
-      j <- jsonlite::read_json(x)
+      # j <- jsonlite::read_json(x) # cannot handle Infinity
+      j <- RJSONIO::fromJSON(x) # turns Infinity to NULL
       j |>
         purrr::map(l2tib) |>
         dplyr::bind_rows(.id = "section")
@@ -468,9 +484,12 @@ TsoTmbFile <- R6::R6Class("TsoTmbFile", inherit = File, public = list(
   #' * CodingRegionSizeMb
   read = function() {
     x <- self$path
-    j <- jsonlite::read_json(x)
+    # j <- jsonlite::read_json(x) # cannot handle NaN
+    j <- RJSONIO::fromJSON(x) # turns NaN to NULL
     # not interested in Settings element
     j[["Settings"]] <- NULL
+    # handle silly NULLs
+    j <- lapply(j, function(x) ifelse(is.null(x), NA, x))
     tibble::as_tibble_row(j) |>
       dplyr::mutate(dplyr::across(dplyr::everything(), as.numeric))
   }
