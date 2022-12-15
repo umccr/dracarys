@@ -51,7 +51,8 @@ gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
 #' @param pattern Pattern to further filter the returned file type tibble.
 #' @param dryrun Just list the files that will be downloaded?
 #' @export
-dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN"), pattern = NULL, dryrun = FALSE) {
+dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                            pattern = NULL, dryrun = FALSE) {
   fs::dir_create(outdir)
   d <- gds_files_list(gdsdir = gdsdir, token = token) |>
     dplyr::mutate(type = purrr::map_chr(.data$bname, match_regex)) |>
