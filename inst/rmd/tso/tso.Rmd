@@ -29,23 +29,33 @@ require(DT)
 ```
 
 ```{r data_setup}
-options(scipen=999) # disable scientific notation
+options(scipen = 999) # disable scientific notation
 pref <- params$prefix
 combinedvars <- glue("{pref}_CombinedVariantOutput.tsv") |>
-  TsoCombinedVariantOutputFile$new() |> read()
+  TsoCombinedVariantOutputFile$new() |>
+  read()
 trace <- glue("{pref}_TMB_Trace.tsv") |>
-  TsoTmbTraceTsvFile$new() |> read()
+  TsoTmbTraceTsvFile$new() |>
+  read()
 fraglenhist <- glue("{pref}.fragment_length_hist.json.gz") |>
   TsoFragmentLengthHistFile$new()
 cov <- glue("{pref}.TargetRegionCoverage.json.gz") |>
   TsoTargetRegionCoverageFile$new()
 alcolfus <- glue("{pref}.AlignCollapseFusionCaller_metrics.json.gz") |>
-  TsoAlignCollapseFusionCallerMetricsFile$new() |> read()
-tmb <- glue("{pref}.tmb.json.gz") |> TsoTmbFile$new() |> read()
-msi <- glue("{pref}.msi.json.gz") |> TsoMsiFile$new() |> read()
-fus <- glue("{pref}_Fusions.csv") |> TsoFusionsCsvFile$new() |> read()
+  TsoAlignCollapseFusionCallerMetricsFile$new() |>
+  read()
+tmb <- glue("{pref}.tmb.json.gz") |>
+  TsoTmbFile$new() |>
+  read()
+msi <- glue("{pref}.msi.json.gz") |>
+  TsoMsiFile$new() |>
+  read()
+fus <- glue("{pref}_Fusions.csv") |>
+  TsoFusionsCsvFile$new() |>
+  read()
 res <- glue("{pref}_SampleAnalysisResults.json.gz") |>
-  TsoSampleAnalysisResultsFile$new() |> read()
+  TsoSampleAnalysisResultsFile$new() |>
+  read()
 ```
 
 ```{r funcs, echo=F}
@@ -212,14 +222,15 @@ combinedvars[["MSI"]] |>
 
 ```{r tmb_trace}
 trace |>
-  dplyr::mutate(Position = as.integer(Position),
-                VAF = as.numeric(VAF),
-                Depth = as.numeric(Depth),
-                GermlineFilterDatabase = as.logical(GermlineFilterDatabase),
-                GermlineFilterProxi = as.logical(GermlineFilterProxi),
-                CodingVariant = as.logical(CodingVariant),
-                Nonsynonymous = as.logical(Nonsynonymous),
-                IncludedInTMBNumerator = as.logical(IncludedInTMBNumerator)
+  dplyr::mutate(
+    Position = as.integer(Position),
+    VAF = as.numeric(VAF),
+    Depth = as.numeric(Depth),
+    GermlineFilterDatabase = as.logical(GermlineFilterDatabase),
+    GermlineFilterProxi = as.logical(GermlineFilterProxi),
+    CodingVariant = as.logical(CodingVariant),
+    Nonsynonymous = as.logical(Nonsynonymous),
+    IncludedInTMBNumerator = as.logical(IncludedInTMBNumerator)
   ) |>
   dplyr::select(
     chrom = "Chromosome", pos = "Position", ref = "RefCall", alt = "AltCall", "VAF",
