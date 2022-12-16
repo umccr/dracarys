@@ -24,10 +24,15 @@ x <- d |>
   ungroup() |>
   select(sbj, sbj2, gds_indir, date = time_created) |>
   arrange(sbj2) |>
-  mutate(outdir = here(glue("nogit/tso/2022-12-13/{sbj2}"))) |>
-  select(sbj2, gds_indir, outdir)
+  mutate(
+    outdir = here(glue("nogit/tso/2022-12-13/{sbj2}")),
+    local_indir = file.path(outdir, "dracarys_gds_sync")
+  ) |>
+  select(sbj2, gds_indir, outdir, local_indir)
+
 
 token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
-for (i in 1:20) {
-  dracarys::dracarys_tso(indir = x$gds_indir[i], outdir = x$outdir[i], dryrun = FALSE, token = token)
+for (i in 1:80) {
+  # dracarys::dracarys_tso(indir = x$gds_indir[i], outdir = x$outdir[i], dryrun = FALSE, token = token)
+  dracarys::dracarys_tso(indir = x$local_indir[i], outdir = x$outdir[i], dryrun = FALSE, token = token)
 }

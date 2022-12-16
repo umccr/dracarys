@@ -1,3 +1,4 @@
+require(ggforce)
 require(tidyverse)
 require(arrow)
 
@@ -5,14 +6,18 @@ require(arrow)
 
 d <-
   tibble(
-    x = list.files(here::here("nogit/tso"),
-                   pattern = "tmb\\.json\\.gz$",
-                   recursive = TRUE, full.names = TRUE)) |>
+    x = list.files(
+      here::here("nogit/tso"),
+      pattern = "tmb\\.json\\.gz$",
+      recursive = TRUE, full.names = TRUE
+    )
+  ) |>
   rowwise() |>
   mutate(
     obj = list(TsoTmbFile$new(x)),
     sample = sub(".tmb.json.gz", "", obj$bname()),
-    y = list(read(obj))) |>
+    y = list(read(obj))
+  ) |>
   unnest(y) |>
   select(-c(x, obj)) |>
   pivot_longer(TmbPerMb:CodingRegionSizeMb)
@@ -34,5 +39,3 @@ d |>
   facet_wrap(~name, scales = "free")
 
 arrow::read_parquet(here::here("nogit/tso/tmb/56.TMB.parquet"))
-
-

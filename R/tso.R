@@ -34,11 +34,13 @@ dracarys_tso <- function(indir, outdir, out_format = "tsv", dryrun = FALSE,
   #   span.emph = list(color = "orange")
   # ))
   cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying {.file {indir}} {e('fire')}")
+  gds_local_dir <- if (grepl("^gds://", indir)) file.path(outdir, "dracarys_gds_sync") else NULL
   # main dracarys function
-  gds_local_dir <- file.path(outdir, "dracarys_gds_sync")
   d <- tso_tidy(indir = indir, gds_local_dir = gds_local_dir, dryrun = dryrun, token = token)
   if (!dryrun) {
-    readr::write_rds(d, file.path(outdir, "res.rds"))
+    fs::dir_create(outdir)
+    res <- file.path(outdir, "res.rds")
+    readr::write_rds(d, res)
 
     # if (out_format %in% c("tsv", "both")) {
     #   tsv_out <- file.path(outdir, glue::glue("{prefix}.tsv"))
@@ -130,8 +132,8 @@ tso_tidy <- function(indir, gds_local_dir = NULL, dryrun = FALSE,
       dplyr::select("type", "path", "bname") |>
       dplyr::rowwise() |>
       dplyr::mutate(
-        res = list(tso_funcall(.data$type)$new(.data$path)$read()) #|>
-        # purrr::set_names(.data$type)
+        res = list(tso_funcall(.data$type)$new(.data$path)$read()) |>
+          purrr::set_names(.data$type)
       )
 
     d[["res"]]
