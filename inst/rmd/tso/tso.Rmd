@@ -1,20 +1,25 @@
 ---
-title: "dracarys TSO500"
-editor: source
-format:
-  html:
-    embed-resources: true
-    standalone: true
-    code-fold: true
-    toc: true
-    page-layout: custom
+author: "University of Melbourne Centre for Cancer Research"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    theme: cosmo
+    css: style.css
+    code_download: true
+  rmdformats::material:
+    highlight: kate
 params:
+  title: "UMCCR TSO500 ctDNA Report"
   prefix: NULL
+description: "UMCCR LINX Report"
+title: "`r params$title`"
 ---
+
+__Prefix:__ __`r params$prefix`__
 
 ```{r knitr_opts, include=F}
 knitr::opts_chunk$set(
-  collapse = TRUE, echo = TRUE,
+  collapse = TRUE, echo = FALSE,
   warning = FALSE, message = FALSE
 )
 ```
@@ -76,9 +81,7 @@ dt_view <- function(x, caption = NULL, scroll_y = 200) {
 }
 ```
 
-## `SampleAnalysisResults.json.gz`
-
-::: {.panel-tabset}
+## `SampleAnalysisResults.json.gz` {.tabset #SampleAnalysisResults}
 
 ### SNVs
 
@@ -140,7 +143,7 @@ res$sample_metrics_expanded |>
   knitr::kable()
 ```
 
-:::
+---
 
 ## `Fusions.csv`
 
@@ -168,9 +171,7 @@ msi |>
   knitr::kable()
 ```
 
-## `CombinedVariantOutput.tsv`
-
-::: {.panel-tabset}
+## `CombinedVariantOutput.tsv` {.tabset #CombinedVariantOutput}
 
 ### SNVs
 
@@ -215,7 +216,7 @@ combinedvars[["MSI"]] |>
   knitr::kable()
 ```
 
-:::
+---
 
 ## `TMB_Trace.tsv`
 
@@ -259,9 +260,7 @@ plot(cov)
 read(cov) |> dt_view()
 ```
 
-## `AlignCollapseFusionCaller_metrics.json.gz`
-
-::: {.panel-tabset}
+## `AlignCollapseFusionCaller_metrics.json.gz` {.tabset #AlignCollapseFusionCaller_metrics}
 
 ### CoverageSummary
 
@@ -280,7 +279,6 @@ alcolfus |>
   dplyr::select(-"section") |>
   dt_view()
 ```
-
 
 ### MappingAligningSummary
 
@@ -327,5 +325,4 @@ alcolfus |>
   dt_view()
 ```
 
-:::
-
+---
