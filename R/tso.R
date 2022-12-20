@@ -198,7 +198,8 @@ TsoCombinedVariantOutputFile <- R6::R6Class("TsoCombinedVariantOutputFile",
               col_types = readr::cols(.default = "c"),
               col_names = c("variable", "value", "empty")
             ) |>
-            dplyr::select("variable", "value")
+            dplyr::select("variable", "value") |>
+            tidyr::pivot_wider(names_from = "variable", values_from = "value")
         } else if (section %in% c("Copy Number Variants", "DNA Fusions", "Small Variants")) {
           if (length(chunk) > 2) {
             d <- s |>
@@ -452,7 +453,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class("TsoAlignCollapseFusionCa
           dplyr::bind_rows()
       }
       # j <- jsonlite::read_json(x) # cannot handle Infinity
-      j <- RJSONIO::fromJSON(x) # turns Infinity to NULL
+      j <- RJSONIO::fromJSON(x, simplify = FALSE) # turns Infinity to NULL
       j |>
         purrr::map(l2tib) |>
         dplyr::bind_rows(.id = "section")

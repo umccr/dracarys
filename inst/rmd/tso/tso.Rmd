@@ -11,7 +11,7 @@ output:
 params:
   title: "UMCCR TSO500 ctDNA Report"
   prefix: NULL
-description: "UMCCR LINX Report"
+description: "UMCCR TSO500 ctDNA Report"
 title: "`r params$title`"
 ---
 
