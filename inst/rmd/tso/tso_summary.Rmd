@@ -3,6 +3,7 @@ author: "University of Melbourne Centre for Cancer Research"
 date: "`r Sys.time()`"
 output:
   html_document:
+    toc: true
     theme: cosmo
     css: style.css
     code_download: true
@@ -283,10 +284,6 @@ combinedvars[["DNA Fusions"]] |>
 
 ```{r cv_adet}
 combinedvars[["Analysis Details"]] |>
-  map(function(el) {
-    el |>
-      pivot_wider(names_from = variable, values_from = value)
-  }) |>
   set_names(d$sbj) |>
   bind_rows(.id = "sbj") |>
   glimpse()
@@ -296,10 +293,6 @@ combinedvars[["Analysis Details"]] |>
 
 ```{r cv_tmb}
 combinedvars[["TMB"]] |>
-  map(function(el) {
-    el |>
-      pivot_wider(names_from = variable, values_from = value)
-  }) |>
   set_names(d$sbj) |>
   bind_rows(.id = "sbj") |>
   glimpse()
@@ -309,10 +302,6 @@ combinedvars[["TMB"]] |>
 
 ```{r cv_msi}
 combinedvars[["MSI"]] |>
-  map(function(el) {
-    el |>
-      pivot_wider(names_from = variable, values_from = value)
-  }) |>
   set_names(d$sbj) |>
   bind_rows(.id = "sbj") |>
   glimpse()
@@ -454,3 +443,12 @@ alcolfus |>
 ```
 
 ---
+
+## Session Info
+
+```{r session_info, echo=FALSE}
+pkgs_of_interest <- c("base", "dracarys", "tidyverse", "tidyselect", "ggplot2", "dplyr", "tidyr", "readr")
+si <- session_info_kable(pkgs_of_interest)
+si$si_pkg
+si$si_pl
+```
