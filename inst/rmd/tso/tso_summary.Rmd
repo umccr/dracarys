@@ -32,7 +32,7 @@ require(DT)
 require(fs)
 ```
 
-```{r data_setup}
+```{r data_setup, eval=FALSE}
 options(scipen = 999) # disable scientific notation
 options(width = 150)
 d <- here("nogit/tso/2022-12-13") |>
@@ -44,7 +44,14 @@ d <- here("nogit/tso/2022-12-13") |>
   mutate(dat = list(read_rds(path))) |>
   select(sbj, dat) |>
   unnest_wider(dat, simplify = FALSE)
+d |>
+  readr::write_rds(here("nogit/tso/rds/tso_summary_object_d_2022-12-21.rds"))
+```
 
+```{r data_setup2}
+d <- readr::read_rds(here("nogit/tso/rds/tso_summary_object_d_2022-12-21.rds"))
+options(scipen = 999) # disable scientific notation
+options(width = 150)
 ## align_collapse_fusion_caller_metrics
 alcolfus <- d |>
   pull("tso__align_collapse_fusion_caller_metrics") |>
