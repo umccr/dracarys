@@ -20,14 +20,18 @@ subp <- p$add_subparsers(help = "sub-command help", dest = subparser_name)
 
 
 source(system.file("cli/multiqc.R", package = pkg))
+source(system.file("cli/tso.R", package = pkg))
 
 multiqc_add_args(subp)
+tso_add_args(subp)
 
 args <- p$parse_args()
 if (length(args$subparser_name) == 0) {
   p$print_help()
 } else if (args$subparser_name == "multiqc") {
   multiqc_parse_args(args)
+} else if (args$subparser_name == "tso") {
+  tso_parse_args(args)
 } else {
   cli_alert_danger("Need to specify 'multiqc' in the cli...")
 }
