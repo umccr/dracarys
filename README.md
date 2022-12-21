@@ -32,6 +32,10 @@ conda install r-dracarys -c umccr -c conda-forge -c bioconda
   single quality metric/variable. See the [CLI](#cli) section below for
   options.
 
+### tso
+
+- Generate a ‘tidier’ form of the TSO500 ctDNA workflow results.
+
 ## 💻 CLI
 
 A `dracarys` command line interface is available for convenience.
@@ -66,4 +70,20 @@ export PATH="${dracarys_cli}:${PATH}"
                             ✨ Prefix output files with this string.
       -q, --quiet           😴 Shush all the logs.
       -f {tsv,parquet,both}, --format {tsv,parquet,both}
+                            🍦 Format of output (default: tsv).
+    #------- tso -------#
+
+
+    $ dracarys.R tso --help
+    usage: dracarys.R tso [-h] -i INDIR -o OUTDIR [-q] [-n] [-f {tsv,parquet,rds}]
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -i INDIR, --indir INDIR
+                            💩 Path to directory with TSO ctDNA workflow results.
+      -o OUTDIR, --outdir OUTDIR
+                            🎁 Output tidy results to this directory.
+      -q, --quiet           😴 Shush all the logs.
+      -n, --dryrun          🐫 Dry run.
+      -f {tsv,parquet,rds}, --format {tsv,parquet,rds}
                             🍦 Format of output (default: tsv).

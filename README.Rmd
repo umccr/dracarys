@@ -45,6 +45,10 @@ conda install r-dracarys -c umccr -c conda-forge -c bioconda
   to a single sample, and each column corresponds to a single quality metric/variable.
   See the [CLI](#cli) section below for options.
 
+### tso {#id_-tso}
+
+- Generate a 'tidier' form of the TSO500 ctDNA workflow results.
+
 ## 💻 CLI {#id_-cli}
 
 A `dracarys` command line interface is available for convenience.
@@ -71,4 +75,10 @@ echo ""
 echo ""
 echo "$ dracarys.R multiqc --help"
 dracarys.R multiqc --help
+
+echo "#------- tso -------#"
+echo ""
+echo ""
+echo "$ dracarys.R tso --help"
+dracarys.R tso --help
 ```
