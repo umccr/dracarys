@@ -23,13 +23,20 @@ knitr::opts_chunk$set(
 ```
 
 ```{r load_pkgs}
-require(tidyverse)
-require(dracarys)
-require(glue)
-require(here)
-require(knitr)
-require(DT)
-require(fs)
+require(dplyr, include.only = c(
+  "select", "mutate", "filter", "arrange", "rowwise", "glimpse", "pull",
+  "bind_rows", "everything", "all_of", "across"
+))
+require(tidyr, include.only = c("unnest_wider", "unnest", "pivot_wider", "hoist"))
+require(purrr, include.only = c("set_names", "map"))
+require(tibble, include.only = c("as_tibble_col"))
+require(readr, include.only = c("read_rds", "write_rds"))
+# require(dracarys) # only needed for session info
+require(glue, include.only = "glue")
+require(here, include.only = "here")
+require(knitr, include.only = "kable")
+require(DT, include.only = "datatable")
+require(fs, include.only = c("dir_ls"))
 ```
 
 ```{r data_setup, eval=FALSE}
@@ -45,11 +52,11 @@ d <- here("nogit/tso/2022-12-13") |>
   select(sbj, dat) |>
   unnest_wider(dat, simplify = FALSE)
 d |>
-  readr::write_rds(here("nogit/tso/rds/tso_summary_object_d_2022-12-21.rds"))
+  write_rds(here("nogit/tso/rds/tso_summary_object_d_2022-12-21.rds"))
 ```
 
 ```{r data_setup2}
-d <- readr::read_rds(here("nogit/tso/rds/tso_summary_object_d_2022-12-21.rds"))
+d <- read_rds(here("nogit/tso/rds/tso_summary_object_d_2022-12-21.rds"))
 options(scipen = 999) # disable scientific notation
 options(width = 150)
 ## align_collapse_fusion_caller_metrics
@@ -119,9 +126,10 @@ trace <- d |>
 ```
 
 ```{r funcs, echo=F}
+# can use this to view smallish tables, just don't use it on big ones!
 dt_view <- function(x, caption = NULL, scroll_y = 200) {
   x |>
-    DT::datatable(
+    datatable(
       filter = list(position = "top", clear = FALSE, plain = TRUE),
       class = "cell-border display compact",
       rownames = FALSE,
@@ -210,7 +218,7 @@ sampres |>
   unnest("msi_additional_metrics") |>
   select("sbj", "msi_pct_unstable_sites", msi_subjsd = "value", "tmb_additional_metrics") |>
   unnest("tmb_additional_metrics") |>
-  select(-RAD) |>
+  select(-"RAD") |>
   pivot_wider(names_from = c("name"), values_from = "value", names_prefix = "tmb_") |>
   glimpse()
 ```
@@ -321,9 +329,9 @@ combinedvars[["MSI"]] |>
 
 ```{r tmb_trace}
 trace |>
-  dplyr::select(
+  select(
     chrom = "Chromosome", pos = "Position", ref = "RefCall", alt = "AltCall", "VAF",
-    dp = "Depth", "GermlineFilterProxi", "IncludedInTMBNumerator", dplyr::everything()
+    dp = "Depth", "GermlineFilterProxi", "IncludedInTMBNumerator", everything()
   ) |>
   glimpse()
 ```
@@ -348,12 +356,12 @@ cvg |>
 
 ```{r met1}
 alcolfus |>
-  dplyr::filter(section == "CoverageSummary") |>
-  dplyr::mutate(
+  filter(section == "CoverageSummary") |>
+  mutate(
     value = ifelse(grepl("Aligned .* in genome", name), glue("{value} ({percent}%)"), value)
   ) |>
-  dplyr::select(-c("section", "percent")) |>
-  tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+  select(-c("section", "percent")) |>
+  pivot_wider(names_from = "name", values_from = "value") |>
   glimpse()
 ```
 
@@ -361,12 +369,12 @@ alcolfus |>
 
 ```{r met2}
 alcolfus |>
-  dplyr::filter(section == "MappingAligningPerRg") |>
-  dplyr::mutate(
+  filter(section == "MappingAligningPerRg") |>
+  mutate(
     value = ifelse(!is.na(percent), glue("{value} ({percent}%)"), value)
   ) |>
-  dplyr::select(-c("section", "percent")) |>
-  tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+  select(-c("section", "percent")) |>
+  pivot_wider(names_from = "name", values_from = "value") |>
   glimpse()
 ```
 
@@ -374,13 +382,13 @@ alcolfus |>
 
 ```{r met3}
 alcolfus |>
-  dplyr::filter(section == "MappingAligningSummary") |>
-  dplyr::mutate(
+  filter(section == "MappingAligningSummary") |>
+  mutate(
     value = ifelse(!is.na(percent), glue("{value} ({percent}%)"), value)
   ) |>
-  dplyr::select(-c("section", "percent")) |>
-  dplyr::filter(!is.na(name)) |> # temp
-  tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+  select(-c("section", "percent")) |>
+  filter(!is.na(name)) |> # temp
+  pivot_wider(names_from = "name", values_from = "value") |>
   glimpse()
 ```
 
@@ -388,10 +396,10 @@ alcolfus |>
 
 ```{r met4}
 alcolfus |>
-  dplyr::filter(section == "RunTime") |>
-  dplyr::mutate(value = glue("{value} ({percent}%)")) |>
-  dplyr::select(-c("section", "percent")) |>
-  tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+  filter(section == "RunTime") |>
+  mutate(value = glue("{value} ({percent}%)")) |>
+  select(-c("section", "percent")) |>
+  pivot_wider(names_from = "name", values_from = "value") |>
   glimpse()
 ```
 
@@ -399,10 +407,10 @@ alcolfus |>
 
 ```{r met5}
 alcolfus |>
-  dplyr::filter(.data$section == "SvSummary") |>
-  dplyr::mutate(value = as.numeric(.data$value)) |>
-  dplyr::select(-c("section", "percent")) |>
-  tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+  filter(.data$section == "SvSummary") |>
+  mutate(value = as.numeric(.data$value)) |>
+  select(-c("section", "percent")) |>
+  pivot_wider(names_from = "name", values_from = "value") |>
   glimpse()
 ```
 
@@ -416,13 +424,13 @@ numeric_cols <- c(
   "Total input bases R2", "Total input reads"
 )
 alcolfus |>
-  dplyr::filter(section == "TrimmerStatistics") |>
-  dplyr::mutate(
+  filter(section == "TrimmerStatistics") |>
+  mutate(
     value = ifelse(!is.na(percent), glue("{value} ({percent}%)"), value)
   ) |>
-  dplyr::select(-c("section", "percent")) |>
-  tidyr::pivot_wider(names_from = "name", values_from = "value") |>
-  dplyr::mutate(dplyr::across(dplyr::all_of(numeric_cols), as.numeric)) |>
+  select(-c("section", "percent")) |>
+  pivot_wider(names_from = "name", values_from = "value") |>
+  mutate(across(all_of(numeric_cols), as.numeric)) |>
   glimpse()
 ```
 
@@ -439,13 +447,13 @@ numeric_cols <- c(
 )
 
 alcolfus |>
-  dplyr::filter(section == "UmiStatistics") |>
-  dplyr::mutate(
+  filter(section == "UmiStatistics") |>
+  mutate(
     value = ifelse(!is.na(percent), glue("{value} ({percent}%)"), value)
   ) |>
-  dplyr::select(-c("section", "percent")) |>
-  tidyr::pivot_wider(names_from = "name", values_from = "value") |>
-  dplyr::mutate(dplyr::across(dplyr::all_of(numeric_cols), as.numeric)) |>
+  select(-c("section", "percent")) |>
+  pivot_wider(names_from = "name", values_from = "value") |>
+  mutate(across(all_of(numeric_cols), as.numeric)) |>
   glimpse()
 ```
 
@@ -453,9 +461,10 @@ alcolfus |>
 
 ## Session Info
 
-```{r session_info, echo=FALSE}
+```{r session_info, echo=FALSE, eval=FALSE}
 pkgs_of_interest <- c("base", "dracarys", "tidyverse", "tidyselect", "ggplot2", "dplyr", "tidyr", "readr")
-si <- session_info_kable(pkgs_of_interest)
+# need dracarys for session info
+si <- dracarys::session_info_kable(pkgs_of_interest)
 si$si_pkg
 si$si_pl
 ```
