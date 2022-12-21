@@ -546,6 +546,9 @@ TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
     if (is.null(j[["ResultMessage"]])) {
       j[["ResultMessage"]] <- NA_character_
     }
+    if (j[["PercentageUnstableSites"]] == "NaN") {
+      j[["PercentageUnstableSites"]] <- NA_real_
+    }
     tibble::as_tibble_row(j) |>
       dplyr::mutate(ResultIsValid = as.character(.data$ResultIsValid))
   }
