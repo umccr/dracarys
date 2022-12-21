@@ -85,10 +85,6 @@ fraglenhist <- d |>
 msi <- d |>
   pull("tso__msi") |>
   set_names(d$sbj) |>
-  map(function(el) {
-    el[["PercentageUnstableSites"]] <- if (el[["PercentageUnstableSites"]] == "NaN") NA else el[["PercentageUnstableSites"]]
-    el
-  }) |>
   bind_rows(.id = "sbj")
 
 ## tmb
