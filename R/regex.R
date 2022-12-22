@@ -25,7 +25,7 @@ match_regex <- function(x) {
 
 FILE_REGEX <- tibble::tribble(
   ~regex, ~name,
-  "MetricsOutput\\.tsv$", "tso__metrics_output",
+  # "MetricsOutput\\.tsv$", "tso__metrics_output",
   "AlignCollapseFusionCaller_metrics\\.json\\.gz$", "tso__align_collapse_fusion_caller_metrics",
   "TargetRegionCoverage\\.json\\.gz$", "tso__target_region_coverage",
   "fragment_length_hist\\.json\\.gz$", "tso__fragment_length_hist",

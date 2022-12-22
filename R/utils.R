@@ -16,7 +16,7 @@ date_log <- function() {
 #' the specified packages (`pkgs`).
 #' @export
 session_info_kable <- function(pkgs) {
-  si <- devtools::session_info(include_base = TRUE)
+  si <- sessioninfo::session_info(include_base = TRUE)
   assertthat::assert_that(all(c("platform", "packages") %in% names(si)))
   si_pl <- unclass(si[["platform"]]) |>
     unlist() |>
@@ -33,4 +33,24 @@ session_info_kable <- function(pkgs) {
     si_pl = knitr::kable(si_pl, caption = "Platform information."),
     si_pkg = knitr::kable(si_pkg, caption = "Main packages used.")
   )
+}
+
+output_format_valid <- function(x) {
+  format_choices <- c("tsv", "parquet", "both")
+  assertthat::assert_that(
+    length(x) == 1,
+    x %in% format_choices
+  )
+}
+
+write_dracarys <- function(obj, prefix, out_format) {
+  output_format_valid(out_format)
+  if (out_format %in% c("tsv", "both")) {
+    tsv_out <- glue::glue("{prefix}.tsv")
+    readr::write_tsv(obj, tsv_out)
+  }
+  if (out_format %in% c("parquet", "both")) {
+    parquet_out <- glue::glue("{prefix}.parquet")
+    arrow::write_parquet(obj, parquet_out)
+  }
 }

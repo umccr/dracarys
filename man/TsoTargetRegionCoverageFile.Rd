@@ -20,6 +20,7 @@ trc$plot(90) # or plot(trc, 90)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TsoTargetRegionCoverageFile-read}{\code{TsoTargetRegionCoverageFile$read()}}
+\item \href{#method-TsoTargetRegionCoverageFile-write}{\code{TsoTargetRegionCoverageFile$write()}}
 \item \href{#method-TsoTargetRegionCoverageFile-plot}{\code{TsoTargetRegionCoverageFile$plot()}}
 \item \href{#method-TsoTargetRegionCoverageFile-clone}{\code{TsoTargetRegionCoverageFile$clone()}}
 }
@@ -50,6 +51,27 @@ tibble with the following columns:
 \item BasePair
 \item Percentage
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TsoTargetRegionCoverageFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoTargetRegionCoverageFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{TargetRegionCoverage.json.gz} file output
+from TSO.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TsoTargetRegionCoverageFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prefix}}{Prefix path of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
+'parquet', 'both').}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
