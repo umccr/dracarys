@@ -9,11 +9,7 @@
 #' MultiQC JSON file.
 #' @export
 dracarys_multiqc <- function(json, prefix, outdir, out_format = "tsv") {
-  format_choices <- c("tsv", "parquet", "both")
-  assertthat::assert_that(
-    length(out_format) == 1,
-    out_format %in% format_choices
-  )
+  output_format_valid(out_format)
   e <- emojifont::emoji
   cli::cli_div(theme = list(
     span.file = list(color = "lightblue"),

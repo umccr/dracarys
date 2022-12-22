@@ -41,6 +41,7 @@ requirements:
     - r-knitr
     - r-rmarkdown
     - r-scales
+    - r-sessioninfo
     - r-testthat
   run:
     # imports
@@ -68,6 +69,7 @@ requirements:
     - r-knitr
     - r-rmarkdown
     - r-scales
+    - r-sessioninfo
     - r-testthat
 
 test:

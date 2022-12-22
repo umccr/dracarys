@@ -42,6 +42,7 @@ Suggests:
     knitr,
     rmarkdown,
     scales,
+    sessioninfo,
     testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE,
               roclets = c("namespace", "rd", "roxytest::testthat_roclet"))

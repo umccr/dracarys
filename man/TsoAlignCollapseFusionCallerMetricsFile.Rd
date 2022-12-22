@@ -13,6 +13,7 @@ x <- system.file("extdata/tso/sample705.AlignCollapseFusionCaller_metrics.json.g
 )
 m <- TsoAlignCollapseFusionCallerMetricsFile$new(x)
 m$read() # or read(m)
+m$write(prefix = tempfile(), out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoAlignCollapseFusionCallerMetricsFile}
@@ -21,6 +22,7 @@ m$read() # or read(m)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-read}{\code{TsoAlignCollapseFusionCallerMetricsFile$read()}}
+\item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-write}{\code{TsoAlignCollapseFusionCallerMetricsFile$write()}}
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-clone}{\code{TsoAlignCollapseFusionCallerMetricsFile$clone()}}
 }
 }
@@ -51,6 +53,31 @@ tibble with the following columns:
 \item value: value of metric
 \item percent: percentage
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TsoAlignCollapseFusionCallerMetricsFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoAlignCollapseFusionCallerMetricsFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{AlignCollapseFusionCaller_metrics.json.gz} file
+output from TSO.
+
+Histo is the majority from UmiStatistics section, write out separately.
+Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
+Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prefix}}{Prefix path of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
+'parquet', 'both').}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
