@@ -649,24 +649,30 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inhe
     biom_list <- list()
     if ("microsatelliteInstability" %in% names(biom)) {
       msi <- biom[["microsatelliteInstability"]]
-      amet <- msi[["additionalMetrics"]] |>
-        purrr::map(tibble::as_tibble_row) |>
-        dplyr::bind_rows()
-      biom_list[["msi"]] <- list(
-        msi_pct_unstable_sites = msi[["msiPercentUnstableSites"]],
-        additional_metrics = amet
+      assertthat::assert_that(
+        purrr::is_list(msi, n = 3),
+        all(c("msiPercentUnstableSites", "additionalMetrics") %in% names(msi)),
+        msi[["additionalMetrics"]][[1]][["name"]] == "SumJsd"
       )
+      biom_list[["msi_pct_unstable_sites"]] <- msi[["msiPercentUnstableSites"]]
+      biom_list[["msi_SumJsd"]] <- msi[["additionalMetrics"]][[1]][["value"]]
     }
     if ("tumorMutationalBurden" %in% names(biom)) {
       tmb <- biom[["tumorMutationalBurden"]]
       amet <- tmb[["additionalMetrics"]] |>
         purrr::map(tibble::as_tibble_row) |>
-        dplyr::bind_rows()
-      biom_list[["tmb"]] <- list(
-        tmb_per_mb = tmb[["tumorMutationalBurdenPerMegabase"]],
-        additional_metrics = amet
+        dplyr::bind_rows() |>
+        dplyr::select("name", "value") |>
+        tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+        as.list()
+      assertthat::assert_that(
+        all(c("CodingRegionSizeMb", "SomaticCodingVariantsCount") %in% names(amet))
       )
+      biom_list[["tmb_per_mb"]] <- tmb[["tumorMutationalBurdenPerMegabase"]]
+      biom_list[["tmb_coding_region_sizemb"]] <- amet[["CodingRegionSizeMb"]]
+      biom_list[["tmb_somatic_coding_variants_count"]] <- amet[["SomaticCodingVariantsCount"]]
     }
+    biom_tbl <- tibble::as_tibble_row(biom_list)
 
     ## sampleMetrics
     smet <- dat[["sampleMetrics"]]
@@ -674,7 +680,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inhe
       purrr::map(tibble::as_tibble_row) |>
       dplyr::bind_rows() |>
       dplyr::select("name", "value") |>
-      tidyr::pivot_wider(names_from = .data$name, values_from = .data$value)
+      tidyr::pivot_wider(names_from = "name", values_from = "value")
 
     qc2tib <- function(el) {
       el[["metrics"]] |>
@@ -687,7 +693,21 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inhe
     smet_qc <- smet_qc |>
       purrr::map(qc2tib) |>
       purrr::set_names(smet_nms) |>
-      dplyr::bind_rows(.id = "metric")
+      dplyr::bind_rows(.id = "metric") |>
+      # try to tidy up a bit
+      dplyr::mutate(
+        metric = dplyr::case_when(
+          .data$metric == "DNA Library QC Metrics" ~ "dna_qc",
+          .data$metric == "DNA Library QC Metrics for Small Variant Calling and TMB" ~ "dna_qc_smallv_tmb",
+          .data$metric == "DNA Library QC Metrics for Copy Number Variant Calling" ~ "dna_qc_cnv",
+          .data$metric == "DNA Library QC Metrics for MSI and Fusions" ~ "dna_qc_msi_fus",
+          TRUE ~ .data$metric
+        ),
+        name = glue("{.data$metric}_{.data$name}")
+      ) |>
+      dplyr::select("name", "value", "LSL", "USL") |>
+      tidyr::pivot_longer(c("value", "LSL", "USL"), names_to = "variable") |>
+      tidyr::pivot_wider(names_from = c("name", "variable"), values_from = "value")
 
     v <- dat[["variants"]]
     vars <- list(
@@ -699,7 +719,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inhe
     res <- list(
       sample_info = sample_info,
       software_config = sw,
-      biomarkers = biom_list,
+      biomarkers = biom_tbl,
       sample_metrics_qc = smet_qc,
       sample_metrics_expanded = smet_em,
       vars = vars
