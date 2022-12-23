@@ -614,6 +614,7 @@ TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
 #' x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
 #' res <- TsoSampleAnalysisResultsFile$new(x)
 #' res$read() # or read(res)
+#' res$write(tempfile(), "both")
 #' @export
 TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inherit = File, public = list(
   #' @description
@@ -725,6 +726,70 @@ TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inhe
       vars = vars
     )
     res
+  },
+  #' @description
+  #' Writes a tidy version of the `SampleAnalysisResults.json.gz` file output
+  #' from TSO.
+  #'
+  #' @param prefix Prefix path of output file(s).
+  #' @param out_format Format of output file(s) (one of 'tsv' (def.),
+  #' 'parquet', 'both').
+  #'
+  write = function(prefix, out_format = "tsv") {
+    d <- self$read()
+    p <- glue("{prefix}_SampleAnalysisResults")
+    l <- list(
+      sample_info = list(
+        obj = d[["sample_info"]],
+        pref = glue("{p}_sample_info")
+      ),
+      qc = list(
+        obj = dplyr::bind_cols(d[["sample_metrics_qc"]], d[["sample_metrics_expanded"]]),
+        pref = glue("{p}_qc")
+      ),
+      biomarkers = list(
+        obj = d[["biomarkers"]],
+        pref = glue("{p}_biomarkers")
+      ),
+      sw_conf_datasources = list(
+        obj = d[["software_config"]][["data_sources"]],
+        pref = glue("{p}_sw_conf_datasources")
+      ),
+      sw_conf_other = list(
+        obj = d[["software_config"]][["other"]],
+        pref = glue("{p}_sw_conf_other")
+      ),
+      snv = list(
+        obj = d[["vars"]][["snvs"]],
+        pref = glue("{p}_smallv"),
+        empty_tbl = c(
+          "chrom", "pos", "ref", "alt", "af", "qual", "dp_tot", "dp_alt",
+          "transcript", "source", "bioType", "aminoAcids", "cdnaPos", "codons",
+          "cdsPos", "exons", "geneId", "hgnc", "hgvsc", "hgvsp", "isCanonical",
+          "polyPhenScore", "polyPhenPrediction", "proteinId", "proteinPos",
+          "siftScore", "siftPrediction", "consequence", "introns"
+        ) |>
+          purrr::map_dfc(setNames, object = list(logical()))
+      ),
+      cnv = list(
+        obj = d[["vars"]][["cnvs"]],
+        pref = glue("{p}_cnv"),
+        empty_tbl = c(
+          "foldChange", "qual", "copyNumberType", "gene", "chromosome",
+          "startPosition", "endPosition"
+        ) |>
+          purrr::map_dfc(setNames, object = list(logical()))
+      )
+    )
+    if (nrow(l[["snv"]][["obj"]]) == 0) {
+      l[["snv"]][["obj"]] <- l[["snv"]][["empty_tbl"]]
+    }
+    if (nrow(l[["cnv"]][["obj"]]) == 0) {
+      l[["cnv"]][["obj"]] <- l[["cnv"]][["empty_tbl"]]
+    }
+    purrr::map(l, function(k) {
+      write_dracarys(obj = k[["obj"]], prefix = k[["pref"]], out_format = out_format)
+    })
   }
 ))
 
