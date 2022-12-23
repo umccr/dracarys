@@ -11,6 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705.tmb.json.gz", package = "dracarys")
 tmb <- TsoTmbFile$new(x)
 tmb$read() # or read(tmb)
+tmb$write(tempfile(), "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTmbFile}
@@ -19,6 +20,7 @@ tmb$read() # or read(tmb)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TsoTmbFile-read}{\code{TsoTmbFile$read()}}
+\item \href{#method-TsoTmbFile-write}{\code{TsoTmbFile$write()}}
 \item \href{#method-TsoTmbFile-clone}{\code{TsoTmbFile$clone()}}
 }
 }
@@ -53,6 +55,26 @@ tibble with the following columns:
 \item TotalRegionSizeMb
 \item CodingRegionSizeMb
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TsoTmbFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoTmbFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{tmb.json.gz} file output from TSO.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TsoTmbFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prefix}}{Prefix path of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
+'parquet', 'both').}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

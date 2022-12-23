@@ -12,6 +12,7 @@ x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package =
 trc <- TsoTargetRegionCoverageFile$new(x)
 trc$read() # or read(trc)
 trc$plot(90) # or plot(trc, 90)
+trc$write(prefix = tempfile(), out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTargetRegionCoverageFile}

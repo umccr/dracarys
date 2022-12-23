@@ -32,7 +32,6 @@ FILE_REGEX <- tibble::tribble(
   "msi\\.json\\.gz$", "tso__msi",
   "tmb\\.json\\.gz$", "tso__tmb",
   "TMB_Trace\\.tsv$", "tso__tmb_trace_tsv",
-  "_CombinedVariantOutput\\.tsv$", "tso__combined_variant_output",
   # "_Fusions\\.json\\.gz$", "tso__fusions_json",
   "_Fusions\\.csv$", "tso__fusions_csv",
   "SampleAnalysisResults\\.json\\.gz$", "tso__sample_analysis_results",

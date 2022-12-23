@@ -11,6 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
 msi <- TsoMsiFile$new(x)
 msi$read() # or read(msi)
+msi$write(tempfile(), "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoMsiFile}
@@ -19,6 +20,7 @@ msi$read() # or read(msi)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TsoMsiFile-read}{\code{TsoMsiFile$read()}}
+\item \href{#method-TsoMsiFile-write}{\code{TsoMsiFile$write()}}
 \item \href{#method-TsoMsiFile-clone}{\code{TsoMsiFile$clone()}}
 }
 }
@@ -46,6 +48,26 @@ tibble with the following columns:
 \itemize{
 \item label:
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TsoMsiFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoMsiFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{msi.json.gz} file output from TSO.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TsoMsiFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prefix}}{Prefix path of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
+'parquet', 'both').}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
