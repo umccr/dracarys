@@ -10,7 +10,8 @@ Contains methods for reading and displaying contents of the
 \examples{
 x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
 res <- TsoSampleAnalysisResultsFile$new(x)
-res$read() # or read(res)
+#res$read() # or read(res)
+res$write(tempfile(), "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoSampleAnalysisResultsFile}
@@ -19,6 +20,7 @@ res$read() # or read(res)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TsoSampleAnalysisResultsFile-read}{\code{TsoSampleAnalysisResultsFile$read()}}
+\item \href{#method-TsoSampleAnalysisResultsFile-write}{\code{TsoSampleAnalysisResultsFile$write()}}
 \item \href{#method-TsoSampleAnalysisResultsFile-clone}{\code{TsoSampleAnalysisResultsFile$clone()}}
 }
 }
@@ -43,6 +45,27 @@ Reads the \code{SampleAnalysisResults.json.gz} file output from TSO.
 
 \subsection{Returns}{
 list of tibbles
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TsoSampleAnalysisResultsFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoSampleAnalysisResultsFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{SampleAnalysisResults.json.gz} file output
+from TSO.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TsoSampleAnalysisResultsFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prefix}}{Prefix path of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
+'parquet', 'both').}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
