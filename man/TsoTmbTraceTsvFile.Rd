@@ -11,6 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
 d <- TsoTmbTraceTsvFile$new(x)
 d$read() # or read(d)
+d$write(prefix = tempfile(), out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTmbTraceTsvFile}
@@ -19,6 +20,7 @@ d$read() # or read(d)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TsoTmbTraceTsvFile-read}{\code{TsoTmbTraceTsvFile$read()}}
+\item \href{#method-TsoTmbTraceTsvFile-write}{\code{TsoTmbTraceTsvFile$write()}}
 \item \href{#method-TsoTmbTraceTsvFile-clone}{\code{TsoTmbTraceTsvFile$clone()}}
 }
 }
@@ -47,6 +49,26 @@ tibble with the following columns:
 \item FragmentLength
 \item Count
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TsoTmbTraceTsvFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoTmbTraceTsvFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{TMB_Trace.tsv} file output from TSO.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TsoTmbTraceTsvFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prefix}}{Prefix path of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
+'parquet', 'both').}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

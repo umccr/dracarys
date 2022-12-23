@@ -12,6 +12,7 @@ x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package =
 fl <- TsoFragmentLengthHistFile$new(x)
 fl$read() # or read(fl)
 fl$plot(5)
+fl$write(tempfile(), out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoFragmentLengthHistFile}
@@ -20,6 +21,7 @@ fl$plot(5)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TsoFragmentLengthHistFile-read}{\code{TsoFragmentLengthHistFile$read()}}
+\item \href{#method-TsoFragmentLengthHistFile-write}{\code{TsoFragmentLengthHistFile$write()}}
 \item \href{#method-TsoFragmentLengthHistFile-plot}{\code{TsoFragmentLengthHistFile$plot()}}
 \item \href{#method-TsoFragmentLengthHistFile-clone}{\code{TsoFragmentLengthHistFile$clone()}}
 }
@@ -49,6 +51,27 @@ tibble with the following columns:
 \item FragmentLength
 \item Count
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TsoFragmentLengthHistFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoFragmentLengthHistFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{fragment_length_hist.json.gz} file output
+from TSO.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TsoFragmentLengthHistFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{prefix}}{Prefix path of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
+'parquet', 'both').}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
