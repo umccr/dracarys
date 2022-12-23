@@ -10,7 +10,7 @@ Contains methods for reading and displaying contents of the
 \examples{
 x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
 fl <- TsoFragmentLengthHistFile$new(x)
-fl$read() # or read(fl)
+#fl$read() # or read(fl)
 fl$plot(5)
 fl$write(tempfile(), out_format = "both")
 }

@@ -11,9 +11,10 @@
 #' @return Generates tidy TSV and/or Parquet representations of the workflow results.
 #' @examples
 #' \dontrun{
-#' indir <- "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
-#' indir <- "gds://production/analysis_data/SBJ00476/tso_ctdna_tumor_only/20211217c0a5d1f8/L2100345/Results/PRJ200603_L2100345/"
-#' indir <- "gds://production/analysis_data/SBJ00006/tso_ctdna_tumor_only/202210111b001d7f/L2201499/Results/NTC_ctTSO221004_L2201499/"
+#' indir <- paste0(
+#'   "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only",
+#'   "/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+#' )
 #' outdir <- here::here(glue("nogit/tso/SBJ00476"))
 #' outdir <- here::here(glue("nogit/tso/SBJ00006"))
 #' dryrun <- TRUE
@@ -74,7 +75,10 @@ tso_write <- function(d, outdir, prefix, format = "tsv") {
 #' @return List of tibbles.
 #' @examples
 #' \dontrun{
-#' indir <- "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+#' indir <- paste0(
+#'   "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/",
+#'   "20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+#' )
 #' gds_local_dir <- here::here(glue("nogit/tso/SBJ02858"))
 #' dryrun <- F
 #' tso_tidy(indir, gds_local_dir, dryrun)
@@ -172,8 +176,10 @@ tso_funcall <- function(x) {
 #' d$read() # or read(d)
 #' d$write(prefix = tempfile(), out_format = "both")
 #' @export
-TsoTmbTraceTsvFile <- R6::R6Class("TsoTmbTraceTsvFile",
-  inherit = File, public = list(
+TsoTmbTraceTsvFile <- R6::R6Class(
+  "TsoTmbTraceTsvFile",
+  inherit = File,
+  public = list(
     #' @description
     #' Reads the `TMB_Trace.tsv` file output from TSO.
     #'
@@ -230,12 +236,14 @@ TsoTmbTraceTsvFile <- R6::R6Class("TsoTmbTraceTsvFile",
 #' @examples
 #' x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
 #' fl <- TsoFragmentLengthHistFile$new(x)
-#' fl$read() # or read(fl)
+#' # fl$read() # or read(fl)
 #' fl$plot(5)
 #' fl$write(tempfile(), out_format = "both")
 #' @export
-TsoFragmentLengthHistFile <- R6::R6Class("TsoFragmentLengthHistFile",
-  inherit = File, public = list(
+TsoFragmentLengthHistFile <- R6::R6Class(
+  "TsoFragmentLengthHistFile",
+  inherit = File,
+  public = list(
     #' @description
     #' Reads the `fragment_length_hist.json.gz` file output from TSO.
     #'
@@ -310,8 +318,10 @@ TsoFragmentLengthHistFile <- R6::R6Class("TsoFragmentLengthHistFile",
 #' trc$plot(90) # or plot(trc, 90)
 #' trc$write(prefix = tempfile(), out_format = "both")
 #' @export
-TsoTargetRegionCoverageFile <- R6::R6Class("TsoTargetRegionCoverageFile",
-  inherit = File, public = list(
+TsoTargetRegionCoverageFile <- R6::R6Class(
+  "TsoTargetRegionCoverageFile",
+  inherit = File,
+  public = list(
     #' @description
     #' Reads the `TargetRegionCoverage.json.gz` file output from TSO.
     #'
@@ -396,8 +406,10 @@ TsoTargetRegionCoverageFile <- R6::R6Class("TsoTargetRegionCoverageFile",
 #' m$read() # or read(m)
 #' m$write(prefix = tempfile(), out_format = "both")
 #' @export
-TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class("TsoAlignCollapseFusionCallerMetricsFile",
-  inherit = File, public = list(
+TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
+  "TsoAlignCollapseFusionCallerMetricsFile",
+  inherit = File,
+  public = list(
     #' @description
     #' Reads the `AlignCollapseFusionCaller_metrics.json.gz` file output from TSO.
     #'
@@ -481,44 +493,48 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class("TsoAlignCollapseFusionCa
 #' tmb$read() # or read(tmb)
 #' tmb$write(tempfile(), "both")
 #' @export
-TsoTmbFile <- R6::R6Class("TsoTmbFile", inherit = File, public = list(
-  #' @description
-  #' Reads the `tmb.json.gz` file output from TSO.
-  #'
-  #' @return tibble with the following columns:
-  #' * TmbPerMb
-  #' * AdjustedTmbPerMb
-  #' * NonsynonymousTmbPerMb
-  #' * AdjustedNonsynonymousTmbPerMb
-  #' * SomaticCodingVariantsCount
-  #' * NonsynonymousSomaticCodingVariantsCount
-  #' * TotalRegionSizeMb
-  #' * CodingRegionSizeMb
-  read = function() {
-    x <- self$path
-    # j <- jsonlite::read_json(x) # cannot handle NaN
-    j <- RJSONIO::fromJSON(x) # turns NaN to NULL
-    # not interested in Settings element
-    j[["Settings"]] <- NULL
-    # handle silly NULLs
-    j <- lapply(j, function(x) ifelse(is.null(x), NA, x))
-    tibble::as_tibble_row(j) |>
-      dplyr::mutate(dplyr::across(dplyr::everything(), as.numeric))
-  },
+TsoTmbFile <- R6::R6Class(
+  "TsoTmbFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `tmb.json.gz` file output from TSO.
+    #'
+    #' @return tibble with the following columns:
+    #' * TmbPerMb
+    #' * AdjustedTmbPerMb
+    #' * NonsynonymousTmbPerMb
+    #' * AdjustedNonsynonymousTmbPerMb
+    #' * SomaticCodingVariantsCount
+    #' * NonsynonymousSomaticCodingVariantsCount
+    #' * TotalRegionSizeMb
+    #' * CodingRegionSizeMb
+    read = function() {
+      x <- self$path
+      # j <- jsonlite::read_json(x) # cannot handle NaN
+      j <- RJSONIO::fromJSON(x) # turns NaN to NULL
+      # not interested in Settings element
+      j[["Settings"]] <- NULL
+      # handle silly NULLs
+      j <- lapply(j, function(x) ifelse(is.null(x), NA, x))
+      tibble::as_tibble_row(j) |>
+        dplyr::mutate(dplyr::across(dplyr::everything(), as.numeric))
+    },
 
-  #' @description
-  #' Writes a tidy version of the `tmb.json.gz` file output from TSO.
-  #'
-  #' @param prefix Prefix path of output file(s).
-  #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-  #' 'parquet', 'both').
-  #'
-  write = function(prefix, out_format = "tsv") {
-    d <- self$read()
-    prefix2 <- glue("{prefix}_tmb")
-    write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
-  }
-))
+    #' @description
+    #' Writes a tidy version of the `tmb.json.gz` file output from TSO.
+    #'
+    #' @param prefix Prefix path of output file(s).
+    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
+    #' 'parquet', 'both').
+    #'
+    write = function(prefix, out_format = "tsv") {
+      d <- self$read()
+      prefix2 <- glue("{prefix}_tmb")
+      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    }
+  )
+)
 
 #' TsoFusionsCsvFile R6 Class
 #'
@@ -532,30 +548,34 @@ TsoTmbFile <- R6::R6Class("TsoTmbFile", inherit = File, public = list(
 #' fus$read() # or read(fus)
 #' fus$write(tempfile(), "both")
 #' @export
-TsoFusionsCsvFile <- R6::R6Class("TsoFusionsCsvFile", inherit = File, public = list(
-  #' @description
-  #' Reads the `Fusions.csv` file output from TSO.
-  #'
-  #' @return tibble with the following columns:
-  #'   - label:
-  read = function() {
-    x <- self$path
-    readr::read_csv(x, col_types = readr::cols(.default = "c"), comment = "#")
-  },
+TsoFusionsCsvFile <- R6::R6Class(
+  "TsoFusionsCsvFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `Fusions.csv` file output from TSO.
+    #'
+    #' @return tibble with the following columns:
+    #'   - label:
+    read = function() {
+      x <- self$path
+      readr::read_csv(x, col_types = readr::cols(.default = "c"), comment = "#")
+    },
 
-  #' @description
-  #' Writes a tidy version of the `Fusions.csv` file output from TSO.
-  #'
-  #' @param prefix Prefix path of output file(s).
-  #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-  #' 'parquet', 'both').
-  #'
-  write = function(prefix, out_format = "tsv") {
-    d <- self$read()
-    prefix2 <- glue("{prefix}_Fusions")
-    write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
-  }
-))
+    #' @description
+    #' Writes a tidy version of the `Fusions.csv` file output from TSO.
+    #'
+    #' @param prefix Prefix path of output file(s).
+    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
+    #' 'parquet', 'both').
+    #'
+    write = function(prefix, out_format = "tsv") {
+      d <- self$read()
+      prefix2 <- glue("{prefix}_Fusions")
+      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    }
+  )
+)
 
 #' TsoMsiFile R6 Class
 #'
@@ -569,40 +589,44 @@ TsoFusionsCsvFile <- R6::R6Class("TsoFusionsCsvFile", inherit = File, public = l
 #' msi$read() # or read(msi)
 #' msi$write(tempfile(), "both")
 #' @export
-TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
-  #' @description
-  #' Reads the `msi.json.gz` file output from TSO.
-  #'
-  #' @return tibble with the following columns:
-  #'   - label:
-  read = function() {
-    x <- self$path
-    j <- jsonlite::read_json(x)
-    # not interested in Settings element
-    j[["Settings"]] <- NULL
-    if (is.null(j[["ResultMessage"]])) {
-      j[["ResultMessage"]] <- NA_character_
-    }
-    if (j[["PercentageUnstableSites"]] == "NaN") {
-      j[["PercentageUnstableSites"]] <- NA_real_
-    }
-    tibble::as_tibble_row(j) |>
-      dplyr::mutate(ResultIsValid = as.character(.data$ResultIsValid))
-  },
+TsoMsiFile <- R6::R6Class(
+  "TsoMsiFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `msi.json.gz` file output from TSO.
+    #'
+    #' @return tibble with the following columns:
+    #'   - label:
+    read = function() {
+      x <- self$path
+      j <- jsonlite::read_json(x)
+      # not interested in Settings element
+      j[["Settings"]] <- NULL
+      if (is.null(j[["ResultMessage"]])) {
+        j[["ResultMessage"]] <- NA_character_
+      }
+      if (j[["PercentageUnstableSites"]] == "NaN") {
+        j[["PercentageUnstableSites"]] <- NA_real_
+      }
+      tibble::as_tibble_row(j) |>
+        dplyr::mutate(ResultIsValid = as.character(.data$ResultIsValid))
+    },
 
-  #' @description
-  #' Writes a tidy version of the `msi.json.gz` file output from TSO.
-  #'
-  #' @param prefix Prefix path of output file(s).
-  #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-  #' 'parquet', 'both').
-  #'
-  write = function(prefix, out_format = "tsv") {
-    d <- self$read()
-    prefix2 <- glue("{prefix}_msi")
-    write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
-  }
-))
+    #' @description
+    #' Writes a tidy version of the `msi.json.gz` file output from TSO.
+    #'
+    #' @param prefix Prefix path of output file(s).
+    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
+    #' 'parquet', 'both').
+    #'
+    write = function(prefix, out_format = "tsv") {
+      d <- self$read()
+      prefix2 <- glue("{prefix}_msi")
+      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    }
+  )
+)
 
 #' TsoSampleAnalysisResultsFile R6 Class
 #'
@@ -613,185 +637,189 @@ TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
 #' @examples
 #' x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
 #' res <- TsoSampleAnalysisResultsFile$new(x)
-#' res$read() # or read(res)
+#' # res$read() # or read(res)
 #' res$write(tempfile(), "both")
 #' @export
-TsoSampleAnalysisResultsFile <- R6::R6Class("TsoSampleAnalysisResultsFile", inherit = File, public = list(
-  #' @description
-  #' Reads the `SampleAnalysisResults.json.gz` file output from TSO.
-  #'
-  #' @return list of tibbles
-  read = function() {
-    x <- self$path
-    j <- jsonlite::read_json(x)
-    dat <- j[["data"]]
-    ## sampleInformation
-    sample_info <- dat[["sampleInformation"]] |>
-      tibble::as_tibble_row()
-    ## softwareConfiguration
-    sw_conf <- dat[["softwareConfiguration"]]
-    sw_nl_data_sources <- sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] |>
-      purrr::map(tibble::as_tibble_row) |>
-      dplyr::bind_rows()
-    # get rid of it to grab the remaining elements
-    sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] <- NULL
-    sw_nl_rest <- sw_conf[["nirvanaVersionList"]][[1]] |>
-      tibble::as_tibble()
-    sw_conf[["nirvanaVersionList"]] <- NULL
-    sw_rest <- tibble::as_tibble(sw_conf)
-    sw_all <- dplyr::bind_cols(sw_rest, sw_nl_rest)
-    sw <- list(
-      data_sources = sw_nl_data_sources,
-      other = sw_all
-    )
-
-    ## biomarkers
-    biom <- dat[["biomarkers"]]
-    biom_list <- list()
-    if ("microsatelliteInstability" %in% names(biom)) {
-      msi <- biom[["microsatelliteInstability"]]
-      assertthat::assert_that(
-        purrr::is_list(msi, n = 3),
-        all(c("msiPercentUnstableSites", "additionalMetrics") %in% names(msi)),
-        msi[["additionalMetrics"]][[1]][["name"]] == "SumJsd"
+TsoSampleAnalysisResultsFile <- R6::R6Class(
+  "TsoSampleAnalysisResultsFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `SampleAnalysisResults.json.gz` file output from TSO.
+    #'
+    #' @return list of tibbles
+    read = function() {
+      x <- self$path
+      j <- jsonlite::read_json(x)
+      dat <- j[["data"]]
+      ## sampleInformation
+      sample_info <- dat[["sampleInformation"]] |>
+        tibble::as_tibble_row()
+      ## softwareConfiguration
+      sw_conf <- dat[["softwareConfiguration"]]
+      sw_nl_data_sources <- sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] |>
+        purrr::map(tibble::as_tibble_row) |>
+        dplyr::bind_rows()
+      # get rid of it to grab the remaining elements
+      sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] <- NULL
+      sw_nl_rest <- sw_conf[["nirvanaVersionList"]][[1]] |>
+        tibble::as_tibble()
+      sw_conf[["nirvanaVersionList"]] <- NULL
+      sw_rest <- tibble::as_tibble(sw_conf)
+      sw_all <- dplyr::bind_cols(sw_rest, sw_nl_rest)
+      sw <- list(
+        data_sources = sw_nl_data_sources,
+        other = sw_all
       )
-      biom_list[["msi_pct_unstable_sites"]] <- msi[["msiPercentUnstableSites"]]
-      biom_list[["msi_SumJsd"]] <- msi[["additionalMetrics"]][[1]][["value"]]
-    }
-    if ("tumorMutationalBurden" %in% names(biom)) {
-      tmb <- biom[["tumorMutationalBurden"]]
-      amet <- tmb[["additionalMetrics"]] |>
+
+      ## biomarkers
+      biom <- dat[["biomarkers"]]
+      biom_list <- list()
+      if ("microsatelliteInstability" %in% names(biom)) {
+        msi <- biom[["microsatelliteInstability"]]
+        assertthat::assert_that(
+          purrr::is_list(msi, n = 3),
+          all(c("msiPercentUnstableSites", "additionalMetrics") %in% names(msi)),
+          msi[["additionalMetrics"]][[1]][["name"]] == "SumJsd"
+        )
+        biom_list[["msi_pct_unstable_sites"]] <- msi[["msiPercentUnstableSites"]]
+        biom_list[["msi_SumJsd"]] <- msi[["additionalMetrics"]][[1]][["value"]]
+      }
+      if ("tumorMutationalBurden" %in% names(biom)) {
+        tmb <- biom[["tumorMutationalBurden"]]
+        amet <- tmb[["additionalMetrics"]] |>
+          purrr::map(tibble::as_tibble_row) |>
+          dplyr::bind_rows() |>
+          dplyr::select("name", "value") |>
+          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+          as.list()
+        assertthat::assert_that(
+          all(c("CodingRegionSizeMb", "SomaticCodingVariantsCount") %in% names(amet))
+        )
+        biom_list[["tmb_per_mb"]] <- tmb[["tumorMutationalBurdenPerMegabase"]]
+        biom_list[["tmb_coding_region_sizemb"]] <- amet[["CodingRegionSizeMb"]]
+        biom_list[["tmb_somatic_coding_variants_count"]] <- amet[["SomaticCodingVariantsCount"]]
+      }
+      biom_tbl <- tibble::as_tibble_row(biom_list)
+
+      ## sampleMetrics
+      smet <- dat[["sampleMetrics"]]
+      smet_em <- smet[["expandedMetrics"]][[1]][["metrics"]] |>
         purrr::map(tibble::as_tibble_row) |>
         dplyr::bind_rows() |>
         dplyr::select("name", "value") |>
-        tidyr::pivot_wider(names_from = "name", values_from = "value") |>
-        as.list()
-      assertthat::assert_that(
-        all(c("CodingRegionSizeMb", "SomaticCodingVariantsCount") %in% names(amet))
+        tidyr::pivot_wider(names_from = "name", values_from = "value")
+
+      qc2tib <- function(el) {
+        el[["metrics"]] |>
+          purrr::map(tibble::as_tibble) |>
+          dplyr::bind_rows()
+      }
+
+      smet_qc <- smet[["qualityControlMetrics"]]
+      smet_nms <- purrr::map_chr(smet_qc, "name")
+      smet_qc <- smet_qc |>
+        purrr::map(qc2tib) |>
+        purrr::set_names(smet_nms) |>
+        dplyr::bind_rows(.id = "metric") |>
+        # try to tidy up a bit
+        dplyr::mutate(
+          metric = dplyr::case_when(
+            .data$metric == "DNA Library QC Metrics" ~ "dna_qc",
+            .data$metric == "DNA Library QC Metrics for Small Variant Calling and TMB" ~ "dna_qc_smallv_tmb",
+            .data$metric == "DNA Library QC Metrics for Copy Number Variant Calling" ~ "dna_qc_cnv",
+            .data$metric == "DNA Library QC Metrics for MSI and Fusions" ~ "dna_qc_msi_fus",
+            TRUE ~ .data$metric
+          ),
+          name = glue("{.data$metric}_{.data$name}")
+        ) |>
+        dplyr::select("name", "value", "LSL", "USL") |>
+        tidyr::pivot_longer(c("value", "LSL", "USL"), names_to = "variable") |>
+        tidyr::pivot_wider(names_from = c("name", "variable"), values_from = "value")
+
+      v <- dat[["variants"]]
+      vars <- list(
+        # fusions are more comprehensive in the Fusions.csv file
+        snvs = tso_snv(v[["smallVariants"]]),
+        cnvs = tso_cnv(v[["copyNumberVariants"]])
       )
-      biom_list[["tmb_per_mb"]] <- tmb[["tumorMutationalBurdenPerMegabase"]]
-      biom_list[["tmb_coding_region_sizemb"]] <- amet[["CodingRegionSizeMb"]]
-      biom_list[["tmb_somatic_coding_variants_count"]] <- amet[["SomaticCodingVariantsCount"]]
-    }
-    biom_tbl <- tibble::as_tibble_row(biom_list)
 
-    ## sampleMetrics
-    smet <- dat[["sampleMetrics"]]
-    smet_em <- smet[["expandedMetrics"]][[1]][["metrics"]] |>
-      purrr::map(tibble::as_tibble_row) |>
-      dplyr::bind_rows() |>
-      dplyr::select("name", "value") |>
-      tidyr::pivot_wider(names_from = "name", values_from = "value")
-
-    qc2tib <- function(el) {
-      el[["metrics"]] |>
-        purrr::map(tibble::as_tibble) |>
-        dplyr::bind_rows()
-    }
-
-    smet_qc <- smet[["qualityControlMetrics"]]
-    smet_nms <- purrr::map_chr(smet_qc, "name")
-    smet_qc <- smet_qc |>
-      purrr::map(qc2tib) |>
-      purrr::set_names(smet_nms) |>
-      dplyr::bind_rows(.id = "metric") |>
-      # try to tidy up a bit
-      dplyr::mutate(
-        metric = dplyr::case_when(
-          .data$metric == "DNA Library QC Metrics" ~ "dna_qc",
-          .data$metric == "DNA Library QC Metrics for Small Variant Calling and TMB" ~ "dna_qc_smallv_tmb",
-          .data$metric == "DNA Library QC Metrics for Copy Number Variant Calling" ~ "dna_qc_cnv",
-          .data$metric == "DNA Library QC Metrics for MSI and Fusions" ~ "dna_qc_msi_fus",
-          TRUE ~ .data$metric
+      res <- list(
+        sample_info = sample_info,
+        software_config = sw,
+        biomarkers = biom_tbl,
+        sample_metrics_qc = smet_qc,
+        sample_metrics_expanded = smet_em,
+        vars = vars
+      )
+      res
+    },
+    #' @description
+    #' Writes a tidy version of the `SampleAnalysisResults.json.gz` file output
+    #' from TSO.
+    #'
+    #' @param prefix Prefix path of output file(s).
+    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
+    #' 'parquet', 'both').
+    #'
+    write = function(prefix, out_format = "tsv") {
+      d <- self$read()
+      p <- glue("{prefix}_SampleAnalysisResults")
+      l <- list(
+        sample_info = list(
+          obj = d[["sample_info"]],
+          pref = glue("{p}_sample_info")
         ),
-        name = glue("{.data$metric}_{.data$name}")
-      ) |>
-      dplyr::select("name", "value", "LSL", "USL") |>
-      tidyr::pivot_longer(c("value", "LSL", "USL"), names_to = "variable") |>
-      tidyr::pivot_wider(names_from = c("name", "variable"), values_from = "value")
-
-    v <- dat[["variants"]]
-    vars <- list(
-      # fusions are more comprehensive in the Fusions.csv file
-      snvs = tso_snv(v[["smallVariants"]]),
-      cnvs = tso_cnv(v[["copyNumberVariants"]])
-    )
-
-    res <- list(
-      sample_info = sample_info,
-      software_config = sw,
-      biomarkers = biom_tbl,
-      sample_metrics_qc = smet_qc,
-      sample_metrics_expanded = smet_em,
-      vars = vars
-    )
-    res
-  },
-  #' @description
-  #' Writes a tidy version of the `SampleAnalysisResults.json.gz` file output
-  #' from TSO.
-  #'
-  #' @param prefix Prefix path of output file(s).
-  #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-  #' 'parquet', 'both').
-  #'
-  write = function(prefix, out_format = "tsv") {
-    d <- self$read()
-    p <- glue("{prefix}_SampleAnalysisResults")
-    l <- list(
-      sample_info = list(
-        obj = d[["sample_info"]],
-        pref = glue("{p}_sample_info")
-      ),
-      qc = list(
-        obj = dplyr::bind_cols(d[["sample_metrics_qc"]], d[["sample_metrics_expanded"]]),
-        pref = glue("{p}_qc")
-      ),
-      biomarkers = list(
-        obj = d[["biomarkers"]],
-        pref = glue("{p}_biomarkers")
-      ),
-      sw_conf_datasources = list(
-        obj = d[["software_config"]][["data_sources"]],
-        pref = glue("{p}_sw_conf_datasources")
-      ),
-      sw_conf_other = list(
-        obj = d[["software_config"]][["other"]],
-        pref = glue("{p}_sw_conf_other")
-      ),
-      snv = list(
-        obj = d[["vars"]][["snvs"]],
-        pref = glue("{p}_smallv"),
-        empty_tbl = c(
-          "chrom", "pos", "ref", "alt", "af", "qual", "dp_tot", "dp_alt",
-          "transcript", "source", "bioType", "aminoAcids", "cdnaPos", "codons",
-          "cdsPos", "exons", "geneId", "hgnc", "hgvsc", "hgvsp", "isCanonical",
-          "polyPhenScore", "polyPhenPrediction", "proteinId", "proteinPos",
-          "siftScore", "siftPrediction", "consequence", "introns"
-        ) |>
-          purrr::map_dfc(setNames, object = list(logical()))
-      ),
-      cnv = list(
-        obj = d[["vars"]][["cnvs"]],
-        pref = glue("{p}_cnv"),
-        empty_tbl = c(
-          "foldChange", "qual", "copyNumberType", "gene", "chromosome",
-          "startPosition", "endPosition"
-        ) |>
-          purrr::map_dfc(setNames, object = list(logical()))
+        qc = list(
+          obj = dplyr::bind_cols(d[["sample_metrics_qc"]], d[["sample_metrics_expanded"]]),
+          pref = glue("{p}_qc")
+        ),
+        biomarkers = list(
+          obj = d[["biomarkers"]],
+          pref = glue("{p}_biomarkers")
+        ),
+        sw_conf_datasources = list(
+          obj = d[["software_config"]][["data_sources"]],
+          pref = glue("{p}_sw_conf_datasources")
+        ),
+        sw_conf_other = list(
+          obj = d[["software_config"]][["other"]],
+          pref = glue("{p}_sw_conf_other")
+        ),
+        snv = list(
+          obj = d[["vars"]][["snvs"]],
+          pref = glue("{p}_smallv"),
+          empty_tbl = c(
+            "chrom", "pos", "ref", "alt", "af", "qual", "dp_tot", "dp_alt",
+            "transcript", "source", "bioType", "aminoAcids", "cdnaPos", "codons",
+            "cdsPos", "exons", "geneId", "hgnc", "hgvsc", "hgvsp", "isCanonical",
+            "polyPhenScore", "polyPhenPrediction", "proteinId", "proteinPos",
+            "siftScore", "siftPrediction", "consequence", "introns"
+          ) |>
+            purrr::map_dfc(setNames, object = list(logical()))
+        ),
+        cnv = list(
+          obj = d[["vars"]][["cnvs"]],
+          pref = glue("{p}_cnv"),
+          empty_tbl = c(
+            "foldChange", "qual", "copyNumberType", "gene", "chromosome",
+            "startPosition", "endPosition"
+          ) |>
+            purrr::map_dfc(setNames, object = list(logical()))
+        )
       )
-    )
-    if (nrow(l[["snv"]][["obj"]]) == 0) {
-      l[["snv"]][["obj"]] <- l[["snv"]][["empty_tbl"]]
+      if (nrow(l[["snv"]][["obj"]]) == 0) {
+        l[["snv"]][["obj"]] <- l[["snv"]][["empty_tbl"]]
+      }
+      if (nrow(l[["cnv"]][["obj"]]) == 0) {
+        l[["cnv"]][["obj"]] <- l[["cnv"]][["empty_tbl"]]
+      }
+      purrr::map(l, function(k) {
+        write_dracarys(obj = k[["obj"]], prefix = k[["pref"]], out_format = out_format)
+      })
     }
-    if (nrow(l[["cnv"]][["obj"]]) == 0) {
-      l[["cnv"]][["obj"]] <- l[["cnv"]][["empty_tbl"]]
-    }
-    purrr::map(l, function(k) {
-      write_dracarys(obj = k[["obj"]], prefix = k[["pref"]], out_format = out_format)
-    })
-  }
-))
+  )
+)
 
 tso_snv <- function(snvs) {
   # snvs is an array of snv elements

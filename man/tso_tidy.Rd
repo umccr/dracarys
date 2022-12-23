@@ -30,7 +30,8 @@ Tidies TSO ctDNA results into a list of tibbles.
 }
 \examples{
 \dontrun{
-indir <- "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+indir <- paste0("gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/",
+                "20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/")
 gds_local_dir <- here::here(glue("nogit/tso/SBJ02858"))
 dryrun <- F
 tso_tidy(indir, gds_local_dir, dryrun)
