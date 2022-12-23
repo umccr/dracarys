@@ -556,6 +556,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class("TsoAlignCollapseFusionCa
 #' x <- system.file("extdata/tso/sample705.tmb.json.gz", package = "dracarys")
 #' tmb <- TsoTmbFile$new(x)
 #' tmb$read() # or read(tmb)
+#' tmb$write(tempfile(), "both")
 #' @export
 TsoTmbFile <- R6::R6Class("TsoTmbFile", inherit = File, public = list(
   #' @description
@@ -580,6 +581,19 @@ TsoTmbFile <- R6::R6Class("TsoTmbFile", inherit = File, public = list(
     j <- lapply(j, function(x) ifelse(is.null(x), NA, x))
     tibble::as_tibble_row(j) |>
       dplyr::mutate(dplyr::across(dplyr::everything(), as.numeric))
+  },
+
+  #' @description
+  #' Writes a tidy version of the `tmb.json.gz` file output from TSO.
+  #'
+  #' @param prefix Prefix path of output file(s).
+  #' @param out_format Format of output file(s) (one of 'tsv' (def.),
+  #' 'parquet', 'both').
+  #'
+  write = function(prefix, out_format = "tsv") {
+    d <- self$read()
+    prefix2 <- glue("{prefix}_tmb")
+    write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
   }
 ))
 
@@ -593,6 +607,7 @@ TsoTmbFile <- R6::R6Class("TsoTmbFile", inherit = File, public = list(
 #' x <- system.file("extdata/tso/sample705_Fusions.csv", package = "dracarys")
 #' fus <- TsoFusionsCsvFile$new(x)
 #' fus$read() # or read(fus)
+#' fus$write(tempfile(), "both")
 #' @export
 TsoFusionsCsvFile <- R6::R6Class("TsoFusionsCsvFile", inherit = File, public = list(
   #' @description
@@ -603,6 +618,19 @@ TsoFusionsCsvFile <- R6::R6Class("TsoFusionsCsvFile", inherit = File, public = l
   read = function() {
     x <- self$path
     readr::read_csv(x, col_types = readr::cols(.default = "c"), comment = "#")
+  },
+
+  #' @description
+  #' Writes a tidy version of the `Fusions.csv` file output from TSO.
+  #'
+  #' @param prefix Prefix path of output file(s).
+  #' @param out_format Format of output file(s) (one of 'tsv' (def.),
+  #' 'parquet', 'both').
+  #'
+  write = function(prefix, out_format = "tsv") {
+    d <- self$read()
+    prefix2 <- glue("{prefix}_Fusions")
+    write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
   }
 ))
 
@@ -616,6 +644,7 @@ TsoFusionsCsvFile <- R6::R6Class("TsoFusionsCsvFile", inherit = File, public = l
 #' x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
 #' msi <- TsoMsiFile$new(x)
 #' msi$read() # or read(msi)
+#' msi$write(tempfile(), "both")
 #' @export
 TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
   #' @description
@@ -639,8 +668,7 @@ TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
   },
 
   #' @description
-  #' Writes a tidy version of the `fragment_length_hist.json.gz` file output
-  #' from TSO.
+  #' Writes a tidy version of the `msi.json.gz` file output from TSO.
   #'
   #' @param prefix Prefix path of output file(s).
   #' @param out_format Format of output file(s) (one of 'tsv' (def.),
@@ -648,7 +676,7 @@ TsoMsiFile <- R6::R6Class("TsoMsiFile", inherit = File, public = list(
   #'
   write = function(prefix, out_format = "tsv") {
     d <- self$read()
-    prefix2 <- glue("{prefix}_fragment_length_hist")
+    prefix2 <- glue("{prefix}_msi")
     write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
   }
 ))
