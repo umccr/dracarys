@@ -189,26 +189,13 @@ TsoTmbTraceTsvFile <- R6::R6Class(
     read = function() {
       x <- self$path
       ct <- readr::cols(
-        Chromosome = "c",
-        Position = "i",
-        RefCall = "c",
-        AltCall = "c",
-        VAF = "d",
-        Depth = "d",
-        CytoBand = "c",
-        GeneName = "c",
-        VariantType = "c",
-        CosmicIDs = "c",
-        MaxCosmicCount = "d",
-        AlleleCountsGnomadExome = "d",
-        AlleleCountsGnomadGenome = "d",
-        AlleleCounts1000Genomes = "d",
-        MaxDatabaseAlleleCounts = "d",
-        GermlineFilterDatabase = "l",
-        GermlineFilterProxi = "l",
-        CodingVariant = "l",
-        Nonsynonymous = "l",
-        IncludedInTMBNumerator = "l"
+        Chromosome = "c", Position = "i", RefCall = "c", AltCall = "c",
+        VAF = "d", Depth = "d", CytoBand = "c", GeneName = "c",
+        VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
+        AlleleCountsGnomadExome = "d", AlleleCountsGnomadGenome = "d",
+        AlleleCounts1000Genomes = "d", MaxDatabaseAlleleCounts = "d",
+        GermlineFilterDatabase = "l", GermlineFilterProxi = "l",
+        CodingVariant = "l", Nonsynonymous = "l", IncludedInTMBNumerator = "l"
       )
       readr::read_tsv(x, col_types = ct)
     },
@@ -559,7 +546,13 @@ TsoFusionsCsvFile <- R6::R6Class(
     #'   - label:
     read = function() {
       x <- self$path
-      readr::read_csv(x, col_types = readr::cols(.default = "c"), comment = "#")
+      ct <- readr::cols(
+        Sample = "c", Name = "c", Chr1 = "c", Pos1 = "d", Chr2 = "c",
+        Pos2 = "d", Direction = "c", Alt_Depth = "d", BP1_Depth = "d",
+        BP2_Depth = "d", Total_Depth = "d", VAF = "d", Gene1 = "c", Gene2 = "c",
+        Contig = "c", Filter = "c", Is_Cosmic_GenePair = "l"
+      )
+      readr::read_csv(x, col_types = ct, comment = "#")
     },
 
     #' @description
