@@ -10,7 +10,7 @@ Contains methods for reading and displaying contents of the
 \examples{
 x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
 res <- TsoSampleAnalysisResultsFile$new(x)
-#res$read() # or read(res)
+# res$read() # or read(res)
 res$write(tempfile(), "both")
 }
 \section{Super class}{

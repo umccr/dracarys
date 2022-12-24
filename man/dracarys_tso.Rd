@@ -31,8 +31,10 @@ Generate tidier representations of TSO500 ctDNA workflow outputs.
 }
 \examples{
 \dontrun{
-indir <- paste0("gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only",
-                "/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/")
+indir <- paste0(
+  "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only",
+  "/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+)
 outdir <- here::here(glue("nogit/tso/SBJ00476"))
 outdir <- here::here(glue("nogit/tso/SBJ00006"))
 dryrun <- TRUE
