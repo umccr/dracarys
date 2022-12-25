@@ -84,13 +84,14 @@ tso_write <- function(d, outdir, prefix, format = "tsv") {
 #' tso_tidy(indir, gds_local_dir, dryrun)
 #' }
 #' @export
-tso_tidy <- function(indir, gds_local_dir = NULL, dryrun = FALSE,
-                     token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
+                     dryrun = FALSE, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
   # - List indir files
   # - If GDS, download locally to gdslocaldir
   #   - Grab only the 'recognisable' ones
   # - Apply the tidy functions to each
   # - Export as list of tibbles
+  output_format_valid(out_format)
   pat <- "tso__"
   e <- emojifont::emoji
   if (grepl("^gds://", indir)) {
@@ -135,15 +136,12 @@ tso_tidy <- function(indir, gds_local_dir = NULL, dryrun = FALSE,
       cli::cli_abort(msg)
     }
 
-    d <- d |>
+    d |>
       dplyr::select("type", "path", "bname") |>
       dplyr::rowwise() |>
       dplyr::mutate(
-        res = list(tso_funcall(.data$type)$new(.data$path)$read()) |>
-          purrr::set_names(.data$type)
+        res = list(tso_funcall(.data$type)$new(.data$path)$write(prefix = outprefix, out_format = out_format)) # |> purrr::set_names(.data$type)
       )
-
-    d[["res"]]
   }
 }
 
