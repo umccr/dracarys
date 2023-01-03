@@ -6,7 +6,9 @@
 \usage{
 tso_tidy(
   indir,
+  outprefix,
   gds_local_dir = NULL,
+  out_format = "tsv",
   dryrun = FALSE,
   token = Sys.getenv("ICA_ACCESS_TOKEN")
 )
@@ -15,8 +17,12 @@ tso_tidy(
 \item{indir}{Directory path to TSO500 ctDNA workflow results (must end
 with \code{/}).}
 
+\item{outprefix}{Prefix path of output file(s).}
+
 \item{gds_local_dir}{If \code{indir} is a GDS directory, 'recognisable' files
 will be first downloaded to this directory.}
+
+\item{out_format}{Format of output (tsv, parquet, both) (def: tsv).}
 
 \item{dryrun}{Just list the files that will be downloaded?}
 
@@ -34,8 +40,10 @@ indir <- paste0(
   "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/",
   "20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
 )
-gds_local_dir <- here::here(glue("nogit/tso/SBJ02858"))
+indir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
+gds_local_dir <- NULL
+outprefix <- file.path(indir, "out/SBJ02858")
 dryrun <- F
-tso_tidy(indir, gds_local_dir, dryrun)
+tso_tidy(indir = indir, outprefix = outprefix)
 }
 }

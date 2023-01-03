@@ -1,31 +1,26 @@
 #' Generate TSO Report
 #'
-#' @param prefix Prefix for input files i.e. '/path/to/file1'.ext, where 'file1'
-#' is the common prefix of all files.
-#' @param out_file Name of output HTML file (needs '.html' suffix) (def: `{tumor_name}_cancer_report.html`).
+#' Generates a HTML report with results from the UMCCR TSO500 ctDNA workflow.
+#'
+#' @param prefix Prefix for input files generated from UMCCR TSO500 ctDNA workflow (i.e. '/path/to/sbjx'.ext, where 'sbjx'
+#' is the common prefix of all relevant files in directory '/path/to/').
+#' @param out_file Name of output HTML file (needs '.html' suffix) (def: `tso_report.html`).
 #' @param quiet Suppress warning and other messages.
 #'
 #' @return Path to rendered HTML report.
 #' @export
-tso_rmd <- function(prefix = NULL, out_file = NULL, quiet = FALSE) {
+tso_rmd <- function(prefix = NULL, out_file = "tso_report.html", quiet = FALSE) {
   assertthat::assert_that(
     quiet %in% c(FALSE, TRUE),
-    !is.null(prefix)
+    !is.null(prefix),
+    is.character(out_file),
+    tools::file_ext(out_file) == "html"
   )
-  if (!is.null(out_file)) {
-    assertthat::assert_that(
-      is.character(out_file),
-      tools::file_ext(out_file) == "html"
-    )
-  } else {
-    out_file <- glue::glue("tso_report.html")
-  }
   tmp_dir <- tempdir()
-  # R's file.copy('foo', 'bar/baz') copies 'foo' to 'bar/baz/foo'
   rmd_dir <- system.file("rmd/tso", package = "dracarys")
   rmd_dir_b <- basename(rmd_dir)
-  fs::dir_copy(rmd_dir, tmp_dir) # /path/to/rmd/tso -> /tmp/tso
-  rmd_file <- file.path(tmp_dir, "tso", "tso.Rmd")
+  fs::dir_copy(rmd_dir, tmp_dir, overwrite = TRUE)
+  rmd_file <- file.path(tmp_dir, "tso.Rmd")
   out_dir <- dirname(out_file)
   fs::dir_create(out_dir)
   # suppress DT large size warning

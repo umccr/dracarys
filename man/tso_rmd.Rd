@@ -4,13 +4,13 @@
 \alias{tso_rmd}
 \title{Generate TSO Report}
 \usage{
-tso_rmd(prefix = NULL, out_file = NULL, quiet = FALSE)
+tso_rmd(prefix = NULL, out_file = "tso_report.html", quiet = FALSE)
 }
 \arguments{
-\item{prefix}{Prefix for input files i.e. '/path/to/file1'.ext, where 'file1'
-is the common prefix of all files.}
+\item{prefix}{Prefix for input files generated from UMCCR TSO500 ctDNA workflow (i.e. '/path/to/sbjx'.ext, where 'sbjx'
+is the common prefix of all relevant files in directory '/path/to/').}
 
-\item{out_file}{Name of output HTML file (needs '.html' suffix) (def: \verb{\{tumor_name\}_cancer_report.html}).}
+\item{out_file}{Name of output HTML file (needs '.html' suffix) (def: \code{tso_report.html}).}
 
 \item{quiet}{Suppress warning and other messages.}
 }
@@ -18,5 +18,5 @@ is the common prefix of all files.}
 Path to rendered HTML report.
 }
 \description{
-Generate TSO Report
+Generates a HTML report with results from the UMCCR TSO500 ctDNA workflow.
 }

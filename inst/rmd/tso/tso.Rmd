@@ -6,11 +6,12 @@ output:
     theme: cosmo
     css: style.css
     code_download: true
+    toc: true
   rmdformats::material:
     highlight: kate
 params:
   title: "UMCCR TSO500 ctDNA Report"
-  prefix: NULL
+  prefix: "x"
 description: "UMCCR TSO500 ctDNA Report"
 title: "`r params$title`"
 ---
@@ -36,19 +37,17 @@ require(DT)
 ```{r data_setup}
 options(scipen = 999) # disable scientific notation
 pref <- params$prefix
-combinedvars <- glue("{pref}_CombinedVariantOutput.tsv") |>
-  TsoCombinedVariantOutputFile$new() |>
-  read()
 trace <- glue("{pref}_TMB_Trace.tsv") |>
   TsoTmbTraceTsvFile$new() |>
   read()
 fraglenhist <- glue("{pref}.fragment_length_hist.json.gz") |>
   TsoFragmentLengthHistFile$new()
-cov <- glue("{pref}.TargetRegionCoverage.json.gz") |>
+cvg <- glue("{pref}.TargetRegionCoverage.json.gz") |>
   TsoTargetRegionCoverageFile$new()
-alcolfus <- glue("{pref}.AlignCollapseFusionCaller_metrics.json.gz") |>
-  TsoAlignCollapseFusionCallerMetricsFile$new() |>
-  read()
+# for accessing the histo plots
+alcolfus_obj <- glue("{pref}.AlignCollapseFusionCaller_metrics.json.gz") |>
+  TsoAlignCollapseFusionCallerMetricsFile$new()
+alcolfus <- read(alcolfus_obj)
 tmb <- glue("{pref}.tmb.json.gz") |>
   TsoTmbFile$new() |>
   read()
@@ -118,20 +117,16 @@ res$software_config$other |>
 
 ### Biomarkers (MSI/TMB)
 
-- MSI Percentage of unstable sites: `r res$biomarkers$msi$msi_pct_unstable_sites`
-- TMB per MB: `r res$biomarkers$tmb$tmb_per_mb`
-
 ```{r res_biom}
-res$biomarkers$msi$additional_metrics |>
-  knitr::kable(caption = "MSI additional metrics")
-res$biomarkers$tmb$additional_metrics |>
-  knitr::kable(caption = "TMB additional metrics")
+res$biomarkers |>
+  knitr::kable(caption = "MSI/TMB metrics")
 ```
 
 ### QC1
 
 ```{r res_qc1}
 res$sample_metrics_qc |>
+  tidyr::pivot_longer(cols = dplyr::everything(), names_to = "metric", values_to = "value") |>
   knitr::kable()
 ```
 
@@ -171,51 +166,6 @@ msi |>
   knitr::kable()
 ```
 
-## `CombinedVariantOutput.tsv` {.tabset #CombinedVariantOutput}
-
-### SNVs
-
-```{r cv_snvs}
-combinedvars[["Small Variants"]] |>
-  dt_view()
-```
-
-### CNVs
-
-```{r cv_cnvs}
-combinedvars[["Copy Number Variants"]] |>
-  # dplyr::select("Gene", "Fold Change") |>
-  dt_view()
-```
-
-### Fusions
-
-```{r cv_fusions}
-combinedvars[["DNA Fusions"]] |>
-  dt_view()
-```
-
-### Analysis Details
-
-```{r cv_adet}
-combinedvars[["Analysis Details"]] |>
-  knitr::kable()
-```
-
-### TMB
-
-```{r cv_tmb}
-combinedvars[["TMB"]] |>
-  knitr::kable()
-```
-
-### MSI
-
-```{r cv_msi}
-combinedvars[["MSI"]] |>
-  knitr::kable()
-```
-
 ---
 
 ## `TMB_Trace.tsv`
@@ -243,21 +193,22 @@ trace |>
 ## `fragment_length_hist.json.gz`
 
 ```{r fraglenhist_plot}
-#| panel: input
-#| layout-ncol: 2
-
 plot(fraglenhist)
-read(fraglenhist) |> dt_view()
+# read(fraglenhist) |> dt_view()
 ```
 
-## `TargetRegionCoverage.json.gz`
+## `TargetRegionCoverage.json.gz` {.tabset}
 
-```{r cov}
-#| panel: input
-#| layout-ncol: 2
+### Plot
 
-plot(cov)
-read(cov) |> dt_view()
+```{r cvg}
+plot(cvg)
+```
+
+### Data
+
+```{r cvg2}
+read(cvg) |> dt_view()
 ```
 
 ## `AlignCollapseFusionCaller_metrics.json.gz` {.tabset #AlignCollapseFusionCaller_metrics}
@@ -320,9 +271,19 @@ alcolfus |>
 
 ```{r met7}
 alcolfus |>
-  dplyr::filter(section == "UmiStatistics") |>
+  dplyr::filter(section == "UmiStatistics", !grepl("Hist", .data$name)) |>
   dplyr::select(-"section") |>
   dt_view()
+```
+
+### UmiStatistics-Histo
+
+```{r met8}
+p <- alcolfus_obj |>
+  read() |>
+  alcolfus_obj$histoplot(max_num = 20)
+p$p_num_supporting_fragments
+p$p_unique_umis_per_frag_pos
 ```
 
 ---

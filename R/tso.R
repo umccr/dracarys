@@ -71,6 +71,8 @@ tso_write <- function(d, outdir, prefix, format = "tsv") {
 #' will be first downloaded to this directory.
 #' @param dryrun Just list the files that will be downloaded?
 #' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#' @param outprefix Prefix path of output file(s).
+#' @param out_format Format of output (tsv, parquet, both) (def: tsv).
 #'
 #' @return List of tibbles.
 #' @examples
@@ -79,18 +81,15 @@ tso_write <- function(d, outdir, prefix, format = "tsv") {
 #'   "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/",
 #'   "20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
 #' )
-#' gds_local_dir <- here::here(glue("nogit/tso/SBJ02858"))
+#' indir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
+#' gds_local_dir <- NULL
+#' outprefix <- file.path(indir, "out/SBJ02858")
 #' dryrun <- F
-#' tso_tidy(indir, gds_local_dir, dryrun)
+#' tso_tidy(indir = indir, outprefix = outprefix)
 #' }
 #' @export
 tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
                      dryrun = FALSE, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
-  # - List indir files
-  # - If GDS, download locally to gdslocaldir
-  #   - Grab only the 'recognisable' ones
-  # - Apply the tidy functions to each
-  # - Export as list of tibbles
   output_format_valid(out_format)
   pat <- "tso__"
   e <- emojifont::emoji
@@ -106,6 +105,7 @@ tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
     # Use the downloaded results
     indir <- gds_local_dir
   } else {
+    # indir is not gds
     if (!is.null(gds_local_dir)) {
       cli::cli_warn(glue(
         "You have specified 'gds_local_dir' to download GDS results,\n",
@@ -140,7 +140,7 @@ tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
       dplyr::select("type", "path", "bname") |>
       dplyr::rowwise() |>
       dplyr::mutate(
-        res = list(tso_funcall(.data$type)$new(.data$path)$write(prefix = outprefix, out_format = out_format)) # |> purrr::set_names(.data$type)
+        res = list(tso_funcall(.data$type)$new(.data$path)$write(prefix = outprefix, out_format = out_format))
       )
   }
 }
@@ -347,6 +347,7 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
     #' @description Plots the `TargetRegionCoverage.json.gz` file.
     #'
     #' @param min_pct Minimum percentage to be plotted (Default: 2).
+    #' @importFrom ggplot2 ggplot
     #' @return A ggplot2 plot containing read depth on X axis and percentage
     #'   covered on Y axis.
     plot = function(min_pct = 2) {
@@ -359,7 +360,7 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
         dplyr::select(dp = "ConsensusReadDepth", pct = "Percentage") |>
         dplyr::mutate(dp = as.numeric(sub("X", "", .data$dp)))
       d |>
-        ggplot2::ggplot(aes(x = dp, y = pct, label = dp)) +
+        ggplot2::ggplot(ggplot2::aes(x = dp, y = pct, label = dp)) +
         ggplot2::geom_point() +
         ggplot2::geom_line() +
         ggrepel::geom_text_repel() +
@@ -440,11 +441,31 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #'
     write = function(prefix, out_format = "tsv") {
       d <- self$read()
+      dhist <- self$histoprep(d)
+      dmain <- d |>
+        dplyr::filter(!grepl("Hist", .data$name))
+
+      p <- glue("{prefix}_AlignCollapseFusionCaller_metrics_")
+      p_hist <- glue("{p}_hist")
+      p_main <- glue("{p}_main")
+      write_dracarys(obj = dhist, prefix = p_hist, out_format = out_format)
+      write_dracarys(obj = dmain, prefix = p_main, out_format = out_format)
+    },
+    #' @description
+    #' Prepares the UmiStatistics histogram data from the
+    #' `AlignCollapseFusionCaller_metrics.json.gz` file output from TSO.
+    #'
+    #' Histo is the majority from UmiStatistics section, deal with it separately.
+    #' Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
+    #' Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
+    #' @param d Parsed `AlignCollapseFusionCaller_metrics.json.gz` file (with
+    #' the `read` function).
+    histoprep = function(d) {
       dhist <- d |>
         dplyr::filter(grepl("Hist", .data$name))
       assertthat::assert_that(all(dhist[["section"]] == "UmiStatistics"))
       assertthat::assert_that(all(dhist[["percent"]] %in% NA))
-      dhist <- dhist |>
+      dhist |>
         dplyr::mutate(
           name = sub("Histogram of ", "", .data$name),
           name = gsub(" ", "_", .data$name),
@@ -454,14 +475,47 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         dplyr::mutate(num = dplyr::row_number()) |>
         dplyr::ungroup() |>
         dplyr::select(c("name", "num", "value"))
-      dmain <- d |>
-        dplyr::filter(!grepl("Hist", .data$name))
-
-      p <- glue("{prefix}_AlignCollapseFusionCaller_metrics_")
-      p_hist <- glue("{p}_hist")
-      p_main <- glue("{p}_main")
-      write_dracarys(obj = dhist, prefix = p_hist, out_format = out_format)
-      write_dracarys(obj = dmain, prefix = p_main, out_format = out_format)
+    },
+    #' @description
+    #' Generates the UmiStatistics Histogram plots from the
+    #' `AlignCollapseFusionCaller_metrics.json.gz` file output from TSO.
+    #'
+    #' Histo is the majority from UmiStatistics section, deal with it separately.
+    #' Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
+    #' Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
+    #' @param d Parsed `AlignCollapseFusionCaller_metrics.json.gz` file (with
+    #' the `read` function).
+    #' @param max_num Maximum number to display in both plots.
+    #' @return Both histogram plot objects.
+    histoplot = function(d, max_num = 15) {
+      h <- self$histoprep(d)
+      # 15 seems like a good cutoff for both plots
+      p1 <- h |>
+        dplyr::filter(
+          .data$name == "num_supporting_fragments",
+          .data$num <= max_num
+        ) |>
+        ggplot2::ggplot(ggplot2::aes(x = num, y = value)) +
+        ggplot2::geom_line() +
+        ggplot2::theme_bw() +
+        ggplot2::labs(title = "Number of families with 0/1/2/3... raw reads.") +
+        ggplot2::xlab("Families") +
+        ggplot2::ylab("Reads")
+      p2 <- h |>
+        dplyr::filter(
+          name == "unique_UMIs_per_fragment_position",
+          .data$num <= max_num
+        ) |>
+        ggplot2::ggplot(ggplot2::aes(x = num, y = value)) +
+        ggplot2::geom_line() +
+        ggplot2::theme_bw() +
+        ggplot2::labs(title = "Number of positions with 0/1/2/3... UMI sequences.") +
+        ggplot2::xlab("Positions") +
+        ggplot2::ylab("UMI Sequences")
+      list(
+        p_num_supporting_fragments = p1,
+        p_unique_umis_per_frag_pos = p2
+      )
     }
   )
 )
@@ -540,8 +594,7 @@ TsoFusionsCsvFile <- R6::R6Class(
     #' @description
     #' Reads the `Fusions.csv` file output from TSO.
     #'
-    #' @return tibble with the following columns:
-    #'   - label:
+    #' @return tibble with several columns.
     read = function() {
       x <- self$path
       ct <- readr::cols(
@@ -559,7 +612,6 @@ TsoFusionsCsvFile <- R6::R6Class(
     #' @param prefix Prefix path of output file(s).
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    #'
     write = function(prefix, out_format = "tsv") {
       d <- self$read()
       prefix2 <- glue("{prefix}_Fusions")
