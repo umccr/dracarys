@@ -45,6 +45,7 @@ output_format_valid <- function(x) {
 
 write_dracarys <- function(obj, prefix, out_format) {
   output_format_valid(out_format)
+  fs::dir_create(dirname(prefix))
   if (out_format %in% c("tsv", "both")) {
     tsv_out <- glue::glue("{prefix}.tsv")
     readr::write_tsv(obj, tsv_out)

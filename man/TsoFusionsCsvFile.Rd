@@ -44,10 +44,7 @@ Reads the \code{Fusions.csv} file output from TSO.
 }
 
 \subsection{Returns}{
-tibble with the following columns:
-\itemize{
-\item label:
-}
+tibble with several columns.
 }
 }
 \if{html}{\out{<hr>}}
