@@ -24,15 +24,16 @@ will be first downloaded to this directory.}
 
 \item{out_format}{Format of output (tsv, parquet, both) (def: tsv).}
 
-\item{dryrun}{Just list the files that will be downloaded?}
+\item{dryrun}{Just list the files that will be downloaded (def: FALSE).}
 
 \item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 }
 \value{
-List of tibbles.
+Tibble with path to input file and the resultant tidy object.
 }
 \description{
-Tidies TSO ctDNA results into a list of tibbles.
+Tidies TSO500 ctDNA results into a list of tibbles and writes individual tibbles to
+TSV and/or Parquet format.
 }
 \examples{
 \dontrun{
