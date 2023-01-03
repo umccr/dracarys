@@ -5,7 +5,7 @@
 #' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
 #' @export
 gds_file_download <- function(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
-  system(glue::glue("ica files download {gds} {out} --access-token {token}"))
+  system(glue("ica files download {gds} {out} --access-token {token}"))
 }
 
 #' GDS Files List
@@ -24,8 +24,8 @@ gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
   path2 <- sub("gds://(.*?)/(.*)", "\\2", gdsdir)
 
   res <- httr::GET(
-    glue::glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize=100"),
-    httr::add_headers(Authorization = glue::glue("Bearer {token}")),
+    glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize=100"),
+    httr::add_headers(Authorization = glue("Bearer {token}")),
     httr::accept_json()
   )
   j <- jsonlite::fromJSON(httr::content(res, "text"), simplifyVector = FALSE)[["items"]]
@@ -34,7 +34,7 @@ gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
     dplyr::mutate(
       size = fs::as_fs_bytes(.data$size),
       bname = basename(.data$path),
-      path = glue::glue("gds://{volname}{.data$path}"),
+      path = glue("gds://{volname}{.data$path}"),
       dname = basename(dirname(.data$path))
     ) |>
     dplyr::select(.data$bname, .data$size, .data$path, .data$dname)
@@ -53,6 +53,7 @@ gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
 #' @export
 dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN"),
                             pattern = NULL, dryrun = FALSE) {
+  e <- emojifont::emoji
   fs::dir_create(outdir)
   d <- gds_files_list(gdsdir = gdsdir, token = token) |>
     dplyr::mutate(type = purrr::map_chr(.data$bname, match_regex)) |>
@@ -66,10 +67,12 @@ dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
     dplyr::mutate(out = file.path(outdir, .data$bname))
   if (!dryrun) {
+    cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {gdsdir}}")
     d_filt |>
       dplyr::rowwise() |>
       dplyr::mutate(cmd = gds_file_download(.data$path, .data$out, token))
   } else {
+    cli::cli_alert_info("{date_log()} {e('camera')} Just list relevant files from {.file {gdsdir}}")
     d_filt
   }
 }

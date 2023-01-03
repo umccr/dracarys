@@ -1,6 +1,5 @@
 # List/Download files from ICA for testing
 require(fs)
-require(glue)
 require(here)
 require(httr)
 require(jsonlite)
@@ -18,7 +17,7 @@ dr_download_multiqc <- function(gdsdir, outdir, token = Sys.getenv("ICA_TOKEN_PR
   # download dracarys files to outdir/{dname}.json
   d |>
     dplyr::filter(.data$type == "multiqc") |>
-    dplyr::mutate(out = file.path(outdir, glue::glue("{dname}.json"))) |>
+    dplyr::mutate(out = file.path(outdir, glue("{dname}.json"))) |>
     dplyr::rowwise() |>
     dplyr::mutate(cmd = gds_file_download(path, out, token))
 }

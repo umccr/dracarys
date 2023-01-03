@@ -352,7 +352,7 @@ FragmentLengthHistFile <- R6::R6Class("FragmentLengthHistFile", inherit = File, 
       ggplot2::geom_line() +
       ggplot2::labs(title = "Fragment Length Distribution") +
       ggplot2::xlab("Fragment Length (bp)") +
-      ggplot2::ylab(glue::glue("Read Count (min: {min_count})")) +
+      ggplot2::ylab(glue("Read Count (min: {min_count})")) +
       ggplot2::theme_minimal() +
       ggplot2::theme(
         legend.position = c(0.9, 0.9),
