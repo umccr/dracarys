@@ -1,80 +1,18 @@
-#' Dracarys Tso Tidy
-#'
-#' Generate tidier representations of TSO500 ctDNA workflow outputs.
-#'
-#' @param indir Path to TSO500 ctDNA workflow results.
-#' @param outdir Path to output dracarys results.
-#' @param dryrun Just list the files that will be downloaded?
-#' @param out_format Format of output (tsv, parquet, both) (def: tsv).
-#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
-#'
-#' @return Generates tidy TSV and/or Parquet representations of the workflow results.
-#' @examples
-#' \dontrun{
-#' indir <- paste0(
-#'   "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only",
-#'   "/20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
-#' )
-#' outdir <- here::here(glue("nogit/tso/SBJ00476"))
-#' outdir <- here::here(glue("nogit/tso/SBJ00006"))
-#' dryrun <- TRUE
-#' token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
-#' dracarys_tso(indir, outdir, dryrun = F, token = token)
-#' }
-#' @export
-dracarys_tso <- function(indir, outdir, out_format = "tsv", dryrun = FALSE,
-                         token = Sys.getenv("ICA_ACCESS_TOKEN")) {
-  output_format_valid(out_format)
-  e <- emojifont::emoji
-  # cli::cli_div(theme = list(
-  #   span.file = list(color = "blue"),
-  #   span.emph = list(color = "orange")
-  # ))
-  cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying {.file {indir}} {e('fire')}")
-  gds_local_dir <- if (grepl("^gds://", indir)) file.path(outdir, "dracarys_gds_sync") else NULL
-  # main dracarys function
-  d <- tso_tidy(indir = indir, gds_local_dir = gds_local_dir, dryrun = dryrun, token = token)
-  if (!dryrun) {
-    fs::dir_create(outdir)
-    res <- file.path(outdir, "res.rds")
-    readr::write_rds(d, res)
-
-    # if (out_format %in% c("tsv", "both")) {
-    #   tsv_out <- file.path(outdir, glue("{prefix}.tsv"))
-    #   readr::write_tsv(d1, tsv_out)
-    # }
-    # if (out_format %in% c("parquet", "both")) {
-    #   parquet_out <- file.path(outdir, glue("{prefix}.parquet"))
-    #   arrow::write_parquet(d1, parquet_out)
-    # }
-
-    cli::cli_alert_success("{date_log()} {e('rocket')} End tidying {.file {indir}} {e('comet')}!")
-    cli::cli_alert_info("{date_log()} {e('tada')} Path to output directory with results for {.emph {indir}}: {.file {outdir}}")
-  }
-}
-
-tso_write <- function(d, outdir, prefix, format = "tsv") {
-  tso_fnames <- FILE_REGEX |>
-    dplyr::filter(grepl("tso__", .data$name)) |>
-    dplyr::pull("name")
-  assertthat::assert_that(purrr::is_list(d, n = length(tso_fnames)))
-  output_format_valid(format)
-}
-
 #' Tidy TSO ctDNA Results
 #'
-#' Tidies TSO ctDNA results into a list of tibbles.
+#' Tidies TSO500 ctDNA results into a list of tibbles and writes individual tibbles to
+#' TSV and/or Parquet format.
 #'
 #' @param indir Directory path to TSO500 ctDNA workflow results (must end
 #' with `/`).
+#' @param outprefix Prefix path of output file(s).
 #' @param gds_local_dir If `indir` is a GDS directory, 'recognisable' files
 #' will be first downloaded to this directory.
-#' @param dryrun Just list the files that will be downloaded?
+#' @param dryrun Just list the files that will be downloaded (def: FALSE).
 #' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
-#' @param outprefix Prefix path of output file(s).
 #' @param out_format Format of output (tsv, parquet, both) (def: tsv).
 #'
-#' @return List of tibbles.
+#' @return Tibble with path to input file and the resultant tidy object.
 #' @examples
 #' \dontrun{
 #' indir <- paste0(
@@ -91,17 +29,18 @@ tso_write <- function(d, outdir, prefix, format = "tsv") {
 tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
                      dryrun = FALSE, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
   output_format_valid(out_format)
+  outdir <- dirname(outprefix)
   pat <- "tso__"
   e <- emojifont::emoji
+
   if (grepl("^gds://", indir)) {
-    assertthat::assert_that(
-      !is.null(gds_local_dir),
-      msg = "You need to specify a local directory to download the GDS files."
-    )
-    print(dr_gds_download(
+    if (is.null(gds_local_dir)) {
+      gds_local_dir <- file.path(outdir, "dracarys_gds_sync")
+    }
+    dr_gds_download(
       gdsdir = indir, outdir = gds_local_dir, token = token,
       pattern = pat, dryrun = dryrun
-    ))
+    )
     # Use the downloaded results
     indir <- gds_local_dir
   } else {
@@ -136,12 +75,17 @@ tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
       cli::cli_abort(msg)
     }
 
-    d |>
+    cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying TSO dir:  {.file {indir}}")
+    res <- d |>
       dplyr::select("type", "path", "bname") |>
       dplyr::rowwise() |>
       dplyr::mutate(
         res = list(tso_funcall(.data$type)$new(.data$path)$write(prefix = outprefix, out_format = out_format))
-      )
+      ) |>
+      dplyr::select("path", "res")
+    cli::cli_alert_success("{date_log()} {e('rocket')} Finish tidying TSO dir: {.file {indir}}")
+    cli::cli_alert_success("{date_log()} {e('tada')} TSO results output at:  {.file {outdir}}")
+    return(res)
   }
 }
 
