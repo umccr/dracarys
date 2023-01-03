@@ -19,11 +19,11 @@ dracarys_multiqc <- function(json, prefix, outdir, out_format = "tsv") {
   # main dracarys function
   d1 <- multiqc_tidy_json(json)
   if (out_format %in% c("tsv", "both")) {
-    tsv_out <- file.path(outdir, glue::glue("{prefix}.tsv"))
+    tsv_out <- file.path(outdir, glue("{prefix}.tsv"))
     readr::write_tsv(d1, tsv_out)
   }
   if (out_format %in% c("parquet", "both")) {
-    parquet_out <- file.path(outdir, glue::glue("{prefix}.parquet"))
+    parquet_out <- file.path(outdir, glue("{prefix}.parquet"))
     arrow::write_parquet(d1, parquet_out)
   }
 
@@ -122,7 +122,7 @@ multiqc_tidy_json <- function(j) {
     } else if (all(c("Samtools", "Bcftools (somatic)", "Bcftools (germline)") %in% ds)) {
       return("bcbio_wgs")
     } else {
-      warning(glue::glue(
+      warning(glue(
         "Unknown which bcbio workflow this MultiQC JSON was generated from",
       ))
       return("bcbio_unknown")
@@ -141,7 +141,7 @@ multiqc_tidy_json <- function(j) {
     } else if (grepl("^UMCCR MultiQC ctDNA", config_title)) {
       return("dragen_ctdna")
     } else {
-      warning(glue::glue(
+      warning(glue(
         "config_title: '{config_title}'.\n",
         "Unknown which DRAGEN workflow this MultiQC JSON was generated from",
       ))

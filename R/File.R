@@ -44,9 +44,9 @@ File <- R6::R6Class("File", public = list(
   #' @param ... (ignored).
   print = function(...) {
     cat("#--- File ---#\n")
-    cat(glue::glue("Path: {self$path}"), "\n")
-    cat(glue::glue("Basename: {self$bname()}"), "\n")
-    cat(glue::glue("Type: {self$type()}"), "\n")
+    cat(glue("Path: {self$path}"), "\n")
+    cat(glue("Basename: {self$bname()}"), "\n")
+    cat(glue("Type: {self$type()}"), "\n")
     invisible(self)
   },
 
@@ -64,7 +64,7 @@ File <- R6::R6Class("File", public = list(
     } else if (t == "JSON") {
       jsonlite::read_json(x, ...)
     } else {
-      stop(glue::glue("Don't know how to read file of type {t}."))
+      stop(glue("Don't know how to read file of type {t}."))
     }
   }
 ))

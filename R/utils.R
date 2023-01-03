@@ -3,7 +3,7 @@
 #' @return Current timestamp as character.
 #' @export
 date_log <- function() {
-  as.character(glue::glue('[{format(Sys.time(), "%Y-%m-%dT%H:%M:%S%Z")}]'))
+  as.character(glue('[{format(Sys.time(), "%Y-%m-%dT%H:%M:%S%Z")}]'))
 }
 
 #' Session Information Kable
@@ -47,11 +47,12 @@ write_dracarys <- function(obj, prefix, out_format) {
   output_format_valid(out_format)
   fs::dir_create(dirname(prefix))
   if (out_format %in% c("tsv", "both")) {
-    tsv_out <- glue::glue("{prefix}.tsv")
+    tsv_out <- glue("{prefix}.tsv")
     readr::write_tsv(obj, tsv_out)
   }
   if (out_format %in% c("parquet", "both")) {
-    parquet_out <- glue::glue("{prefix}.parquet")
+    parquet_out <- glue("{prefix}.parquet")
     arrow::write_parquet(obj, parquet_out)
   }
+  obj
 }
