@@ -79,11 +79,17 @@ tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
       dplyr::select("type", "path", "bname") |>
       dplyr::rowwise() |>
       dplyr::mutate(
-        res = list(tso_funcall(.data$type)$new(.data$path)$write(prefix = outprefix, out_format = out_format))
-      )
+        env = list(tso_funcall(.data$type)),
+        obj = list(.data$env$new(.data$path)),
+        has_plot = "plot" %in% names(.data$env[["public_methods"]]),
+        obj_parsed = list(.data$obj$read()),
+        obj_parsed2 = list(.data$obj$write(.data$obj_parsed, prefix = outprefix, out_format = out_format)),
+        plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
+      ) |>
+      dplyr::select("type", "path", "obj", dat = "obj_parsed", "plot")
     cli::cli_alert_success("{date_log()} {e('rocket')} Finish tidying TSO dir: {.file {indir}}")
     cli::cli_alert_success("{date_log()} {e('tada')} TSO results output at:  {.file {outdir}}")
-    return(res)
+    return(invisible(res))
   }
 }
 
@@ -113,8 +119,8 @@ tso_funcall <- function(x) {
 #' @examples
 #' x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
 #' d <- TsoTmbTraceTsvFile$new(x)
-#' d$read() # or read(d)
-#' d$write(prefix = tempfile(), out_format = "both")
+#' d_parsed <- d$read() # or read(d)
+#' d$write(d_parsed, prefix = tempfile(), out_format = "both")
 #' @export
 TsoTmbTraceTsvFile <- R6::R6Class(
   "TsoTmbTraceTsvFile",
@@ -143,11 +149,11 @@ TsoTmbTraceTsvFile <- R6::R6Class(
     #' @description
     #' Writes a tidy version of the `TMB_Trace.tsv` file output from TSO.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix path of output file(s).
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    write = function(prefix, out_format = "tsv") {
-      d <- self$read()
+    write = function(d, prefix, out_format = "tsv") {
       prefix2 <- glue("{prefix}_TMB_Trace")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     }
@@ -163,9 +169,9 @@ TsoTmbTraceTsvFile <- R6::R6Class(
 #' @examples
 #' x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
 #' fl <- TsoFragmentLengthHistFile$new(x)
-#' # fl$read() # or read(fl)
-#' fl$plot(5)
-#' fl$write(tempfile(), out_format = "both")
+#' d_parsed <- fl$read() # or read(fl)
+#' fl$plot(d_parsed, 5)
+#' fl$write(d_parsed, tempfile(), out_format = "both")
 #' @export
 TsoFragmentLengthHistFile <- R6::R6Class(
   "TsoFragmentLengthHistFile",
@@ -192,12 +198,12 @@ TsoFragmentLengthHistFile <- R6::R6Class(
     #' Writes a tidy version of the `fragment_length_hist.json.gz` file output
     #' from TSO.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix path of output file(s).
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(prefix, out_format = "tsv") {
-      d <- self$read()
+    write = function(d, prefix, out_format = "tsv") {
       prefix2 <- glue("{prefix}_fragment_length_hist")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     },
@@ -206,15 +212,14 @@ TsoFragmentLengthHistFile <- R6::R6Class(
     #' @description Plots the fragment length distributions as given in the
     #' `fragment_length_hist.json.gz` file.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param min_count Minimum read count to be plotted (Default: 10).
     #' @return A ggplot2 plot containing fragment lengths on X axis and read counts
     #'   on Y axis for each sample.
-    plot = function(min_count = 10) {
+    plot = function(d, min_count = 10) {
       assertthat::assert_that(is.numeric(min_count), min_count >= 0)
-      d <- self$read() |>
-        dplyr::filter(.data$Count >= min_count)
-
       d |>
+        dplyr::filter(.data$Count >= min_count) |>
         ggplot2::ggplot(ggplot2::aes(x = .data$FragmentLength, y = .data$Count)) +
         ggplot2::geom_line() +
         ggplot2::labs(title = "Fragment Length Distribution") +
@@ -241,9 +246,9 @@ TsoFragmentLengthHistFile <- R6::R6Class(
 #' @examples
 #' x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package = "dracarys")
 #' trc <- TsoTargetRegionCoverageFile$new(x)
-#' trc$read() # or read(trc)
-#' trc$plot(90) # or plot(trc, 90)
-#' trc$write(prefix = tempfile(), out_format = "both")
+#' d_parsed <- trc$read() # or read(trc)
+#' trc$plot(d_parsed, 90) # or plot(trc, d_parsed, 90)
+#' trc$write(d_parsed, prefix = tempfile(), out_format = "both")
 #' @export
 TsoTargetRegionCoverageFile <- R6::R6Class(
   "TsoTargetRegionCoverageFile",
@@ -276,25 +281,26 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
     #' Writes a tidy version of the `TargetRegionCoverage.json.gz` file output
     #' from TSO.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix path of output file(s).
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(prefix, out_format = "tsv") {
-      d <- self$read()
+    write = function(d, prefix, out_format = "tsv") {
       prefix2 <- glue("{prefix}_TargetRegionCoverage")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     },
 
     #' @description Plots the `TargetRegionCoverage.json.gz` file.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param min_pct Minimum percentage to be plotted (Default: 2).
     #' @importFrom ggplot2 ggplot
     #' @return A ggplot2 plot containing read depth on X axis and percentage
     #'   covered on Y axis.
-    plot = function(min_pct = 2) {
+    plot = function(d, min_pct = 2) {
       assertthat::assert_that(is.numeric(min_pct), min_pct >= 0)
-      d <- self$read() |>
+      d <- d |>
         dplyr::filter(
           !.data$ConsensusReadDepth == "TargetRegion",
           .data$Percentage >= min_pct
@@ -331,8 +337,8 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
 #'   package = "dracarys"
 #' )
 #' m <- TsoAlignCollapseFusionCallerMetricsFile$new(x)
-#' m$read() # or read(m)
-#' m$write(prefix = tempfile(), out_format = "both")
+#' d_parsed <- m$read() # or read(m)
+#' m$write(d_parsed, prefix = tempfile(), out_format = "both")
 #' @export
 TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
   "TsoAlignCollapseFusionCallerMetricsFile",
@@ -377,12 +383,12 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #' Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
     #' Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix path of output file(s).
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(prefix, out_format = "tsv") {
-      d <- self$read()
+    write = function(d, prefix, out_format = "tsv") {
       dhist <- self$histoprep(d)
       dmain <- d |>
         dplyr::filter(!grepl("Hist", .data$name))
@@ -397,11 +403,11 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #' Prepares the UmiStatistics histogram data from the
     #' `AlignCollapseFusionCaller_metrics.json.gz` file output from TSO.
     #'
-    #' Histo is the majority from UmiStatistics section, deal with it separately.
-    #' Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
-    #' Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
-    #' @param d Parsed `AlignCollapseFusionCaller_metrics.json.gz` file (with
-    #' the `read` function).
+    #' - Histo is the majority from UmiStatistics section, deal with it separately.
+    #' - Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
+    #' - Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
+    #'
+    #' @param d Parsed object from `self$read()`.
     histoprep = function(d) {
       dhist <- d |>
         dplyr::filter(grepl("Hist", .data$name))
@@ -425,11 +431,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #' Histo is the majority from UmiStatistics section, deal with it separately.
     #' Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
     #' Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
-    #' @param d Parsed `AlignCollapseFusionCaller_metrics.json.gz` file (with
-    #' the `read` function).
+    #' @param d Parsed object from `self$read()`.
     #' @param max_num Maximum number to display in both plots.
     #' @return Both histogram plot objects.
-    histoplot = function(d, max_num = 15) {
+    plot = function(d, max_num = 15) {
       h <- self$histoprep(d)
       # 15 seems like a good cutoff for both plots
       p1 <- h |>
@@ -471,8 +476,8 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
 #' @examples
 #' x <- system.file("extdata/tso/sample705.tmb.json.gz", package = "dracarys")
 #' tmb <- TsoTmbFile$new(x)
-#' tmb$read() # or read(tmb)
-#' tmb$write(tempfile(), "both")
+#' d_parsed <- tmb$read() # or read(tmb)
+#' tmb$write(d_parsed, tempfile(), "both")
 #' @export
 TsoTmbFile <- R6::R6Class(
   "TsoTmbFile",
@@ -505,12 +510,12 @@ TsoTmbFile <- R6::R6Class(
     #' @description
     #' Writes a tidy version of the `tmb.json.gz` file output from TSO.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix path of output file(s).
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(prefix, out_format = "tsv") {
-      d <- self$read()
+    write = function(d, prefix, out_format = "tsv") {
       prefix2 <- glue("{prefix}_tmb")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     }
@@ -526,8 +531,8 @@ TsoTmbFile <- R6::R6Class(
 #' @examples
 #' x <- system.file("extdata/tso/sample705_Fusions.csv", package = "dracarys")
 #' fus <- TsoFusionsCsvFile$new(x)
-#' fus$read() # or read(fus)
-#' fus$write(tempfile(), "both")
+#' d_parsed <- fus$read() # or read(fus)
+#' fus$write(d_parsed, tempfile(), "both")
 #' @export
 TsoFusionsCsvFile <- R6::R6Class(
   "TsoFusionsCsvFile",
@@ -551,11 +556,11 @@ TsoFusionsCsvFile <- R6::R6Class(
     #' @description
     #' Writes a tidy version of the `Fusions.csv` file output from TSO.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix path of output file(s).
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    write = function(prefix, out_format = "tsv") {
-      d <- self$read()
+    write = function(d, prefix, out_format = "tsv") {
       prefix2 <- glue("{prefix}_Fusions")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     }
@@ -571,8 +576,8 @@ TsoFusionsCsvFile <- R6::R6Class(
 #' @examples
 #' x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
 #' msi <- TsoMsiFile$new(x)
-#' msi$read() # or read(msi)
-#' msi$write(tempfile(), "both")
+#' d_parsed <- msi$read() # or read(msi)
+#' msi$write(d_parsed, tempfile(), "both")
 #' @export
 TsoMsiFile <- R6::R6Class(
   "TsoMsiFile",
@@ -601,12 +606,12 @@ TsoMsiFile <- R6::R6Class(
     #' @description
     #' Writes a tidy version of the `msi.json.gz` file output from TSO.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix path of output file(s).
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(prefix, out_format = "tsv") {
-      d <- self$read()
+    write = function(d, prefix, out_format = "tsv") {
       prefix2 <- glue("{prefix}_msi")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     }
@@ -622,8 +627,8 @@ TsoMsiFile <- R6::R6Class(
 #' @examples
 #' x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
 #' res <- TsoSampleAnalysisResultsFile$new(x)
-#' # res$read() # or read(res)
-#' res$write(tempfile(), "both")
+#' d_parsed <- res$read() # or read(res)
+#' res$write(d_parsed, tempfile(), "both")
 #' @export
 TsoSampleAnalysisResultsFile <- R6::R6Class(
   "TsoSampleAnalysisResultsFile",
@@ -688,19 +693,17 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
       biom_tbl <- tibble::as_tibble_row(biom_list)
 
       ## sampleMetrics
+      qc2tib <- function(el) {
+        el[["metrics"]] |>
+          purrr::map(tibble::as_tibble) |>
+          dplyr::bind_rows()
+      }
       smet <- dat[["sampleMetrics"]]
       smet_em <- smet[["expandedMetrics"]][[1]][["metrics"]] |>
         purrr::map(tibble::as_tibble_row) |>
         dplyr::bind_rows() |>
         dplyr::select("name", "value") |>
         tidyr::pivot_wider(names_from = "name", values_from = "value")
-
-      qc2tib <- function(el) {
-        el[["metrics"]] |>
-          purrr::map(tibble::as_tibble) |>
-          dplyr::bind_rows()
-      }
-
       smet_qc <- smet[["qualityControlMetrics"]]
       smet_nms <- purrr::map_chr(smet_qc, "name")
       smet_qc <- smet_qc |>
@@ -722,20 +725,17 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
         tidyr::pivot_longer(c("value", "LSL", "USL"), names_to = "variable") |>
         tidyr::pivot_wider(names_from = c("name", "variable"), values_from = "value")
 
-      v <- dat[["variants"]]
-      vars <- list(
-        # fusions are more comprehensive in the Fusions.csv file
-        snvs = tso_snv(v[["smallVariants"]]),
-        cnvs = tso_cnv(v[["copyNumberVariants"]])
-      )
+      qc <- dplyr::bind_cols(smet_qc, smet_em)
+      snvs <- tso_snv(dat[["variants"]][["smallVariants"]])
+      cnvs <- tso_cnv(dat[["variants"]][["copyNumberVariants"]])
 
       res <- list(
         sample_info = sample_info,
         software_config = sw,
         biomarkers = biom_tbl,
-        sample_metrics_qc = smet_qc,
-        sample_metrics_expanded = smet_em,
-        vars = vars
+        qc = qc,
+        snvs = snvs,
+        cnvs = cnvs
       )
       res
     },
@@ -743,12 +743,12 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
     #' Writes a tidy version of the `SampleAnalysisResults.json.gz` file output
     #' from TSO.
     #'
+    #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix path of output file(s).
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(prefix, out_format = "tsv") {
-      d <- self$read()
+    write = function(d, prefix, out_format = "tsv") {
       p <- glue("{prefix}_SampleAnalysisResults")
       l <- list(
         sample_info = list(
@@ -756,7 +756,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
           pref = glue("{p}_sample_info")
         ),
         qc = list(
-          obj = dplyr::bind_cols(d[["sample_metrics_qc"]], d[["sample_metrics_expanded"]]),
+          obj = d[["qc"]],
           pref = glue("{p}_qc")
         ),
         biomarkers = list(
@@ -772,7 +772,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
           pref = glue("{p}_sw_conf_other")
         ),
         snv = list(
-          obj = d[["vars"]][["snvs"]],
+          obj = d[["snvs"]],
           pref = glue("{p}_smallv"),
           empty_tbl = c(
             "chrom", "pos", "ref", "alt", "af", "qual", "dp_tot", "dp_alt",
@@ -784,7 +784,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
             purrr::map_dfc(setNames, object = list(logical()))
         ),
         cnv = list(
-          obj = d[["vars"]][["cnvs"]],
+          obj = d[["cnvs"]],
           pref = glue("{p}_cnv"),
           empty_tbl = c(
             "foldChange", "qual", "copyNumberType", "gene", "chromosome",
@@ -793,6 +793,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
             purrr::map_dfc(setNames, object = list(logical()))
         )
       )
+      # handle emptiness
       if (nrow(l[["snv"]][["obj"]]) == 0) {
         l[["snv"]][["obj"]] <- l[["snv"]][["empty_tbl"]]
       }
