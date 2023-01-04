@@ -12,8 +12,8 @@ x <- system.file("extdata/tso/sample705.AlignCollapseFusionCaller_metrics.json.g
   package = "dracarys"
 )
 m <- TsoAlignCollapseFusionCallerMetricsFile$new(x)
-m$read() # or read(m)
-m$write(prefix = tempfile(), out_format = "both")
+d_parsed <- m$read() # or read(m)
+m$write(d_parsed, prefix = tempfile(), out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoAlignCollapseFusionCallerMetricsFile}
@@ -24,7 +24,7 @@ m$write(prefix = tempfile(), out_format = "both")
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-read}{\code{TsoAlignCollapseFusionCallerMetricsFile$read()}}
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-write}{\code{TsoAlignCollapseFusionCallerMetricsFile$write()}}
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-histoprep}{\code{TsoAlignCollapseFusionCallerMetricsFile$histoprep()}}
-\item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-histoplot}{\code{TsoAlignCollapseFusionCallerMetricsFile$histoplot()}}
+\item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-plot}{\code{TsoAlignCollapseFusionCallerMetricsFile$plot()}}
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-clone}{\code{TsoAlignCollapseFusionCallerMetricsFile$clone()}}
 }
 }
@@ -68,12 +68,14 @@ Histo is the majority from UmiStatistics section, write out separately.
 Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
 Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{prefix}}{Prefix path of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
@@ -88,10 +90,11 @@ Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 \subsection{Method \code{histoprep()}}{
 Prepares the UmiStatistics histogram data from the
 \code{AlignCollapseFusionCaller_metrics.json.gz} file output from TSO.
-
-Histo is the majority from UmiStatistics section, deal with it separately.
-Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
-Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
+\itemize{
+\item Histo is the majority from UmiStatistics section, deal with it separately.
+\item Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
+\item Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
+}
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$histoprep(d)}\if{html}{\out{</div>}}
 }
@@ -99,16 +102,15 @@ Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{d}}{Parsed \code{AlignCollapseFusionCaller_metrics.json.gz} file (with
-the \code{read} function).}
+\item{\code{d}}{Parsed object from \code{self$read()}.}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-TsoAlignCollapseFusionCallerMetricsFile-histoplot"></a>}}
-\if{latex}{\out{\hypertarget{method-TsoAlignCollapseFusionCallerMetricsFile-histoplot}{}}}
-\subsection{Method \code{histoplot()}}{
+\if{html}{\out{<a id="method-TsoAlignCollapseFusionCallerMetricsFile-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoAlignCollapseFusionCallerMetricsFile-plot}{}}}
+\subsection{Method \code{plot()}}{
 Generates the UmiStatistics Histogram plots from the
 \code{AlignCollapseFusionCaller_metrics.json.gz} file output from TSO.
 
@@ -116,14 +118,13 @@ Histo is the majority from UmiStatistics section, deal with it separately.
 Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
 Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$histoplot(d, max_num = 15)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$plot(d, max_num = 15)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{d}}{Parsed \code{AlignCollapseFusionCaller_metrics.json.gz} file (with
-the \code{read} function).}
+\item{\code{d}}{Parsed object from \code{self$read()}.}
 
 \item{\code{max_num}}{Maximum number to display in both plots.}
 }

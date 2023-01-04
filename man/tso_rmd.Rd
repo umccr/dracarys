@@ -4,13 +4,26 @@
 \alias{tso_rmd}
 \title{Generate TSO Report}
 \usage{
-tso_rmd(prefix = NULL, out_file = "tso_report.html", quiet = FALSE)
+tso_rmd(
+  indir,
+  outprefix,
+  gds_local_dir = NULL,
+  out_format = "tsv",
+  token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  quiet = FALSE
+)
 }
 \arguments{
-\item{prefix}{Prefix for input files generated from UMCCR TSO500 ctDNA workflow (i.e. '/path/to/sbjx'.ext, where 'sbjx'
-is the common prefix of all relevant files in directory '/path/to/').}
+\item{indir}{Directory path to TSO500 ctDNA workflow results (can be GDS or local).}
 
-\item{out_file}{Name of output HTML file (needs '.html' suffix) (def: \code{tso_report.html}).}
+\item{outprefix}{Prefix path of output file(s).}
+
+\item{gds_local_dir}{If \code{indir} is a GDS directory, 'recognisable' files
+will be first downloaded to this directory.}
+
+\item{out_format}{Format of output (tsv, parquet, both) (def: tsv).}
+
+\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 
 \item{quiet}{Suppress warning and other messages.}
 }

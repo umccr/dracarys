@@ -10,9 +10,9 @@ Contains methods for reading and displaying contents of the
 \examples{
 x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package = "dracarys")
 trc <- TsoTargetRegionCoverageFile$new(x)
-trc$read() # or read(trc)
-trc$plot(90) # or plot(trc, 90)
-trc$write(prefix = tempfile(), out_format = "both")
+d_parsed <- trc$read() # or read(trc)
+trc$plot(d_parsed, 90) # or plot(trc, d_parsed, 90)
+trc$write(d_parsed, prefix = tempfile(), out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTargetRegionCoverageFile}
@@ -61,12 +61,14 @@ tibble with the following columns:
 Writes a tidy version of the \code{TargetRegionCoverage.json.gz} file output
 from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoTargetRegionCoverageFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoTargetRegionCoverageFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{prefix}}{Prefix path of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
@@ -81,12 +83,14 @@ from TSO.
 \subsection{Method \code{plot()}}{
 Plots the \code{TargetRegionCoverage.json.gz} file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoTargetRegionCoverageFile$plot(min_pct = 2)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoTargetRegionCoverageFile$plot(d, min_pct = 2)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{min_pct}}{Minimum percentage to be plotted (Default: 2).}
 }
 \if{html}{\out{</div>}}

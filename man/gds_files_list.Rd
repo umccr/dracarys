@@ -7,7 +7,7 @@
 gds_files_list(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN"))
 }
 \arguments{
-\item{gdsdir}{Full path to GDS directory, must end with \code{/}.}
+\item{gdsdir}{Full path to GDS directory.}
 
 \item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 }

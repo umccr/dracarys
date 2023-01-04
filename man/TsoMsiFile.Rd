@@ -10,8 +10,8 @@ Contains methods for reading and displaying contents of the
 \examples{
 x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
 msi <- TsoMsiFile$new(x)
-msi$read() # or read(msi)
-msi$write(tempfile(), "both")
+d_parsed <- msi$read() # or read(msi)
+msi$write(d_parsed, tempfile(), "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoMsiFile}
@@ -56,12 +56,14 @@ tibble with the following columns:
 \subsection{Method \code{write()}}{
 Writes a tidy version of the \code{msi.json.gz} file output from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoMsiFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoMsiFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{prefix}}{Prefix path of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),

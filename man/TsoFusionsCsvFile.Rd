@@ -10,8 +10,8 @@ Contains methods for reading and displaying contents of the
 \examples{
 x <- system.file("extdata/tso/sample705_Fusions.csv", package = "dracarys")
 fus <- TsoFusionsCsvFile$new(x)
-fus$read() # or read(fus)
-fus$write(tempfile(), "both")
+d_parsed <- fus$read() # or read(fus)
+fus$write(d_parsed, tempfile(), "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoFusionsCsvFile}
@@ -53,12 +53,14 @@ tibble with several columns.
 \subsection{Method \code{write()}}{
 Writes a tidy version of the \code{Fusions.csv} file output from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoFusionsCsvFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoFusionsCsvFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{prefix}}{Prefix path of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
