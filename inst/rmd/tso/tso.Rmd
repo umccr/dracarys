@@ -11,12 +11,12 @@ output:
     highlight: kate
 params:
   title: "UMCCR TSO500 ctDNA Report"
-  prefix: "x"
+  rds: "/path/to/rds"
 description: "UMCCR TSO500 ctDNA Report"
 title: "`r params$title`"
 ---
 
-__Prefix:__ __`r params$prefix`__
+__RDS:__ __`r params$rds`__
 
 ```{r knitr_opts, include=F}
 knitr::opts_chunk$set(
@@ -28,7 +28,6 @@ knitr::opts_chunk$set(
 ```{r load_pkgs}
 require(tidyverse)
 require(dracarys)
-require(glue)
 require(here)
 require(knitr)
 require(DT)
@@ -36,30 +35,26 @@ require(DT)
 
 ```{r data_setup}
 options(scipen = 999) # disable scientific notation
-pref <- params$prefix
-trace <- glue("{pref}_TMB_Trace.tsv") |>
-  TsoTmbTraceTsvFile$new() |>
-  read()
-fraglenhist <- glue("{pref}.fragment_length_hist.json.gz") |>
-  TsoFragmentLengthHistFile$new()
-cvg <- glue("{pref}.TargetRegionCoverage.json.gz") |>
-  TsoTargetRegionCoverageFile$new()
-# for accessing the histo plots
-alcolfus_obj <- glue("{pref}.AlignCollapseFusionCaller_metrics.json.gz") |>
-  TsoAlignCollapseFusionCallerMetricsFile$new()
-alcolfus <- read(alcolfus_obj)
-tmb <- glue("{pref}.tmb.json.gz") |>
-  TsoTmbFile$new() |>
-  read()
-msi <- glue("{pref}.msi.json.gz") |>
-  TsoMsiFile$new() |>
-  read()
-fus <- glue("{pref}_Fusions.csv") |>
-  TsoFusionsCsvFile$new() |>
-  read()
-res <- glue("{pref}_SampleAnalysisResults.json.gz") |>
-  TsoSampleAnalysisResultsFile$new() |>
-  read()
+stopifnot(file.exists(params$rds))
+# read tibble and convert to list of file types
+rds_raw <- params$rds |>
+  readr::read_rds()
+rds_nms <- rds_raw[["type"]]
+rds <- rds_raw |>
+  purrr::transpose() |>
+  purrr::set_names(rds_nms)
+
+trace <- rds[["tso__tmb_trace_tsv"]][["dat"]]
+fraglenhist_plot <- rds[["tso__fragment_length_hist"]][["plot"]]
+cvg_plot <- rds[["tso__target_region_coverage"]][["plot"]]
+alcolfus <- rds[["tso__align_collapse_fusion_caller_metrics"]][["dat"]] |>
+  # remove histo data since already have plot
+  dplyr::filter(!(grepl("Hist", .data$name) & .data$section == "UmiStatistics"))
+alcolfus_plot <- rds[["tso__align_collapse_fusion_caller_metrics"]][["plot"]]
+tmb <- rds[["tso__tmb"]][["dat"]]
+msi <- rds[["tso__msi"]][["dat"]]
+fus <- rds[["tso__fusions_csv"]][["dat"]]
+res <- rds[["tso__sample_analysis_results"]][["dat"]]
 ```
 
 ```{r funcs, echo=F}
@@ -80,22 +75,21 @@ dt_view <- function(x, caption = NULL, scroll_y = 200) {
 }
 ```
 
-## `SampleAnalysisResults.json.gz` {.tabset #SampleAnalysisResults}
+## `SampleAnalysisResults.json.gz`
 
 ### SNVs
 
 ```{r res_snvs}
-res$vars$snvs |>
+res$snvs |>
   dt_view()
 ```
 
 ### CNVs
 
 ```{r res_cnvs}
-res$vars$cnvs |>
+res$cnvs |>
   dt_view()
 ```
-
 
 ### SampleInfo
 
@@ -122,20 +116,12 @@ res$biomarkers |>
   knitr::kable(caption = "MSI/TMB metrics")
 ```
 
-### QC1
+### QC
 
 ```{r res_qc1}
-res$sample_metrics_qc |>
+res$qc |>
   tidyr::pivot_longer(cols = dplyr::everything(), names_to = "metric", values_to = "value") |>
-  knitr::kable()
-```
-
-### QC2
-
-```{r res_qc2}
-res$sample_metrics_expanded |>
-  tidyr::pivot_longer(dplyr::everything(), names_to = "metric", values_to = "value") |>
-  knitr::kable()
+  dt_view()
 ```
 
 ---
@@ -147,7 +133,6 @@ fus |>
   dplyr::select(-"Contig") |>
   dt_view()
 ```
-
 
 ## `tmb.json.gz`
 
@@ -193,22 +178,13 @@ trace |>
 ## `fragment_length_hist.json.gz`
 
 ```{r fraglenhist_plot}
-plot(fraglenhist)
-# read(fraglenhist) |> dt_view()
+fraglenhist_plot
 ```
 
-## `TargetRegionCoverage.json.gz` {.tabset}
+## `TargetRegionCoverage.json.gz`
 
-### Plot
-
-```{r cvg}
-plot(cvg)
-```
-
-### Data
-
-```{r cvg2}
-read(cvg) |> dt_view()
+```{r cvg_plot}
+cvg_plot
 ```
 
 ## `AlignCollapseFusionCaller_metrics.json.gz` {.tabset #AlignCollapseFusionCaller_metrics}
@@ -279,11 +255,8 @@ alcolfus |>
 ### UmiStatistics-Histo
 
 ```{r met8}
-p <- alcolfus_obj |>
-  read() |>
-  alcolfus_obj$histoplot(max_num = 20)
-p$p_num_supporting_fragments
-p$p_unique_umis_per_frag_pos
+alcolfus_plot$p_num_supporting_fragments
+alcolfus_plot$p_unique_umis_per_frag_pos
 ```
 
 ---
