@@ -5,8 +5,9 @@
 \title{Tidy TSO ctDNA Results}
 \usage{
 tso_tidy(
-  indir,
-  outprefix,
+  in_dir,
+  out_dir,
+  prefix,
   gds_local_dir = NULL,
   out_format = "tsv",
   dryrun = FALSE,
@@ -14,9 +15,11 @@ tso_tidy(
 )
 }
 \arguments{
-\item{indir}{Directory path to TSO500 ctDNA workflow results (can be GDS or local).}
+\item{in_dir}{Directory path to TSO500 ctDNA workflow results (can be GDS or local).}
 
-\item{outprefix}{Prefix path of output file(s).}
+\item{out_dir}{Output directory.}
+
+\item{prefix}{Prefix of output file(s).}
 
 \item{gds_local_dir}{If \code{indir} is a GDS directory, 'recognisable' files
 will be first downloaded to this directory.}
@@ -36,14 +39,15 @@ TSV and/or Parquet format.
 }
 \examples{
 \dontrun{
-indir <- paste0(
+in_dir <- paste0(
   "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/",
   "20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
 )
-indir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
+in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
+out_dir <- file.path(in_dir, "../out")
 gds_local_dir <- NULL
-outprefix <- file.path(indir, "out/SBJ02858")
+prefix <- "SBJ02858"
 dryrun <- F
-tso_tidy(indir = indir, outprefix = outprefix)
+tso_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix)
 }
 }

@@ -54,7 +54,7 @@ list of tibbles
 Writes a tidy version of the \code{SampleAnalysisResults.json.gz} file output
 from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoSampleAnalysisResultsFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoSampleAnalysisResultsFile$write(d, out_dir, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -62,7 +62,9 @@ from TSO.
 \describe{
 \item{\code{d}}{Parsed object from \code{self$read()}.}
 
-\item{\code{prefix}}{Prefix path of output file(s).}
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').}

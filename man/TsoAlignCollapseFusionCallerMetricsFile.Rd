@@ -13,7 +13,7 @@ x <- system.file("extdata/tso/sample705.AlignCollapseFusionCaller_metrics.json.g
 )
 m <- TsoAlignCollapseFusionCallerMetricsFile$new(x)
 d_parsed <- m$read() # or read(m)
-m$write(d_parsed, prefix = tempfile(), out_format = "both")
+m$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoAlignCollapseFusionCallerMetricsFile}
@@ -68,7 +68,12 @@ Histo is the majority from UmiStatistics section, write out separately.
 Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
 Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$write(
+  d,
+  out_dir,
+  prefix,
+  out_format = "tsv"
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -76,7 +81,9 @@ Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 \describe{
 \item{\code{d}}{Parsed object from \code{self$read()}.}
 
-\item{\code{prefix}}{Prefix path of output file(s).}
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').}
