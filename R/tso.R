@@ -3,8 +3,9 @@
 #' Tidies TSO500 ctDNA results into a list of tibbles and writes individual tibbles to
 #' TSV and/or Parquet format.
 #'
-#' @param indir Directory path to TSO500 ctDNA workflow results (can be GDS or local).
-#' @param outprefix Prefix path of output file(s).
+#' @param in_dir Directory path to TSO500 ctDNA workflow results (can be GDS or local).
+#' @param prefix Prefix of output file(s).
+#' @param out_dir Output directory.
 #' @param gds_local_dir If `indir` is a GDS directory, 'recognisable' files
 #' will be first downloaded to this directory.
 #' @param dryrun Just list the files that will be downloaded (def: FALSE).
@@ -14,36 +15,36 @@
 #' @return Tibble with path to input file and the resultant tidy object.
 #' @examples
 #' \dontrun{
-#' indir <- paste0(
+#' in_dir <- paste0(
 #'   "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/",
 #'   "20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
 #' )
-#' indir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
+#' in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
+#' out_dir <- file.path(in_dir, "../out")
 #' gds_local_dir <- NULL
-#' outprefix <- file.path(indir, "out/SBJ02858")
+#' prefix <- "SBJ02858"
 #' dryrun <- F
-#' tso_tidy(indir = indir, outprefix = outprefix)
+#' tso_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix)
 #' }
 #' @export
-tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
+tso_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format = "tsv",
                      dryrun = FALSE, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
   output_format_valid(out_format)
-  outdir <- dirname(outprefix)
   pat <- "tso__"
   e <- emojifont::emoji
 
-  if (grepl("^gds://", indir)) {
+  if (grepl("^gds://", in_dir)) {
     if (is.null(gds_local_dir)) {
-      gds_local_dir <- file.path(outdir, "dracarys_gds_sync")
+      gds_local_dir <- file.path(out_dir, "dracarys_gds_sync")
     }
     dr_gds_download(
-      gdsdir = indir, outdir = gds_local_dir, token = token,
+      gdsdir = in_dir, outdir = gds_local_dir, token = token,
       pattern = pat, dryrun = dryrun
     )
     # Use the downloaded results
-    indir <- gds_local_dir
+    in_dir <- gds_local_dir
   } else {
-    # indir is not gds
+    # in_dir is not gds
     if (!is.null(gds_local_dir)) {
       cli::cli_warn(glue(
         "You have specified 'gds_local_dir' to download GDS results,\n",
@@ -55,7 +56,7 @@ tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
     cli::cli_inform("You have specified 'dryrun' - terminating {e('ghost')}!")
     return(NULL)
   } else {
-    d <- fs::dir_ls(indir) |>
+    d <- fs::dir_ls(in_dir) |>
       tibble::as_tibble_col(column_name = "path") |>
       dplyr::mutate(
         bname = basename(.data$path),
@@ -68,13 +69,13 @@ tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
         dplyr::filter(grepl("tso__", .data$name)) |>
         dplyr::pull("regex")
       msg <- paste(
-        "No TSO files for dracarys were found in {.file {indir}}.",
+        "No TSO files for dracarys were found in {.file {in_dir}}.",
         "See current supported regexes for TSO: {regex}."
       )
       cli::cli_abort(msg)
     }
 
-    cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying TSO dir:  {.file {indir}}")
+    cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying TSO dir:  {.file {in_dir}}")
     res <- d |>
       dplyr::select("type", "path", "bname") |>
       dplyr::rowwise() |>
@@ -83,12 +84,12 @@ tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
         obj = list(.data$env$new(.data$path)),
         has_plot = "plot" %in% names(.data$env[["public_methods"]]),
         obj_parsed = list(.data$obj$read()),
-        obj_parsed2 = list(.data$obj$write(.data$obj_parsed, prefix = outprefix, out_format = out_format)),
+        obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = prefix, out_format = out_format)),
         plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
       ) |>
       dplyr::select("type", "path", "obj", dat = "obj_parsed", "plot")
-    cli::cli_alert_success("{date_log()} {e('rocket')} Finish tidying TSO dir: {.file {indir}}")
-    cli::cli_alert_success("{date_log()} {e('tada')} TSO results output at:  {.file {outdir}}")
+    cli::cli_alert_success("{date_log()} {e('rocket')} Finish tidying TSO dir: {.file {in_dir}}")
+    cli::cli_alert_success("{date_log()} {e('tada')} TSO results output at:  {.file {out_dir}}")
     return(invisible(res))
   }
 }
@@ -120,7 +121,7 @@ tso_funcall <- function(x) {
 #' x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
 #' d <- TsoTmbTraceTsvFile$new(x)
 #' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, prefix = tempfile(), out_format = "both")
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 #' @export
 TsoTmbTraceTsvFile <- R6::R6Class(
   "TsoTmbTraceTsvFile",
@@ -150,10 +151,12 @@ TsoTmbTraceTsvFile <- R6::R6Class(
     #' Writes a tidy version of the `TMB_Trace.tsv` file output from TSO.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix path of output file(s).
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    write = function(d, prefix, out_format = "tsv") {
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
       prefix2 <- glue("{prefix}_TMB_Trace")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     }
@@ -171,7 +174,7 @@ TsoTmbTraceTsvFile <- R6::R6Class(
 #' fl <- TsoFragmentLengthHistFile$new(x)
 #' d_parsed <- fl$read() # or read(fl)
 #' fl$plot(d_parsed, 5)
-#' fl$write(d_parsed, tempfile(), out_format = "both")
+#' fl$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 #' @export
 TsoFragmentLengthHistFile <- R6::R6Class(
   "TsoFragmentLengthHistFile",
@@ -199,11 +202,13 @@ TsoFragmentLengthHistFile <- R6::R6Class(
     #' from TSO.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix path of output file(s).
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(d, prefix, out_format = "tsv") {
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
       prefix2 <- glue("{prefix}_fragment_length_hist")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     },
@@ -248,7 +253,7 @@ TsoFragmentLengthHistFile <- R6::R6Class(
 #' trc <- TsoTargetRegionCoverageFile$new(x)
 #' d_parsed <- trc$read() # or read(trc)
 #' trc$plot(d_parsed, 90) # or plot(trc, d_parsed, 90)
-#' trc$write(d_parsed, prefix = tempfile(), out_format = "both")
+#' trc$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 #' @export
 TsoTargetRegionCoverageFile <- R6::R6Class(
   "TsoTargetRegionCoverageFile",
@@ -282,11 +287,13 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
     #' from TSO.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix path of output file(s).
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(d, prefix, out_format = "tsv") {
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
       prefix2 <- glue("{prefix}_TargetRegionCoverage")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     },
@@ -338,7 +345,7 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
 #' )
 #' m <- TsoAlignCollapseFusionCallerMetricsFile$new(x)
 #' d_parsed <- m$read() # or read(m)
-#' m$write(d_parsed, prefix = tempfile(), out_format = "both")
+#' m$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 #' @export
 TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
   "TsoAlignCollapseFusionCallerMetricsFile",
@@ -384,11 +391,13 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #' Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix path of output file(s).
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(d, prefix, out_format = "tsv") {
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
       dhist <- self$histoprep(d)
       dmain <- d |>
         dplyr::filter(!grepl("Hist", .data$name))
@@ -477,7 +486,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
 #' x <- system.file("extdata/tso/sample705.tmb.json.gz", package = "dracarys")
 #' tmb <- TsoTmbFile$new(x)
 #' d_parsed <- tmb$read() # or read(tmb)
-#' tmb$write(d_parsed, tempfile(), "both")
+#' tmb$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 #' @export
 TsoTmbFile <- R6::R6Class(
   "TsoTmbFile",
@@ -511,11 +520,13 @@ TsoTmbFile <- R6::R6Class(
     #' Writes a tidy version of the `tmb.json.gz` file output from TSO.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix path of output file(s).
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(d, prefix, out_format = "tsv") {
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
       prefix2 <- glue("{prefix}_tmb")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     }
@@ -532,7 +543,7 @@ TsoTmbFile <- R6::R6Class(
 #' x <- system.file("extdata/tso/sample705_Fusions.csv", package = "dracarys")
 #' fus <- TsoFusionsCsvFile$new(x)
 #' d_parsed <- fus$read() # or read(fus)
-#' fus$write(d_parsed, tempfile(), "both")
+#' fus$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 #' @export
 TsoFusionsCsvFile <- R6::R6Class(
   "TsoFusionsCsvFile",
@@ -557,10 +568,12 @@ TsoFusionsCsvFile <- R6::R6Class(
     #' Writes a tidy version of the `Fusions.csv` file output from TSO.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix path of output file(s).
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    write = function(d, prefix, out_format = "tsv") {
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
       prefix2 <- glue("{prefix}_Fusions")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     }
@@ -577,7 +590,7 @@ TsoFusionsCsvFile <- R6::R6Class(
 #' x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
 #' msi <- TsoMsiFile$new(x)
 #' d_parsed <- msi$read() # or read(msi)
-#' msi$write(d_parsed, tempfile(), "both")
+#' msi$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 #' @export
 TsoMsiFile <- R6::R6Class(
   "TsoMsiFile",
@@ -607,11 +620,13 @@ TsoMsiFile <- R6::R6Class(
     #' Writes a tidy version of the `msi.json.gz` file output from TSO.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix path of output file(s).
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(d, prefix, out_format = "tsv") {
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
       prefix2 <- glue("{prefix}_msi")
       write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
     }
@@ -744,11 +759,13 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
     #' from TSO.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix path of output file(s).
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #'
-    write = function(d, prefix, out_format = "tsv") {
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
       p <- glue("{prefix}_SampleAnalysisResults")
       l <- list(
         sample_info = list(

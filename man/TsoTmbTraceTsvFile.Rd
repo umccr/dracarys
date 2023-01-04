@@ -11,7 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
 d <- TsoTmbTraceTsvFile$new(x)
 d_parsed <- d$read() # or read(d)
-d$write(d_parsed, prefix = tempfile(), out_format = "both")
+d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTmbTraceTsvFile}
@@ -57,7 +57,7 @@ tibble with the following columns:
 \subsection{Method \code{write()}}{
 Writes a tidy version of the \code{TMB_Trace.tsv} file output from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoTmbTraceTsvFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoTmbTraceTsvFile$write(d, out_dir, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -65,7 +65,9 @@ Writes a tidy version of the \code{TMB_Trace.tsv} file output from TSO.
 \describe{
 \item{\code{d}}{Parsed object from \code{self$read()}.}
 
-\item{\code{prefix}}{Prefix path of output file(s).}
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').}

@@ -5,8 +5,9 @@
 \title{Generate TSO Report}
 \usage{
 tso_rmd(
-  indir,
-  outprefix,
+  in_dir,
+  out_dir,
+  prefix,
   gds_local_dir = NULL,
   out_format = "tsv",
   token = Sys.getenv("ICA_ACCESS_TOKEN"),
@@ -14,9 +15,11 @@ tso_rmd(
 )
 }
 \arguments{
-\item{indir}{Directory path to TSO500 ctDNA workflow results (can be GDS or local).}
+\item{in_dir}{Directory path to TSO500 ctDNA workflow results (can be GDS or local).}
 
-\item{outprefix}{Prefix path of output file(s).}
+\item{out_dir}{Output directory.}
+
+\item{prefix}{Prefix of output file(s).}
 
 \item{gds_local_dir}{If \code{indir} is a GDS directory, 'recognisable' files
 will be first downloaded to this directory.}
@@ -32,4 +35,15 @@ Path to rendered HTML report.
 }
 \description{
 Generates a HTML report with results from the UMCCR TSO500 ctDNA workflow.
+}
+\examples{
+\dontrun{
+in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
+gds_local_dir <- NULL
+out_format <- "tsv"
+quiet <- TRUE
+out_dir <- file.path(in_dir, "../out")
+prefix <- "SBJ02858"
+tso_rmd(in_dir = in_dir, out_dir = out_dir, prefix = prefix, quiet = quiet)
+}
 }

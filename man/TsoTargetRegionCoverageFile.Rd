@@ -12,7 +12,7 @@ x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package =
 trc <- TsoTargetRegionCoverageFile$new(x)
 d_parsed <- trc$read() # or read(trc)
 trc$plot(d_parsed, 90) # or plot(trc, d_parsed, 90)
-trc$write(d_parsed, prefix = tempfile(), out_format = "both")
+trc$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTargetRegionCoverageFile}
@@ -61,7 +61,7 @@ tibble with the following columns:
 Writes a tidy version of the \code{TargetRegionCoverage.json.gz} file output
 from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoTargetRegionCoverageFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoTargetRegionCoverageFile$write(d, out_dir, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -69,7 +69,9 @@ from TSO.
 \describe{
 \item{\code{d}}{Parsed object from \code{self$read()}.}
 
-\item{\code{prefix}}{Prefix path of output file(s).}
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').}
