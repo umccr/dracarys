@@ -1,21 +1,23 @@
+## r
 ^data-raw$
-^conda$
-^docs$
-^\.github$
 ^dracarys\.Rproj$
-^inst/rmd$
 ^LICENSE\.md$
-^nogit$
-^outputs$
+^docs$
 ^_pkgdown\.yaml$
 ^pkgdown$
 ^README\.Rmd$
 ^\.Rproj\.user$
 
+## python
 ^setup\.py$
 ^setup\.cfg$
 ^pyproject\.toml$
 ^dracarys$
+
+## misc
+^\.github$
+^nogit$
+^conda$
 ^Dockerfile$
 ^\.bumpversion\.cfg$
 ^\.pre-commit-config\.yaml$
