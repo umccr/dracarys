@@ -12,13 +12,16 @@ gds_file_download <- function(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN")) 
 #'
 #' List files on ICA GDS file system.
 #'
-#' @param gdsdir Full path to GDS directory, must end with `/`.
+#' @param gdsdir Full path to GDS directory.
 #' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
 #'
 #' @return Tibble with file basename, file size, file full data path, file dir name.
 #' @export
 gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
-  assertthat::assert_that(grepl("^gds://", gdsdir), grepl("/$", gdsdir))
+  assertthat::assert_that(grepl("^gds://", gdsdir))
+  if (!grepl("/$", gdsdir)) {
+    gdsdir <- glue("{gdsdir}/")
+  }
   base_url <- "https://aps2.platform.illumina.com/v1"
   volname <- sub("gds://(.*?)/.*", "\\1", gdsdir)
   path2 <- sub("gds://(.*?)/(.*)", "\\2", gdsdir)
