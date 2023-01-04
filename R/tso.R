@@ -3,8 +3,7 @@
 #' Tidies TSO500 ctDNA results into a list of tibbles and writes individual tibbles to
 #' TSV and/or Parquet format.
 #'
-#' @param indir Directory path to TSO500 ctDNA workflow results (must end
-#' with `/`).
+#' @param indir Directory path to TSO500 ctDNA workflow results (can be GDS or local).
 #' @param outprefix Prefix path of output file(s).
 #' @param gds_local_dir If `indir` is a GDS directory, 'recognisable' files
 #' will be first downloaded to this directory.
@@ -81,8 +80,7 @@ tso_tidy <- function(indir, outprefix, gds_local_dir = NULL, out_format = "tsv",
       dplyr::rowwise() |>
       dplyr::mutate(
         res = list(tso_funcall(.data$type)$new(.data$path)$write(prefix = outprefix, out_format = out_format))
-      ) |>
-      dplyr::select("path", "res")
+      )
     cli::cli_alert_success("{date_log()} {e('rocket')} Finish tidying TSO dir: {.file {indir}}")
     cli::cli_alert_success("{date_log()} {e('tada')} TSO results output at:  {.file {outdir}}")
     return(res)
