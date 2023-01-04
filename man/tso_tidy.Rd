@@ -14,8 +14,7 @@ tso_tidy(
 )
 }
 \arguments{
-\item{indir}{Directory path to TSO500 ctDNA workflow results (must end
-with \code{/}).}
+\item{indir}{Directory path to TSO500 ctDNA workflow results (can be GDS or local).}
 
 \item{outprefix}{Prefix path of output file(s).}
 

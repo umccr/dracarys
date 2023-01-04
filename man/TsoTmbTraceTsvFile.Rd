@@ -10,8 +10,8 @@ Contains methods for reading and displaying contents of the
 \examples{
 x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
 d <- TsoTmbTraceTsvFile$new(x)
-d$read() # or read(d)
-d$write(prefix = tempfile(), out_format = "both")
+d_parsed <- d$read() # or read(d)
+d$write(d_parsed, prefix = tempfile(), out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTmbTraceTsvFile}
@@ -57,12 +57,14 @@ tibble with the following columns:
 \subsection{Method \code{write()}}{
 Writes a tidy version of the \code{TMB_Trace.tsv} file output from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoTmbTraceTsvFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoTmbTraceTsvFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{prefix}}{Prefix path of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),

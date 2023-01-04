@@ -10,9 +10,9 @@ Contains methods for reading and displaying contents of the
 \examples{
 x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
 fl <- TsoFragmentLengthHistFile$new(x)
-# fl$read() # or read(fl)
-fl$plot(5)
-fl$write(tempfile(), out_format = "both")
+d_parsed <- fl$read() # or read(fl)
+fl$plot(d_parsed, 5)
+fl$write(d_parsed, tempfile(), out_format = "both")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoFragmentLengthHistFile}
@@ -60,12 +60,14 @@ tibble with the following columns:
 Writes a tidy version of the \code{fragment_length_hist.json.gz} file output
 from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoFragmentLengthHistFile$write(prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoFragmentLengthHistFile$write(d, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{prefix}}{Prefix path of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
@@ -81,12 +83,14 @@ from TSO.
 Plots the fragment length distributions as given in the
 \code{fragment_length_hist.json.gz} file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoFragmentLengthHistFile$plot(min_count = 10)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoFragmentLengthHistFile$plot(d, min_count = 10)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{min_count}}{Minimum read count to be plotted (Default: 10).}
 }
 \if{html}{\out{</div>}}
