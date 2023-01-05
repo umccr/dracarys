@@ -18,6 +18,7 @@
 #' }
 #' @export
 tso_rmd <- function(tidy_rds, out_dir, prefix, quiet = FALSE) {
+  e <- emojifont::emoji
   assertthat::assert_that(
     rlang::is_logical(quiet), file.exists(tidy_rds), fs::path_ext(tidy_rds) == "rds"
   )
@@ -33,4 +34,6 @@ tso_rmd <- function(tidy_rds, out_dir, prefix, quiet = FALSE) {
     input = rmd_file, output_dir = out_dir, output_file = I(out_html),
     params = list(rds = tidy_rds), quiet = quiet
   )
+  html_path <- file.path(out_dir, out_html)
+  cli::cli_alert_success("{date_log()} {e('sparkles')} {.emph {prefix}}: TSO HTML reportr at: {.file {html_path}}")
 }

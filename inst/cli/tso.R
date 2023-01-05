@@ -9,6 +9,7 @@ tso_add_args <- function(subp) {
   tso$add_argument("-f", "--format", help = glue("{emoji('icecream')} Format of output (default: %(default)s)."), default = "tsv", choices = c("tsv", "parquet", "both"))
   tso$add_argument("-n", "--dryrun", help = glue("{emoji('camel')} Dry run (just print tibble with files to be tidied)."), action = "store_true")
   tso$add_argument("-q", "--quiet", help = glue("{emoji('sleeping')} Shush all the logs."), action = "store_true")
+  tso$add_argument("--quiet_rmd", help = glue("{emoji('sleeping')} Shush just the Rmd rendering logs."), action = "store_true")
 }
 
 tso_parse_args <- function(args) {
@@ -54,7 +55,7 @@ tso_parse_args <- function(args) {
     tidy_rds = rds_path,
     out_dir = report_dir,
     prefix = args$prefix,
-    quiet = args$quiet
+    quiet = args$quiet_rmd || args$quiet
   )
 
   # tso_rmd run
