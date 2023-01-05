@@ -33,5 +33,5 @@ if (length(args$subparser_name) == 0) {
 } else if (args$subparser_name == "tso") {
   tso_parse_args(args)
 } else {
-  cli_alert_danger("Need to specify 'multiqc' in the cli...")
+  cli_alert_danger("Need to specify 'multiqc' or 'tso' in the cli...")
 }
