@@ -26,11 +26,11 @@ knitr::opts_chunk$set(
 ```
 
 ```{r load_pkgs}
-require(tidyverse)
-require(dracarys)
-require(here)
-require(knitr)
-require(DT)
+suppressPackageStartupMessages(library(tidyverse))
+suppressPackageStartupMessages(library(dracarys))
+suppressPackageStartupMessages(library(here))
+suppressPackageStartupMessages(library(knitr))
+suppressPackageStartupMessages(library(DT))
 ```
 
 ```{r data_setup}
