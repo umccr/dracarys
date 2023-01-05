@@ -4,29 +4,14 @@
 \alias{tso_rmd}
 \title{Generate TSO Report}
 \usage{
-tso_rmd(
-  in_dir,
-  out_dir,
-  prefix,
-  gds_local_dir = NULL,
-  out_format = "tsv",
-  token = Sys.getenv("ICA_ACCESS_TOKEN"),
-  quiet = FALSE
-)
+tso_rmd(tidy_rds, out_dir, prefix, quiet = FALSE)
 }
 \arguments{
-\item{in_dir}{Directory path to TSO500 ctDNA workflow results (can be GDS or local).}
+\item{tidy_rds}{Path to RDS object output from \code{tso_tidy}.}
 
 \item{out_dir}{Output directory.}
 
 \item{prefix}{Prefix of output file(s).}
-
-\item{gds_local_dir}{If \code{indir} is a GDS directory, 'recognisable' files
-will be first downloaded to this directory.}
-
-\item{out_format}{Format of output (tsv, parquet, both) (def: tsv).}
-
-\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 
 \item{quiet}{Suppress warning and other messages.}
 }
@@ -38,12 +23,11 @@ Generates a HTML report with results from the UMCCR TSO500 ctDNA workflow.
 }
 \examples{
 \dontrun{
-in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
-gds_local_dir <- NULL
-out_format <- "tsv"
+tidy_rds <- "~/tmp/tso/SBJ02858.rds"
+tso_tidy(...) |> saveRDS(tidy_rds)
 quiet <- TRUE
-out_dir <- file.path(in_dir, "../out")
+out_dir <- file.path("~/tmp/tso/out2")
 prefix <- "SBJ02858"
-tso_rmd(in_dir = in_dir, out_dir = out_dir, prefix = prefix, quiet = quiet)
+tso_rmd(tidy_rds = tidy_rds, out_dir = out_dir, prefix = prefix, quiet = quiet)
 }
 }
