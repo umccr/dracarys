@@ -75,7 +75,7 @@ tso_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format =
       cli::cli_abort(msg)
     }
 
-    cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying TSO dir:  {.file {in_dir}}")
+    cli::cli_alert_info("{date_log()} {e('dragon')} {.emph {prefix}}: Start tidying TSO dir: {.file {in_dir}}")
     res <- d |>
       dplyr::select("type", "path", "bname") |>
       dplyr::rowwise() |>
@@ -88,8 +88,7 @@ tso_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format =
         plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
       ) |>
       dplyr::select("type", "path", "obj", dat = "obj_parsed", "plot")
-    cli::cli_alert_success("{date_log()} {e('rocket')} Finish tidying TSO dir: {.file {in_dir}}")
-    cli::cli_alert_success("{date_log()} {e('tada')} TSO results output at:  {.file {out_dir}}")
+    cli::cli_alert_success("{date_log()} {e('tada')} {.emph {prefix}}: TSO tidy results at: {.file {out_dir}}")
     return(invisible(res))
   }
 }
@@ -706,6 +705,17 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
         biom_list[["tmb_somatic_coding_variants_count"]] <- amet[["SomaticCodingVariantsCount"]]
       }
       biom_tbl <- tibble::as_tibble_row(biom_list)
+      empty_tbl <- function(cnames) {
+        cnames |>
+          purrr::map_dfc(setNames, object = list(logical()))
+      }
+      if (length(biom_list) == 0) {
+        biom_tbl <- c(
+          "msi_pct_unstable_sites", "msi_SumJsd", "tmb_per_mb",
+          "tmb_coding_region_sizemb", "tmb_somatic_coding_variants_count"
+        ) |>
+          empty_tbl()
+      }
 
       ## sampleMetrics
       qc2tib <- function(el) {
@@ -742,7 +752,25 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
 
       qc <- dplyr::bind_cols(smet_qc, smet_em)
       snvs <- tso_snv(dat[["variants"]][["smallVariants"]])
+      if (nrow(snvs) == 0) {
+        snvs <- c(
+          "chrom", "pos", "ref", "alt", "af", "qual", "dp_tot", "dp_alt",
+          "transcript", "source", "bioType", "aminoAcids", "cdnaPos", "codons",
+          "cdsPos", "exons", "geneId", "hgnc", "hgvsc", "hgvsp", "isCanonical",
+          "polyPhenScore", "polyPhenPrediction", "proteinId", "proteinPos",
+          "siftScore", "siftPrediction", "consequence", "introns"
+        ) |>
+          empty_tbl()
+      }
+
       cnvs <- tso_cnv(dat[["variants"]][["copyNumberVariants"]])
+      if (nrow(cnvs) == 0) {
+        cnvs <- c(
+          "foldChange", "qual", "copyNumberType", "gene", "chromosome",
+          "startPosition", "endPosition"
+        ) |>
+          empty_tbl()
+      }
 
       res <- list(
         sample_info = sample_info,
@@ -790,33 +818,13 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
         ),
         snv = list(
           obj = d[["snvs"]],
-          pref = glue("{p}_smallv"),
-          empty_tbl = c(
-            "chrom", "pos", "ref", "alt", "af", "qual", "dp_tot", "dp_alt",
-            "transcript", "source", "bioType", "aminoAcids", "cdnaPos", "codons",
-            "cdsPos", "exons", "geneId", "hgnc", "hgvsc", "hgvsp", "isCanonical",
-            "polyPhenScore", "polyPhenPrediction", "proteinId", "proteinPos",
-            "siftScore", "siftPrediction", "consequence", "introns"
-          ) |>
-            purrr::map_dfc(setNames, object = list(logical()))
+          pref = glue("{p}_smallv")
         ),
         cnv = list(
           obj = d[["cnvs"]],
-          pref = glue("{p}_cnv"),
-          empty_tbl = c(
-            "foldChange", "qual", "copyNumberType", "gene", "chromosome",
-            "startPosition", "endPosition"
-          ) |>
-            purrr::map_dfc(setNames, object = list(logical()))
+          pref = glue("{p}_cnv")
         )
       )
-      # handle emptiness
-      if (nrow(l[["snv"]][["obj"]]) == 0) {
-        l[["snv"]][["obj"]] <- l[["snv"]][["empty_tbl"]]
-      }
-      if (nrow(l[["cnv"]][["obj"]]) == 0) {
-        l[["cnv"]][["obj"]] <- l[["cnv"]][["empty_tbl"]]
-      }
       purrr::map(l, function(k) {
         write_dracarys(obj = k[["obj"]], prefix = k[["pref"]], out_format = out_format)
       })
