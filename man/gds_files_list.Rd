@@ -15,5 +15,5 @@ gds_files_list(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN"))
 Tibble with file basename, file size, file full data path, file dir name.
 }
 \description{
-List files on ICA GDS file system.
+List files on ICA GDS filesystem.
 }

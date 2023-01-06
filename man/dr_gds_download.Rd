@@ -13,7 +13,7 @@ dr_gds_download(
 )
 }
 \arguments{
-\item{gdsdir}{Full path to GDS directory, must end with \code{/}.}
+\item{gdsdir}{Full path to GDS directory.}
 
 \item{outdir}{Path to output directory.}
 
