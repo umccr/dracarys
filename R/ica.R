@@ -1,4 +1,30 @@
-#' GDS File Download
+#' GDS File Download via API
+#'
+#' @param gds_fileid GDS file ID.
+#' @param out_file Path to output file.
+#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#'
+#' @examples
+#' \dontrun{
+#' gds_fileid <- "fil.f9aa2ba7af0c4330095d08dadd2e16b0"
+#' out <- tempfile()
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
+#' }
+#' @export
+gds_file_download_api <- function(gds_fileid, out_file, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+  base_url <- "https://aps2.platform.illumina.com/v1"
+  res <- httr::GET(
+    glue("{base_url}/files/{gds_fileid}"),
+    httr::add_headers(Authorization = glue("Bearer {token}")),
+    httr::accept_json()
+  )
+  presigned_url <- jsonlite::fromJSON(httr::content(res, "text"), simplifyVector = FALSE)[["presignedUrl"]]
+  assertthat::assert_that(grepl("^https://stratus-gds-aps2.s3.ap-southeast-2.amazonaws.com", presigned_url))
+  utils::download.file(url = presigned_url, destfile = out_file)
+  out_file
+}
+
+#' GDS File Download via CLI
 #'
 #' @param gds Full path to GDS file.
 #' @param out Path to output file.
@@ -10,7 +36,7 @@ gds_file_download <- function(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN")) 
 
 #' GDS Files List
 #'
-#' List files on ICA GDS file system.
+#' List files on ICA GDS filesystem.
 #'
 #' @param gdsdir Full path to GDS directory.
 #' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
@@ -48,7 +74,7 @@ gds_files_list <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
 #'
 #' Download only GDS files that can be processed by dracarys.
 #'
-#' @param gdsdir Full path to GDS directory, must end with `/`.
+#' @param gdsdir Full path to GDS directory.
 #' @param outdir Path to output directory.
 #' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
 #' @param pattern Pattern to further filter the returned file type tibble.

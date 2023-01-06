@@ -2,7 +2,7 @@
 % Please edit documentation in R/ica.R
 \name{gds_file_download}
 \alias{gds_file_download}
-\title{GDS File Download}
+\title{GDS File Download via CLI}
 \usage{
 gds_file_download(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN"))
 }
@@ -14,5 +14,5 @@ gds_file_download(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN"))
 \item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 }
 \description{
-GDS File Download
+GDS File Download via CLI
 }
