@@ -4,13 +4,7 @@
 \alias{dr_gds_download}
 \title{dracarys GDS Download}
 \usage{
-dr_gds_download(
-  gdsdir,
-  outdir,
-  token = Sys.getenv("ICA_ACCESS_TOKEN"),
-  pattern = NULL,
-  dryrun = FALSE
-)
+dr_gds_download(gdsdir, outdir, token, pattern = NULL, dryrun = FALSE)
 }
 \arguments{
 \item{gdsdir}{Full path to GDS directory.}
@@ -21,7 +15,8 @@ dr_gds_download(
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
-\item{dryrun}{Just list the files that will be downloaded?}
+\item{dryrun}{If TRUE, just list the files that will be downloaded (don't
+download them).}
 }
 \description{
 Download only GDS files that can be processed by dracarys.

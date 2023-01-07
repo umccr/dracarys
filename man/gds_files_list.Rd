@@ -4,7 +4,7 @@
 \alias{gds_files_list}
 \title{GDS Files List}
 \usage{
-gds_files_list(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN"))
+gds_files_list(gdsdir, token)
 }
 \arguments{
 \item{gdsdir}{Full path to GDS directory.}

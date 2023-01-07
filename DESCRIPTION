@@ -38,6 +38,7 @@ Suggests:
     fs,
     here,
     httr,
+    jose,
     jsonlite,
     knitr,
     rmarkdown,
