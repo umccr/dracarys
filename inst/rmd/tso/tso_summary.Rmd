@@ -23,20 +23,22 @@ knitr::opts_chunk$set(
 ```
 
 ```{r load_pkgs}
-require(dplyr, include.only = c(
-  "select", "mutate", "filter", "arrange", "rowwise", "glimpse", "pull",
-  "bind_rows", "everything", "all_of", "across"
-))
-require(tidyr, include.only = c("unnest_wider", "unnest", "pivot_wider", "hoist"))
-require(purrr, include.only = c("set_names", "map"))
-require(tibble, include.only = c("as_tibble_col"))
-require(readr, include.only = c("read_rds", "write_rds"))
-# require(dracarys) # only needed for session info
-require(glue, include.only = "glue")
-require(here, include.only = "here")
-require(knitr, include.only = "kable")
-require(DT, include.only = "datatable")
-require(fs, include.only = c("dir_ls"))
+{
+  require(dplyr, include.only = c(
+    "select", "mutate", "filter", "arrange", "rowwise", "glimpse", "pull",
+    "bind_rows", "everything", "all_of", "across"
+  ))
+  require(tidyr, include.only = c("unnest_wider", "unnest", "pivot_wider", "hoist"))
+  require(purrr, include.only = c("set_names", "map"))
+  require(tibble, include.only = c("as_tibble_col"))
+  require(readr, include.only = c("read_rds", "write_rds"))
+  # require(dracarys) # only needed for session info
+  require(glue, include.only = "glue")
+  require(here, include.only = "here")
+  require(knitr, include.only = "kable")
+  require(DT, include.only = "datatable")
+  require(fs, include.only = c("dir_ls"))
+}
 ```
 
 ```{r data_setup, eval=FALSE}

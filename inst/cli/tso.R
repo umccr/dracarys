@@ -4,11 +4,12 @@ tso_add_args <- function(subp) {
   tso$add_argument("-o", "--out_dir", help = glue("{emoji('gift')} Output tidy results to this directory."), required = TRUE)
   tso$add_argument("-r", "--report_dir", help = glue("{emoji('sparkles')} Output HTML report with tidy RDS object to this directory."))
   tso$add_argument("-p", "--prefix", help = glue("{emoji('dancer')} Prefix string (used for all results)."), required = TRUE)
+  tso$add_argument("-t", "--token", help = glue("{emoji('see_no_evil')} ICA access token (def. ICA_ACCESS_TOKEN env var)."), default = Sys.getenv("ICA_ACCESS_TOKEN"))
   tso$add_argument("-g", "--gds_local_dir", help = glue("{emoji('clipboard')} If input is a GDS directory, download the 'recognisable' files to this directory. If not specified, files will be downloaded to 'out_dir/dracarys_gds_sync'."))
   tso$add_argument("--rds_dir", help = glue("{emoji('droplet')} Directory to save RDS object with results from tidy function."))
   tso$add_argument("-f", "--format", help = glue("{emoji('icecream')} Format of output (default: %(default)s)."), default = "tsv", choices = c("tsv", "parquet", "both"))
   tso$add_argument("-n", "--dryrun", help = glue("{emoji('camel')} Dry run (just print tibble with files to be tidied)."), action = "store_true")
-  tso$add_argument("-q", "--quiet", help = glue("{emoji('sleeping')} Shush all the logs."), action = "store_true")
+  tso$add_argument("-q", "--quiet", help = glue("{emoji('sleeping')} Shush all the logs (also see --quiet_rmd)."), action = "store_true")
   tso$add_argument("--quiet_rmd", help = glue("{emoji('sleeping')} Shush just the Rmd rendering logs."), action = "store_true")
 }
 
@@ -34,6 +35,7 @@ tso_parse_args <- function(args) {
     rds_dir <- normalizePath(args$rds_dir)
     rds_path <- file.path(rds_dir, glue("{args$prefix}_dracarys_data.rds"))
   }
+  token <- ica_token_validate(args$token)
 
   tidy_args <- list(
     in_dir = args$in_dir,
@@ -42,7 +44,7 @@ tso_parse_args <- function(args) {
     gds_local_dir = gds_local_dir,
     out_format = args$format,
     dryrun = args$dryrun,
-    token = args$token
+    token = token
   )
 
   # tso_tidy run

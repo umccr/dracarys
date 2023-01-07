@@ -4,11 +4,7 @@
 \alias{gds_file_download_api}
 \title{GDS File Download via API}
 \usage{
-gds_file_download_api(
-  gds_fileid,
-  out_file,
-  token = Sys.getenv("ICA_ACCESS_TOKEN")
-)
+gds_file_download_api(gds_fileid, out_file, token)
 }
 \arguments{
 \item{gds_fileid}{GDS file ID.}
