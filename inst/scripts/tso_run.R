@@ -1,8 +1,7 @@
+require(dracarys)
 require(here)
-require(glue)
 require(dplyr)
 require(readr)
-require(dracarys)
 
 # SQL
 # select * from data_portal.data_portal_gdsfile where regexp_like(path, 'SampleAnalysisResults.json.gz') order by time_created desc;
@@ -34,18 +33,24 @@ x <- d |>
   select(sbj, sbj2, gds_indir, date = time_created) |>
   arrange(sbj2) |>
   mutate(
-    outdir = here(glue("nogit/tso/2022-12-13/{sbj2}")),
+    outdir = here(glue("nogit/tso/2023-01-07/{sbj2}")),
     local_indir = file.path(outdir, "dracarys_gds_sync")
   ) |>
   select(sbj2, gds_indir, outdir, local_indir)
 
 
 token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
-for (i in 319:320) {
+for (i in 1:2) {
   print(i)
-  # print(x$gds_indir[i])
-  print(x$local_indir[i])
-  dracarys::dracarys_tso(indir = x$gds_indir[i], outdir = x$outdir[i], dryrun = FALSE, token = token)
-  # dracarys::dracarys_tso(indir = x$local_indir[i], outdir = x$outdir[i], dryrun = FALSE, token = token)
-  # dracarys::tso_rmd(prefix = x$pref[i], out_file = x$out_html)
+  print(x$gds_indir[i])
+  # print(x$local_indir[i])
+  dracarys::tso_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = TRUE, token = token)
+  # dracarys::tso_tidy(in_dir = x$local_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = FALSE, token = token)
 }
+
+x |>
+  mutate(
+    cmd = glue("./dracarys.R -i {local_indir} -o {outdir} -r {outdir}/report_dir -p {sbj2} --rds_dir {outdir}/rds_dir")
+  ) |>
+  select(cmd) |>
+  write_tsv(here("inst/cli/run2.sh"))

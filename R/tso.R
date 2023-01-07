@@ -53,7 +53,7 @@ tso_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format =
     }
   }
   if (dryrun) {
-    cli::cli_inform("You have specified 'dryrun' - terminating {e('ghost')}!")
+    cli::cli_inform("{e('camel')} You have specified 'dryrun' - terminating!")
     return(NULL)
   } else {
     d <- fs::dir_ls(in_dir) |>
@@ -88,6 +88,10 @@ tso_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format =
         plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
       ) |>
       dplyr::select("type", "path", "obj", dat = "obj_parsed", "plot")
+    assertthat::assert_that(
+      !any(duplicated(d[["type"]])),
+      msg = glue("Aborting - duplicated file types detected in {in_dir}")
+    )
     cli::cli_alert_success("{date_log()} {e('tada')} {.emph {prefix}}: TSO tidy results at: {.file {out_dir}}")
     return(invisible(res))
   }
