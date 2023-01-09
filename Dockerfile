@@ -1,4 +1,4 @@
-FROM condaforge/mambaforge:4.12.0-2 as conda
+FROM condaforge/mambaforge:22.9.0-2 as conda
 LABEL maintainer="https://github.com/pdiakumis"
 
 # install conda-lock
@@ -8,7 +8,7 @@ RUN mamba config \
     mamba install \
       -c conda-forge \
       -c nodefaults \
-      conda-lock==1.0.5 && \
+      conda-lock==1.3.0 && \
     mamba clean --all --force-pkgs-dirs
 
 ARG ENV_NAME="dracarys_env"
