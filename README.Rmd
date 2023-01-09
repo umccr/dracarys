@@ -75,7 +75,7 @@ dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, 
 export PATH="${dracarys_cli}:${PATH}"
 
 echo "$ dracarys.R --version"
-echo "dracarys.R 0.5.0"
+echo "dracarys.R 0.6.0"
 echo ""
 echo "#------- multiqc -------#"
 echo ""
