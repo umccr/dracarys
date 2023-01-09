@@ -24,17 +24,24 @@ conda install r-dracarys -c umccr -c conda-forge -c bioconda
 
 ## Main modules
 
-### ✨ multiqc
+### 🌈 multiqc
 
-- Generate a ‘tidier’ form of the `multiqc_data.json` MultiQC summary
-  file. TSV and Parquet outputs are generated. For the TSV file, each
-  row corresponds to a single sample, and each column corresponds to a
-  single quality metric/variable. See the [CLI](#cli) section below for
-  options.
+- Generate a ‘tidier’ form of the `multiqc_data.json`
+  [MultiQC](https://multiqc.info/) data summary file. Builds on
+  functionality from
+  [TidyMultiqc](https://github.com/multimeric/TidyMultiqc). TSV and/or
+  Parquet outputs are generated. For the TSV file, each row corresponds
+  to a single sample, and each column corresponds to a single quality
+  metric/variable. See the [CLI](#cli) section below for options.
 
-### tso
+### 🌶 tso
 
-- Generate a ‘tidier’ form of the TSO500 ctDNA workflow results.
+- Generate a ‘tidier’ form of the UMCCR TSO500 ctDNA workflow results.
+  Input is a GDS (or local) directory with ‘raw’ TSO500 ctDNA results,
+  and output includes the relevant GDS files synced, their tidy form in
+  parquet/tsv format, a HTML report with those results in table form,
+  and an RDS R file that feeds into the HTML report. See the [CLI](#cli)
+  section below for options.
 
 ## 💻 CLI
 
@@ -75,15 +82,33 @@ export PATH="${dracarys_cli}:${PATH}"
 
 
     $ dracarys.R tso --help
-    usage: dracarys.R tso [-h] -i INDIR -o OUTDIR [-q] [-n] [-f {tsv,parquet,rds}]
+    usage: dracarys.R tso [-h] -i IN_DIR -o OUT_DIR [-r REPORT_DIR] -p PREFIX
+                          [-t TOKEN] [-g GDS_LOCAL_DIR] [--rds_dir RDS_DIR]
+                          [-f {tsv,parquet,both}] [-n] [-q] [--quiet_rmd]
 
     optional arguments:
       -h, --help            show this help message and exit
-      -i INDIR, --indir INDIR
-                            💩 Path to directory with TSO ctDNA workflow results.
-      -o OUTDIR, --outdir OUTDIR
+      -i IN_DIR, --in_dir IN_DIR
+                            💩 Directory with TSO500 ctDNA workflow results (GDS or
+                            local).
+      -o OUT_DIR, --out_dir OUT_DIR
                             🎁 Output tidy results to this directory.
-      -q, --quiet           😴 Shush all the logs.
-      -n, --dryrun          🐫 Dry run.
-      -f {tsv,parquet,rds}, --format {tsv,parquet,rds}
+      -r REPORT_DIR, --report_dir REPORT_DIR
+                            ✨ Output HTML report with tidy RDS object to this
+                            directory.
+      -p PREFIX, --prefix PREFIX
+                            💃 Prefix string (used for all results).
+      -t TOKEN, --token TOKEN
+                            🙈 ICA access token (def. ICA_ACCESS_TOKEN env var).
+      -g GDS_LOCAL_DIR, --gds_local_dir GDS_LOCAL_DIR
+                            📋 If input is a GDS directory, download the
+                            'recognisable' files to this directory. If not
+                            specified, files will be downloaded to
+                            'out_dir/dracarys_gds_sync'.
+      --rds_dir RDS_DIR     💧 Directory to save RDS object with results from tidy
+                            function.
+      -f {tsv,parquet,both}, --format {tsv,parquet,both}
                             🍦 Format of output (default: tsv).
+      -n, --dryrun          🐫 Dry run (just print tibble with files to be tidied).
+      -q, --quiet           😴 Shush all the logs (also see --quiet_rmd).
+      --quiet_rmd           😴 Shush just the Rmd rendering logs.

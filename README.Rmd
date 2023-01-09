@@ -38,16 +38,23 @@ conda install r-dracarys -c umccr -c conda-forge -c bioconda
 
 ## Main modules
 
-### ✨ multiqc {#id_-multiqc}
+### 🌈 multiqc {#id_-multiqc}
 
-- Generate a 'tidier' form of the `multiqc_data.json` MultiQC summary file.
-  TSV and Parquet outputs are generated. For the TSV file, each row corresponds
+- Generate a 'tidier' form of the `multiqc_data.json`
+  [MultiQC](https://multiqc.info/) data summary file. Builds on functionality from
+  [TidyMultiqc](https://github.com/multimeric/TidyMultiqc). TSV and/or Parquet
+  outputs are generated. For the TSV file, each row corresponds
   to a single sample, and each column corresponds to a single quality metric/variable.
   See the [CLI](#cli) section below for options.
 
-### tso {#id_-tso}
+### 🌶 tso {#id_-tso}
 
-- Generate a 'tidier' form of the TSO500 ctDNA workflow results.
+- Generate a 'tidier' form of the UMCCR TSO500 ctDNA workflow results. Input is
+  a GDS (or local) directory with 'raw' TSO500 ctDNA results, and output includes
+  the relevant GDS files synced, their tidy form in parquet/tsv format, a HTML
+  report with those results in table form, and an RDS R file that feeds into the
+  HTML report.
+  See the [CLI](#cli) section below for options.
 
 ## 💻 CLI {#id_-cli}
 
