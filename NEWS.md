@@ -1,3 +1,35 @@
+# dracarys 0.6.0 (2023-01-09)
+
+- :wrench: GH Actions:
+  - replace `::set-output`.
+  - add linux/arm64 support.
+- :wrench: R core:
+  - replace select `.data` with quotes.
+  - bump Roxygen `7.2.1 -> 7.2.2`
+  - add {fs}, {httr}, {jose}, {sessioninfo} dependencies.
+  - import `%||%` from {rlang} to specify fallback values in NULL cases.
+- :sparkles: pkgdown: change theme to simplex.
+- :whale: Docker:
+  - bump mambaforge: `4.12.0-2 -> 22.9.0-2`
+  - bump conda-lock: `1.0.5 -> 1.3.0`
+- :computer: CLI:
+  - add support for tidying outputs from the UMCCR TSO500 ctDNA workflow, and
+    for generating a HTML file with tidy results from the same workflow.
+- :star: Added R functions:
+  - `tso_tidy` for tidying outputs from the UMCCR TSO500 ctDNA workflow.
+  - `tso_rmd` for generating a HTML file with tidy results from the above workflow.
+  - `dr_gds_download` for downloading dracarys-related files from GDS.
+  - `gds_files_list` for listing files on GDS via the API.
+  - `gds_file_download` and `gds_file_download_api` for downloading files
+    from GDS via the ica binary and API (via presigned URLs), respectively.
+  - `ica_token_validate` for validating the ICA access token is valid and has not expired.
+- :x: Removed R functions:
+  - `TsoCombinedVariantOutputFile`: these files were deemed to have less info compared to other output files.
+  - `dracarys_tidy_multiqc`: renamed to `dracarys_multiqc`.
+  - `mkdir`: use `fs::create_dir` instead.
+  - Remove {tibble}, {readr} and {ggplot} multi-imports for R6, since we can get away with just importing a single
+    function in one of the R6 classes.
+
 # dracarys 0.5.0 (2022-09-28)
 
 - MultiQC: update column mappings ([pr15](https://github.com/umccr/dracarys/pull/15), [pr16](https://github.com/umccr/dracarys/pull/16)).
