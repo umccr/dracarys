@@ -42,10 +42,9 @@ stopifnot(file.exists(params$rds))
 rds_raw <- params$rds |>
   readr::read_rds()
 rds_nms <- rds_raw[["type"]]
-assertthat::assert_that(
-  !any(duplicated(rds_nms)),
-  msg = glue("There are duplicated file types for {params$rds}.")
-)
+if (any(duplicated(rds_nms))) {
+  stop(glue("There are duplicated file types for {params$rds}."))
+}
 rds <- rds_raw |>
   purrr::transpose() |>
   purrr::set_names(rds_nms)

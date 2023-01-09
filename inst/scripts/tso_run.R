@@ -40,17 +40,18 @@ x <- d |>
 
 
 token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
-for (i in 1:2) {
+dryrun <- FALSE
+for (i in 1:20) {
   print(i)
   print(x$gds_indir[i])
   # print(x$local_indir[i])
-  dracarys::tso_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = TRUE, token = token)
+  dracarys::tso_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = dryrun, token = token)
   # dracarys::tso_tidy(in_dir = x$local_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = FALSE, token = token)
 }
 
 x |>
   mutate(
-    cmd = glue("./dracarys.R -i {local_indir} -o {outdir} -r {outdir}/report_dir -p {sbj2} --rds_dir {outdir}/rds_dir")
+    cmd = glue("./dracarys.R tso -i {gds_indir} -o {outdir} -r {outdir}/report_dir -p {sbj2} --rds_dir {outdir}/rds_dir --quiet_rmd")
   ) |>
   select(cmd) |>
-  write_tsv(here("inst/cli/run2.sh"))
+  write_tsv(here("inst/cli/run.sh"), col_names = FALSE)

@@ -53,7 +53,7 @@ tso_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format =
     }
   }
   if (dryrun) {
-    cli::cli_inform("{e('camel')} You have specified 'dryrun' - terminating!")
+    cli::cli_inform("{e('camel')} You have specified 'dryrun' - just listing files!")
     return(NULL)
   } else {
     d <- fs::dir_ls(in_dir) |>
