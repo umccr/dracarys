@@ -46,9 +46,6 @@
     <loc>https://umccr.github.io/dracarys/reference/TsoAlignCollapseFusionCallerMetricsFile.html</loc>
   </url>
   <url>
-    <loc>https://umccr.github.io/dracarys/reference/TsoCombinedVariantOutputFile.html</loc>
-  </url>
-  <url>
     <loc>https://umccr.github.io/dracarys/reference/TsoFragmentLengthHistFile.html</loc>
   </url>
   <url>
@@ -76,19 +73,31 @@
     <loc>https://umccr.github.io/dracarys/reference/date_log.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/dr_gds_download.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/dracarys-package.html</loc>
   </url>
   <url>
-    <loc>https://umccr.github.io/dracarys/reference/dracarys_tidy_multiqc.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/dracarys_multiqc.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/gds_file_download.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/gds_file_download_api.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/gds_files_list.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/ica_token_validate.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/index.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/match_regex.html</loc>
-  </url>
-  <url>
-    <loc>https://umccr.github.io/dracarys/reference/mkdir.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/multiqc_parse_gen.html</loc>
@@ -106,6 +115,15 @@
     <loc>https://umccr.github.io/dracarys/reference/read.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/session_info_kable.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/time_metrics_process.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/tso_rmd.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/tso_tidy.html</loc>
   </url>
 </urlset>
