@@ -1,4 +1,5 @@
-FROM condaforge/mambaforge:22.9.0-2 as conda
+ARG MAMBAFORGE_VERSION="22.9.0-2"
+FROM condaforge/mambaforge:${MAMBAFORGE_VERSION}
 LABEL maintainer="https://github.com/pdiakumis"
 
 # install conda-lock
