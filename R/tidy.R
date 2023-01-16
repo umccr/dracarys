@@ -61,7 +61,7 @@ umccr_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format
         bname = basename(.data$path),
         type = purrr::map_chr(.data$bname, match_regex)
       ) |>
-      dplyr::filter(!is.na(.data$type), grepl(pat, .data$type))
+      dplyr::filter(!is.na(.data$type))
 
     if (nrow(d) == 0) {
       regex <- FILE_REGEX |>
