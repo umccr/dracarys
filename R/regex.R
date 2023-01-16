@@ -24,31 +24,40 @@ match_regex <- function(x) {
 }
 
 FILE_REGEX <- tibble::tribble(
-  ~regex, ~name,
-  # "MetricsOutput\\.tsv$", "tso__metrics_output",
-  "AlignCollapseFusionCaller_metrics\\.json\\.gz$", "tso__align_collapse_fusion_caller_metrics",
-  "TargetRegionCoverage\\.json\\.gz$", "tso__target_region_coverage",
-  "fragment_length_hist\\.json\\.gz$", "tso__fragment_length_hist",
-  "msi\\.json\\.gz$", "tso__msi",
-  "tmb\\.json\\.gz$", "tso__tmb",
-  "TMB_Trace\\.tsv$", "tso__tmb_trace_tsv",
-  # "_Fusions\\.json\\.gz$", "tso__fusions_json",
-  "_Fusions\\.csv$", "tso__fusions_csv",
-  "SampleAnalysisResults\\.json\\.gz$", "tso__sample_analysis_results",
-  "fastqc_metrics\\.csv$", "dragen/fastqc_metrics",
-  "insert-stats\\.tab$", "dragen/insert_stats",
-  "sv_metrics\\.csv", "dragen/sv_metrics",
-  "trimmer_metrics\\.csv", "dragen/trimmer_metrics",
-  "wgs_contig_mean_cov(_tumor|_normal|)\\.csv$", "dragen/contig_mean_cov",
-  "wgs_fine_hist(_tumor|_normal|)\\.csv$", "dragen/fine_hist",
-  "wgs_hist(_tumor|_normal|)\\.csv$", "dragen/hist",
-  "wgs_overall_mean_cov(_tumor|_normal|)\\.csv$", "dragen/coverage_overall",
-  "wgs_coverage_metrics(_tumor|_normal|)\\.csv$", "dragen/coverage_metrics",
-  "fragment_length_hist\\.csv$", "dragen/fragment_length_hist",
-  "mapping_metrics\\.csv$", "dragen/mapping_metrics",
-  "ploidy_estimation_metrics\\.csv$", "dragen/ploidy_estimation_metrics",
-  "replay\\.json$", "dragen/replay",
-  "time_metrics\\.csv$", "dragen/time_metrics",
-  "vc_metrics\\.csv$", "dragen/vc_metrics",
-  "multiqc_data\\.json", "multiqc",
+  ~regex, ~name, ~fun,
+  "AlignCollapseFusionCaller_metrics\\.json\\.gz$", "tso__align_collapse_fusion_caller_metrics", "TsoAlignCollapseFusionCallerMetricsFile",
+  "TargetRegionCoverage\\.json\\.gz$", "tso__target_region_coverage", "TsoTargetRegionCoverageFile",
+  "fragment_length_hist\\.json\\.gz$", "tso__fragment_length_hist", "TsoFragmentLengthHistFile",
+  "msi\\.json\\.gz$", "tso__msi", "TsoMsiFile",
+  "tmb\\.json\\.gz$", "tso__tmb", "TsoTmbFile",
+  "TMB_Trace\\.tsv$", "tso__tmb_trace_tsv", "TsoTmbTraceTsvFile",
+  "_Fusions\\.csv$", "tso__fusions_csv", "TsoFusionsCsvFile",
+  "SampleAnalysisResults\\.json\\.gz$", "tso__sample_analysis_results", "TsoSampleAnalysisResultsFile",
+  "fastqc_metrics\\.csv$", "dragen/fastqc_metrics", NULL,
+  "insert-stats\\.tab$", "dragen/insert_stats", NULL,
+  "sv_metrics\\.csv", "dragen/sv_metrics", NULL,
+  "trimmer_metrics\\.csv", "dragen/trimmer_metrics", NULL,
+  "wgs_contig_mean_cov(_tumor|_normal|)\\.csv$", "dragen/contig_mean_cov", NULL,
+  "wgs_fine_hist(_tumor|_normal|)\\.csv$", "dragen/fine_hist", NULL,
+  "wgs_hist(_tumor|_normal|)\\.csv$", "dragen/hist", NULL,
+  "wgs_overall_mean_cov(_tumor|_normal|)\\.csv$", "dragen/coverage_overall", NULL,
+  "wgs_coverage_metrics(_tumor|_normal|)\\.csv$", "dragen/coverage_metrics", NULL,
+  "fragment_length_hist\\.csv$", "dragen/fragment_length_hist", NULL,
+  "mapping_metrics\\.csv$", "dragen/mapping_metrics", NULL,
+  "ploidy_estimation_metrics\\.csv$", "dragen/ploidy_estimation_metrics", NULL,
+  "replay\\.json$", "dragen/replay", NULL,
+  "time_metrics\\.csv$", "dragen/time_metrics", NULL,
+  "vc_metrics\\.csv$", "dragen/vc_metrics", NULL,
+  "multiqc_data\\.json", "multiqc", NULL,
+  "somatic\\.pcgr\\.json\\.gz$", "pcgr__json", "PcgrJsonFile"
 )
+
+func_selector <- function(type) {
+  l <- FILE_REGEX[["fun"]] |>
+    purrr::set_names(FILE_REGEX[["name"]])
+  if (!type %in% names(l)) {
+    return(NULL)
+  }
+  # need this workaround to evaluate string as function
+  eval(parse(text = l[[type]]))
+}
