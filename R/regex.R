@@ -49,7 +49,8 @@ FILE_REGEX <- tibble::tribble(
   "time_metrics\\.csv$", "dragen/time_metrics", NULL,
   "vc_metrics\\.csv$", "dragen/vc_metrics", NULL,
   "multiqc_data\\.json", "multiqc", NULL,
-  "somatic\\.pcgr\\.json\\.gz$", "pcgr__json", "PcgrJsonFile"
+  "somatic\\.pcgr\\.json\\.gz$", "pcgr__json", "PcgrJsonFile",
+  "somatic\\.pcgr\\.snvs_indels\\tiers.tsv$", "pcgr__tiers", "PcgrTiersFile"
 )
 
 func_selector <- function(type) {
