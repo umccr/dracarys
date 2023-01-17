@@ -104,7 +104,7 @@ dr_gds_download <- function(gdsdir, outdir, token,
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
     dplyr::mutate(out = file.path(outdir, .data$bname))
   if (!dryrun) {
-    cli::cli_alert_info("{date_log()} {e('arrow_heading_down')}  Downloading files from {.file {gdsdir}}")
+    cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {gdsdir}}")
     d_filt |>
       dplyr::rowwise() |>
       dplyr::mutate(out_dl = gds_file_download_api(.data$file_id, .data$out, token))

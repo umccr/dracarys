@@ -32,12 +32,16 @@ PcgrJsonFile <- R6::R6Class(
       #   purrr::map(l2tib) |>
       #   dplyr::bind_rows(.id = "name_tidy") |>
       #   dplyr::select("name", "name_tidy", "version", "url", "resource_type")
-      tmb <- j[["content"]][["tmb"]][["variant_statistic"]] |>
-        purrr::flatten() |>
+      tmb <- j[["content"]][["tmb"]][["variant_statistic"]]
+      # handle nulls
+      tmb <- tmb %||% list(tmb_estimate = NA, n_tmb = NA)
+      tmb <- purrr::flatten(tmb) |>
         tibble::as_tibble() |>
         dplyr::select("tmb_estimate", "n_tmb")
-      msi <- j[["content"]][["msi"]][["prediction"]][["msi_stats"]] |>
-        purrr::flatten() |>
+      msi <- j[["content"]][["msi"]][["prediction"]][["msi_stats"]]
+      # handle nulls
+      msi <- msi %||% list(fracIndels = NA, predicted_class = NA)
+      msi <- purrr::flatten(msi) |>
         tibble::as_tibble() |>
         dplyr::select("fracIndels", "predicted_class")
       metrics <- dplyr::bind_cols(msi, tmb)
