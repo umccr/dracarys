@@ -23,7 +23,8 @@ gds_file_download_api <- function(gds_fileid, out_file, token) {
   presigned_url <- jsonlite::fromJSON(httr::content(x = res, as = "text", encoding = "UTF-8"), simplifyVector = FALSE)[["presignedUrl"]]
   assertthat::assert_that(grepl("^https://stratus-gds-aps2.s3.ap-southeast-2.amazonaws.com", presigned_url))
   # keep quiet instead of logging presigned urls
-  utils::download.file(url = presigned_url, destfile = out_file, quiet = TRUE)
+  status_code <- utils::download.file(url = presigned_url, destfile = out_file, quiet = TRUE)
+  assertthat::assert_that(status_code == 0)
   out_file
 }
 
@@ -103,7 +104,7 @@ dr_gds_download <- function(gdsdir, outdir, token,
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
     dplyr::mutate(out = file.path(outdir, .data$bname))
   if (!dryrun) {
-    cli::cli_alert_info("{date_log()} {e('arrow_heading_down')}  Downloading files from {.file {gdsdir}}")
+    cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {gdsdir}}")
     d_filt |>
       dplyr::rowwise() |>
       dplyr::mutate(out_dl = gds_file_download_api(.data$file_id, .data$out, token))
