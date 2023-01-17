@@ -47,7 +47,7 @@ write_dracarys <- function(obj, prefix, out_format) {
   output_format_valid(out_format)
   fs::dir_create(dirname(prefix))
   if (out_format %in% c("tsv", "both")) {
-    tsv_out <- glue("{prefix}.tsv")
+    tsv_out <- glue("{prefix}.tsv.gz")
     readr::write_tsv(obj, tsv_out)
   }
   if (out_format %in% c("parquet", "both")) {
