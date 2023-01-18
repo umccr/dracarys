@@ -35,8 +35,8 @@ FILE_REGEX <- tibble::tribble(
   "SampleAnalysisResults\\.json\\.gz$", "tso__sample_analysis_results", "TsoSampleAnalysisResultsFile",
   "fastqc_metrics\\.csv$", "dragen/fastqc_metrics", NULL,
   "insert-stats\\.tab$", "dragen/insert_stats", NULL,
-  "sv_metrics\\.csv", "dragen/sv_metrics", NULL,
-  "trimmer_metrics\\.csv", "dragen/trimmer_metrics", NULL,
+  "sv_metrics\\.csv$", "dragen/sv_metrics", NULL,
+  "trimmer_metrics\\.csv$", "dragen/trimmer_metrics", NULL,
   "wgs_contig_mean_cov(_tumor|_normal|)\\.csv$", "dragen/contig_mean_cov", NULL,
   "wgs_fine_hist(_tumor|_normal|)\\.csv$", "dragen/fine_hist", NULL,
   "wgs_hist(_tumor|_normal|)\\.csv$", "dragen/hist", NULL,
@@ -50,7 +50,11 @@ FILE_REGEX <- tibble::tribble(
   "vc_metrics\\.csv$", "dragen/vc_metrics", NULL,
   "multiqc_data\\.json", "multiqc", NULL,
   "somatic\\.pcgr\\.json\\.gz$", "pcgr__json", "PcgrJsonFile",
-  "somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$", "pcgr__tiers", "PcgrTiersFile"
+  "somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$", "pcgr__tiers", "PcgrTiersFile",
+  "chord\\.tsv\\.gz$", "um__chord", "UmChordTsvFile",
+  "hrdetect\\.tsv\\.gz$", "um__hrdetect", "UmHrdetectTsvFile",
+  "snv_2015\\.tsv\\.gz$", "um__sigs2015_snv", "UmSigsSnvFile",
+  "snv_2020\\.tsv\\.gz$", "um__sigs2020_snv", "UmSigsSnvFile"
 )
 
 func_selector <- function(type) {

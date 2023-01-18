@@ -41,8 +41,7 @@ dracarys_multiqc <- function(json, prefix, outdir, out_format = "tsv") {
 #' @export
 multiqc_tidy_json <- function(j) {
   p <- RJSONIO::fromJSON(j)
-  cdate <- p[["config_creation_date"]]
-  cdate <- dplyr::if_else(is.null(cdate), "UNKNOWN", cdate)
+  cdate <- p[["config_creation_date"]] %||% "UNKNOWN"
   cdate <- sub(", ", "_", cdate)
   workflow <- .multiqc_guess_workflow(p)
   d <- dracarys::multiqc_parse_gen(p)
@@ -110,7 +109,7 @@ multiqc_tidy_json <- function(j) {
 
 .multiqc_guess_workflow <- function(p) {
   assertthat::assert_that(all(c("config_title", "report_data_sources") %in% names(p)))
-  config_title <- dplyr::if_else(is.null(p[["config_title"]]), "Unknown", p[["config_title"]])
+  config_title <- p[["config_title"]] %||% "Unknown"
   ds <- names(p[["report_data_sources"]])
   # bcbio
   if ("bcbio" %in% ds) {
