@@ -41,16 +41,3 @@ for (i in 101:276) {
   umccr_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = dryrun, token = token)
   # umccr_tidy(in_dir = x$local_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = FALSE, token = token)
 }
-
-# x |>
-#   mutate(
-#     cmd = glue("./dracarys.R tso -i {gds_indir} -o {outdir} -r {outdir}/report_dir -p {sbj2} --rds_dir {outdir}/rds_dir --quiet_rmd")
-#   ) |>
-#   select(cmd) |>
-#   write_tsv(here("inst/cli/run.sh"), col_names = FALSE)
-
-res <- read_rds(here("nogit/pcgr/rds/res_2023-01-17.rds"))
-
-dplyr::left_join(x, res, by = c("sbj2" = "sbj")) |>
-  dplyr::select(sbj = sbj2, date, fracIndels, predicted_class, tmb_estimate, n_tmb, gds_indir) |>
-  readr::write_tsv(here("nogit/pcgr/res_2023-01-17.tsv"))

@@ -41,8 +41,7 @@ dracarys_multiqc <- function(json, prefix, outdir, out_format = "tsv") {
 #' @export
 multiqc_tidy_json <- function(j) {
   p <- RJSONIO::fromJSON(j)
-  cdate <- p[["config_creation_date"]]
-  cdate <- cdate %||% "UNKNOWN"
+  cdate <- p[["config_creation_date"]] %||% "UNKNOWN"
   cdate <- sub(", ", "_", cdate)
   workflow <- .multiqc_guess_workflow(p)
   d <- dracarys::multiqc_parse_gen(p)
