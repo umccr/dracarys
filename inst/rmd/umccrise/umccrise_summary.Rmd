@@ -1,0 +1,82 @@
+---
+author: "University of Melbourne Centre for Cancer Research"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    theme: cosmo
+    css: style.css
+    code_download: true
+  rmdformats::material:
+    highlight: kate
+params:
+  title: "UMCCR umccrise Summary Report"
+description: "UMCCR umccrise Summary Report"
+title: "`r params$title`"
+---
+
+```{r knitr_opts, include=F}
+knitr::opts_chunk$set(
+  collapse = TRUE, echo = FALSE,
+  warning = FALSE, message = FALSE
+)
+```
+
+```{r load_pkgs}
+{
+  require(tidyverse)
+  # require(dracarys) # only needed for session info
+  require(glue, include.only = "glue")
+  require(here, include.only = "here")
+  require(knitr, include.only = "kable")
+  require(DT, include.only = "datatable")
+  require(fs, include.only = c("dir_ls"))
+}
+```
+
+```{r data_setup, eval=FALSE}
+options(width = 150)
+res <- here("nogit/umccrise/2023-01-18") |>
+  dir_ls(recurse = TRUE, type = "file") |>
+  as_tibble_col(column_name = "path") |>
+  filter(!grepl("dracarys_gds_sync", path)) |> # get rid of synced data
+  mutate(
+    type = case_when(
+      grepl("chord", path) ~ "chord",
+      grepl("hrdetect", path) ~ "hrdetect",
+      grepl("snv2015", path) ~ "sigs2015",
+      grepl("snv2020", path) ~ "sigs2020",
+      TRUE ~ "UNKNOWN"
+    ),
+    sbj = basename(dirname(path))
+  ) |>
+  # slice(1:40) |>
+  rowwise() |>
+  mutate(dat = list(read_tsv(path, show_col_types = FALSE))) |>
+  select(sbj, type, dat) |>
+  pivot_wider(names_from = type, values_from = dat)
+hrd <- res |>
+  hoist(chord, chord_hrd = "p_hrd") |>
+  hoist(hrdetect, hrdetect_hrd = "Probability") |>
+  select(sbj, chord_hrd, hrdetect_hrd)
+sigs <- res |>
+  select(sbj, sigs2015, sigs2020) |>
+  pivot_longer(c(sigs2015, sigs2020), names_to = "version", values_to = "dat") |>
+  unnest(dat)
+pcgr <- read_rds(here("nogit/pcgr/rds/res_2023-01-17.rds"))
+all <- dplyr::left_join(pcgr, hrd, by = "sbj")
+readr::write_tsv(all, here("nogit/umccrise/res_2023-01-19.tsv.gz"))
+readr::write_tsv(sigs, here("nogit/umccrise/sigs_2023-01-19.tsv.gz"))
+```
+
+---
+
+## Session Info
+
+```{r session_info, echo=FALSE, eval=FALSE}
+pkgs_of_interest <- c("base", "dracarys", "tidyverse", "tidyselect", "ggplot2", "dplyr", "tidyr", "readr")
+# need dracarys for session info
+si <- dracarys::session_info_kable(pkgs_of_interest)
+si$si_pkg
+si$si_pl
+```
