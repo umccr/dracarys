@@ -17,9 +17,7 @@ TsoTmbTraceTsvFile <- R6::R6Class(
     #' @description
     #' Reads the `TMB_Trace.tsv` file output from TSO.
     #'
-    #' @return tibble with the following columns:
-    #' * FragmentLength
-    #' * Count
+    #' @return tibble with variants.
     read = function() {
       x <- self$path
       ct <- readr::cols(
