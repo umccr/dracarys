@@ -250,9 +250,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         # list to tibble and turn cols to char
         fun1 <- function(l) {
           # handle silly NULLs..
-          if (l[["value"]] |> is.null()) {
-            l[["value"]] <- NA
-          }
+          l[["value"]] <- l[["value"]] %||% NA
           tibble::as_tibble(l) |>
             dplyr::mutate(dplyr::across(dplyr::everything(), ~ as.character(.)))
         }
@@ -491,9 +489,7 @@ TsoMsiFile <- R6::R6Class(
       j <- jsonlite::read_json(x)
       # not interested in Settings element
       j[["Settings"]] <- NULL
-      if (is.null(j[["ResultMessage"]])) {
-        j[["ResultMessage"]] <- NA_character_
-      }
+      j[["ResultMessage"]] <- j[["ResultMessage"]] %||% NA_character_
       if (j[["PercentageUnstableSites"]] == "NaN") {
         j[["PercentageUnstableSites"]] <- NA_real_
       }

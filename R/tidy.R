@@ -33,9 +33,7 @@ umccr_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format
   e <- emojifont::emoji
 
   if (grepl("^gds://", in_dir)) {
-    if (is.null(gds_local_dir)) {
-      gds_local_dir <- file.path(out_dir, "dracarys_gds_sync")
-    }
+    gds_local_dir <- gds_local_dir %||% file.path(out_dir, "dracarys_gds_sync")
     dr_gds_download(
       gdsdir = in_dir, outdir = gds_local_dir, token = token,
       pattern = NULL, dryrun = dryrun

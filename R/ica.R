@@ -97,9 +97,7 @@ dr_gds_download <- function(gdsdir, outdir, token,
     dplyr::select("file_id", "dname", "type", "size", "path", "bname")
 
   # download recognisable dracarys files to outdir/{bname}
-  if (is.null(pattern)) {
-    pattern <- ".*" # keep all recognisable files
-  }
+  pattern <- pattern %||% ".*" # keep all recognisable files
   d_filt <- d |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
     dplyr::mutate(out = file.path(outdir, .data$bname))
