@@ -48,25 +48,49 @@ res <- here("nogit/umccrise/2023-01-18") |>
       grepl("snv2020", path) ~ "sigs2020",
       TRUE ~ "UNKNOWN"
     ),
-    sbj = basename(dirname(path))
+    sbj2 = basename(dirname(path)),
+    sbj = sub("(.*)_.*", "\\1", sbj2)
   ) |>
   # slice(1:40) |>
   rowwise() |>
   mutate(dat = list(read_tsv(path, show_col_types = FALSE))) |>
-  select(sbj, type, dat) |>
+  select(sbj, sbj2, type, dat) |>
   pivot_wider(names_from = type, values_from = dat)
 hrd <- res |>
   hoist(chord, chord_hrd = "p_hrd") |>
   hoist(hrdetect, hrdetect_hrd = "Probability") |>
-  select(sbj, chord_hrd, hrdetect_hrd)
+  select(sbj, sbj2, chord_hrd, hrdetect_hrd)
 sigs <- res |>
-  select(sbj, sigs2015, sigs2020) |>
+  select(sbj, sbj2, sigs2015, sigs2020) |>
   pivot_longer(c(sigs2015, sigs2020), names_to = "version", values_to = "dat") |>
   unnest(dat)
-pcgr <- read_rds(here("nogit/pcgr/rds/res_2023-01-17.rds"))
-all <- dplyr::left_join(pcgr, hrd, by = "sbj")
-readr::write_tsv(all, here("nogit/umccrise/res_2023-01-19.tsv.gz"))
-readr::write_tsv(sigs, here("nogit/umccrise/sigs_2023-01-19.tsv.gz"))
+pcgr <- read_rds(here("nogit/pcgr/rds/res_2023-01-17.rds")) |>
+  rename(sbj2 = sbj)
+all <- left_join(pcgr, hrd, by = "sbj2") |>
+  mutate(sbj = sub("(.*)_.*", "\\1", sbj2)) |>
+  select(sbj, sbj2, everything())
+
+# ids <- read_csv(here("nogit/data_portal/labmetadata_2023-01-19.csv"), col_types = cols(.default = "c")) |>
+#   # select(subject_id, phenotype, assay,  library_id, sample_name, sample_id, external_sample_id, external_subject_id) |>
+#   filter(subject_id %in% all$sbj,
+#          type == "WGS")
+
+# add libids based on sbj2
+sbj2_to_libids <- read_rds(here("nogit/umccrise/rds/x_2023-01-20.rds")) |>
+  select(sbj2, libids, analysis_date = date, gds_indir)
+
+all <- all |>
+  left_join(sbj2_to_libids, by = "sbj2") |>
+  select(sbj, sbj2, libids, analysis_date, gds_indir, everything())
+
+sigs <- sigs |>
+  left_join(sbj2_to_libids, by = "sbj2") |>
+  select(sbj, sbj2, libids, analysis_date, gds_indir, everything())
+
+# limsrow <- read_csv(here("nogit/data_portal/limsrow_2023-01-19.csv"), col_types = cols(.default = "c"))
+
+readr::write_tsv(all, here("nogit/umccrise/res_2023-01-20.tsv.gz"))
+readr::write_tsv(sigs, here("nogit/umccrise/sigs_2023-01-20.tsv.gz"))
 ```
 
 ---

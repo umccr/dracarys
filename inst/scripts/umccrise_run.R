@@ -14,7 +14,8 @@ x <- d |>
   mutate(
     sbj = sub("/analysis_data/(SBJ.*?)/.*", "\\1", path),
     dir = dirname(path),
-    gds_indir = glue("gds://{volume_name}{dir}/")
+    gds_indir = glue("gds://{volume_name}{dir}/"),
+    libids = dirname(dirname(dirname(path))) |> basename()
   ) |>
   group_by(sbj) |>
   # TODO: check if results already exist for same sbj
@@ -23,14 +24,14 @@ x <- d |>
     sbj2 = if_else(n_samp > 1, glue("{sbj}_{dplyr::row_number()}"), sbj)
   ) |>
   ungroup() |>
-  select(sbj, sbj2, gds_indir, date = time_created) |>
   arrange(sbj2) |>
   mutate(
     outdir = here(glue("nogit/umccrise/2023-01-18/{sbj2}")),
     local_indir = file.path(outdir, "dracarys_gds_sync")
   ) |>
-  select(sbj2, gds_indir, outdir, local_indir, date)
+  select(sbj, sbj2, libids, gds_indir, outdir, local_indir, date = time_created)
 
+write_rds(x, here("nogit/umccrise/rds/x_2023-01-20.rds"))
 
 token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
 dryrun <- F
