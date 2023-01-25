@@ -11,6 +11,8 @@
 #' @param dryrun Just list the files that will be downloaded (def: FALSE).
 #' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
 #' @param out_format Format of output (tsv, parquet, both) (def: tsv).
+#' @param pattern Pattern to further filter the returned file type tibble (see
+#' `name` column in the `FILE_REGEX` tibble).
 #'
 #' @return Tibble with path to input file and the resultant tidy object.
 #' @examples
@@ -28,15 +30,17 @@
 #' }
 #' @export
 umccr_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format = "tsv",
-                       dryrun = FALSE, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+                       dryrun = FALSE, token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                       pattern = NULL) {
   output_format_valid(out_format)
   e <- emojifont::emoji
 
   if (grepl("^gds://", in_dir)) {
     gds_local_dir <- gds_local_dir %||% file.path(out_dir, "dracarys_gds_sync")
+    pat <- pattern %||% ".*" # keep all recognisable files
     dr_gds_download(
       gdsdir = in_dir, outdir = gds_local_dir, token = token,
-      pattern = NULL, dryrun = dryrun
+      pattern = pat, dryrun = dryrun
     )
     # Use the downloaded results
     in_dir <- gds_local_dir

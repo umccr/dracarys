@@ -54,7 +54,8 @@ FILE_REGEX <- tibble::tribble(
   "chord\\.tsv\\.gz$", "um__chord", "UmChordTsvFile",
   "hrdetect\\.tsv\\.gz$", "um__hrdetect", "UmHrdetectTsvFile",
   "snv_2015\\.tsv\\.gz$", "um__sigs2015_snv", "UmSigsSnvFile",
-  "snv_2020\\.tsv\\.gz$", "um__sigs2020_snv", "UmSigsSnvFile"
+  "snv_2020\\.tsv\\.gz$", "um__sigs2020_snv", "UmSigsSnvFile",
+  "-qc_summary\\.tsv\\.gz$", "um__qcsum", "UmQcSumFile"
 )
 
 func_selector <- function(type) {

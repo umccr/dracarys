@@ -46,28 +46,33 @@ res <- here("nogit/umccrise/2023-01-18") |>
       grepl("hrdetect", path) ~ "hrdetect",
       grepl("snv2015", path) ~ "sigs2015",
       grepl("snv2020", path) ~ "sigs2020",
+      grepl("qc_summary", path) ~ "qcsum",
       TRUE ~ "UNKNOWN"
     ),
     sbj2 = basename(dirname(path)),
     sbj = sub("(.*)_.*", "\\1", sbj2)
   ) |>
-  # slice(1:40) |>
+  # slice(1:10) |>
   rowwise() |>
   mutate(dat = list(read_tsv(path, show_col_types = FALSE))) |>
   select(sbj, sbj2, type, dat) |>
   pivot_wider(names_from = type, values_from = dat)
+qc <- res |>
+  select("sbj", "sbj2", "qcsum") |>
+  unnest_wider(qcsum)
 hrd <- res |>
-  hoist(chord, chord_hrd = "p_hrd") |>
-  hoist(hrdetect, hrdetect_hrd = "Probability") |>
-  select(sbj, sbj2, chord_hrd, hrdetect_hrd)
+  hoist(chord, hrd_chord1 = "p_hrd") |>
+  hoist(hrdetect, hrd_hrdetect1 = "Probability") |>
+  select(sbj, sbj2, hrd_chord1, hrd_hrdetect1)
 sigs <- res |>
   select(sbj, sbj2, sigs2015, sigs2020) |>
   pivot_longer(c(sigs2015, sigs2020), names_to = "version", values_to = "dat") |>
   unnest(dat)
 pcgr <- read_rds(here("nogit/pcgr/rds/res_2023-01-17.rds")) |>
-  rename(sbj2 = sbj)
+  rename(sbj2 = "sbj", tmb_pcgr = "tmb_estimate", tmb_n_pcgr = "n_tmb")
 all <- left_join(pcgr, hrd, by = "sbj2") |>
-  mutate(sbj = sub("(.*)_.*", "\\1", sbj2)) |>
+  left_join(qc, by = c("sbj2", "sbj")) |>
+  select(-c("hrd_chord1", "hrd_hrdetect1")) |>
   select(sbj, sbj2, everything())
 
 # ids <- read_csv(here("nogit/data_portal/labmetadata_2023-01-19.csv"), col_types = cols(.default = "c")) |>
@@ -81,7 +86,26 @@ sbj2_to_libids <- read_rds(here("nogit/umccrise/rds/x_2023-01-20.rds")) |>
 
 all <- all |>
   left_join(sbj2_to_libids, by = "sbj2") |>
-  select(sbj, sbj2, libids, analysis_date, gds_indir, everything())
+  select(sbj, sbj2, libids, analysis_date, gds_indir,
+    qc_status_hmf,
+    sex_hmf,
+    purity_hmf,
+    ploidy_hmf,
+    msi_fracIndels_pcgr = fracIndels,
+    msi_predicted_class_pcgr = predicted_class,
+    msi_hmf,
+    msi_mb_hmf,
+    hrd_chord,
+    hrd_hrdetect,
+    tmb_pcgr,
+    tmb_n_pcgr,
+    tmb_hmf,
+    tml_hmf,
+    contamination_hmf,
+    deleted_genes_hmf,
+    wgd_hmf,
+    everything()
+  )
 
 sigs <- sigs |>
   left_join(sbj2_to_libids, by = "sbj2") |>
@@ -89,7 +113,7 @@ sigs <- sigs |>
 
 # limsrow <- read_csv(here("nogit/data_portal/limsrow_2023-01-19.csv"), col_types = cols(.default = "c"))
 
-readr::write_tsv(all, here("nogit/umccrise/res_2023-01-20.tsv.gz"))
+readr::write_tsv(all, here("nogit/umccrise/res_2023-01-25.tsv.gz"))
 readr::write_tsv(sigs, here("nogit/umccrise/sigs_2023-01-20.tsv.gz"))
 ```
 

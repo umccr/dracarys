@@ -35,10 +35,11 @@ write_rds(x, here("nogit/umccrise/rds/x_2023-01-20.rds"))
 
 token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
 dryrun <- F
-for (i in 101:276) {
+for (i in 1:276) {
   print(i)
   # print(x$gds_indir[i])
   # print(x$local_indir[i])
-  umccr_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = dryrun, token = token)
+  umccr_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = dryrun, token = token, pattern = "um__qcsum")
+  # umccr_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = dryrun, token = token)
   # umccr_tidy(in_dir = x$local_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = FALSE, token = token)
 }

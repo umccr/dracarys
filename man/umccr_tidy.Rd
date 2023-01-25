@@ -11,7 +11,8 @@ umccr_tidy(
   gds_local_dir = NULL,
   out_format = "tsv",
   dryrun = FALSE,
-  token = Sys.getenv("ICA_ACCESS_TOKEN")
+  token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  pattern = NULL
 )
 }
 \arguments{
@@ -29,6 +30,9 @@ will be first downloaded to this directory.}
 \item{dryrun}{Just list the files that will be downloaded (def: FALSE).}
 
 \item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
+
+\item{pattern}{Pattern to further filter the returned file type tibble (see
+\code{name} column in the \code{FILE_REGEX} tibble).}
 }
 \value{
 Tibble with path to input file and the resultant tidy object.
