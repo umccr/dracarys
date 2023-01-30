@@ -1,3 +1,25 @@
+#' GDS File Presigned URL
+#'
+#' Returns presigned URL of given GDS file.
+#'
+#' @param gds_fileid GDS file ID.
+#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#' @return Presigned URL if valid.
+#' @export
+gds_file_presignedurl <- function(gds_fileid, token) {
+  token <- ica_token_validate(token)
+  base_url <- "https://aps2.platform.illumina.com/v1"
+  url <- glue("{base_url}/files/{gds_fileid}")
+  res <- httr::GET(
+    url,
+    httr::add_headers(Authorization = glue("Bearer {token}")),
+    httr::accept_json()
+  )
+  presigned_url <- jsonlite::fromJSON(httr::content(x = res, as = "text", encoding = "UTF-8"), simplifyVector = FALSE)[["presignedUrl"]]
+  assertthat::assert_that(grepl("^https://stratus-gds-aps2.s3.ap-southeast-2.amazonaws.com", presigned_url))
+  presigned_url
+}
+
 #' GDS File Download via API
 #'
 #' @param gds_fileid GDS file ID.
@@ -12,16 +34,7 @@
 #' }
 #' @export
 gds_file_download_api <- function(gds_fileid, out_file, token) {
-  token <- ica_token_validate(token)
-  base_url <- "https://aps2.platform.illumina.com/v1"
-  url <- glue("{base_url}/files/{gds_fileid}")
-  res <- httr::GET(
-    url,
-    httr::add_headers(Authorization = glue("Bearer {token}")),
-    httr::accept_json()
-  )
-  presigned_url <- jsonlite::fromJSON(httr::content(x = res, as = "text", encoding = "UTF-8"), simplifyVector = FALSE)[["presignedUrl"]]
-  assertthat::assert_that(grepl("^https://stratus-gds-aps2.s3.ap-southeast-2.amazonaws.com", presigned_url))
+  presigned_url <- gds_file_presignedurl(gds_fileid, token)
   # keep quiet instead of logging presigned urls
   status_code <- utils::download.file(url = presigned_url, destfile = out_file, quiet = TRUE)
   assertthat::assert_that(status_code == 0)
