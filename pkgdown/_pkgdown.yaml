@@ -1,0 +1,26 @@
+template:
+  bootstrap: 5
+  bootswatch: simplex #sketchy
+url: https://umccr.github.io/dracarys/
+title: dracarys
+authors:
+  Peter Diakumis:
+    href: https://github.com/pdiakumis
+  Victor San Kho Lin:
+    href: https://github.com/victorskl
+navbar:
+  structure:
+    left: [home, articles]
+    right: [reference, search, github]
+  components:
+    home:
+      text: Intro
+      href: index.html
+    articles:
+      text: Articles
+      menu:
+      - text: Developer notes
+        href: articles/developers.html
+
+news:
+  one_page: true
