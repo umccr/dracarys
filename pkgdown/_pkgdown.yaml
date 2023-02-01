@@ -19,7 +19,9 @@ navbar:
     articles:
       text: Articles
       menu:
-      - text: Developer notes
+      - text: FlameStories
+        href: articles/flames.html
+      - text: DevNotes
         href: articles/developers.html
 
 news:
