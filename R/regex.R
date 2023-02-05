@@ -48,7 +48,7 @@ FILE_REGEX <- tibble::tribble(
   "replay\\.json$", "dragen/replay", NULL,
   "time_metrics\\.csv$", "dragen/time_metrics", NULL,
   "vc_metrics\\.csv$", "dragen/vc_metrics", NULL,
-  "multiqc_data\\.json", "multiqc", NULL,
+  "multiqc_data\\.json", "multiqc", "MultiqcFile",
   "somatic\\.pcgr\\.json\\.gz$", "pcgr__json", "PcgrJsonFile",
   "somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$", "pcgr__tiers", "PcgrTiersFile",
   "chord\\.tsv\\.gz$", "um__chord", "UmChordTsvFile",

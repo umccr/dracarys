@@ -7,8 +7,8 @@ output:
     code_download: true
   rmdformats::material:
     highlight: kate
-description: "UMCCR MultiQC JSON Data Comparison"
-title: "MultiQC JSON Data Comparison"
+description: "UMCCR MultiQC JSON Summary"
+title: "MultiQC JSON Summary"
 ---
 
 ```{r knitr_opts, include=F}
@@ -25,25 +25,6 @@ library(tibble)
 library(here)
 ```
 
-## Introduction
-
-Here we are comparing the contents of `multiqc_data.json` files generated from several UMCCR workflows:
-
-- [x] `dragen_wgs_alignment_qc`
-- [x] `dragen_wgs_tumor_normal`
-- [x] `dragen_wts_tumor_only`
-- [x] `dragen_umccrise`
-- [x] `bcbio_umccrise`
-- [x] `bcbio_wgs`
-- [x] `bcbio_wts`
-
-We are only interested in the following JSON elements:
-
-- `report_general_stats_data`: contains everything we need
-- `report_saved_raw_data`: contains everything from above, plus fragment
-  length data (which isn't needed for our purposes) and maybe other random stuff.
-- `config_creation_date`: useful for keeping an analysis timestamp.
-- `config_title`: contains sample name and workflow name (for the DRAGEN workflows)
 
 ```{r}
 # multiqc_tidy_json(here("nogit/multiqc/dragen/wgs_alignment_qc/SBJ02402/MDX220189_dragen_alignment_multiqc_data.json"))
@@ -59,14 +40,16 @@ We are only interested in the following JSON elements:
 
 
 
-x <- fs::dir_ls(here("nogit/multiqc"), glob = "*json", recurse = TRUE)
-x |>
+x <- fs::dir_ls(here("nogit/multiqc"), regexp = "multiqc_data\\.json$", recurse = TRUE)
+# debug
+for (i in seq_len(length(x))) {
+  print(i)
+  MultiqcFile$new(x[i])$read()
+}
+
+# store
+m <- x |>
   purrr::map_df(function(fn) {
-    d <- multiqc_tidy_json(fn)
-    tibble::tibble(cols = ncol(d), rows = nrow(d), fname = fn)
-  }) |>
-  dplyr::arrange(cols, rows, fname) |>
-  dplyr::mutate(n = dplyr::row_number()) |>
-  dplyr::select("n", dplyr::everything()) |>
-  knitr::kable()
+    MultiqcFile$new(fn)$read()
+  })
 ```

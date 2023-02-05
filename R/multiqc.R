@@ -1,35 +1,45 @@
-#' Dracarys MultiQC Tidy
+#' MultiqcFile R6 Class
 #'
-#' Generate tidier representations of MultiQC JSON output
-#' @param json Path to `multiqc_data.json`.
-#' @param prefix Prefix for output files.
-#' @param outdir Path to output results.
-#' @param out_format Format of output (tsv, parquet, both) (def: tsv).
-#' @return Generates TSV and/or Parquet representations of the input
-#' MultiQC JSON file.
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `multiqc_data.json` file output from MultiQC.
+#'
+#' @examples
+#' x <- "/path/to/multiqc_data.json"
+#' mqc <- MultiqcFile$new(x)
+#' mqc_parsed <- mqc$read() # or read(mqc)
+#' mqc$write(mqc_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
 #' @export
-dracarys_multiqc <- function(json, prefix, outdir, out_format = "tsv") {
-  output_format_valid(out_format)
-  e <- emojifont::emoji
-  cli::cli_div(theme = list(
-    span.file = list(color = "lightblue"),
-    span.emph = list(color = "orange")
-  ))
-  cli::cli_alert_info("{date_log()} {e('dragon')} Start tidying {.file {json}} {e('fire')}")
-  # main dracarys function
-  d1 <- multiqc_tidy_json(json)
-  if (out_format %in% c("tsv", "both")) {
-    tsv_out <- file.path(outdir, glue("{prefix}.tsv"))
-    readr::write_tsv(d1, tsv_out)
-  }
-  if (out_format %in% c("parquet", "both")) {
-    parquet_out <- file.path(outdir, glue("{prefix}.parquet"))
-    arrow::write_parquet(d1, parquet_out)
-  }
+MultiqcFile <- R6::R6Class(
+  "MultiqcFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `multiqc_data.json` file output from MultiQC.
+    #'
+    #' @return A tidy tibble.
+    #'   - label:
+    read = function() {
+      x <- self$path
+      multiqc_tidy_json(x)
+    },
 
-  cli::cli_alert_success("{date_log()} {e('rocket')} End tidying {.file {json}} {e('comet')}!")
-  cli::cli_alert_info("{date_log()} {e('tada')} Path to output directory with results for {.emph {prefix}}: {.file {outdir}}")
-}
+    #' @description
+    #' Writes a tidy version of the `multiqc_data.json` file output from MultiQC.
+    #'
+    #' @param d Parsed object from `self$read()`.
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
+    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
+    #' 'parquet', 'both').
+    #'
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
+      prefix2 <- glue("{prefix}_multiqc")
+      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    }
+  )
+)
 
 #' Tidy MultiQC JSON
 #'
