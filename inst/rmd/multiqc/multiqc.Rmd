@@ -62,3 +62,26 @@ dat |>
   facet_grid(metric ~ pheno, scales = "free") +
   theme_bw()
 ```
+
+```{r}
+# add lims info
+lims <- readr::read_tsv("~/Downloads/Google LIMS - Sheet1.tsv")
+out <- lims |>
+  select(SubjectID, SampleID, SampleName, ProjectName, Type) |>
+  filter(ProjectName %in% c("CIRCUIT", "Control", "PROSPECT")) |>
+  filter(SubjectID != "-") |>
+  distinct(SubjectID, ProjectName) |>
+  pull(SubjectID)
+dat |>
+  dplyr::select(
+    umccr_sbj, umccr_id, date, pheno, hash1, dplyr::contains("dupmark"),
+    dplyr::everything(), -c(date1, umccr_workflow)
+  ) |>
+  dplyr::mutate(EXCLUDE = umccr_sbj %in% out) |>
+  tidyr::pivot_longer(contains("dupmark"), names_to = "metric", values_to = "value") |>
+  # dplyr::filter(metric %in% c("reads_num_dupmarked_dragen", "reads_num_dupmarked_samtools")) |>
+  ggplot(aes(x = date, y = value)) +
+  geom_point(aes(colour = EXCLUDE)) +
+  facet_grid(metric ~ pheno, scales = "free") +
+  theme_bw()
+```
