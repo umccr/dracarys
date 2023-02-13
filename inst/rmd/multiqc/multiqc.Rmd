@@ -85,3 +85,18 @@ dat |>
   facet_grid(metric ~ pheno, scales = "free") +
   theme_bw()
 ```
+
+```{r}
+x <- readr::read_tsv(here("nogit/multiqc/2023-02-13_multiqc_results.tsv.gz"))
+x |>
+  dplyr::select(
+    sbj_id = umccr_sbj, sample_id = umccr_id, date, phenotype = pheno, hash6 = hash1,
+    cov_median_mosdepth, cov_auto_median_dragen,
+    reads_tot_input_dragen, reads_mapped_pct_dragen, insert_len_median_dragen,
+    var_tot_dragen, var_snp_dragen, ploidy = ploidy_purple1, purity = purity_purple1,
+    qc_status_purple, sex = gender_purple,
+    ms_status = ms_status_purple, tmb = tmb_permb_purple,
+  ) |>
+  readr::write_tsv(here("nogit/multiqc/2023-02-13_multiqc_results_subset.tsv.gz"))
+```
+
