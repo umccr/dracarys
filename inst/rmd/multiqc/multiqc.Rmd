@@ -21,35 +21,44 @@ knitr::opts_chunk$set(
 ```{r setup, message=FALSE, warning=FALSE}
 library(dracarys)
 library(dplyr)
+library(ggplot2)
 library(tibble)
 library(here)
+library(fs)
 ```
 
 
 ```{r}
-# multiqc_tidy_json(here("nogit/multiqc/dragen/wgs_alignment_qc/SBJ02402/MDX220189_dragen_alignment_multiqc_data.json"))
-# multiqc_tidy_json(here("nogit/multiqc/dragen/wgs_alignment_qc/SBJ02402/MDX220190_dragen_alignment_multiqc_data.json"))
-# multiqc_tidy_json(here("nogit/multiqc/dragen/wgs_tumor_normal/SBJ02402/MDX220190_dragen_somatic_multiqc_data.json"))
-# multiqc_tidy_json(here("nogit/multiqc/dragen/wts_tumor_only/SBJ02402/MDX220191_dragen_transcriptome_multiqc_data.json"))
-# multiqc_tidy_json(here("nogit/multiqc/dragen/umccrise/SBJ02403/SBJ02403__PRJ221333-multiqc_report_data.json"))
-# multiqc_tidy_json(here("nogit/multiqc/bcbio/umccrise/SBJ00665__SBJ00665_PRJ200639_L2100018_multiqc_data.json"))
-# multiqc_tidy_json(here("nogit/multiqc/bcbio/umccrise/SBJ02403__SBJ02403_PRJ221333_L2200722_multiqc_data.json"))
-# multiqc_tidy_json(here("nogit/multiqc/bcbio/wts/SBJ02400_multiqc_data.json"))
-# multiqc_tidy_json(here("nogit/multiqc/bcbio/wgs/SBJ02400_multiqc_data.json"))
-# multiqc_tidy_json(here("nogit/multiqc/tso/PTC_TSOctDNA200901VD_L2000754/multiqc_data.json"))
+date1 <- "2023-02-07"
+res <- here(glue("nogit/multiqc/{date1}")) |>
+  dir_ls(recurse = TRUE, regexp = "_multiqc\\.tsv\\.gz") |>
+  as_tibble_col(column_name = "path") |>
+  mutate(
+    bname = basename(path),
+    date_hash = basename(dirname(path)),
+    sbj = sub("(.*)_multiqc.tsv.gz", "\\1", bname),
+    sbj_date_hash = glue("{sbj}_{date_hash}")
+  )
 
-
-
-x <- fs::dir_ls(here("nogit/multiqc"), regexp = "multiqc_data\\.json$", recurse = TRUE)
-# debug
-for (i in seq_len(length(x))) {
-  print(i)
-  MultiqcFile$new(x[i])$read()
+l1 <- vector("list", nrow(res)) |> purrr::set_names(res$sbj_date_hash)
+for (i in seq_len(nrow(res))) {
+  l1[[i]] <- readr::read_tsv(res$path[i], show_col_types = FALSE)
 }
+dat <- dplyr::bind_rows(l1, .id = "sbj_date_hash") |>
+  tidyr::separate(col = sbj_date_hash, sep = "_", into = c("umccr_sbj", "date1", "hash1")) |>
+  dplyr::mutate(
+    pheno = dplyr::if_else(is.na(purity_purple1), "normal", "tumor"),
+    date = lubridate::ymd_hm(sub("_", " ", date))
+  )
+dat |>
+  dplyr::select(umccr_sbj, umccr_id, date, pheno, hash1, dplyr::contains("dupmark"), dplyr::everything(), -c(date1, umccr_workflow)) |>
+  readr::write_tsv(here("nogit/multiqc/2023-02-13_results.tsv"))
 
-# store
-m <- x |>
-  purrr::map_df(function(fn) {
-    MultiqcFile$new(fn)$read()
-  })
+dat |>
+  tidyr::pivot_longer(contains("dupmark"), names_to = "metric", values_to = "value") |>
+  # dplyr::filter(metric %in% c("reads_num_dupmarked_dragen", "reads_num_dupmarked_samtools")) |>
+  ggplot(aes(x = date, y = value)) +
+  geom_point(aes(colour = pheno)) +
+  facet_grid(metric ~ pheno, scales = "free") +
+  theme_bw()
 ```
