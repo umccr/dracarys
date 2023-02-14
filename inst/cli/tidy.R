@@ -1,0 +1,44 @@
+tidy_add_args <- function(subp) {
+  tidy <- subp$add_parser("tidy", help = "Tidy UMCCR Workflow Outputs")
+  tidy$add_argument("-i", "--in_dir", help = glue("{emoji('snowman')} Directory with untidy UMCCR workflow results (GDS or local)."), required = TRUE)
+  tidy$add_argument("-o", "--out_dir", help = glue("{emoji('fire')} Directory to output tidy results."), required = TRUE)
+  tidy$add_argument("-p", "--prefix", help = glue("{emoji('violin')} Prefix string (used for all results)."), required = TRUE)
+  tidy$add_argument("-t", "--token", help = glue("{emoji('see_no_evil')} ICA access token (def. ICA_ACCESS_TOKEN env var)."), default = Sys.getenv("ICA_ACCESS_TOKEN"))
+  tidy$add_argument("-g", "--gds_local_dir", help = glue("{emoji('clipboard')} If input is a GDS directory, download the 'recognisable' files to this directory. If not specified, files will be downloaded to '<out_dir>/dracarys_gds_sync'."))
+  tidy$add_argument("-f", "--format", help = glue("{emoji('icecream')} Format of output (default: %(default)s)."), default = "tsv", choices = c("tsv", "parquet", "both"))
+  tidy$add_argument("-n", "--dryrun", help = glue("{emoji('camel')} Dry run (just show files to be tidied)."), action = "store_true")
+  tidy$add_argument("-q", "--quiet", help = glue("{emoji('sleeping')} Shush all the logs."), action = "store_true")
+}
+
+tidy_parse_args <- function(args) {
+  # handle dir creation
+  fs::dir_create(c(args$out_dir, args$gds_local_dir))
+  out_dir <- normalizePath(args$out_dir)
+  gds_local_dir <- args$gds_local_dir
+  if (!is.null(gds_local_dir)) {
+    gds_local_dir <- normalizePath(gds_local_dir)
+  }
+  if (!is.null(args$rds_dir)) {
+    rds_dir <- normalizePath(args$rds_dir)
+    rds_path <- file.path(rds_dir, glue("{args$prefix}_dracarys_data.rds"))
+  }
+  token <- ica_token_validate(args$token)
+
+  tidy_args <- list(
+    in_dir = args$in_dir,
+    out_dir = out_dir,
+    prefix = args$prefix,
+    gds_local_dir = gds_local_dir,
+    out_format = args$format,
+    dryrun = args$dryrun,
+    token = token,
+    pattern = args$pattern
+  )
+
+  # tidy run
+  if (args$quiet) {
+    rds_obj <- suppressMessages(do.call(umccr_tidy, tidy_args))
+  } else {
+    rds_obj <- do.call(umccr_tidy, tidy_args)
+  }
+}
