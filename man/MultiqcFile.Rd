@@ -8,10 +8,12 @@ Contains methods for reading and displaying contents of the
 \code{multiqc_data.json} file output from MultiQC.
 }
 \examples{
+\dontrun{
 x <- "/path/to/multiqc_data.json"
 mqc <- MultiqcFile$new(x)
 mqc_parsed <- mqc$read() # or read(mqc)
 mqc$write(mqc_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+}
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{MultiqcFile}

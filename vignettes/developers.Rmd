@@ -3,6 +3,13 @@ title: "Developers"
 output: rmarkdown::html_document
 ---
 
+```{r knitr_opts, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
 ## Development notes
 
 ### R package dev

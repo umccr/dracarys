@@ -7,6 +7,7 @@
 ^pkgdown$
 ^README\.Rmd$
 ^\.Rproj\.user$
+^vignettes$
 
 ## python
 ^setup\.py$

@@ -3,6 +3,13 @@ title: "Flames"
 output: rmarkdown::html_document
 ---
 
+```{r knitr_opts, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
 ## Flames
 
 Flames are dracarys user stories. D'oh.
