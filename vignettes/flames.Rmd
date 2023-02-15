@@ -16,7 +16,6 @@ Flames are dracarys user stories. D'oh.
 
 ### FFPE vs. Fresh Frozen
 
-- Tidymultiqc
 - Slack [link](https://umccr.slack.com/archives/CP356DDCH/p1636330424082100).
 
 ### Coverage depth exploration
@@ -26,3 +25,12 @@ Flames are dracarys user stories. D'oh.
 ### SV runtime
 
 - Slack [link](https://umccr.slack.com/archives/C02LGHE2G/p1674776735134439).
+
+### MSI and TMB
+
+- Slack [link](https://umccr.slack.com/archives/C016A5BSKRC/p1670891255355989).
+
+### Germline duplication rate
+
+- Slack [link1](https://umccr.slack.com/archives/C025TLC7D/p1675376443664149).
+- Slack [link2](https://umccr.slack.com/archives/C94CQMNVA/p1676418217160999).
