@@ -47,7 +47,7 @@ jobs:
           conda activate
           mamba create --name lockenv conda-lock pip
           conda activate lockenv
-          conda-lock --file ${env_yaml_path}/dracarys.yaml --platform linux-64 --platform=linux-aarch64
+          conda-lock --file ${env_yaml_path}/dracarys.yaml --platform linux-64
           mv conda-lock.yml ${env_lock_path}/conda-lock.yml
       - name: 💾 Commit lockfile
         run: |
@@ -118,5 +118,5 @@ jobs:
           tags: ghcr.io/${{ github.repository }}:${{ env.VERSION }}
           context: . # yes, dot
           push: true
-          platforms: linux/amd64, linux/arm64
+          platforms: linux/amd64
 
