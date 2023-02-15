@@ -31,7 +31,8 @@ jobs:
           auto-update-conda: true
           add-pip-as-python-dependency: false # conda-lock goes crazy if pip pre-installed
           activate-environment: env1
-          mamba-version: "*"
+          miniforge-variant: Mambaforge
+          miniforge-version: "latest"
           channels: "umccr,conda-forge,bioconda"
       - name: 🐍 Conda pkg build and upload
         run: |
