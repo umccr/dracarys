@@ -1,4 +1,32 @@
+# dracarys 0.7.0 (2023-02-15)
+
+[0.6.0 - 0.7.0 diff](https://github.com/umccr/dracarys/compare/v0.6.0...v0.7.0)
+
+Mostly added use cases based on requests from the curation team related to
+umccrise (CHORD, HRDetect, QC summary), PCGR, and MultiQC.
+
+- :star: Added :
+  - R functions:
+    - `umccr_tidy`: workhorse that handles the tidying and method dispatch.
+    - `gds_file_presignedurl`
+  - R6 classes:
+    - `PcgrJsonFile`
+    - `PcgrTiersFile`
+    - `UmChordTsvFile`
+    - `UmHrdetectTsvFile`
+    - `UmQcSumFile`
+    - `UmSigsSnvFile`
+    - `MultiqcFile`
+- :wrench:
+  - Updated README with unified `dracarys tidy` CLI.
+  - Added a `fun` column to `FILE_REGEX` for handling method dispatch.
+  - GH Actions: Remove linux/arm64 from docker since conda pkgs don't generally have ARM64 equivalents.
+  - GH Actions: use "miniforge-variant: Mambaforge"
+    (see [this issue](https://github.com/conda-incubator/setup-miniconda/issues/274)).
+
 # dracarys 0.6.0 (2023-01-09)
+
+[0.5.0 - 0.6.0 diff](https://github.com/umccr/dracarys/compare/v0.5.0...v0.6.0)
 
 - :wrench: GH Actions:
   - replace `::set-output`.
@@ -32,21 +60,29 @@
 
 # dracarys 0.5.0 (2022-09-28)
 
+[0.4.0 - 0.5.0 diff](https://github.com/umccr/dracarys/compare/v0.4.0...v0.5.0)
+
 - MultiQC: update column mappings ([pr15](https://github.com/umccr/dracarys/pull/15), [pr16](https://github.com/umccr/dracarys/pull/16)).
   - move map to separate TSV
 - CLI: add option for output format (tsv, parquet, or both) ([pr18](https://github.com/umccr/dracarys/pull/18)).
-- contributors: [@victorskl](https://github.com/victorskl)
+- new contributors: [@victorskl](https://github.com/victorskl)
 
 # dracarys 0.4.0 (2022-09-12)
+
+[0.3.0 - 0.4.0 diff](https://github.com/umccr/dracarys/compare/v0.3.0...v0.4.0)
 
 - :star: support for DRAGEN TSO500 ctdna output ([pr14](https://github.com/umccr/dracarys/pull/14)).
   - also add Quarto HTML report template
 
 # dracarys 0.3.0 (2022-08-28)
 
+[0.2.0 - 0.3.0 diff](https://github.com/umccr/dracarys/compare/v0.2.0...v0.3.0)
+
 - :star: MultiQC: support for DRAGEN ctdna output ([pr13](https://github.com/umccr/dracarys/pull/13)).
 
 # dracarys 0.2.0 (2022-07-23)
+
+[0.1.0 - 0.2.0 diff](https://github.com/umccr/dracarys/compare/v0.1.0...v0.2.0)
 
 - Add `MULTIQC_COLUMNS` tibble that maps the raw metric name to a cleaner name
   ([pr12](https://github.com/umccr/dracarys/pull/12)).
