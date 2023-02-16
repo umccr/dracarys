@@ -55,7 +55,14 @@ dat |>
   readr::write_tsv(here("nogit/multiqc/2023-02-13_results.tsv"))
 
 dat |>
-  tidyr::pivot_longer(contains("dupmark"), names_to = "metric", values_to = "value") |>
+  tidyr::pivot_longer(
+    c(
+      "reads_num_dupmarked_samtools", "reads_num_dupmarked_dragen",
+      "reads_num_dupmarked_pct_samtools", "reads_num_dupmarked_pct_dragen",
+      "cov_median_mosdepth", "cov_auto_median_dragen"
+    ),
+    names_to = "metric", values_to = "value"
+  ) |>
   # dplyr::filter(metric %in% c("reads_num_dupmarked_dragen", "reads_num_dupmarked_samtools")) |>
   ggplot(aes(x = date, y = value)) +
   geom_point(aes(colour = pheno)) +
