@@ -6,10 +6,13 @@ require(readr)
 # SQL
 # select * from data_portal.data_portal_gdsfile where regexp_like(path, 'multiqc_data.json') order by time_created desc;
 
-d <- here("nogit/multiqc/sql/e7fd7995-d280-4457-a1ac-0cf46bf723dd_gds_multiqcjson_query_2023-02-03.csv") |>
+# d <- here("nogit/multiqc/sql/e7fd7995-d280-4457-a1ac-0cf46bf723dd_gds_multiqcjson_query_2023-02-03.csv") |>
+#   read_csv(col_names = TRUE)
+d <- here("nogit/multiqc/sql/8606d0f0-2d42-4faf-b774-d3f45d54fe53_gds_after_29jan2023.csv") |>
   read_csv(col_names = TRUE)
 
-date1 <- "2023-02-07"
+date1 <- "2023-02-17"
+wf <- "wgs_alignment_qc"
 
 x <- d |>
   filter(!grepl("bclconvert|interop", path)) |>
@@ -22,7 +25,7 @@ x <- d |>
     time_created = as.Date(time_created)
   ) |>
   select(sbj, workflow, gds_indir, time_created, unique_hash) |>
-  filter(workflow == "umccrise") |>
+  filter(workflow == wf) |>
   mutate(
     outdir = here(glue("nogit/multiqc/{date1}/{sbj}/{time_created}_{unique_hash}")),
     local_indir = file.path(outdir, "dracarys_gds_sync")
@@ -34,7 +37,7 @@ x <- d |>
 token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
 dryrun <- TRUE
 dryrun <- FALSE
-for (i in 201:288) {
+for (i in 1:12) {
   print(i)
   print(x$gds_indir[i])
   # print(x$local_indir[i])

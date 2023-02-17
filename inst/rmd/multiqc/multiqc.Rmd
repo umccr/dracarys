@@ -29,7 +29,7 @@ library(fs)
 
 
 ```{r}
-date1 <- "2023-02-07"
+date1 <- "2023-02-17"
 res <- here(glue("nogit/multiqc/{date1}")) |>
   dir_ls(recurse = TRUE, regexp = "_multiqc\\.tsv\\.gz") |>
   as_tibble_col(column_name = "path") |>
@@ -44,35 +44,37 @@ l1 <- vector("list", nrow(res)) |> purrr::set_names(res$sbj_date_hash)
 for (i in seq_len(nrow(res))) {
   l1[[i]] <- readr::read_tsv(res$path[i], show_col_types = FALSE)
 }
+# add lims info
+lims <- readr::read_tsv("~/Downloads/Google LIMS - Sheet1.tsv") |>
+  dplyr::select(SubjectID, SampleID, LibraryID, Phenotype, ProjectOwner, ProjectName, Type, Workflow, Quality) |>
+  dplyr::distinct()
 dat <- dplyr::bind_rows(l1, .id = "sbj_date_hash") |>
   tidyr::separate(col = sbj_date_hash, sep = "_", into = c("umccr_sbj", "date1", "hash1")) |>
-  dplyr::mutate(
-    pheno = dplyr::if_else(is.na(purity_purple1), "normal", "tumor"),
-    date = lubridate::ymd_hm(sub("_", " ", date))
-  )
-dat |>
-  dplyr::select(umccr_sbj, umccr_id, date, pheno, hash1, dplyr::contains("dupmark"), dplyr::everything(), -c(date1, umccr_workflow)) |>
-  readr::write_tsv(here("nogit/multiqc/2023-02-13_results.tsv"))
+  dplyr::mutate(date = lubridate::ymd_hm(sub("_", " ", date))) |>
+  dplyr::select(umccr_sbj, umccr_id, date, hash1, everything(), -date1) |>
+  dplyr::left_join(lims |> select(SampleID, Phenotype) |> distinct(), by = c("umccr_id" = "SampleID"), multiple = "all") |>
+  dplyr::arrange(umccr_sbj, date)
+# dat |>
+#   dplyr::select(umccr_sbj, umccr_id, date, pheno, hash1, dplyr::contains("dupmark"), dplyr::everything(), -c(date1, umccr_workflow)) |>
+#   readr::write_tsv(here("nogit/multiqc/2023-02-13_results.tsv"))
 
 dat |>
   tidyr::pivot_longer(
     c(
-      "reads_num_dupmarked_samtools", "reads_num_dupmarked_dragen",
-      "reads_num_dupmarked_pct_samtools", "reads_num_dupmarked_pct_dragen",
-      "cov_median_mosdepth", "cov_auto_median_dragen"
+      "reads_num_dupmarked_dragen", "reads_num_dupmarked_pct_dragen",
+      "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen",
     ),
     names_to = "metric", values_to = "value"
   ) |>
+  dplyr::filter(!Phenotype %in% c("normal", "tumor")) |>
   # dplyr::filter(metric %in% c("reads_num_dupmarked_dragen", "reads_num_dupmarked_samtools")) |>
   ggplot(aes(x = date, y = value)) +
-  geom_point(aes(colour = pheno)) +
-  facet_grid(metric ~ pheno, scales = "free") +
+  geom_point(aes(colour = Phenotype)) +
+  facet_grid(metric ~ Phenotype, scales = "free") +
   theme_bw()
 ```
 
 ```{r}
-# add lims info
-lims <- readr::read_tsv("~/Downloads/Google LIMS - Sheet1.tsv")
 out <- lims |>
   select(SubjectID, SampleID, SampleName, ProjectName, Type) |>
   filter(ProjectName %in% c("CIRCUIT", "Control", "PROSPECT")) |>
