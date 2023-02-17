@@ -188,6 +188,7 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param min_pct Minimum percentage to be plotted (Default: 2).
     #' @importFrom ggplot2 ggplot
+    #' @importFrom ggrepel geom_text_repel
     #' @return A ggplot2 plot containing read depth on X axis and percentage
     #'   covered on Y axis.
     plot = function(d, min_pct = 2) {

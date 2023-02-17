@@ -21,6 +21,7 @@ requirements:
     - r-assertthat
     - r-dplyr
     - r-ggplot2
+    - r-ggrepel
     - r-glue
     - r-purrr
     - r-r6
@@ -50,6 +51,7 @@ requirements:
     - r-assertthat
     - r-dplyr
     - r-ggplot2
+    - r-ggrepel
     - r-glue
     - r-purrr
     - r-r6
