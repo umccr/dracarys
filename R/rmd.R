@@ -37,3 +37,11 @@ tso_rmd <- function(tidy_rds, out_dir, prefix, quiet = FALSE) {
   html_path <- file.path(out_dir, out_html)
   cli::cli_alert_success("{date_log()} {e('sparkles')} {.emph {prefix}}: TSO HTML reportr at: {.file {html_path}}")
 }
+
+#' Get dracarys `FILE_REGEX``
+#'
+#' @return `FILE_REGEX` R tibble object.
+#' @export
+file_regex_getter <- function() {
+  FILE_REGEX
+}
