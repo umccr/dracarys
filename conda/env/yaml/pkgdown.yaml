@@ -3,6 +3,7 @@ channels:
 dependencies:
   - r-dracarys
   - r-devtools
+  - r-dt
   - r-kableextra
   - r-patchwork
   - r-pkgdown

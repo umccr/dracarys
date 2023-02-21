@@ -57,7 +57,8 @@ umccr_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format
     cli::cli_inform("{e('camel')} You have specified 'dryrun' - just listing files!")
     return(NULL)
   } else {
-    d <- fs::dir_ls(in_dir) |>
+    # TODO: list recursively to match default ICA API, might change later
+    d <- fs::dir_ls(in_dir, recurse = TRUE) |>
       tibble::as_tibble_col(column_name = "path") |>
       dplyr::mutate(
         bname = basename(.data$path),

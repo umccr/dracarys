@@ -1,0 +1,32 @@
+---
+title: "Files Supported"
+output: rmarkdown::html_document
+---
+
+```{r knitr_opts, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r pkg_load, warning=FALSE, message=FALSE, echo=FALSE}
+require(dracarys)
+require(DT)
+```
+
+Below are the files output from UMCCR workflows that are supported by {dracarys}.
+
+```{r echo=FALSE}
+dracarys::file_regex_getter() |>
+  dplyr::arrange(dplyr::desc("name")) |>
+  DT::datatable(
+    filter = list(position = "top", clear = FALSE, plain = TRUE),
+    class = "cell-border display compact",
+    extensions = c("Scroller", "KeyTable"),
+    options = list(
+      scroller = TRUE, scrollY = 600, scrollX = TRUE, autoWidth = FALSE, keys = TRUE,
+      dom = "lfrtip"
+    )
+  )
+```
