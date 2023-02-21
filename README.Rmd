@@ -1,107 +1,168 @@
 ---
 output:
   github_document:
-    toc: false
+    toc: true
 ---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = FALSE,
+  collapse = TRUE,
   comment = "",
   fig.path = "man/figures/README-",
   out.width = "100%"
 )
+knitr::knit_hooks$set(
+  prompt = function(before, options, envir) {
+    options(prompt = if (options$engine %in% c("sh", "bash")) "$ " else "R> ")
+  }
+)
+```
+
+```{r pkg_load, warning=FALSE, message=FALSE, echo=FALSE}
+require(dracarys)
 ```
 
 # 🔥 dracarys - DRAGEN Workflow Post-Processing
 
-![](https://emojis.slackmojis.com/emojis/images/1643517245/32837/dragon_wiggle.gif?1643517245 "Dragon Dance")
+![](https://emojis.slackmojis.com/emojis/images/1643515659/16823/flying_dragon.gif?1643515659 "Dragon Flying")
 
 
 - Docs: <https://umccr.github.io/dracarys/>
 
+[![Conda install](https://anaconda.org/umccr/r-dracarys/badges/version.svg)](https://anaconda.org/umccr/r-dracarys)
 [![Conda install](https://anaconda.org/umccr/r-dracarys/badges/latest_release_date.svg)](https://anaconda.org/umccr/r-dracarys)
 
-## Goal
+## 🏆 Aim
 
-Given a GDS (or local) directory with results from a UMCCR workflow, {dracarys} will grab files of interest
-and transform them into 'tidier' structures for output into TSV/Parquet format.
-For supported files see the [Supported Files](#supported-files) section below.
+Given a [ICA GDS][ica-gds] (or local) directory with results from a UMCCR workflow,
+{dracarys} will (recursively) grab files of interest and transform them into
+'tidier' structures for output into TSV/Parquet format for downstream ingestion
+into a database/data lake.
+See [Supported Workflows](#supported-workflows) in the section below.
 
-## Installation
+[ica-gds]: <https://developer.illumina.com/illumina-connected-analytics>
+
+## 🍕 Installation
+
+<details>
+<summary>R</summary>
 
 ```r
-remotes::install_github("umccr/dracarys")
+remotes::install_github("umccr/dracarys@vX.X.X") # for vX.X.X Release/Tag
 ```
 
-- Or if used inside a conda environment:
+</details>
+
+<details>
+<summary>Conda</summary>
+
+- Linux & MacOS (non-M1)
 
 ```bash
-conda install r-dracarys -c umccr -c conda-forge -c bioconda
+mamba create \
+  -n dracarys_env \
+  -c umccr -c bioconda -c conda-forge \
+  r-dracarys
+
+conda activate dracarys_env
 ```
 
-## Supported Files
+- MacOS M1
 
-### 🐉 DRAGEN
+```bash
+CONDA_SUBDIR=osx-64 \
+  mamba create \
+  -n dracarys_env \
+  -c umccr -c bioconda -c conda-forge \
+  r-dracarys
 
-- Generates a 'tidier' form of the UMCCR DRAGEN Somatic workflow outputs:
-    - `wgs_contig_mean_cov_<phenotype>.csv`
-    - `wgs_coverage_metrics_<phenotype>.csv`
-    - `wgs_fine_hist_<phenotype>.csv`
-    - `fragment_length_hist.csv`
-    - `mapping_metrics.csv`
-    - `ploidy_estimation_metrics.csv`
-    - `replay.json`
-    - `time_metrics.csv`
-    - `vc_metrics.csv`
+conda activate dracarys_env
+```
 
-### 🌶 tso
+</details>
 
-- Generates a 'tidier' form of the UMCCR TSO500 ctDNA workflow outputs:
-    - `SampleAnalysisResults.json.gz`
-    - `AlignCollapseFusionCaller_metrics.json.gz`
-    - `TMB_Trace.tsv`
-    - `Fusions.csv`
-    - `tmb.json.gz`
-    - `msi.json.gz`
-    - `fragment_length_hist.json.gz`
-    - `TargetRegionCoverage.json.gz`
+<details>
+<summary>Docker</summary>
 
-### 🌈 MultiQC
+```bash
+docker pull --platform linux/amd64 ghcr.io/umccr/dracarys:X.X.X
+```
 
-- Generates a 'tidier' form of the `multiqc_data.json`
-  [MultiQC](https://multiqc.info/) data summary file. Builds on functionality from
-  [TidyMultiqc](https://github.com/multimeric/TidyMultiqc). TSV and/or Parquet
-  outputs are generated. For the TSV file, each row corresponds
-  to a single sample, and each column corresponds to a single quality metric/variable.
+</details>
 
+## ✨ Supported Workflows
 
-## 💻 CLI
+| Workflow | Description |
+|----------|-------------|
+| 🐉 DRAGEN | UMCCR [DRAGEN DNA/RNA][dragen-web] workflows |
+| 🌶 cttso | UMCCR [ctDNA TSO500][cttso-web] workflow |
+| 🌈 MultiQC | [MultiQC][multiqc-web] QC workflow summaries |
+
+[dragen-web]: <https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm>
+[multiqc-web]: <https://multiqc.info/>
+[cttso-web]: <https://support-docs.illumina.com/SW/DRAGEN_TSO500_ctDNA_v2.1/Content/SW/TSO500/WorkflowDiagram_appT500ctDNAlocal.htm>
+
+See which output files from these workflows are supported in
+[Supported Files](https://umccr.github.io/dracarys/articles/files.html).
+
+## 🌀 CLI
 
 A `dracarys` command line interface is available for convenience.
 
-- If you're using the conda package, the `dracarys.R` command will already be set up
-  inside an activated conda environment.
+- If you're using the conda package, the `dracarys.R` command will already be
+  available inside the activated conda environment.
 - If you're _not_ using the conda package, you need to export the
   `dracarys/inst/cli/` directory to your `PATH` in order to use `dracarys.R`.
 
-```{bash echo=TRUE, eval=FALSE}
+```{bash prompt=TRUE}
 dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, "\n")' | xargs)
 export PATH="${dracarys_cli}:${PATH}"
-```
-
-```{bash echo=FALSE}
-dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, "\n")' | xargs)
-export PATH="${dracarys_cli}:${PATH}"
-
-echo "$ dracarys.R --version"
-echo "dracarys.R 0.7.0"
-echo ""
-echo "#------- tidy -------#"
-echo ""
-echo ""
-echo "$ dracarys.R tidy --help"
 dracarys.R tidy --help
 ```
+
+## 🚕 Running
+
+<details><summary>R</summary>
+
+```{r eval=FALSE}
+in_dir <- "gds://path/to/subjectX_multiqc_data/"
+out_dir <- tempdir()
+prefix <- "subjectX"
+umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix)
+```
+
+
+</details>
+
+<details><summary>Mac/Linux</summary>
+
+From within an activated conda environment or a shell with the `dracarys.R`
+CLI available:
+
+```bash
+dracarys.R tidy \
+      -i gds://path/to/subjectX_multiqc_data/ \
+      -o local_output_dir \
+      -p subjectX_prefix
+```
+
+</details>
+
+<details><summary>Docker</summary>
+
+```bash
+docker container run \
+  -v $(PWD):/mount1 \
+  --platform=linux/amd64 \
+  --env "ICA_ACCESS_TOKEN" \
+  --rm -it \
+  ghcr.io/umccr/dracarys:X.X.X \
+    dracarys.R tidy \
+      -i gds://path/to/subjectX_multiqc_data/ \
+      -o /mount1/output_dir \
+      -p subjectX_prefix
+```
+
+</details>
