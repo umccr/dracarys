@@ -9,7 +9,7 @@ gds_file_presignedurl(gds_fileid, token)
 \arguments{
 \item{gds_fileid}{GDS file ID.}
 
-\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
+\item{token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 }
 \value{
 Presigned URL if valid.

@@ -11,7 +11,7 @@ gds_file_download(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN"))
 
 \item{out}{Path to output file.}
 
-\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
+\item{token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 }
 \description{
 GDS File Download via CLI

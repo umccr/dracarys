@@ -36,6 +36,7 @@ umccr_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format
   e <- emojifont::emoji
 
   if (grepl("^gds://", in_dir)) {
+    # in_dir is gds
     gds_local_dir <- gds_local_dir %||% file.path(out_dir, "dracarys_gds_sync")
     pat <- pattern %||% ".*" # keep all recognisable files
     dr_gds_download(
@@ -48,8 +49,8 @@ umccr_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format
     # in_dir is not gds
     if (!is.null(gds_local_dir)) {
       cli::cli_warn(glue(
-        "You have specified 'gds_local_dir' to download GDS results,\n",
-        "but your input directory is local - ignoring {gds_local_dir}"
+        "You have specified the 'gds_local_dir' option to download GDS results, ",
+        "but your input directory is local. Ignoring that option."
       ))
     }
   }
