@@ -1,6 +1,6 @@
 
-- [🔥 dracarys - DRAGEN Workflow
-  Post-Processing](#-dracarys---dragen-workflow-post-processing)
+- [🔥 dracarys - UMCCR Workflow
+  Tidying](#-dracarys---umccr-workflow-tidying)
   - [🏆 Aim](#-aim)
   - [🍕 Installation](#-installation)
   - [✨ Supported Workflows](#-supported-workflows)
@@ -9,7 +9,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# 🔥 dracarys - DRAGEN Workflow Post-Processing
+# 🔥 dracarys - UMCCR Workflow Tidying
 
 ![](https://emojis.slackmojis.com/emojis/images/1643515659/16823/flying_dragon.gif?1643515659 "Dragon Flying")
 
@@ -23,12 +23,13 @@ install](https://anaconda.org/umccr/r-dracarys/badges/latest_release_date.svg)](
 ## 🏆 Aim
 
 Given a [ICA
-GDS](https://developer.illumina.com/illumina-connected-analytics) (or
-local) directory with results from a UMCCR workflow, {dracarys} will
-(recursively) grab files of interest and transform them into ‘tidier’
-structures for output into TSV/Parquet format for downstream ingestion
-into a database/data lake. See [Supported
-Workflows](#supported-workflows) in the section below.
+GDS](https://developer.illumina.com/illumina-connected-analytics) or
+local directory with results from a UMCCR workflow, {dracarys} will grab
+files of interest and transform them into ‘tidier’ structures for output
+into TSV/Parquet format for downstream ingestion into a database/data
+lake. See supported [workflows](#supported-workflows),
+[running](#running) examples, and [CLI](#cli) options in the sections
+below.
 
 ## 🍕 Installation
 
@@ -53,7 +54,7 @@ Conda
 mamba create \
   -n dracarys_env \
   -c umccr -c bioconda -c conda-forge \
-  r-dracarys
+  r-dracarys==X.X.X
 
 conda activate dracarys_env
 ```
@@ -65,7 +66,7 @@ CONDA_SUBDIR=osx-64 \
   mamba create \
   -n dracarys_env \
   -c umccr -c bioconda -c conda-forge \
-  r-dracarys
+  r-dracarys==X.X.X
 
 conda activate dracarys_env
 ```
@@ -82,6 +83,8 @@ docker pull --platform linux/amd64 ghcr.io/umccr/dracarys:X.X.X
 
 </details>
 
+<a name="supported-workflows"></a>
+
 ## ✨ Supported Workflows
 
 | Workflow   | Description                                                                                                                                          |
@@ -93,9 +96,11 @@ docker pull --platform linux/amd64 ghcr.io/umccr/dracarys:X.X.X
 See which output files from these workflows are supported in [Supported
 Files](https://umccr.github.io/dracarys/articles/files.html).
 
+<a name="cli"></a>
+
 ## 🌀 CLI
 
-A `dracarys` command line interface is available for convenience.
+A `dracarys.R` command line interface is available for convenience.
 
 - If you’re using the conda package, the `dracarys.R` command will
   already be available inside the activated conda environment.
@@ -126,12 +131,25 @@ optional arguments:
                         recognisable files to this directory. Default:
                         '<out_dir>/dracarys_gds_sync'.
   -f {tsv,parquet,both}, --format {tsv,parquet,both}
-                        🍦 Format of output. Default: tsv.
+                        🎨 Format of output. Default: tsv.
   -n, --dryrun          🐫 Dry run - just show files to be tidied.
   -q, --quiet           😴 Shush all the logs.
 ```
 
+<a name="running"></a>
+
 ## 🚕 Running
+
+{dracarys} takes as input (`--in_dir`) a directory with results from one
+of the UMCCR [workflows](#supported-workflows). It will recursively scan
+that directory for [supported
+files](https://umccr.github.io/dracarys/articles/files.html), download
+those into a local directory (`--gds_local_dir`), and then it will
+parse, transform and write the tidied versions into the specified output
+directory (`--out_dir`). A prefix (`--prefix`) is prepended to each of
+the tidied files. The output file format (`--format`) can be tsv,
+parquet, or both. To get just a list of supported files within the
+specified input directory, use the `-n (--dryrun)` option.
 
 <details>
 <summary>
