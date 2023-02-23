@@ -11,7 +11,7 @@ dr_gds_download(gdsdir, outdir, token, pattern = NULL, dryrun = FALSE)
 
 \item{outdir}{Path to output directory.}
 
-\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
+\item{token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 

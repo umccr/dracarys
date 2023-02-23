@@ -9,7 +9,7 @@ gds_files_list(gdsdir, token)
 \arguments{
 \item{gdsdir}{Full path to GDS directory.}
 
-\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
+\item{token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 }
 \value{
 Tibble with file basename, file size, file full data path, file dir name.

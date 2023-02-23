@@ -3,7 +3,7 @@
 #' Returns presigned URL of given GDS file.
 #'
 #' @param gds_fileid GDS file ID.
-#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #' @return Presigned URL if valid.
 #' @export
 gds_file_presignedurl <- function(gds_fileid, token) {
@@ -24,7 +24,7 @@ gds_file_presignedurl <- function(gds_fileid, token) {
 #'
 #' @param gds_fileid GDS file ID.
 #' @param out_file Path to output file.
-#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #'
 #' @examples
 #' \dontrun{
@@ -45,7 +45,7 @@ gds_file_download_api <- function(gds_fileid, out_file, token) {
 #'
 #' @param gds Full path to GDS file.
 #' @param out Path to output file.
-#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #' @export
 gds_file_download <- function(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
   token <- ica_token_validate(token)
@@ -57,13 +57,14 @@ gds_file_download <- function(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN")) 
 #' List files on ICA GDS filesystem.
 #'
 #' @param gdsdir Full path to GDS directory.
-#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #'
 #' @return Tibble with file basename, file size, file full data path, file dir name.
 #' @export
 gds_files_list <- function(gdsdir, token) {
   token <- ica_token_validate(token)
   assertthat::assert_that(grepl("^gds://", gdsdir))
+  gdsdir_original <- gdsdir
   if (!grepl("/$", gdsdir)) {
     gdsdir <- glue("{gdsdir}/")
   }
@@ -77,8 +78,20 @@ gds_files_list <- function(gdsdir, token) {
     httr::add_headers(Authorization = glue("Bearer {token}")),
     httr::accept_json()
   )
-  j <- jsonlite::fromJSON(httr::content(x = res, type = "text", encoding = "UTF-8"), simplifyVector = FALSE)[["items"]]
-  d <- purrr::map_df(j, function(x) c(file_id = x[["id"]], path = x[["path"]], size = x[["sizeInBytes"]]))
+  j <- jsonlite::fromJSON(httr::content(x = res, type = "text", encoding = "UTF-8"), simplifyVector = FALSE)
+  if (j[["itemCount"]] == 0) {
+    if (likely_file(gdsdir_original)) {
+      cli::cli_abort("{date_log()} ERROR: Is the input directory a file perhaps?\n{.file {gdsdir_original}}")
+    }
+    msg <- paste0(
+      "{date_log()} ERROR: ",
+      "No GDS files listed in the input directory. Please confirm you can ",
+      "access the following GDS input directory with your token: ",
+      "{.file {gdsdir_original}}"
+    )
+    cli::cli_abort(msg)
+  } # endif
+  d <- purrr::map_df(j[["items"]], function(x) c(file_id = x[["id"]], path = x[["path"]], size = x[["sizeInBytes"]]))
   d |>
     dplyr::mutate(
       size = fs::as_fs_bytes(.data$size),
@@ -89,6 +102,29 @@ gds_files_list <- function(gdsdir, token) {
     dplyr::select("file_id", "bname", "size", "path", "dname")
 }
 
+#' List GDS Volumes
+#'
+#' Lists GDS volumes accessible by the provided ICA token.
+#'
+#' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+#' @param page_size Page size (def: 10).
+#'
+#' @return A tibble with vol name and vol id.
+#' @export
+gds_volumes_list <- function(token, page_size = 10) {
+  token <- ica_token_validate(token)
+  base_url <- "https://aps2.platform.illumina.com/v1"
+  query_url <- glue("{base_url}/volumes?pageSize={page_size}")
+
+  res <- httr::GET(
+    query_url,
+    httr::add_headers(Authorization = glue("Bearer {token}")),
+    httr::accept_json()
+  )
+  j <- jsonlite::fromJSON(httr::content(x = res, type = "text", encoding = "UTF-8"), simplifyVector = FALSE)
+  purrr::map_df(j[["items"]], function(x) c(name = x[["name"]], id = x[["id"]]))
+}
+
 
 #' dracarys GDS Download
 #'
@@ -96,7 +132,7 @@ gds_files_list <- function(gdsdir, token) {
 #'
 #' @param gdsdir Full path to GDS directory.
 #' @param outdir Path to output directory.
-#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
+#' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #' @param pattern Pattern to further filter the returned file type tibble.
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
@@ -121,7 +157,10 @@ dr_gds_download <- function(gdsdir, outdir, token,
       dplyr::mutate(out_dl = gds_file_download_api(.data$file_id, .data$out, token))
   } else {
     cli::cli_alert_info("{date_log()} {e('camera')} Just list relevant files from {.file {gdsdir}}")
-    print(d_filt)
+    d_filt |>
+      dplyr::select("path", "type", "size") |>
+      as.data.frame() |>
+      print()
   }
 }
 
@@ -149,7 +188,19 @@ ica_token_validate <- function(token = Sys.getenv("ICA_ACCESS_TOKEN")) {
       }
     }
   }
+  # giving a friendlier error msg in case this isn't even valid jwt
+  tmp <- strsplit(token, ".", fixed = TRUE)[[1]]
+  msg <- "The input token is not a valid JWT"
+  assertthat::assert_that(length(tmp) %in% c(2, 3), msg = msg)
   l <- jose::jwt_split(token)
   .ica_token_check_expiration_time(l[["payload"]])
   token
+}
+
+likely_file <- function(x) {
+  e <- c(
+    "txt", "tsv", "csv", "html", "json", "stdout", "stderr", "stdouterr",
+    "log", "vcf", "gz", "bam", "bai"
+  )
+  tolower(tools::file_ext(x)) %in% e
 }

@@ -5,7 +5,7 @@ tidy_add_args <- function(subp) {
   tidy$add_argument("-p", "--prefix", help = glue("{emoji('violin')} Prefix string used for all results."), required = TRUE)
   tidy$add_argument("-t", "--token", help = glue("{emoji('see_no_evil')} ICA access token. Default: ICA_ACCESS_TOKEN env var."), default = Sys.getenv("ICA_ACCESS_TOKEN"))
   tidy$add_argument("-g", "--gds_local_dir", help = glue("{emoji('inbox_tray')} If input is a GDS directory, download the recognisable files to this directory. Default: '<out_dir>/dracarys_gds_sync'."))
-  tidy$add_argument("-f", "--format", help = glue("{emoji('icecream')} Format of output. Default: %(default)s."), default = "tsv", choices = c("tsv", "parquet", "both"))
+  tidy$add_argument("-f", "--format", help = glue("{emoji('art')} Format of output. Default: %(default)s."), default = "tsv", choices = c("tsv", "parquet", "both"))
   tidy$add_argument("-n", "--dryrun", help = glue("{emoji('camel')} Dry run - just show files to be tidied."), action = "store_true")
   tidy$add_argument("-q", "--quiet", help = glue("{emoji('sleeping')} Shush all the logs."), action = "store_true")
 }
