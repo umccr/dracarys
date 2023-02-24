@@ -157,6 +157,7 @@ R
 </summary>
 
 ``` r
+# help(umccr_tidy)
 in_dir <- "gds://path/to/subjectX_multiqc_data/"
 out_dir <- tempdir()
 prefix <- "subjectX"

@@ -144,12 +144,12 @@ the `-n (--dryrun)` option.
 <details><summary>R</summary>
 
 ```{r eval=FALSE}
+# help(umccr_tidy)
 in_dir <- "gds://path/to/subjectX_multiqc_data/"
 out_dir <- tempdir()
 prefix <- "subjectX"
 umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix)
 ```
-
 
 </details>
 
