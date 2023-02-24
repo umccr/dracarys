@@ -1,6 +1,6 @@
 Package: dracarys
 Title: Post-processing DRAGEN workflows
-Version: 0.7.0
+Version: 0.8.0
 Description: Post-processing DRAGEN workflows.
 Authors@R:
     c(person(given = "Peter",
