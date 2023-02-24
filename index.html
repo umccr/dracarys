@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">dracarys</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.7.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.8.0</span>
       </span>
     </div>
 
@@ -51,6 +51,9 @@
   <ul class="dropdown-menu" role="menu">
 <li>
       <a href="articles/developers.html">Developers</a>
+    </li>
+    <li>
+      <a href="articles/files.html">Files Supported</a>
     </li>
     <li>
       <a href="articles/flames.html">Flames</a>
@@ -80,120 +83,167 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div class="section level1">
-<div class="page-header"><h1 id="id_-dracarys---dragen-workflow-post-processing">🔥 dracarys - DRAGEN Workflow Post-Processing<a class="anchor" aria-label="anchor" href="#id_-dracarys---dragen-workflow-post-processing"></a>
+
+<ul>
+<li>
+<a href="#id_-dracarys---umccr-workflow-tidying">🔥 dracarys - UMCCR Workflow Tidying</a>
+<ul>
+<li><a href="#id_-aim">🏆 Aim</a></li>
+<li><a href="#id_-installation">🍕 Installation</a></li>
+<li><a href="#id_-supported-workflows">✨ Supported Workflows</a></li>
+<li><a href="#id_-cli">🌀 CLI</a></li>
+<li><a href="#id_-running">🚕 Running</a></li>
+</ul>
+</li>
+</ul>
+<!-- README.md is generated from README.Rmd. Please edit that file --><div class="section level1">
+<div class="page-header"><h1 id="id_-dracarys---umccr-workflow-tidying">🔥 dracarys - UMCCR Workflow Tidying<a class="anchor" aria-label="anchor" href="#id_-dracarys---umccr-workflow-tidying"></a>
 </h1></div>
-<p><img src="https://emojis.slackmojis.com/emojis/images/1643517245/32837/dragon_wiggle.gif?1643517245" title="Dragon Dance"></p>
+<p><img src="https://emojis.slackmojis.com/emojis/images/1643515659/16823/flying_dragon.gif?1643515659" title="Dragon Flying"></p>
 <ul>
 <li>Docs: <a href="https://umccr.github.io/dracarys/" class="external-link uri">https://umccr.github.io/dracarys/</a>
 </li>
 </ul>
-<p><a href="https://anaconda.org/umccr/r-dracarys" class="external-link"><img src="https://anaconda.org/umccr/r-dracarys/badges/latest_release_date.svg" alt="Conda install"></a></p>
+<p><a href="https://anaconda.org/umccr/r-dracarys" class="external-link"><img src="https://anaconda.org/umccr/r-dracarys/badges/version.svg" alt="Conda install"></a> <a href="https://anaconda.org/umccr/r-dracarys" class="external-link"><img src="https://anaconda.org/umccr/r-dracarys/badges/latest_release_date.svg" alt="Conda install"></a></p>
 <div class="section level2">
-<h2 id="goal">Goal<a class="anchor" aria-label="anchor" href="#goal"></a>
+<h2 id="id_-aim">🏆 Aim<a class="anchor" aria-label="anchor" href="#id_-aim"></a>
 </h2>
-<p>Given a GDS (or local) directory with results from a UMCCR workflow, {dracarys} will grab files of interest and transform them into ‘tidier’ structures for output into TSV/Parquet format. For supported files see the <a href="#supported-files">Supported Files</a> section below.</p>
-</div>
-<div class="section level2">
-<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
-</h2>
-<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"umccr/dracarys"</span><span class="op">)</span></span></code></pre></div>
-<ul>
-<li>Or if used inside a conda environment:</li>
-</ul>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> install r-dracarys <span class="at">-c</span> umccr <span class="at">-c</span> conda-forge <span class="at">-c</span> bioconda</span></code></pre></div>
+<p>Given a <a href="https://developer.illumina.com/illumina-connected-analytics" class="external-link">ICA GDS</a> or local directory with results from a UMCCR workflow, {dracarys} will grab files of interest and transform them into ‘tidier’ structures for output into TSV/Parquet format for downstream ingestion into a database/data lake. See supported <a href="#supported-workflows">workflows</a>, <a href="#running">running</a> examples, and <a href="#cli">CLI</a> options in the sections below.</p>
 </div>
 <div class="section level2">
-<h2 id="supported-files">Supported Files<a class="anchor" aria-label="anchor" href="#supported-files"></a>
+<h2 id="id_-installation">🍕 Installation<a class="anchor" aria-label="anchor" href="#id_-installation"></a>
 </h2>
-<div class="section level3">
-<h3 id="id_-dragen">🐉 DRAGEN<a class="anchor" aria-label="anchor" href="#id_-dragen"></a>
-</h3>
-<ul>
-<li>Generates a ‘tidier’ form of the UMCCR DRAGEN Somatic workflow outputs:
-<ul>
-<li><code>wgs_contig_mean_cov_&lt;phenotype&gt;.csv</code></li>
-<li><code>wgs_coverage_metrics_&lt;phenotype&gt;.csv</code></li>
-<li><code>wgs_fine_hist_&lt;phenotype&gt;.csv</code></li>
-<li><code>fragment_length_hist.csv</code></li>
-<li><code>mapping_metrics.csv</code></li>
-<li><code>ploidy_estimation_metrics.csv</code></li>
-<li><code>replay.json</code></li>
-<li><code>time_metrics.csv</code></li>
-<li><code>vc_metrics.csv</code></li>
+<details><summary>
+R
+</summary><div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">remotes</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"umccr/dracarys@vX.X.X"</span><span class="op">)</span> <span class="co"># for vX.X.X Release/Tag</span></span></code></pre></div>
+</details><details><summary>
+Conda
+</summary><ul>
+<li>Linux &amp; MacOS (non-M1)</li>
 </ul>
-</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="id_-tso">🌶 tso<a class="anchor" aria-label="anchor" href="#id_-tso"></a>
-</h3>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ex">mamba</span> create <span class="dt">\</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-n</span> dracarys_env <span class="dt">\</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-c</span> umccr <span class="at">-c</span> bioconda <span class="at">-c</span> conda-forge <span class="dt">\</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  r-dracarys==X.X.X</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate dracarys_env</span></code></pre></div>
 <ul>
-<li>Generates a ‘tidier’ form of the UMCCR TSO500 ctDNA workflow outputs:
-<ul>
-<li><code>SampleAnalysisResults.json.gz</code></li>
-<li><code>AlignCollapseFusionCaller_metrics.json.gz</code></li>
-<li><code>TMB_Trace.tsv</code></li>
-<li><code>Fusions.csv</code></li>
-<li><code>tmb.json.gz</code></li>
-<li><code>msi.json.gz</code></li>
-<li><code>fragment_length_hist.json.gz</code></li>
-<li><code>TargetRegionCoverage.json.gz</code></li>
+<li>MacOS M1</li>
 </ul>
-</li>
-</ul>
-</div>
-<div class="section level3">
-<h3 id="id_-multiqc">🌈 MultiQC<a class="anchor" aria-label="anchor" href="#id_-multiqc"></a>
-</h3>
-<ul>
-<li>Generates a ‘tidier’ form of the <code>multiqc_data.json</code> <a href="https://multiqc.info/" class="external-link">MultiQC</a> data summary file. Builds on functionality from <a href="https://github.com/multimeric/TidyMultiqc" class="external-link">TidyMultiqc</a>. TSV and/or Parquet outputs are generated. For the TSV file, each row corresponds to a single sample, and each column corresponds to a single quality metric/variable.</li>
-</ul>
-</div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">CONDA_SUBDIR</span><span class="op">=</span>osx-64 <span class="dt">\</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="ex">mamba</span> create <span class="dt">\</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">-n</span> dracarys_env <span class="dt">\</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">-c</span> umccr <span class="at">-c</span> bioconda <span class="at">-c</span> conda-forge <span class="dt">\</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  r-dracarys==X.X.X</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="ex">conda</span> activate dracarys_env</span></code></pre></div>
+</details><details><summary>
+Docker
+</summary><div class="sourceCode" id="cb4"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> pull <span class="at">--platform</span> linux/amd64 ghcr.io/umccr/dracarys:X.X.X</span></code></pre></div>
+</details><p><a name="supported-workflows"></a></p>
 </div>
 <div class="section level2">
-<h2 id="id_-cli">💻 CLI<a class="anchor" aria-label="anchor" href="#id_-cli"></a>
+<h2 id="id_-supported-workflows">✨ Supported Workflows<a class="anchor" aria-label="anchor" href="#id_-supported-workflows"></a>
 </h2>
-<p>A <code>dracarys</code> command line interface is available for convenience.</p>
+<table class="table">
+<colgroup>
+<col width="7%">
+<col width="92%">
+</colgroup>
+<thead><tr class="header">
+<th>Workflow</th>
+<th>Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td>🐉 DRAGEN</td>
+<td>UMCCR <a href="https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm" class="external-link">DRAGEN DNA/RNA</a> workflows</td>
+</tr>
+<tr class="even">
+<td>🌶 cttso</td>
+<td>UMCCR <a href="https://support-docs.illumina.com/SW/DRAGEN_TSO500_ctDNA_v2.1/Content/SW/TSO500/WorkflowDiagram_appT500ctDNAlocal.htm" class="external-link">ctDNA TSO500</a> workflow</td>
+</tr>
+<tr class="odd">
+<td>🌈 MultiQC</td>
+<td>
+<a href="https://multiqc.info/" class="external-link">MultiQC</a> QC workflow summaries</td>
+</tr>
+</tbody>
+</table>
+<p>See which output files from these workflows are supported in <a href="https://umccr.github.io/dracarys/articles/files.html" class="external-link">Supported Files</a>.</p>
+<p><a name="cli"></a></p>
+</div>
+<div class="section level2">
+<h2 id="id_-cli">🌀 CLI<a class="anchor" aria-label="anchor" href="#id_-cli"></a>
+</h2>
+<p>A <code>dracarys.R</code> command line interface is available for convenience.</p>
 <ul>
-<li>If you’re using the conda package, the <code>dracarys.R</code> command will already be set up inside an activated conda environment.</li>
+<li>If you’re using the conda package, the <code>dracarys.R</code> command will already be available inside the activated conda environment.</li>
 <li>If you’re <em>not</em> using the conda package, you need to export the <code>dracarys/inst/cli/</code> directory to your <code>PATH</code> in order to use <code>dracarys.R</code>.</li>
 </ul>
-<div class="sourceCode" id="cb3"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="va">dracarys_cli</span><span class="op">=</span><span class="va">$(</span><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'x = system.file("cli", package = "dracarys"); cat(x, "\n")'</span> <span class="kw">|</span> <span class="fu">xargs</span><span class="va">)</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="st">"</span><span class="va">${dracarys_cli}</span><span class="st">:</span><span class="va">${PATH}</span><span class="st">"</span></span></code></pre></div>
-<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span> dracarys.R <span class="sc">--</span>version</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>dracarys.R <span class="dv">0</span>.<span class="fl">7.0</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">#------- tidy -------#</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="sc">$</span> dracarys.R tidy <span class="sc">--</span>help</span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>usage<span class="sc">:</span> dracarys.R tidy [<span class="sc">-</span>h] <span class="sc">-</span>i IN_DIR <span class="sc">-</span>o OUT_DIR <span class="sc">-</span>p PREFIX [<span class="sc">-</span>t TOKEN]</span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                       [<span class="sc">-</span>g GDS_LOCAL_DIR] [<span class="sc">-</span>f {tsv,parquet,both}] [<span class="sc">-</span>n] [<span class="sc">-</span>q]</span>
-<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>optional arguments<span class="sc">:</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>h, <span class="sc">--</span>help            show this help message and exit</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>i IN_DIR, <span class="sc">--</span>in_dir IN_DIR</span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>                        ⛄️ Directory with untidy UMCCR workflow <span class="fu">results</span> (GDS</span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>                        or local).</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>o OUT_DIR, <span class="sc">--</span>out_dir OUT_DIR</span>
-<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>                        🔥 Directory to output tidy results.</span>
-<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>p PREFIX, <span class="sc">--</span>prefix PREFIX</span>
-<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>                        🎻 Prefix <span class="fu">string</span> (used <span class="cf">for</span> all results).</span>
-<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>t TOKEN, <span class="sc">--</span>token TOKEN</span>
-<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>                        🙈 ICA access <span class="fu">token</span> (def. ICA_ACCESS_TOKEN env var).</span>
-<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>g GDS_LOCAL_DIR, <span class="sc">--</span>gds_local_dir GDS_LOCAL_DIR</span>
-<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>                        📋 If input is a GDS directory, download the</span>
-<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>                        <span class="st">'recognisable'</span> files to this directory. If not</span>
-<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                        specified, files will be downloaded to</span>
-<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>                        <span class="st">'&lt;out_dir&gt;/dracarys_gds_sync'</span>.</span>
-<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>f {tsv,parquet,both}, <span class="sc">--</span>format {tsv,parquet,both}</span>
-<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>                        🍦 Format of <span class="fu">output</span> (default<span class="sc">:</span> tsv).</span>
-<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>n, <span class="sc">--</span>dryrun          🐫 Dry <span class="fu">run</span> (just show files to be tidied).</span>
-<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a>  <span class="sc">-</span>q, <span class="sc">--</span>quiet           😴 Shush all the logs.</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="ex">$</span> dracarys_cli=<span class="va">$(</span><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'x = system.file("cli", package = "dracarys"); cat(x, "\n")'</span> <span class="kw">|</span> <span class="fu">xargs</span><span class="va">)</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="ex">+</span> export PATH=<span class="st">"</span><span class="va">${dracarys_cli}</span><span class="st">:</span><span class="va">${PATH}</span><span class="st">"</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="ex">+</span> dracarys.R tidy <span class="at">--help</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="ex">usage:</span> dracarys.R tidy [-h] <span class="at">-i</span> IN_DIR <span class="at">-o</span> OUT_DIR <span class="at">-p</span> PREFIX [-t TOKEN]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                       <span class="ex">[-g</span> GDS_LOCAL_DIR] [-f <span class="dt">{tsv</span><span class="op">,</span><span class="dt">parquet</span><span class="op">,</span><span class="dt">both}</span>] [-n] [-q]</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="ex">optional</span> arguments:</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-h,</span> <span class="at">--help</span>            show this help message and exit</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-i</span> IN_DIR, <span class="at">--in_dir</span> IN_DIR</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                        <span class="ex">⛄️</span> Directory with untidy UMCCR workflow results. Can</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>                        <span class="ex">be</span> GDS or local.</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-o</span> OUT_DIR, <span class="at">--out_dir</span> OUT_DIR</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>                        <span class="ex">🔥</span> Directory to output tidy results.</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-p</span> PREFIX, <span class="at">--prefix</span> PREFIX</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>                        <span class="ex">🎻</span> Prefix string used for all results.</span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-t</span> TOKEN, <span class="at">--token</span> TOKEN</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>                        <span class="ex">🙈</span> ICA access token. Default: ICA_ACCESS_TOKEN env var.</span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-g</span> GDS_LOCAL_DIR, <span class="at">--gds_local_dir</span> GDS_LOCAL_DIR</span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>                        <span class="ex">📥</span> If input is a GDS directory, download the</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true" tabindex="-1"></a>                        <span class="ex">recognisable</span> files to this directory. Default:</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true" tabindex="-1"></a>                        <span class="st">'&lt;out_dir&gt;/dracarys_gds_sync'</span><span class="ex">.</span></span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-f</span> <span class="dt">{tsv</span><span class="op">,</span><span class="dt">parquet</span><span class="op">,</span><span class="dt">both}</span>, <span class="at">--format</span> <span class="dt">{tsv</span><span class="op">,</span><span class="dt">parquet</span><span class="op">,</span><span class="dt">both}</span></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true" tabindex="-1"></a>                        <span class="ex">🎨</span> Format of output. Default: tsv.</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-n,</span> <span class="at">--dryrun</span>          🐫 Dry run <span class="at">-</span> just show files to be tidied.</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true" tabindex="-1"></a>  <span class="ex">-q,</span> <span class="at">--quiet</span>           😴 Shush all the logs.</span></code></pre></div>
+<p><a name="running"></a></p>
+</div>
+<div class="section level2">
+<h2 id="id_-running">🚕 Running<a class="anchor" aria-label="anchor" href="#id_-running"></a>
+</h2>
+<p>{dracarys} takes as input (<code>--in_dir</code>) a directory with results from one of the UMCCR <a href="#supported-workflows">workflows</a>. It will recursively scan that directory for <a href="https://umccr.github.io/dracarys/articles/files.html" class="external-link">supported files</a>, download those into a local directory (<code>--gds_local_dir</code>), and then it will parse, transform and write the tidied versions into the specified output directory (<code>--out_dir</code>). A prefix (<code>--prefix</code>) is prepended to each of the tidied files. The output file format (<code>--format</code>) can be tsv, parquet, or both. To get just a list of supported files within the specified input directory, use the <code>-n (--dryrun)</code> option.</p>
+<details><summary>
+R
+</summary><div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># help(umccr_tidy)</span></span>
+<span><span class="va">in_dir</span> <span class="op">&lt;-</span> <span class="st">"gds://path/to/subjectX_multiqc_data/"</span></span>
+<span><span class="va">out_dir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="va">prefix</span> <span class="op">&lt;-</span> <span class="st">"subjectX"</span></span>
+<span><span class="fu"><a href="reference/umccr_tidy.html">umccr_tidy</a></span><span class="op">(</span>in_dir <span class="op">=</span> <span class="va">in_dir</span>, out_dir <span class="op">=</span> <span class="va">out_dir</span>, prefix <span class="op">=</span> <span class="va">prefix</span><span class="op">)</span></span></code></pre></div>
+</details><details><summary>
+Mac/Linux
+</summary><p>From within an activated conda environment or a shell with the <code>dracarys.R</code> CLI available:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="ex">dracarys.R</span> tidy <span class="dt">\</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>      <span class="at">-i</span> gds://path/to/subjectX_multiqc_data/ <span class="dt">\</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>      <span class="at">-o</span> local_output_dir <span class="dt">\</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>      <span class="at">-p</span> subjectX_prefix</span></code></pre></div>
+</details><details><summary>
+Docker
+</summary><div class="sourceCode" id="cb8"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ex">docker</span> container run <span class="dt">\</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">-v</span> <span class="va">$(</span><span class="ex">PWD</span><span class="va">)</span>:/mount1 <span class="dt">\</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">--platform</span><span class="op">=</span>linux/amd64 <span class="dt">\</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">--env</span> <span class="st">"ICA_ACCESS_TOKEN"</span> <span class="dt">\</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">--rm</span> <span class="at">-it</span> <span class="dt">\</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  ghcr.io/umccr/dracarys:X.X.X <span class="dt">\</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>    dracarys.R tidy <span class="dt">\</span></span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>      <span class="at">-i</span> gds://path/to/subjectX_multiqc_data/ <span class="dt">\</span></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>      <span class="at">-o</span> /mount1/output_dir <span class="dt">\</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">-p</span> subjectX_prefix</span></code></pre></div>
+</details>
 </div>
 </div>
+
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
