@@ -57,7 +57,7 @@ multiqc_tidy_json <- function(j) {
   cdate <- multiqc_date_fmt(cdate)
   workflow <- .multiqc_guess_workflow(p)
   d <- dracarys::multiqc_parse_gen(p)
-  if (workflow %in% c("dragen_umccrise", "dragen_somgerm")) {
+  if (workflow %in% c("dragen_umccrise", "dragen_somatic")) {
     # replace the "NA" strings with NA, else we get a column class error
     # due to trying to bind string ('NA') with numeric.
     # https://stackoverflow.com/questions/35292757/replace-values-in-list
@@ -89,7 +89,7 @@ multiqc_tidy_json <- function(j) {
 .multiqc_rename_cols <- function(d) {
   umccr_workflows <- c(
     "dragen_alignment", "dragen_somatic",
-    "dragen_transcriptome", "dragen_umccrise", "dragen_somgerm",
+    "dragen_transcriptome", "dragen_umccrise",
     "dragen_ctdna",
     "bcbio_umccrise", "bcbio_wgs", "bcbio_wts"
   )
@@ -142,13 +142,13 @@ multiqc_tidy_json <- function(j) {
 
   # dragen
   if ("DRAGEN" %in% ds) {
-    dragen_workflows <- c("alignment", "transcriptome", "somatic", "ctdna", "somgerm")
+    dragen_workflows <- c("alignment", "transcriptome", "somatic", "ctdna")
     if (all(c("PURPLE", "Conpair", "mosdepth") %in% ds)) {
       return("dragen_umccrise")
     } else if (grepl("^UMCCR MultiQC Dragen", config_title)) {
       w <- tolower(sub("UMCCR MultiQC Dragen (.*) Report for .*", "\\1", config_title))
       if (w == "somatic and germline") {
-        w <- "somgerm"
+        w <- "somatic"
       }
       assertthat::assert_that(w %in% dragen_workflows)
       return(paste0("dragen_", w))
