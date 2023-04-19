@@ -57,7 +57,7 @@ multiqc_tidy_json <- function(j) {
   cdate <- multiqc_date_fmt(cdate)
   workflow <- .multiqc_guess_workflow(p)
   d <- dracarys::multiqc_parse_gen(p)
-  if (workflow == "dragen_umccrise") {
+  if (workflow %in% c("dragen_umccrise", "dragen_somatic")) {
     # replace the "NA" strings with NA, else we get a column class error
     # due to trying to bind string ('NA') with numeric.
     # https://stackoverflow.com/questions/35292757/replace-values-in-list
@@ -147,6 +147,9 @@ multiqc_tidy_json <- function(j) {
       return("dragen_umccrise")
     } else if (grepl("^UMCCR MultiQC Dragen", config_title)) {
       w <- tolower(sub("UMCCR MultiQC Dragen (.*) Report for .*", "\\1", config_title))
+      if (w == "somatic and germline") {
+        w <- "somatic"
+      }
       assertthat::assert_that(w %in% dragen_workflows)
       return(paste0("dragen_", w))
     } else if (grepl("^UMCCR MultiQC ctDNA", config_title)) {
@@ -231,6 +234,27 @@ multiqc_kv_map <- function(l, func) {
 MULTIQC_COLUMNS <- system.file("extdata/multiqc_column_map.tsv", package = "dracarys") |>
   readr::read_tsv(col_types = "ccc")
 
+
+#' Append New MultiQC Workflow Columns
+#'
+#' @param d Tidy MultiQC tibble with raw names (i.e. pre-rename).
+#' @param w New workflow name.
+#' @param m Path to the 'inst/extdata/multiqc_column_map.tsv' dracarys file.
+#'
+#' @export
+multiqc_column_map_append <- function(d, w, m) {
+  assertthat::assert_that(
+    inherits(d, "data.frame"),
+    inherits(w, "character"),
+    file.exists(m)
+  )
+  new_workflow <- w
+  tibble::tibble(new_workflow = new_workflow, raw = colnames(d)) |>
+    dplyr::left_join(MULTIQC_COLUMNS, by = "raw", multiple = "first") |>
+    dplyr::distinct(.data$new_workflow, .data$raw, .data$clean) |>
+    dplyr::rename(workflow = "new_workflow") |>
+    readr::write_tsv(append = TRUE, file = m)
+}
 
 #' Format MultiQC Config Date
 #'

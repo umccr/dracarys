@@ -29,9 +29,11 @@
 #' umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix)
 #' }
 #' @export
-umccr_tidy <- function(in_dir, out_dir, prefix, gds_local_dir = NULL, out_format = "tsv",
+umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
+                       gds_local_dir = NULL, out_format = "tsv",
                        dryrun = FALSE, token = Sys.getenv("ICA_ACCESS_TOKEN"),
                        pattern = NULL) {
+  assertthat::assert_that(!is.null(in_dir), !is.null(out_dir), !is.null(prefix))
   output_format_valid(out_format)
   e <- emojifont::emoji
 
