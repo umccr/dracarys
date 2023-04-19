@@ -89,7 +89,7 @@ multiqc_tidy_json <- function(j) {
 .multiqc_rename_cols <- function(d) {
   umccr_workflows <- c(
     "dragen_alignment", "dragen_somatic",
-    "dragen_transcriptome", "dragen_umccrise",
+    "dragen_transcriptome", "dragen_umccrise", "dragen_somgerm",
     "dragen_ctdna",
     "bcbio_umccrise", "bcbio_wgs", "bcbio_wts"
   )
@@ -233,3 +233,24 @@ multiqc_kv_map <- function(l, func) {
 # generates them is added as the suffix e.g. awesome_metric_tool1.
 MULTIQC_COLUMNS <- system.file("extdata/multiqc_column_map.tsv", package = "dracarys") |>
   readr::read_tsv(col_types = "ccc")
+
+#' Append New MultiQC Workflow Columns
+#'
+#' @param d Tidy MultiQC tibble with raw names (i.e. pre-rename).
+#' @param w New workflow name.
+#' @param m Path to the 'inst/extdata/multiqc_column_map.tsv' dracarys file.
+#'
+#' @export
+multiqc_column_map_append <- function(d, w, m) {
+  assertthat::assert_that(
+    inherits(d, "data.frame"),
+    inherits(w, "character"),
+    file.exists(m)
+  )
+  new_workflow <- w
+  tibble::tibble(new_workflow = new_workflow, raw = colnames(d)) |>
+    dplyr::left_join(MULTIQC_COLUMNS, by = "raw", multiple = "first") |>
+    dplyr::distinct(.data$new_workflow, .data$raw, .data$clean) |>
+    dplyr::rename(workflow = "new_workflow") |>
+    readr::write_tsv(append = TRUE, file = m)
+}
