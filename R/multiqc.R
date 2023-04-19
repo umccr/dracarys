@@ -54,7 +54,7 @@ MultiqcFile <- R6::R6Class(
 multiqc_tidy_json <- function(j) {
   p <- RJSONIO::fromJSON(j)
   cdate <- p[["config_creation_date"]] %||% "UNKNOWN"
-  cdate <- sub(", ", "_", cdate)
+  cdate <- multiqc_date_fmt(cdate)
   workflow <- .multiqc_guess_workflow(p)
   d <- dracarys::multiqc_parse_gen(p)
   if (workflow %in% c("dragen_umccrise", "dragen_somgerm")) {
@@ -234,6 +234,7 @@ multiqc_kv_map <- function(l, func) {
 MULTIQC_COLUMNS <- system.file("extdata/multiqc_column_map.tsv", package = "dracarys") |>
   readr::read_tsv(col_types = "ccc")
 
+
 #' Append New MultiQC Workflow Columns
 #'
 #' @param d Tidy MultiQC tibble with raw names (i.e. pre-rename).
@@ -253,4 +254,30 @@ multiqc_column_map_append <- function(d, w, m) {
     dplyr::distinct(.data$new_workflow, .data$raw, .data$clean) |>
     dplyr::rename(workflow = "new_workflow") |>
     readr::write_tsv(append = TRUE, file = m)
+}
+
+#' Format MultiQC Config Date
+#'
+#' @param cdate String with config date in "YYYY-MM-DD, HH:MM UTC" format.
+#' @return Properly formatted datetime string in "YYYY-MM-DDTHH:MM:SS" format.
+#' If the input string was formatted differently, it will return NA.
+#'
+#' @examples
+#' cdate <- "2023-04-07, 09:09 UTC"
+#' (res1 <- multiqc_date_fmt(cdate))
+#' (res2 <- multiqc_date_fmt("2023-04-07"))
+#' (res3 <- multiqc_date_fmt("UNKNOWN"))
+#' @testexamples
+#' expect_equal(res1, "2023-04-07T09:09:00")
+#' expect_equal(res2, NA_character_)
+#' expect_equal(res3, NA_character_)
+#' @export
+multiqc_date_fmt <- function(cdate) {
+  # Input: "2023-04-07, 09:09 UTC"
+  # "YYYY-MM-DD, HH:MM UTC"
+  # Output: 2023-04-07T09:09:00
+  res <- sub(" UTC", "", cdate) |>
+    strptime(format = "%Y-%m-%d, %H:%M", tz = "UTC") |>
+    format("%Y-%m-%dT%H:%M:%S")
+  return(res)
 }
