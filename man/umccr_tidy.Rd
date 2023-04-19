@@ -5,9 +5,9 @@
 \title{Tidy UMCCR Results}
 \usage{
 umccr_tidy(
-  in_dir,
-  out_dir,
-  prefix,
+  in_dir = NULL,
+  out_dir = NULL,
+  prefix = NULL,
   gds_local_dir = NULL,
   out_format = "tsv",
   dryrun = FALSE,

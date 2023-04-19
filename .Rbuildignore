@@ -25,3 +25,4 @@
 ^\.dvc$
 ^\.dvcignore$
 ^\.dockerignore$
+CODE_OF_CONDUCT.md
