@@ -159,7 +159,7 @@ dragen_alignment	Aligned reads in genome pct	reads_aligned_in_genome_pct_dragen
 dragen_alignment	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
 dragen_somatic	umccr_id	umccr_id
 dragen_somatic	umccr_workflow	umccr_workflow
-dragen_somatic	config_creation_date	date
+dragen_somatic	config_creation_date	date_multiqc
 dragen_somatic	Total input reads	reads_tot_input_dragen
 dragen_somatic	Total input reads pct	reads_tot_input_pct_dragen
 dragen_somatic	Number of duplicate marked reads	reads_num_dupmarked_dragen
@@ -366,7 +366,7 @@ dragen_somatic	Number of duplicate marked and mate reads removed	reads_num_dupma
 dragen_somatic	avg_gc_content_percent	gc_pct_dragen
 dragen_transcriptome	umccr_id	umccr_id
 dragen_transcriptome	umccr_workflow	umccr_workflow
-dragen_transcriptome	config_creation_date	date
+dragen_transcriptome	config_creation_date	date_multiqc
 dragen_transcriptome	Total input reads	reads_tot_input_dragen
 dragen_transcriptome	Total input reads pct	reads_tot_input_pct_dragen
 dragen_transcriptome	Number of duplicate marked reads	reads_num_dupmarked_dragen
@@ -501,7 +501,7 @@ dragen_transcriptome	avg_gc_content_percent	gc_pct_qualimap
 dragen_transcriptome	Mean/Median autosomal coverage ratio over genome	cov_mean_median_auto_ratio_over_genome_dragen
 dragen_umccrise	umccr_id	umccr_id
 dragen_umccrise	umccr_workflow	umccr_workflow
-dragen_umccrise	config_creation_date	date
+dragen_umccrise	config_creation_date	date_multiqc
 dragen_umccrise	Total input reads	reads_tot_input_dragen
 dragen_umccrise	Total input reads pct	reads_tot_input_pct_dragen
 dragen_umccrise	Number of duplicate marked reads	reads_num_dupmarked_dragen
@@ -807,7 +807,7 @@ dragen_umccrise	germline	germline_umccrise
 dragen_umccrise	germline_predispose	germline_predispose_umccrise
 dragen_ctdna	umccr_id	umccr_id
 dragen_ctdna	umccr_workflow	umccr_workflow
-dragen_ctdna	config_creation_date	date
+dragen_ctdna	config_creation_date	date_multiqc
 dragen_ctdna	Total input reads	reads_tot_input_dragen
 dragen_ctdna	Total input reads pct	reads_tot_input_pct_dragen
 dragen_ctdna	Number of duplicate marked reads	reads_num_dupmarked_dragen
@@ -930,7 +930,7 @@ dragen_ctdna	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
 dragen_ctdna	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
 bcbio_umccrise	umccr_id	umccr_id
 bcbio_umccrise	umccr_workflow	umccr_workflow
-bcbio_umccrise	config_creation_date	date
+bcbio_umccrise	config_creation_date	date_multiqc
 bcbio_umccrise	concordance_used_markers	concordance_used_markers_conpair
 bcbio_umccrise	concordance_total_markers	concordance_total_markers_conpair
 bcbio_umccrise	concordance_marker_threshold	concordance_marker_threshold_conpair
@@ -1229,7 +1229,7 @@ bcbio_umccrise	GENE	gene_snpeff
 bcbio_umccrise	GENE_percent	gene_pct_snpeff
 bcbio_wts	umccr_id	umccr_id
 bcbio_wts	umccr_workflow	umccr_workflow
-bcbio_wts	config_creation_date	date
+bcbio_wts	config_creation_date	date_multiqc
 bcbio_wts	raw_total_sequences	raw_total_sequences_samtools
 bcbio_wts	filtered_sequences	filtered_sequences_samtools
 bcbio_wts	sequences	sequences_samtools
@@ -1327,7 +1327,7 @@ bcbio_wts	unmapped_other	unmapped_other_star
 bcbio_wts	reads_aligned	reads_aligned_qualimap
 bcbio_wgs	umccr_id	umccr_id
 bcbio_wgs	umccr_workflow	umccr_workflow
-bcbio_wgs	config_creation_date	date
+bcbio_wgs	config_creation_date	date_multiqc
 bcbio_wgs	raw_total_sequences	raw_total_sequences_samtools
 bcbio_wgs	filtered_sequences	filtered_sequences_samtools
 bcbio_wgs	sequences	sequences_samtools
