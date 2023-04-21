@@ -27,17 +27,17 @@ library(here)
 library(fs)
 ```
 
-
 ```{r}
-date1 <- "2023-02-17"
-res <- here(glue("nogit/multiqc/{date1}")) |>
+warehouse_dir <- here(glue("nogit/warehouse"))
+res <- warehouse_dir |>
   dir_ls(recurse = TRUE, regexp = "_multiqc\\.tsv\\.gz") |>
   as_tibble_col(column_name = "path") |>
   mutate(
     bname = basename(path),
     date_hash = basename(dirname(path)),
     sbj = sub("(.*)_multiqc.tsv.gz", "\\1", bname),
-    sbj_date_hash = glue("{sbj}_{date_hash}")
+    sbj_date_hash = glue("{sbj}_{date_hash}"),
+    workflow = sub(glue("{warehouse_dir}/(.*?)/SBJ.*"), "\\1", path)
   )
 
 l1 <- vector("list", nrow(res)) |> purrr::set_names(res$sbj_date_hash)
@@ -46,32 +46,88 @@ for (i in seq_len(nrow(res))) {
 }
 # add lims info
 lims <- readr::read_tsv("~/Downloads/Google LIMS - Sheet1.tsv") |>
-  dplyr::select(SubjectID, SampleID, LibraryID, Phenotype, ProjectOwner, ProjectName, Type, Workflow, Quality) |>
+  dplyr::select(Run, Timestamp, SubjectID, SampleID, LibraryID, Phenotype, ProjectOwner, ProjectName, Type, Assay, Workflow, Quality) |>
+  dplyr::filter(Type == "WGS") |>
   dplyr::distinct()
 dat <- dplyr::bind_rows(l1, .id = "sbj_date_hash") |>
-  tidyr::separate(col = sbj_date_hash, sep = "_", into = c("umccr_sbj", "date1", "hash1")) |>
-  dplyr::mutate(date = lubridate::ymd_hm(sub("_", " ", date))) |>
-  dplyr::select(umccr_sbj, umccr_id, date, hash1, everything(), -date1) |>
-  dplyr::left_join(lims |> select(SampleID, Phenotype) |> distinct(), by = c("umccr_id" = "SampleID"), multiple = "all") |>
-  dplyr::arrange(umccr_sbj, date)
-# dat |>
-#   dplyr::select(umccr_sbj, umccr_id, date, pheno, hash1, dplyr::contains("dupmark"), dplyr::everything(), -c(date1, umccr_workflow)) |>
-#   readr::write_tsv(here("nogit/multiqc/2023-02-13_results.tsv"))
+  dplyr::mutate(
+    date_multiqc = if_else(is.na(.data$date_multiqc), .data$date, .data$date_multiqc),
+    umccr_id = sub("_normal", "", .data$umccr_id)
+  ) |>
+  dplyr::select(-c(date)) |>
+  tidyr::separate_wider_delim(cols = "sbj_date_hash", delim = "_", names = c("id_sbj", "date_portal", "hash_portal"), cols_remove = FALSE) |>
+  dplyr::rename(SampleID = "umccr_id", SubjectID = "id_sbj")
 
-dat |>
+
+d1 <- dat |>
+  dplyr::select(
+    "SubjectID", "SampleID", "umccr_workflow", "date_portal", "date_multiqc", "hash_portal",
+    "reads_tot_input_dragen", "reads_num_unique_pct_dragen", "reads_w_mate_seq_dragen",
+    "reads_mapped_dragen", "reads_mapped_pct_dragen",
+    "reads_unmapped_dragen", "reads_unmapped_pct_dragen",
+    "reads_singleton_dragen", "reads_singleton_pct_dragen",
+    "reads_paired_dragen", "reads_paired_pct_dragen",
+    "reads_discordant_dragen", "reads_discordant_pct_dragen",
+    "reads_paired_mapped_diff_chrom_dragen", "reads_paired_mapped_diff_chrom_pct_dragen",
+    "read_len_dragen", "cov_avg_seq_over_genome_dragen", "insert_len_median_dragen",
+    "var_tot_dragen", "ploidy_est_dragen", "qc_status_purple", "method_purple", "purity_purple1",
+    "gender_cobalt", "contamination_purple", "ploidy_purple1", "status_purple", "ms_indels_permb_purple",
+    "ms_status_purple", "tml_purple", "tml_status_purple",
+    "tmb_permb_purple", "tmb_status_purple",
+    "reads_num_dupmarked_dragen", "reads_num_dupmarked_pct_dragen", "reads_num_dupmarked_samtools",
+    "cov_median_mosdepth", "viral_content_umccrise", "viral_integration_sites_umccrise",
+    "germline_umccrise", "germline_predispose_umccrise",
+    "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen",
+    dplyr::everything()
+  )
+# all SampleIDs are accounted for in lims
+table(d1$SampleID %in% lims$SampleID, useNA = "a")
+# look at duplicated SampleID/LibraryID rows
+# majority have topups - get rid of them since duplicated info
+lims1 <- lims |>
+  dplyr::filter(.data$SampleID %in% d1$SampleID) |>
+  dplyr::mutate(
+    is_topup = grepl("_topup", LibraryID),
+    LibraryID2 = sub("_topup", "", .data$LibraryID)
+  ) |>
+  dplyr::group_by(SampleID) |>
+  dplyr::mutate(has_topup = any(is_topup)) |>
+  dplyr::ungroup() |>
+  # keep LibraryID, Assay, Workflow out for now
+  dplyr::select(SubjectID, SampleID, Phenotype, ProjectOwner, ProjectName, Type, Quality, is_topup, has_topup) |>
+  dplyr::filter(!is_topup) |>
+  dplyr::distinct()
+
+d2 <- d1 |>
+  dplyr::left_join(lims1, by = c("SampleID", "SubjectID"), multiple = "all") |>
+  dplyr::arrange(SubjectID, date_multiqc)
+d2 |>
+  dplyr::select(
+    SubjectID, SampleID, umccr_workflow, date_multiqc, Phenotype, ProjectOwner,
+    ProjectName, Type, Quality, is_topup, has_topup, dplyr::contains("dupmark"),
+    dplyr::everything(), -c(date_portal)
+  ) |>
+  # readr::write_rds(here("nogit/multiqc/2023-04-21_dracarys_multiqc.rds"))
+  readr::write_tsv(here("nogit/multiqc/2023-04-21_dracarys_multiqc.tsv"))
+
+p <- d2 |>
   tidyr::pivot_longer(
     c(
       "reads_num_dupmarked_dragen", "reads_num_dupmarked_pct_dragen",
       "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen",
     ),
     names_to = "metric", values_to = "value"
-  ) |>
-  dplyr::filter(!Phenotype %in% c("normal", "tumor")) |>
-  # dplyr::filter(metric %in% c("reads_num_dupmarked_dragen", "reads_num_dupmarked_samtools")) |>
-  ggplot(aes(x = date, y = value)) +
+  )
+p |>
+  dplyr::filter(metric %in% c("reads_num_dupmarked_pct_dragen")) |>
+  ggplot(aes(x = date_multiqc, y = value)) +
   geom_point(aes(colour = Phenotype)) +
-  facet_grid(metric ~ Phenotype, scales = "free") +
-  theme_bw()
+  facet_grid(umccr_workflow + metric ~ Phenotype, scales = "free") +
+  theme_bw() +
+  geom_vline(
+    xintercept = as.POSIXct(as.Date("2022-10-01")),
+    color = "red", lwd = 0.3
+  )
 ```
 
 ```{r}
