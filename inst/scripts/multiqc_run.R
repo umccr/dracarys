@@ -1,18 +1,16 @@
 require(dracarys)
 require(here)
+require(glue)
 require(dplyr)
 require(readr)
 
 # SQL
 # select * from data_portal.data_portal_gdsfile where regexp_like(path, 'multiqc_data.json') order by time_created desc;
-
-# d <- here("nogit/multiqc/sql/e7fd7995-d280-4457-a1ac-0cf46bf723dd_gds_multiqcjson_query_2023-02-03.csv") |>
-#   read_csv(col_names = TRUE)
-d <- here("nogit/multiqc/sql/8606d0f0-2d42-4faf-b774-d3f45d54fe53_gds_after_29jan2023.csv") |>
+date1 <- "2023-04-19"
+d <- here(glue("nogit/multiqc/sql/53cb0384-3a55-403c-af5e-2c1f4e71cc8d_gds_multiqcjson_query_{date1}.csv")) |>
   read_csv(col_names = TRUE)
 
-date1 <- "2023-02-17"
-wf <- "wgs_alignment_qc"
+wf <- c("umccrise", "wgs_alignment_qc", "wgs_tumor_normal")
 
 x <- d |>
   filter(!grepl("bclconvert|interop", path)) |>
@@ -25,29 +23,23 @@ x <- d |>
     time_created = as.Date(time_created)
   ) |>
   select(sbj, workflow, gds_indir, time_created, unique_hash) |>
-  filter(workflow == wf) |>
+  filter(workflow %in% wf) |>
   mutate(
-    outdir = here(glue("nogit/multiqc/{date1}/{sbj}/{time_created}_{unique_hash}")),
+    outdir = here(glue("nogit/warehouse/{workflow}/{sbj}/{time_created}_{unique_hash}")),
     local_indir = file.path(outdir, "dracarys_gds_sync")
   ) |>
   arrange(sbj, time_created) |>
-  select(sbj, gds_indir, outdir, local_indir)
+  select(sbj, gds_indir, outdir, local_indir, time_created)
 
 
-token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
-dryrun <- TRUE
+token <- Sys.getenv("ICA_ACCESS_TOKEN_PRO")
+# dryrun <- TRUE
 dryrun <- FALSE
-for (i in 1:12) {
-  print(i)
-  print(x$gds_indir[i])
-  # print(x$local_indir[i])
-  dracarys::umccr_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj[i], dryrun = dryrun, token = token)
-  # dracarys::tso_tidy(in_dir = x$local_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = FALSE, token = token)
-}
 
-x |>
-  mutate(
-    cmd = glue("./dracarys.R tso -i {gds_indir} -o {outdir} -r {outdir}/report_dir -p {sbj2} --rds_dir {outdir}/rds_dir --quiet_rmd")
-  ) |>
-  select(cmd) |>
-  write_tsv(here("inst/cli/run.sh"), col_names = FALSE)
+for (i in seq_len(nrow(x))) {
+  print(i)
+  # print(x$gds_indir[i])
+  # dracarys::umccr_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj[i], dryrun = dryrun, token = token)
+  print(x$local_indir[i])
+  dracarys::umccr_tidy(in_dir = x$local_indir[i], out_dir = x$outdir[i], prefix = x$sbj[i], dryrun = dryrun, token = token)
+}
