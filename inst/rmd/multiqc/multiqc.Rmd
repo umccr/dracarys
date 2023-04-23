@@ -101,39 +101,36 @@ lims1 <- lims |>
 d2 <- d1 |>
   dplyr::left_join(lims1, by = c("SampleID", "SubjectID"), multiple = "all") |>
   dplyr::arrange(SubjectID, date_multiqc)
-d2 |>
-  dplyr::select(
-    SubjectID, SampleID, umccr_workflow, date_multiqc, Phenotype, ProjectOwner,
-    ProjectName, Type, Quality, is_topup, has_topup, dplyr::contains("dupmark"),
-    dplyr::everything(), -c(date_portal)
-  ) |>
-  # readr::write_rds(here("nogit/multiqc/2023-04-21_dracarys_multiqc.rds"))
-  readr::write_tsv(here("nogit/multiqc/2023-04-21_dracarys_multiqc.tsv"))
 
+sel_cols <- c(
+  "reads_num_dupmarked_dragen", "reads_num_dupmarked_pct_dragen",
+  "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen"
+)
 p <- d2 |>
-  tidyr::pivot_longer(
-    c(
-      "reads_num_dupmarked_dragen", "reads_num_dupmarked_pct_dragen",
-      "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen",
-    ),
-    names_to = "metric", values_to = "value"
-  )
-p |>
-  dplyr::filter(metric %in% c("reads_num_dupmarked_pct_dragen")) |>
-  ggplot(aes(x = date_multiqc, y = value)) +
-  geom_point(aes(colour = Phenotype)) +
-  facet_grid(umccr_workflow + metric ~ Phenotype, scales = "free") +
+  tidyr::pivot_longer(dplyr::all_of(sel_cols), names_to = "metric", values_to = "value")
+p1 <- p |>
+  dplyr::select(
+    SubjectID, SampleID, umccr_workflow, date_portal, date_multiqc,
+    ProjectOwner, ProjectName, Quality, Type, Phenotype,
+    metric, value
+  ) |>
+  dplyr::mutate(latest_run = date_portal == "2023-04-23", sbj_samp = glue("{SubjectID}_{SampleID}")) |>
+  # filter(ProjectName %in% c("CIRCUIT", "Control", "PROSPECT")) |>
+  filter(
+    metric %in% c("reads_num_dupmarked_pct_dragen"),
+    umccr_workflow == "dragen_alignment",
+    Phenotype != "-"
+  ) |>
+  ggplot(aes(x = date_multiqc, y = value, text = sbj_samp)) +
+  geom_point(aes(colour = latest_run)) +
   theme_bw() +
-  geom_vline(
-    xintercept = as.POSIXct(as.Date("2022-10-01")),
-    color = "red", lwd = 0.3
-  )
+  facet_wrap(~Phenotype, scales = "fixed", ncol = 1)
+plotly::ggplotly(p1, tooltip = c("x", "y", "text"))
 ```
 
-```{r}
+```{r eval=F}
 out <- lims |>
   select(SubjectID, SampleID, SampleName, ProjectName, Type) |>
-  filter(ProjectName %in% c("CIRCUIT", "Control", "PROSPECT")) |>
   filter(SubjectID != "-") |>
   distinct(SubjectID, ProjectName) |>
   pull(SubjectID)
@@ -150,18 +147,3 @@ dat |>
   facet_grid(metric ~ pheno, scales = "free") +
   theme_bw()
 ```
-
-```{r}
-x <- readr::read_tsv(here("nogit/multiqc/2023-02-13_multiqc_results.tsv.gz"))
-x |>
-  dplyr::select(
-    sbj_id = umccr_sbj, sample_id = umccr_id, date, phenotype = pheno, hash6 = hash1,
-    cov_median_mosdepth, cov_auto_median_dragen,
-    reads_tot_input_dragen, reads_mapped_pct_dragen, insert_len_median_dragen,
-    var_tot_dragen, var_snp_dragen, ploidy = ploidy_purple1, purity = purity_purple1,
-    qc_status_purple, sex = gender_purple,
-    ms_status = ms_status_purple, tmb = tmb_permb_purple,
-  ) |>
-  readr::write_tsv(here("nogit/multiqc/2023-02-13_multiqc_results_subset.tsv.gz"))
-```
-
