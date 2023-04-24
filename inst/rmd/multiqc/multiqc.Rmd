@@ -104,7 +104,8 @@ d2 <- d1 |>
 
 sel_cols <- c(
   "reads_num_dupmarked_dragen", "reads_num_dupmarked_pct_dragen",
-  "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen"
+  "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen",
+  "contamination_conpair"
 )
 p <- d2 |>
   tidyr::pivot_longer(dplyr::all_of(sel_cols), names_to = "metric", values_to = "value")
@@ -114,18 +115,24 @@ p1 <- p |>
     ProjectOwner, ProjectName, Quality, Type, Phenotype,
     metric, value
   ) |>
-  dplyr::mutate(latest_run = date_portal == "2023-04-23", sbj_samp = glue("{SubjectID}_{SampleID}")) |>
+  dplyr::mutate(
+    latest_run = date_portal == "2023-04-23",
+    sbj_samp = glue("{SubjectID}_{SampleID}_{Phenotype}")
+  ) |>
   # filter(ProjectName %in% c("CIRCUIT", "Control", "PROSPECT")) |>
   filter(
-    metric %in% c("reads_num_dupmarked_pct_dragen"),
-    umccr_workflow == "dragen_alignment",
-    Phenotype != "-"
+    metric %in% c("contamination_conpair"),
+    umccr_workflow == "dragen_umccrise",
+    Phenotype %in% c("tumor", "normal")
   ) |>
   ggplot(aes(x = date_multiqc, y = value, text = sbj_samp)) +
   geom_point(aes(colour = latest_run)) +
   theme_bw() +
-  facet_wrap(~Phenotype, scales = "fixed", ncol = 1)
-plotly::ggplotly(p1, tooltip = c("x", "y", "text"))
+  ggtitle("Conpair Contamination")
+# facet_wrap(workflow~Phenotype + metric, scales = "free")
+plotly::ggplotly(p1, tooltip = c("x", "y", "text")) |>
+  plotly::partial_bundle() |>
+  htmlwidgets::saveWidget("~/tmp/conpair_contamination_2023-04-24.html")
 ```
 
 ```{r eval=F}
