@@ -6,7 +6,7 @@ require(readr)
 
 # SQL
 # select * from data_portal.data_portal_gdsfile where regexp_like(path, 'multiqc_data.json') order by time_created desc;
-d <- glue("nogit/multiqc/sql/2c527c86-7dee-4377-b18c-5ef01fca6375_gds_multiqcjson_query_2023-04-24.csv") |>
+d <- glue("nogit/multiqc/sql/2023-05-01_gds_multiqcjson_query_dd36b739-af05-4954-8818-3ada048d7394.csv") |>
   here() |>
   read_csv(col_names = TRUE)
 
@@ -23,7 +23,7 @@ x <- d |>
     time_created = as.Date(time_created)
   ) |>
   select(sbj, workflow, gds_indir, time_created, unique_hash) |>
-  filter(time_created >= "2023-04-23") |>
+  filter(time_created >= "2023-04-30") |>
   filter(workflow %in% wf) |>
   mutate(
     outdir = here(glue("nogit/warehouse/{workflow}/{sbj}/{time_created}_{unique_hash}")),

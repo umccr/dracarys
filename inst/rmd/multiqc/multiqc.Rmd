@@ -19,12 +19,14 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, message=FALSE, warning=FALSE}
+options(scipen = 999)
 library(dracarys)
 library(dplyr)
 library(ggplot2)
 library(tibble)
 library(here)
 library(fs)
+library(scales)
 ```
 
 ```{r}
@@ -56,36 +58,16 @@ dat <- dplyr::bind_rows(l1, .id = "sbj_date_hash") |>
   ) |>
   dplyr::select(-c(date)) |>
   tidyr::separate_wider_delim(cols = "sbj_date_hash", delim = "_", names = c("id_sbj", "date_portal", "hash_portal"), cols_remove = FALSE) |>
-  dplyr::rename(SampleID = "umccr_id", SubjectID = "id_sbj")
-
-
-d1 <- dat |>
+  dplyr::rename(SampleID = "umccr_id", SubjectID = "id_sbj") |>
   dplyr::select(
     "SubjectID", "SampleID", "umccr_workflow", "date_portal", "date_multiqc", "hash_portal",
-    "reads_tot_input_dragen", "reads_num_unique_pct_dragen", "reads_w_mate_seq_dragen",
-    "reads_mapped_dragen", "reads_mapped_pct_dragen",
-    "reads_unmapped_dragen", "reads_unmapped_pct_dragen",
-    "reads_singleton_dragen", "reads_singleton_pct_dragen",
-    "reads_paired_dragen", "reads_paired_pct_dragen",
-    "reads_discordant_dragen", "reads_discordant_pct_dragen",
-    "reads_paired_mapped_diff_chrom_dragen", "reads_paired_mapped_diff_chrom_pct_dragen",
-    "read_len_dragen", "cov_avg_seq_over_genome_dragen", "insert_len_median_dragen",
-    "var_tot_dragen", "ploidy_est_dragen", "qc_status_purple", "method_purple", "purity_purple1",
-    "gender_cobalt", "contamination_purple", "ploidy_purple1", "status_purple", "ms_indels_permb_purple",
-    "ms_status_purple", "tml_purple", "tml_status_purple",
-    "tmb_permb_purple", "tmb_status_purple",
-    "reads_num_dupmarked_dragen", "reads_num_dupmarked_pct_dragen", "reads_num_dupmarked_samtools",
-    "cov_median_mosdepth", "viral_content_umccrise", "viral_integration_sites_umccrise",
-    "germline_umccrise", "germline_predispose_umccrise",
-    "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen",
     dplyr::everything()
   )
-# all SampleIDs are accounted for in lims
-table(d1$SampleID %in% lims$SampleID, useNA = "a")
+
 # look at duplicated SampleID/LibraryID rows
 # majority have topups - get rid of them since duplicated info
 lims1 <- lims |>
-  dplyr::filter(.data$SampleID %in% d1$SampleID) |>
+  dplyr::filter(.data$SampleID %in% dat$SampleID) |>
   dplyr::mutate(
     is_topup = grepl("_topup", LibraryID),
     LibraryID2 = sub("_topup", "", .data$LibraryID)
@@ -98,59 +80,102 @@ lims1 <- lims |>
   dplyr::filter(!is_topup) |>
   dplyr::distinct()
 
-d2 <- d1 |>
+d1 <- dat |>
   dplyr::left_join(lims1, by = c("SampleID", "SubjectID"), multiple = "all") |>
-  dplyr::arrange(SubjectID, date_multiqc)
-
-sel_cols <- c(
-  "reads_num_dupmarked_dragen", "reads_num_dupmarked_pct_dragen",
-  "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen",
-  "contamination_conpair"
-)
-p <- d2 |>
-  tidyr::pivot_longer(dplyr::all_of(sel_cols), names_to = "metric", values_to = "value")
-p1 <- p |>
-  dplyr::select(
-    SubjectID, SampleID, umccr_workflow, date_portal, date_multiqc,
-    ProjectOwner, ProjectName, Quality, Type, Phenotype,
-    metric, value
-  ) |>
+  dplyr::arrange(SubjectID, date_multiqc) |>
   dplyr::mutate(
-    latest_run = date_portal == "2023-04-23",
-    sbj_samp = glue("{SubjectID}_{SampleID}_{Phenotype}")
+    sbj_samp_pheno = glue("{SubjectID}_{SampleID}_{Phenotype}"),
+    run = case_when(
+      date_portal >= "2023-04-30" ~ "latest",
+      date_portal >= "2023-04-23" ~ "previous",
+      TRUE ~ "older"
+    )
   ) |>
-  # filter(ProjectName %in% c("CIRCUIT", "Control", "PROSPECT")) |>
-  filter(
-    metric %in% c("contamination_conpair"),
-    umccr_workflow == "dragen_umccrise",
-    Phenotype %in% c("tumor", "normal")
-  ) |>
-  ggplot(aes(x = date_multiqc, y = value, text = sbj_samp)) +
-  geom_point(aes(colour = latest_run)) +
-  theme_bw() +
-  ggtitle("Conpair Contamination")
-# facet_wrap(workflow~Phenotype + metric, scales = "free")
-plotly::ggplotly(p1, tooltip = c("x", "y", "text")) |>
-  plotly::partial_bundle() |>
-  htmlwidgets::saveWidget("~/tmp/conpair_contamination_2023-04-24.html")
-```
+  dplyr::select(-c("date_portal", "hash_portal"))
 
-```{r eval=F}
-out <- lims |>
-  select(SubjectID, SampleID, SampleName, ProjectName, Type) |>
-  filter(SubjectID != "-") |>
-  distinct(SubjectID, ProjectName) |>
-  pull(SubjectID)
-dat |>
-  dplyr::select(
-    umccr_sbj, umccr_id, date, pheno, hash1, dplyr::contains("dupmark"),
-    dplyr::everything(), -c(date1, umccr_workflow)
-  ) |>
-  dplyr::mutate(EXCLUDE = umccr_sbj %in% out) |>
-  tidyr::pivot_longer(contains("dupmark"), names_to = "metric", values_to = "value") |>
-  # dplyr::filter(metric %in% c("reads_num_dupmarked_dragen", "reads_num_dupmarked_samtools")) |>
-  ggplot(aes(x = date, y = value)) +
-  geom_point(aes(colour = EXCLUDE)) +
-  facet_grid(metric ~ pheno, scales = "free") +
-  theme_bw()
+main_cols <- c(
+  "SubjectID", "SampleID", "umccr_workflow", "date_multiqc",
+  "ProjectOwner", "ProjectName", "Quality", "Type", "Phenotype",
+  "sbj_date_hash", "sbj_samp_pheno", "run"
+)
+
+d1_num <- d1 |>
+  dplyr::select(all_of(main_cols), where(is.numeric))
+d1_chr <- d1 |>
+  dplyr::select(all_of(main_cols), where(is.character))
+
+num_cols <- setdiff(colnames(d1_num), main_cols)
+chr_cols <- setdiff(colnames(d1_chr), main_cols)
+
+d1_num_melt <- d1_num |>
+  tidyr::pivot_longer(all_of(num_cols), names_to = "metric", values_to = "value")
+d1_chr_melt <- d1_chr |>
+  tidyr::pivot_longer(all_of(chr_cols), names_to = "metric", values_to = "value")
+
+plot_num <- function(pheno = c("tumor"), wf = c("dragen_alignment")) {
+  stopifnot(pheno %in% c("tumor", "normal", "other"))
+  stopifnot(all(wf %in% c(paste0("dragen_", c("alignment", "somatic", "umccrise")))))
+  if (pheno == "other") {
+    pheno <- c("-", "negative-control", NA)
+  }
+
+  d1_num_melt |>
+    filter(
+      umccr_workflow %in% wf,
+      Phenotype %in% pheno,
+      !is.na(value)
+    ) |>
+    ggplot(aes(x = date_multiqc, y = value, text = sbj_samp_pheno)) +
+    geom_point(aes(colour = run)) +
+    scale_x_datetime(
+      sec.axis = dup_axis(),
+      date_labels = "%m/%y",
+      breaks = scales::pretty_breaks(n = 12)
+    ) +
+    scale_y_continuous(labels = scales::comma) +
+    theme_bw() +
+    facet_wrap(~metric, scales = "free_y", ncol = 3) +
+    theme(legend.position = "none")
+  # guides(x = guide_axis(angle = 45))
+  # ggtitle("Conpair Contamination")
+}
+save_png <- function(obj, pheno = "tumor", wf = c("dragen_alignment")) {
+  stopifnot(pheno %in% c("tumor", "normal", "other"))
+  stopifnot(all(wf %in% c(paste0("dragen_", c("alignment", "somatic", "umccrise")))))
+  wf_out <- wf
+  if (length(wf) > 1) {
+    wf_out <- paste(wf, sep = "_")
+  }
+  ggsave(plot = obj, filename = here::here(glue("nogit/plots/{wf_out}_{pheno}_num_metrics.png")), width = 25, height = 49)
+}
+save_html <- function(obj, pheno = "tumor", wf = c("dragen_alignment")) {
+  stopifnot(pheno %in% c("tumor", "normal", "other"))
+  stopifnot(all(wf %in% c(paste0("dragen_", c("alignment", "somatic", "umccrise")))))
+  wf_out <- wf
+  if (length(wf) > 1) {
+    wf_out <- paste(wf, sep = "_")
+  }
+  plotly::ggplotly(obj, tooltip = c("x", "y", "text"), height = 12000, width = 2000) |>
+    plotly::partial_bundle() |>
+    htmlwidgets::saveWidget(here::here(glue("nogit/plots/{wf_out}_{pheno}_num_metrics.html")))
+}
+p_tumor_alqc <- plot_num("tumor", wf = "dragen_alignment")
+p_normal_alqc <- plot_num("normal", wf = "dragen_alignment")
+p_other_alqc <- plot_num("other", wf = "dragen_alignment")
+save_png(p_tumor_alqc, "tumor", wf = "dragen_alignment")
+save_png(p_normal_alqc, "normal", wf = "dragen_alignment")
+save_png(p_other_alqc, "other", wf = "dragen_alignment")
+save_html(p_tumor_alqc, "tumor", wf = "dragen_somatic")
+save_html(p_normal_alqc, "normal", wf = "dragen_somatic")
+save_html(p_other_alqc, "other", wf = "dragen_somatic")
+
+p_tumor_um <- plot_num("tumor", wf = "dragen_umccrise")
+p_normal_um <- plot_num("normal", wf = "dragen_umccrise")
+p_other_um <- plot_num("other", wf = "dragen_umccrise")
+save_png(p_tumor_um, "tumor", wf = "dragen_umccrise")
+save_png(p_normal_um, "normal", wf = "dragen_umccrise")
+save_png(p_other_um, "other", wf = "dragen_umccrise")
+save_html(p_tumor_um, "tumor", wf = "dragen_umccrise")
+save_html(p_normal_um, "normal", wf = "dragen_umccrise")
+save_html(p_other_um, "other", wf = "dragen_umccrise")
 ```
