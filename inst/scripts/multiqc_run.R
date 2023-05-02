@@ -11,6 +11,7 @@ d <- glue("nogit/multiqc/sql/2023-05-01_gds_multiqcjson_query_dd36b739-af05-4954
   read_csv(col_names = TRUE)
 
 wf <- c("umccrise", "wgs_alignment_qc", "wgs_tumor_normal")
+wf <- "wts_tumor_only"
 
 x <- d |>
   filter(!grepl("bclconvert|interop", path)) |>
@@ -23,7 +24,7 @@ x <- d |>
     time_created = as.Date(time_created)
   ) |>
   select(sbj, workflow, gds_indir, time_created, unique_hash) |>
-  filter(time_created >= "2023-04-30") |>
+  # filter(time_created >= "2023-04-30") |>
   filter(workflow %in% wf) |>
   mutate(
     outdir = here(glue("nogit/warehouse/{workflow}/{sbj}/{time_created}_{unique_hash}")),
