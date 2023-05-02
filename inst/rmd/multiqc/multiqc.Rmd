@@ -19,93 +19,192 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, message=FALSE, warning=FALSE}
+options(scipen = 999)
 library(dracarys)
 library(dplyr)
 library(ggplot2)
 library(tibble)
 library(here)
 library(fs)
+library(scales)
 ```
 
-
 ```{r}
-date1 <- "2023-02-17"
-res <- here(glue("nogit/multiqc/{date1}")) |>
+warehouse_dir <- here(glue("nogit/warehouse"))
+res <- warehouse_dir |>
   dir_ls(recurse = TRUE, regexp = "_multiqc\\.tsv\\.gz") |>
   as_tibble_col(column_name = "path") |>
   mutate(
     bname = basename(path),
     date_hash = basename(dirname(path)),
     sbj = sub("(.*)_multiqc.tsv.gz", "\\1", bname),
-    sbj_date_hash = glue("{sbj}_{date_hash}")
+    sbj_date_hash = glue("{sbj}_{date_hash}"),
+    workflow = sub(glue("{warehouse_dir}/(.*?)/SBJ.*"), "\\1", path)
   )
 
 l1 <- vector("list", nrow(res)) |> purrr::set_names(res$sbj_date_hash)
 for (i in seq_len(nrow(res))) {
   l1[[i]] <- readr::read_tsv(res$path[i], show_col_types = FALSE)
 }
-# add lims info
-lims <- readr::read_tsv("~/Downloads/Google LIMS - Sheet1.tsv") |>
-  dplyr::select(SubjectID, SampleID, LibraryID, Phenotype, ProjectOwner, ProjectName, Type, Workflow, Quality) |>
-  dplyr::distinct()
 dat <- dplyr::bind_rows(l1, .id = "sbj_date_hash") |>
-  tidyr::separate(col = sbj_date_hash, sep = "_", into = c("umccr_sbj", "date1", "hash1")) |>
-  dplyr::mutate(date = lubridate::ymd_hm(sub("_", " ", date))) |>
-  dplyr::select(umccr_sbj, umccr_id, date, hash1, everything(), -date1) |>
-  dplyr::left_join(lims |> select(SampleID, Phenotype) |> distinct(), by = c("umccr_id" = "SampleID"), multiple = "all") |>
-  dplyr::arrange(umccr_sbj, date)
-# dat |>
-#   dplyr::select(umccr_sbj, umccr_id, date, pheno, hash1, dplyr::contains("dupmark"), dplyr::everything(), -c(date1, umccr_workflow)) |>
-#   readr::write_tsv(here("nogit/multiqc/2023-02-13_results.tsv"))
-
-dat |>
-  tidyr::pivot_longer(
-    c(
-      "reads_num_dupmarked_dragen", "reads_num_dupmarked_pct_dragen",
-      "cov_auto_median_dragen", "cov_x_median_dragen", "cov_y_median_dragen",
-    ),
-    names_to = "metric", values_to = "value"
+  dplyr::mutate(
+    date_multiqc = if_else(is.na(.data$date_multiqc), .data$date, .data$date_multiqc),
+    umccr_id = sub("_normal", "", .data$umccr_id)
   ) |>
-  dplyr::filter(!Phenotype %in% c("normal", "tumor")) |>
-  # dplyr::filter(metric %in% c("reads_num_dupmarked_dragen", "reads_num_dupmarked_samtools")) |>
-  ggplot(aes(x = date, y = value)) +
-  geom_point(aes(colour = Phenotype)) +
-  facet_grid(metric ~ Phenotype, scales = "free") +
-  theme_bw()
-```
-
-```{r}
-out <- lims |>
-  select(SubjectID, SampleID, SampleName, ProjectName, Type) |>
-  filter(ProjectName %in% c("CIRCUIT", "Control", "PROSPECT")) |>
-  filter(SubjectID != "-") |>
-  distinct(SubjectID, ProjectName) |>
-  pull(SubjectID)
-dat |>
+  dplyr::select(-c(date)) |>
+  tidyr::separate_wider_delim(cols = "sbj_date_hash", delim = "_", names = c("id_sbj", "date_portal", "hash_portal"), cols_remove = FALSE) |>
+  dplyr::rename(SampleID = "umccr_id", SubjectID = "id_sbj") |>
   dplyr::select(
-    umccr_sbj, umccr_id, date, pheno, hash1, dplyr::contains("dupmark"),
-    dplyr::everything(), -c(date1, umccr_workflow)
-  ) |>
-  dplyr::mutate(EXCLUDE = umccr_sbj %in% out) |>
-  tidyr::pivot_longer(contains("dupmark"), names_to = "metric", values_to = "value") |>
-  # dplyr::filter(metric %in% c("reads_num_dupmarked_dragen", "reads_num_dupmarked_samtools")) |>
-  ggplot(aes(x = date, y = value)) +
-  geom_point(aes(colour = EXCLUDE)) +
-  facet_grid(metric ~ pheno, scales = "free") +
-  theme_bw()
-```
+    "SubjectID", "SampleID", "umccr_workflow", "date_portal", "date_multiqc", "hash_portal",
+    dplyr::everything()
+  )
 
-```{r}
-x <- readr::read_tsv(here("nogit/multiqc/2023-02-13_multiqc_results.tsv.gz"))
-x |>
-  dplyr::select(
-    sbj_id = umccr_sbj, sample_id = umccr_id, date, phenotype = pheno, hash6 = hash1,
-    cov_median_mosdepth, cov_auto_median_dragen,
-    reads_tot_input_dragen, reads_mapped_pct_dragen, insert_len_median_dragen,
-    var_tot_dragen, var_snp_dragen, ploidy = ploidy_purple1, purity = purity_purple1,
-    qc_status_purple, sex = gender_purple,
-    ms_status = ms_status_purple, tmb = tmb_permb_purple,
-  ) |>
-  readr::write_tsv(here("nogit/multiqc/2023-02-13_multiqc_results_subset.tsv.gz"))
-```
+# add lims info
+lims_prep <- function(type = NULL) {
+  stopifnot(type %in% c("WGS", "WTS"))
+  readr::read_tsv("~/Downloads/Google LIMS - Sheet1.tsv") |>
+    dplyr::select(Run, Timestamp, SubjectID, SampleID, LibraryID, Phenotype, ProjectOwner, ProjectName, Type, Assay, Workflow, Quality) |>
+    dplyr::filter(Type == type) |>
+    dplyr::distinct() |>
+    dplyr::filter(.data$SampleID %in% dat[["SampleID"]]) |>
+    dplyr::mutate(
+      is_topup = grepl("_topup", LibraryID),
+      LibraryID2 = sub("_topup", "", .data$LibraryID)
+    ) |>
+    dplyr::group_by(SampleID) |>
+    dplyr::mutate(has_topup = any(is_topup)) |>
+    dplyr::ungroup() |>
+    # keep LibraryID, Assay, Workflow out for now
+    dplyr::select(SubjectID, SampleID, Phenotype, ProjectOwner, ProjectName, Type, Quality, is_topup, has_topup) |>
+    dplyr::filter(!is_topup) |>
+    dplyr::distinct()
+}
 
+dat_prep <- function(wf) {
+  stopifnot(all(wf %in% paste0("dragen_", c("umccrise", "somatic", "alignment", "transcriptome"))))
+  type <- "WGS"
+  if (all(wf == "dragen_transcriptome")) {
+    type <- "WTS"
+  }
+  print(cat(glue::glue("Type is {type}"), sep = "/n"))
+  lims <- lims_prep(type)
+  dat1 <- dat |>
+    dplyr::filter(umccr_workflow %in% wf) |>
+    dplyr::left_join(lims, by = c("SampleID", "SubjectID"), multiple = "all") |>
+    dplyr::arrange(SubjectID, date_multiqc) |>
+    dplyr::mutate(
+      sbj_samp_pheno = glue("{SubjectID}_{SampleID}_{Phenotype}"),
+      run = case_when(
+        date_portal >= "2023-04-30" ~ "latest",
+        date_portal >= "2023-04-23" ~ "previous",
+        TRUE ~ "older"
+      )
+    ) |>
+    dplyr::select(-c("date_portal", "hash_portal"))
+  main_cols <- c(
+    "SubjectID", "SampleID", "umccr_workflow", "date_multiqc",
+    "ProjectOwner", "ProjectName", "Quality", "Type", "Phenotype",
+    "sbj_date_hash", "sbj_samp_pheno", "run"
+  )
+  # split into numeric and character so that class is preserved when pivoting
+  dat1_num <- dat1 |>
+    dplyr::select(all_of(main_cols), where(is.numeric))
+  dat1_chr <- dat1 |>
+    dplyr::select(all_of(main_cols), where(is.character))
+  num_cols <- setdiff(colnames(dat1_num), main_cols)
+  chr_cols <- setdiff(colnames(dat1_chr), main_cols)
+
+  dat1_num <- dat1_num |>
+    tidyr::pivot_longer(all_of(num_cols), names_to = "metric", values_to = "value") |>
+    dplyr::filter(!is.na(value))
+  dat1_chr <- dat1_chr |>
+    tidyr::pivot_longer(all_of(chr_cols), names_to = "metric", values_to = "value") |>
+    dplyr::filter(!is.na(value))
+  list(
+    num = dat1_num,
+    chr = dat1_chr
+  )
+}
+
+plot_num <- function(x, pheno = c("tumor"), wf = c("dragen_alignment")) {
+  stopifnot(pheno %in% c("tumor", "normal", "other"))
+  stopifnot(all(wf %in% c(paste0("dragen_", c("alignment", "somatic", "umccrise", "transcriptome")))))
+  if (pheno == "other") {
+    pheno <- c("-", "negative-control", NA)
+  }
+
+  x |>
+    filter(
+      umccr_workflow %in% wf,
+      Phenotype %in% pheno,
+      !is.na(value)
+    ) |>
+    ggplot(aes(x = date_multiqc, y = value, text = sbj_samp_pheno)) +
+    geom_point(aes(colour = run)) +
+    scale_x_datetime(
+      sec.axis = dup_axis(),
+      date_labels = "%m/%y",
+      breaks = scales::pretty_breaks(n = 12)
+    ) +
+    scale_y_continuous(labels = scales::comma) +
+    theme_bw() +
+    facet_wrap(~metric, scales = "free_y", ncol = 3) +
+    theme(legend.position = "none") +
+    ggtitle(glue("wf: {wf} for pheno: {}"))
+}
+
+save_png <- function(obj, pheno = "tumor", wf = c("dragen_alignment"), date1 = "2023-05-02") {
+  stopifnot(pheno %in% c("tumor", "normal", "other"))
+  stopifnot(all(wf %in% c(paste0("dragen_", c("alignment", "somatic", "umccrise", "transcriptome")))))
+  wf_out <- wf
+  if (length(wf) > 1) {
+    wf_out <- paste(wf, sep = "_")
+  }
+  ggsave(plot = obj, filename = here::here(glue("nogit/plots/{date1}/{wf_out}_{pheno}_num_metrics.png")), width = 25, height = 49)
+}
+
+save_html <- function(obj, pheno = "tumor", wf = c("dragen_alignment"), date1 = "2023-05-02") {
+  stopifnot(pheno %in% c("tumor", "normal", "other"))
+  stopifnot(all(wf %in% c(paste0("dragen_", c("alignment", "somatic", "umccrise", "transcriptome")))))
+  wf_out <- wf
+  if (length(wf) > 1) {
+    wf_out <- paste(wf, sep = "_")
+  }
+  plotly::ggplotly(obj, tooltip = c("x", "y", "text"), height = 12000, width = 2000) |>
+    plotly::partial_bundle() |>
+    htmlwidgets::saveWidget(here::here(glue("nogit/plots/{date1}/{wf_out}_{pheno}_num_metrics.html")))
+}
+
+dat_wgs <- dat_prep(wf = paste0("dragen_", c("umccrise", "somatic", "alignment")))
+dat_wts <- dat_prep(wf = "dragen_transcriptome")
+
+p_tumor_alqc <- plot_num(dat_wgs$num, "tumor", wf = "dragen_alignment")
+p_normal_alqc <- plot_num(dat_wgs$num, "normal", wf = "dragen_alignment")
+p_other_alqc <- plot_num(dat_wgs$num, "other", wf = "dragen_alignment")
+save_png(p_tumor_alqc, "tumor", "dragen_alignment")
+save_png(p_normal_alqc, "normal", "dragen_alignment")
+save_png(p_other_alqc, "other", wf = "dragen_alignment")
+save_html(p_tumor_alqc, "tumor", wf = "dragen_alignment")
+save_html(p_normal_alqc, "normal", wf = "dragen_alignment")
+save_html(p_other_alqc, "other", wf = "dragen_alignment")
+
+p_tumor_um <- plot_num(dat_wgs$num, "tumor", wf = "dragen_umccrise")
+p_normal_um <- plot_num(dat_wgs$num, "normal", wf = "dragen_umccrise")
+p_other_um <- plot_num(dat_wgs$num, "other", wf = "dragen_umccrise")
+save_png(p_tumor_um, "tumor", "dragen_umccrise")
+save_png(p_normal_um, "normal", "dragen_umccrise")
+# save_png(p_other_um, "other", wf = "dragen_umccrise")
+save_html(p_tumor_um, "tumor", wf = "dragen_umccrise")
+save_html(p_normal_um, "normal", wf = "dragen_umccrise")
+# save_html(p_other_um, "other", wf = "dragen_umccrise")
+
+p_tumor_wts <- plot_num(dat_wts$num, "tumor", wf = "dragen_transcriptome")
+p_normal_wts <- plot_num(dat_wts$num, "normal", wf = "dragen_transcriptome")
+p_other_wts <- plot_num(dat_wts$num, "other", wf = "dragen_transcriptome")
+save_png(p_tumor_wts, "tumor", "dragen_transcriptome")
+save_png(p_normal_wts, "normal", "dragen_transcriptome")
+save_png(p_other_wts, "other", wf = "dragen_transcriptome")
+save_html(p_tumor_wts, "tumor", wf = "dragen_transcriptome")
+save_html(p_normal_wts, "normal", wf = "dragen_transcriptome")
+save_html(p_other_wts, "other", wf = "dragen_transcriptome")
+```
