@@ -24,28 +24,28 @@ knitr::opts_chunk$set(
 
 ```{r load_pkgs}
 {
-  require(dplyr, include.only = c(
-    "select", "mutate", "filter", "arrange", "rowwise", "glimpse", "pull",
-    "bind_rows", "everything", "all_of", "across"
-  ))
-  require(tidyr, include.only = c("unnest_wider", "unnest", "pivot_wider", "hoist"))
-  require(purrr, include.only = c("set_names", "map"))
-  require(tibble, include.only = c("as_tibble_col"))
-  require(readr, include.only = c("read_rds", "write_rds"))
+  require(dplyr)
+  require(tidyr)
+  require(purrr)
+  require(tibble)
+  require(readr)
   # require(dracarys) # only needed for session info
   require(glue, include.only = "glue")
   require(here, include.only = "here")
   require(knitr, include.only = "kable")
-  require(DT, include.only = "datatable")
-  require(fs, include.only = c("dir_ls"))
+  require(DT)
+  require(fs)
 }
 ```
 
 ```{r data_setup, eval=FALSE}
 options(scipen = 999) # disable scientific notation
 options(width = 150)
-d <- here("nogit/tso/2022-12-13") |>
-  dir_ls(recurse = TRUE, regexp = "res\\.rds") |>
+pmeta <- here("nogit/data_portal/2023-05-07_workflows_5f43da12-0b6a-41ce-86c9-9ee62df8792e.csv") |>
+  dracarys::cttso_metadata()
+
+d <- here("nogit/warehouse/cttso") |>
+  dir_ls(recurse = TRUE) |>
   as_tibble_col(column_name = "path") |>
   mutate(sbj = basename(dirname(path))) |>
   # slice(1:10) |>
