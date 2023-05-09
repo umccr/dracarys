@@ -4,6 +4,7 @@
 #' a match, it returns the 'name' of that match.
 #'
 #' @param x File to match.
+#' @param regexes Tibble with regex and name.
 #'
 #' @return The 'name' of the matching regex from FILE_REGEX, or NA if there is
 #' no match made.
@@ -13,11 +14,15 @@
 #' match_regex("foo.fake.tsv")
 #'
 #' @export
-match_regex <- function(x) {
+match_regex <- function(x, regexes = FILE_REGEX) {
+  assertthat::assert_that(
+    inherits(regexes, "data.frame"),
+    all(c("regex", "name") %in% colnames(regexes))
+  )
   # d[grepl(FILE_REGEX[["regex"]][i], d[["path"]]), "type"] <- FILE_REGEX[["name"]][i]
-  for (i in seq_len(nrow(FILE_REGEX))) {
-    if (grepl(FILE_REGEX[["regex"]][i], x)) {
-      return(FILE_REGEX[["name"]][i])
+  for (i in seq_len(nrow(regexes))) {
+    if (grepl(regexes[["regex"]][i], x)) {
+      return(regexes[["name"]][i])
     }
   }
   return(NA_character_)

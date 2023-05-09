@@ -24,110 +24,106 @@ knitr::opts_chunk$set(
 
 ```{r load_pkgs}
 {
-  require(dplyr, include.only = c(
-    "select", "mutate", "filter", "arrange", "rowwise", "glimpse", "pull",
-    "bind_rows", "everything", "all_of", "across"
-  ))
-  require(tidyr, include.only = c("unnest_wider", "unnest", "pivot_wider", "hoist"))
-  require(purrr, include.only = c("set_names", "map"))
-  require(tibble, include.only = c("as_tibble_col"))
-  require(readr, include.only = c("read_rds", "write_rds"))
+  require(dplyr)
+  require(tidyr)
+  require(purrr)
+  require(tibble)
+  require(readr)
   # require(dracarys) # only needed for session info
   require(glue, include.only = "glue")
   require(here, include.only = "here")
   require(knitr, include.only = "kable")
-  require(DT, include.only = "datatable")
-  require(fs, include.only = c("dir_ls"))
+  require(DT)
+  require(fs)
 }
 ```
 
-```{r data_setup, eval=FALSE}
+```{r data_setup}
 options(scipen = 999) # disable scientific notation
 options(width = 150)
-d <- here("nogit/tso/2022-12-13") |>
-  dir_ls(recurse = TRUE, regexp = "res\\.rds") |>
+pmeta <- here("nogit/data_portal/2023-05-07_workflows_5f43da12-0b6a-41ce-86c9-9ee62df8792e.csv") |>
+  dracarys::cttso_metadata()
+
+tso_tidyfile_regex <- tibble::tribble(
+  ~regex, ~name,
+  "AlignCollapseFusionCaller_metrics__hist", "tso__alcolfuscaller_metrics_hist",
+  "AlignCollapseFusionCaller_metrics__main", "tso__alcolfuscaller_metrics_main",
+  "SampleAnalysisResults_biomarkers", "tso__sar_biomarkers",
+  "SampleAnalysisResults_cnv", "tso__sar_cnv",
+  "SampleAnalysisResults_qc", "tso__sar_qc",
+  "SampleAnalysisResults_sample_info", "tso__sar_sampleinfo",
+  "SampleAnalysisResults_smallv", "tso__sar_smallv",
+  "SampleAnalysisResults_sw_conf_datasources", "tso__sar_swconfds",
+  "SampleAnalysisResults_sw_conf_other", "tso__sar_swconfother",
+  "TMB_Trace", "tso__tmb_trace",
+  "TargetRegionCoverage", "tso__target_region_coverage",
+  "fragment_length_hist", "tso__fraglength_hist",
+  "msi", "tso__msi",
+  "tmb", "tso__tmb",
+  "Fusions", "tso__fusions",
+  "multiqc", "tso__multiqc"
+)
+
+# match_regex("FOO_AlignCollapseFusionCaller_metrics__hist.tsv.gz", regexes = tso_tidyfile_regex)
+
+d <- here("nogit/warehouse/cttso") |>
+  dir_ls(type = "file", recurse = TRUE) |>
   as_tibble_col(column_name = "path") |>
-  mutate(sbj = basename(dirname(path))) |>
-  # slice(1:10) |>
+  filter(!grepl("dracarys_gds_sync", path)) |>
+  mutate(
+    wfr_id = basename(dirname(.data$path)),
+    bname = basename(.data$path),
+    type = purrr::map_chr(.data$bname, dracarys::match_regex, regexes = tso_tidyfile_regex)
+  ) |>
   rowwise() |>
-  mutate(dat = list(read_rds(path))) |>
-  select(sbj, dat) |>
-  unnest_wider(dat, simplify = FALSE)
-d |>
-  write_rds(here("nogit/tso/rds/tso_summary_object_d_2022-12-21.rds"))
+  mutate(
+    # proteinPos can be numeric (123) or char (123-456). Brrr.
+    dat = list(readr::read_tsv(path, col_types = readr::cols(proteinPos = "c"), show_col_types = FALSE))
+  ) |>
+  ungroup() |>
+  select(-c(path, bname)) |>
+  nest(.by = type)
+
+d
 ```
 
 ```{r data_setup2}
-d <- read_rds(here("nogit/tso/rds/tso_summary_object_d_2022-12-21.rds"))
 options(scipen = 999) # disable scientific notation
 options(width = 150)
-## align_collapse_fusion_caller_metrics
-alcolfus <- d |>
-  pull("tso__align_collapse_fusion_caller_metrics") |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj")
-alcolfus_hist <- alcolfus |>
-  filter(grepl("Hist", .data$name))
-alcolfus <- alcolfus |>
-  filter(!grepl("Hist", .data$name))
-
-## target_region_coverage
-cvg <- d |>
-  pull("tso__target_region_coverage") |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj")
-
-## fragment_length_hist
-fraglenhist <- d |>
-  pull("tso__fragment_length_hist") |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj")
-
-## msi
-msi <- d |>
-  pull("tso__msi") |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj")
-
-## tmb
-tmb <- d |>
-  pull("tso__tmb") |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj")
-
-## combined_variant_output
-combinedvars <- d |>
-  select("sbj", "tso__combined_variant_output") |>
-  unnest_wider("tso__combined_variant_output", simplify = FALSE)
-
-#### Sequencing Run Details
-## all NULL..
-# d_comb |>
-#  pull(`Sequencing Run Details`) |>
-#  set_names(d$sbj) |>
-#  bind_rows(.id = "sbj")
-
-fus <- d |>
-  pull("tso__fusions_csv") |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj")
-
-## sample_analysis_results
-sampres <- d |>
-  select("sbj", "tso__sample_analysis_results") |>
-  unnest_wider("tso__sample_analysis_results", simplify = FALSE)
-
-trace <- d |>
-  pull("tso__tmb_trace_tsv") |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj")
+tso_unnest <- function(x1, d1) {
+  d1 |>
+    dplyr::filter(.data$type == x1) |>
+    tidyr::unnest(data) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(nrows = nrow(dat)) |>
+    dplyr::ungroup() |>
+    dplyr::filter(nrows > 0) |>
+    tidyr::unnest(dat) |>
+    dplyr::select(-c(type, nrows))
+}
+alcolfus_hist <- tso_unnest(x1 = "tso__alcolfuscaller_metrics_hist", d1 = d)
+alcolfus_main <- tso_unnest(x1 = "tso__alcolfuscaller_metrics_main", d1 = d)
+fus <- tso_unnest(x1 = "tso__fusions", d1 = d)
+sar_biomarkers <- tso_unnest(x1 = "tso__sar_biomarkers", d1 = d)
+sar_cnv <- tso_unnest(x1 = "tso__sar_cnv", d1 = d)
+sar_qc <- tso_unnest(x1 = "tso__sar_qc", d1 = d)
+sar_sampleinfo <- tso_unnest(x1 = "tso__sar_sampleinfo", d1 = d)
+sar_smallv <- tso_unnest(x1 = "tso__sar_smallv", d1 = d)
+sar_swconfds <- tso_unnest(x1 = "tso__sar_swconfds", d1 = d)
+sar_swconfother <- tso_unnest(x1 = "tso__sar_swconfother", d1 = d)
+tmb_trace <- tso_unnest(x1 = "tso__tmb_trace", d1 = d)
+target_region_cov <- tso_unnest(x1 = "tso__target_region_coverage", d1 = d)
+fraglen <- tso_unnest(x1 = "tso__fraglength_hist", d1 = d)
+msi <- tso_unnest(x1 = "tso__msi", d1 = d)
+multiqc <- tso_unnest(x1 = "tso__multiqc", d1 = d)
+tmb <- tso_unnest(x1 = "tso__tmb", d1 = d)
 ```
 
 ```{r funcs, echo=F}
 # can use this to view smallish tables, just don't use it on big ones!
 dt_view <- function(x, caption = NULL, scroll_y = 200) {
   x |>
-    datatable(
+    DT::datatable(
       filter = list(position = "top", clear = FALSE, plain = TRUE),
       class = "cell-border display compact",
       rownames = FALSE,
@@ -142,38 +138,31 @@ dt_view <- function(x, caption = NULL, scroll_y = 200) {
 }
 ```
 
+## `Metadata`
+
+```{r meta}
+pmeta |>
+  dt_view()
+```
+
 ## `SampleAnalysisResults.json.gz` {.tabset #SampleAnalysisResults}
 
 ### SNVs
 
-```{r res_snvs}
-sampres_vars <- sampres |>
-  select(sbj, vars) |>
-  unnest_wider(vars)
-
-sampres_vars |>
-  select("sbj", "snvs") |>
-  unnest("snvs") |>
-  glimpse()
+```{r sar_smallv}
+sar_smallv
 ```
 
 ### CNVs
 
-```{r res_cnvs}
-sampres_vars |>
-  select("sbj", "cnvs") |>
-  unnest("cnvs") |>
-  glimpse()
+```{r sar_cnv}
+sar_cnv
 ```
 
 ### SampleInfo
 
-```{r res_sample_info}
-sampres |>
-  pull("sample_info") |>
-  set_names(sampres$sbj) |>
-  bind_rows(.id = "sbj") |>
-  glimpse()
+```{r sar_biomarkers}
+sar_sampleinfo
 ```
 
 ### SoftwareConfig {.tabset}
@@ -181,62 +170,25 @@ sampres |>
 #### datasources
 
 ```{r res_sw_config}
-sampres |>
-  hoist("software_config", data_sources = "data_sources") |>
-  select("sbj", "data_sources") |>
-  unnest("data_sources") |>
-  glimpse()
+sar_swconfds
 ```
 
 #### other
 
 ```{r res_sw_config2}
-sampres |>
-  hoist("software_config", other = "other") |>
-  select("sbj", "other") |>
-  unnest("other") |>
-  glimpse()
+sar_swconfother
 ```
 
 ### Biomarkers (MSI/TMB)
 
 ```{r res_biom}
-sampres |>
-  hoist("biomarkers",
-    msi_pct_unstable_sites = list("msi", "msi_pct_unstable_sites"),
-    msi_additional_metrics = list("msi", "additional_metrics"),
-    tmb_per_mb = list("tmb", "tmb_per_mb"),
-    tmb_additional_metrics = list("tmb", "additional_metrics"),
-  ) |>
-  select(
-    "sbj",
-    "msi_pct_unstable_sites", "msi_additional_metrics",
-    "tmb_per_mb", "tmb_additional_metrics"
-  ) |>
-  unnest("msi_additional_metrics") |>
-  select("sbj", "msi_pct_unstable_sites", msi_subjsd = "value", "tmb_additional_metrics") |>
-  unnest("tmb_additional_metrics") |>
-  select(-"RAD") |>
-  pivot_wider(names_from = c("name"), values_from = "value", names_prefix = "tmb_") |>
-  glimpse()
+sar_biomarkers
 ```
 
 ### QC1
 
 ```{r res_qc1}
-sampres |>
-  select("sbj", "sample_metrics_qc") |>
-  unnest("sample_metrics_qc") |>
-  glimpse()
-```
-
-### QC2
-
-```{r res_qc2}
-sampres |>
-  select("sbj", "sample_metrics_expanded") |>
-  unnest("sample_metrics_expanded") |>
-  glimpse()
+sar_qc |> glimpse()
 ```
 
 ---
@@ -244,80 +196,20 @@ sampres |>
 ## `Fusions.csv`
 
 ```{r fusions}
-fus |>
-  glimpse()
+fus
 ```
 
 
 ## `tmb.json.gz`
 
 ```{r tmb}
-tmb |>
-  glimpse()
+tmb
 ```
 
 ## `msi.json.gz`
 
 ```{r msi}
-msi |>
-  glimpse()
-```
-
-## `CombinedVariantOutput.tsv` {.tabset #CombinedVariantOutput}
-
-### SNVs
-
-```{r cv_snvs}
-combinedvars[["Small Variants"]] |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj") |>
-  glimpse()
-```
-
-### CNVs
-
-```{r cv_cnvs}
-combinedvars[["Copy Number Variants"]] |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj") |>
-  select(-"...3") |>
-  glimpse()
-```
-
-### Fusions
-
-```{r cv_fusions}
-combinedvars[["DNA Fusions"]] |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj") |>
-  glimpse()
-```
-
-### Analysis Details
-
-```{r cv_adet}
-combinedvars[["Analysis Details"]] |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj") |>
-  glimpse()
-```
-
-### TMB
-
-```{r cv_tmb}
-combinedvars[["TMB"]] |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj") |>
-  glimpse()
-```
-
-### MSI
-
-```{r cv_msi}
-combinedvars[["MSI"]] |>
-  set_names(d$sbj) |>
-  bind_rows(.id = "sbj") |>
-  glimpse()
+msi
 ```
 
 ---
@@ -326,8 +218,9 @@ combinedvars[["MSI"]] |>
 
 
 ```{r tmb_trace}
-trace |>
+tmb_trace |>
   select(
+    wfr_id,
     chrom = "Chromosome", pos = "Position", ref = "RefCall", alt = "AltCall", "VAF",
     dp = "Depth", "GermlineFilterProxi", "IncludedInTMBNumerator", everything()
   ) |>
@@ -337,15 +230,13 @@ trace |>
 ## `fragment_length_hist.json.gz`
 
 ```{r fraglenhist_plot}
-fraglenhist |>
-  glimpse()
+fraglen
 ```
 
 ## `TargetRegionCoverage.json.gz`
 
 ```{r cvg}
-cvg |>
-  glimpse()
+target_region_cov
 ```
 
 ## `AlignCollapseFusionCaller_metrics.json.gz` {.tabset #AlignCollapseFusionCaller_metrics}
@@ -353,20 +244,20 @@ cvg |>
 ### CoverageSummary
 
 ```{r met1}
-alcolfus |>
+alcolfus_main |>
   filter(section == "CoverageSummary") |>
   mutate(
     value = ifelse(grepl("Aligned .* in genome", name), glue("{value} ({percent}%)"), value)
   ) |>
   select(-c("section", "percent")) |>
   pivot_wider(names_from = "name", values_from = "value") |>
-  glimpse()
+  dt_view()
 ```
 
 ### MappingAligningPerRg
 
 ```{r met2}
-alcolfus |>
+alcolfus_main |>
   filter(section == "MappingAligningPerRg") |>
   mutate(
     value = ifelse(!is.na(percent), glue("{value} ({percent}%)"), value)
@@ -379,7 +270,7 @@ alcolfus |>
 ### MappingAligningSummary
 
 ```{r met3}
-alcolfus |>
+alcolfus_main |>
   filter(section == "MappingAligningSummary") |>
   mutate(
     value = ifelse(!is.na(percent), glue("{value} ({percent}%)"), value)
@@ -393,23 +284,23 @@ alcolfus |>
 ### RunTime
 
 ```{r met4}
-alcolfus |>
+alcolfus_main |>
   filter(section == "RunTime") |>
-  mutate(value = glue("{value} ({percent}%)")) |>
+  mutate(value = glue("{value} ({percent}sec)")) |>
   select(-c("section", "percent")) |>
   pivot_wider(names_from = "name", values_from = "value") |>
-  glimpse()
+  dt_view()
 ```
 
 ### SvSummary
 
 ```{r met5}
-alcolfus |>
+alcolfus_main |>
   filter(.data$section == "SvSummary") |>
   mutate(value = as.numeric(.data$value)) |>
   select(-c("section", "percent")) |>
   pivot_wider(names_from = "name", values_from = "value") |>
-  glimpse()
+  dt_view()
 ```
 
 ### TrimmerStatistics
@@ -421,7 +312,7 @@ numeric_cols <- c(
   "Average input read length", "Total input bases", "Total input bases R1",
   "Total input bases R2", "Total input reads"
 )
-alcolfus |>
+alcolfus_main |>
   filter(section == "TrimmerStatistics") |>
   mutate(
     value = ifelse(!is.na(percent), glue("{value} ({percent}%)"), value)
@@ -429,7 +320,7 @@ alcolfus |>
   select(-c("section", "percent")) |>
   pivot_wider(names_from = "name", values_from = "value") |>
   mutate(across(all_of(numeric_cols), as.numeric)) |>
-  glimpse()
+  dt_view()
 ```
 
 ### UmiStatistics
@@ -444,7 +335,7 @@ numeric_cols <- c(
   "On target number of reads", "Total number of families"
 )
 
-alcolfus |>
+alcolfus_main |>
   filter(section == "UmiStatistics") |>
   mutate(
     value = ifelse(!is.na(percent), glue("{value} ({percent}%)"), value)
@@ -452,7 +343,7 @@ alcolfus |>
   select(-c("section", "percent")) |>
   pivot_wider(names_from = "name", values_from = "value") |>
   mutate(across(all_of(numeric_cols), as.numeric)) |>
-  glimpse()
+  dt_view()
 ```
 
 ---
