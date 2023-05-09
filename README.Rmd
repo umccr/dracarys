@@ -121,10 +121,24 @@ A `dracarys.R` command line interface is available for convenience.
 - If you're _not_ using the conda package, you need to export the
   `dracarys/inst/cli/` directory to your `PATH` in order to use `dracarys.R`.
 
-```{bash prompt=TRUE}
+```{bash eval=FALSE, echo=TRUE}
 dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, "\n")' | xargs)
 export PATH="${dracarys_cli}:${PATH}"
-dracarys.R tidy --help
+```
+
+```{bash prompt=TRUE, echo=FALSE}
+dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, "\n")' | xargs)
+export PATH="${dracarys_cli}:${PATH}"
+
+echo "dracarys.R --version" & dracarys.R --version
+echo ""
+echo "#-----------------------------------#"
+echo "dracarys.R --help" & dracarys.R --help
+echo ""
+echo "#-----------------------------------#"
+echo "#------- Tidy ----------------------#"
+echo "dracarys.R tidy --help" & dracarys.R tidy --help
+echo ""
 ```
 
 <a name="running"></a>

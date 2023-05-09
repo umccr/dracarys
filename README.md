@@ -109,32 +109,52 @@ A `dracarys.R` command line interface is available for convenience.
   `dracarys.R`.
 
 ``` bash
-$ dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, "\n")' | xargs)
-+ export PATH="${dracarys_cli}:${PATH}"
-+ dracarys.R tidy --help
-usage: dracarys.R tidy [-h] -i IN_DIR -o OUT_DIR -p PREFIX [-t TOKEN]
-                       [-g GDS_LOCAL_DIR] [-f {tsv,parquet,both}] [-n] [-q]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -i IN_DIR, --in_dir IN_DIR
-                        ⛄️ Directory with untidy UMCCR workflow results. Can
-                        be GDS or local.
-  -o OUT_DIR, --out_dir OUT_DIR
-                        🔥 Directory to output tidy results.
-  -p PREFIX, --prefix PREFIX
-                        🎻 Prefix string used for all results.
-  -t TOKEN, --token TOKEN
-                        🙈 ICA access token. Default: ICA_ACCESS_TOKEN env var.
-  -g GDS_LOCAL_DIR, --gds_local_dir GDS_LOCAL_DIR
-                        📥 If input is a GDS directory, download the
-                        recognisable files to this directory. Default:
-                        '<out_dir>/dracarys_gds_sync'.
-  -f {tsv,parquet,both}, --format {tsv,parquet,both}
-                        🎨 Format of output. Default: tsv.
-  -n, --dryrun          🐫 Dry run - just show files to be tidied.
-  -q, --quiet           😴 Shush all the logs.
+dracarys_cli=$(Rscript -e 'x = system.file("cli", package = "dracarys"); cat(x, "\n")' | xargs)
+export PATH="${dracarys_cli}:${PATH}"
 ```
+
+    dracarys.R --version
+    dracarys.R 0.8.0
+
+    #-----------------------------------#
+    dracarys.R --help
+    usage: dracarys.R [-h] [-v] {tidy} ...
+
+    🐉 DRAGEN Output Post-Processing 🔥
+
+    positional arguments:
+      {tidy}         sub-command help
+        tidy         Tidy UMCCR Workflow Outputs
+
+    options:
+      -h, --help     show this help message and exit
+      -v, --version  show program's version number and exit
+
+    #-----------------------------------#
+    #------- Tidy ----------------------#
+    dracarys.R tidy --help
+    usage: dracarys.R tidy [-h] -i IN_DIR -o OUT_DIR -p PREFIX [-t TOKEN]
+                           [-g GDS_LOCAL_DIR] [-f {tsv,parquet,both}] [-n] [-q]
+
+    options:
+      -h, --help            show this help message and exit
+      -i IN_DIR, --in_dir IN_DIR
+                            ⛄️ Directory with untidy UMCCR workflow results. Can
+                            be GDS or local.
+      -o OUT_DIR, --out_dir OUT_DIR
+                            🔥 Directory to output tidy results.
+      -p PREFIX, --prefix PREFIX
+                            🎻 Prefix string used for all results.
+      -t TOKEN, --token TOKEN
+                            🙈 ICA access token. Default: ICA_ACCESS_TOKEN env var.
+      -g GDS_LOCAL_DIR, --gds_local_dir GDS_LOCAL_DIR
+                            📥 If input is a GDS directory, download the
+                            recognisable files to this directory. Default:
+                            '<out_dir>/dracarys_gds_sync'.
+      -f {tsv,parquet,both}, --format {tsv,parquet,both}
+                            🎨 Format of output. Default: tsv.
+      -n, --dryrun          🐫 Dry run - just show files to be tidied.
+      -q, --quiet           😴 Shush all the logs.
 
 <a name="running"></a>
 
