@@ -1,57 +1,30 @@
-require(dracarys)
+require(tidyverse)
+require(jsonlite)
 require(here)
-require(dplyr)
-require(readr)
+require(glue)
 
-# SQL
-# select * from data_portal.data_portal_gdsfile where regexp_like(path, 'SampleAnalysisResults.json.gz') order by time_created desc;
+pmeta <- here::here("nogit/data_portal/2023-05-07_workflows_5f43da12-0b6a-41ce-86c9-9ee62df8792e.csv") |>
+  dracarys::cttso_metadata()
 
-# d <- here("nogit/tso/sql/81b58b53-5d3e-4ff3-bb37-e02e61d91838.csv") |>
-#   read_csv(col_names = TRUE)
-# d1 <- here("nogit/tso/sql/7991c298-b26e-481c-b8f5-df530303b3d5.csv") |>
-#   read_csv(col_names = TRUE)
-# just keep the new tso samples
-# d <- d1 |>
-#   anti_join(d)
-d <- here("nogit/tso/sql/7991c298-b26e-481c-b8f5-df530303b3d5.csv") |>
-  read_csv(col_names = TRUE)
-
-
-x <- d |>
-  mutate(
-    sbj = sub("/analysis_data/(SBJ.*?)/.*", "\\1", path),
-    dir = dirname(path),
-    gds_indir = glue("gds://{volume_name}{dir}/")
-  ) |>
-  group_by(sbj) |>
-  # TODO: check if results already exist for same sbj
-  mutate(
-    n_samp = n(),
-    sbj2 = if_else(n_samp > 1, glue("{sbj}_{dplyr::row_number()}"), sbj)
-  ) |>
-  ungroup() |>
-  select(sbj, sbj2, gds_indir, date = time_created) |>
-  arrange(sbj2) |>
-  mutate(
-    outdir = here(glue("nogit/tso/2023-01-07/{sbj2}")),
+x <- pmeta |>
+  dplyr::mutate(
+    year1 = lubridate::year(start),
+    month1 = sprintf("%02d", lubridate::month(start)),
+    outdir = here::here(glue("nogit/warehouse/cttso/{year1}/{month1}/{wfr_id}")),
     local_indir = file.path(outdir, "dracarys_gds_sync")
   ) |>
-  select(sbj2, gds_indir, outdir, local_indir)
+  dplyr::select(
+    -c(year1, month1)
+  )
 
-
-token <- Sys.getenv("ICA_ACCESS_TOKEN_PROD")
+token <- Sys.getenv("ICA_ACCESS_TOKEN_PRO")
+dryrun <- TRUE
 dryrun <- FALSE
-for (i in 1:20) {
+
+for (i in seq_len(nrow(x))) {
   print(i)
   print(x$gds_indir[i])
+  dracarys::umccr_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$LibraryID_w_rerun[i], dryrun = dryrun, token = token)
   # print(x$local_indir[i])
-  dracarys::tso_tidy(in_dir = x$gds_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = dryrun, token = token)
-  # dracarys::tso_tidy(in_dir = x$local_indir[i], out_dir = x$outdir[i], prefix = x$sbj2[i], dryrun = FALSE, token = token)
+  # dracarys::umccr_tidy(in_dir = x$local_indir[i], out_dir = x$outdir[i], prefix = x$sbj[i], dryrun = dryrun, token = token)
 }
-
-x |>
-  mutate(
-    cmd = glue("./dracarys.R tso -i {gds_indir} -o {outdir} -r {outdir}/report_dir -p {sbj2} --rds_dir {outdir}/rds_dir --quiet_rmd")
-  ) |>
-  select(cmd) |>
-  write_tsv(here("inst/cli/run.sh"), col_names = FALSE)
