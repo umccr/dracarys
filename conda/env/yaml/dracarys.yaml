@@ -6,4 +6,4 @@ channels:
   - bioconda
 
 dependencies:
-  - r-dracarys ==0.8.0 # versioned by bump2version
+  - r-dracarys ==0.9.0 # versioned by bump2version
