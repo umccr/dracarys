@@ -36,7 +36,7 @@ jobs:
       - name: 🐍 Conda pkg build and upload
         run: |
           conda activate
-          mamba create --name cbuildenv conda-build conda-verify anaconda-client boa dvc==2.39.0 dvc-gdrive==2.19.0
+          mamba create --name cbuildenv conda-build conda-verify anaconda-client boa dvc==2.39.0 dvc-gdrive==2.19.0 funcy
           conda activate cbuildenv
           dvc pull
           ls -l inst/extdata/*
