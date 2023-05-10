@@ -4,10 +4,12 @@
 \alias{match_regex}
 \title{Match File to Regex}
 \usage{
-match_regex(x)
+match_regex(x, regexes = FILE_REGEX)
 }
 \arguments{
 \item{x}{File to match.}
+
+\item{regexes}{Tibble with regex and name.}
 }
 \value{
 The 'name' of the matching regex from FILE_REGEX, or NA if there is

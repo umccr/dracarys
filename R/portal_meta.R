@@ -1,6 +1,8 @@
 #' Metadata for cttso workflow
 #'
+#' @param status Workflow status to keep (default: Succeeded).
 #' @param pmeta Portal workflows metadata table in TSV format.
+#'
 #' @return A tibble with metadata per cttso workflow run.
 #' @examples
 #' \dontrun{
@@ -19,22 +21,22 @@ cttso_metadata <- function(pmeta, status = c("Succeeded")) {
   d <- wf |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      i1 = list(jsonlite::fromJSON(input)),
-      o1 = list(jsonlite::fromJSON(output))
+      i1 = list(jsonlite::fromJSON(.data$input)),
+      o1 = list(jsonlite::fromJSON(.data$output))
     ) |>
     dplyr::ungroup() |>
     dplyr::mutate(
-      tso500_samples = purrr::map(i1, "tso500_samples"),
-      outdir = purrr::map(o1, list("output_results_dir", "location"))
+      tso500_samples = purrr::map(.data$i1, "tso500_samples"),
+      outdir = purrr::map(.data$o1, list("output_results_dir", "location"))
     ) |>
-    tidyr::unnest(tso500_samples) |>
+    tidyr::unnest(.data$tso500_samples) |>
     dplyr::mutate(
       libid1 = sub(".*_(L.*)", "\\1", .data$sample_id),
-      rerun = grepl("rerun", libid1),
-      subjectid = sub("umccr__automated__tso_ctdna_tumor_only__(SBJ.*)__L.*", "\\1", wfr_name),
-      libid = sub("umccr__automated__tso_ctdna_tumor_only__SBJ.*__(L.*)__.*", "\\1", wfr_name) # equal to libid1 wo _rerun
+      rerun = grepl("rerun", .data$libid1),
+      subjectid = sub("umccr__automated__tso_ctdna_tumor_only__(SBJ.*)__L.*", "\\1", .data$wfr_name),
+      libid = sub("umccr__automated__tso_ctdna_tumor_only__SBJ.*__(L.*)__.*", "\\1", .data$wfr_name) # equal to libid1 wo _rerun
     ) |>
-    tidyr::unnest(outdir) |>
+    tidyr::unnest(.data$outdir) |>
     dplyr::select(
       SubjectID = "subjectid",
       LibraryID = "libid",

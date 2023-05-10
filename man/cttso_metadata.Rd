@@ -8,6 +8,8 @@ cttso_metadata(pmeta, status = c("Succeeded"))
 }
 \arguments{
 \item{pmeta}{Portal workflows metadata table in TSV format.}
+
+\item{status}{Workflow status to keep (default: Succeeded).}
 }
 \value{
 A tibble with metadata per cttso workflow run.
