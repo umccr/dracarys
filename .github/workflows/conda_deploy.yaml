@@ -44,9 +44,9 @@ jobs:
           dvc status -c
           echo "dvc data status"
           dvc data status
-          echo "dvc fetch -vv "
-          dvc fetch -vv inst/extdata/tso/
-          dvc fetch -vv inst/extdata/wgs/
+          #echo "dvc fetch -vv "
+          #dvc fetch -vv inst/extdata/tso/
+          #dvc fetch -vv inst/extdata/wgs/
           echo "dvc pull"
           dvc pull -vv
           ls -l inst/extdata/*
