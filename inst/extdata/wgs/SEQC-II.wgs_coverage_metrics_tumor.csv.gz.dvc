@@ -1,0 +1,4 @@
+outs:
+- md5: 09188966142821fd1600e67713542382
+  size: 443
+  path: SEQC-II.wgs_coverage_metrics_tumor.csv.gz

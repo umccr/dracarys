@@ -1,0 +1,4 @@
+outs:
+- md5: df758b2507fcbfb7f65411417f5c9366
+  size: 443
+  path: SEQC-II.wgs_coverage_metrics_normal.csv.gz

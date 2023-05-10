@@ -1,0 +1,4 @@
+outs:
+- md5: fc709a1d2391db53889fc5fa6f282d1d
+  size: 7850
+  path: SEQC-II.wgs_fine_hist_normal.csv.gz

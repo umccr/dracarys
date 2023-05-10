@@ -1,0 +1,4 @@
+outs:
+- md5: 9f93c215fe1176acdf14cdb1b8b689e3
+  size: 275
+  path: SEQC-II.ploidy_estimation_metrics.csv.gz

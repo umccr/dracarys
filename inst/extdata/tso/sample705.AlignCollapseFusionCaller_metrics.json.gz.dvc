@@ -1,0 +1,4 @@
+outs:
+- md5: 824d5e363b8720b96972e29c9860e6e6
+  size: 2839
+  path: sample705.AlignCollapseFusionCaller_metrics.json.gz

@@ -1,0 +1,4 @@
+outs:
+- md5: da28ec32ef9b337a56350a48b9396538
+  size: 321
+  path: sample705.TargetRegionCoverage.json.gz

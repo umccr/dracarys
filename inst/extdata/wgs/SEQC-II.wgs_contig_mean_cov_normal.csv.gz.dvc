@@ -1,0 +1,4 @@
+outs:
+- md5: 87086321e14aeb7617dbaeaa42890850
+  size: 31189
+  path: SEQC-II.wgs_contig_mean_cov_normal.csv.gz

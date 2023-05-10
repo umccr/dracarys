@@ -1,0 +1,4 @@
+outs:
+- md5: dfdb72e2f744dd49036b18d3db6d8701
+  size: 2332
+  path: SEQC-II.mapping_metrics.csv.gz
