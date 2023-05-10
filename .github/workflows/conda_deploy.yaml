@@ -38,6 +38,8 @@ jobs:
           conda activate
           mamba create --name cbuildenv conda-build conda-verify anaconda-client boa dvc dvc-gdrive
           conda activate cbuildenv
+          dvc fetch -vv inst/extdata/tso/
+          dvc fetch -vv inst/extdata/wgs/
           dvc config -l --show-origin
           dvc data status
           dvc pull -vv
