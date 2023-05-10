@@ -42,7 +42,7 @@ jobs:
           dvc config -l --show-origin
           echo "dvc status -c"
           dvc status -c
-          dvc "data status"
+          echo "dvc data status"
           dvc data status
           echo "dvc fetch -vv "
           dvc fetch -vv inst/extdata/tso/
