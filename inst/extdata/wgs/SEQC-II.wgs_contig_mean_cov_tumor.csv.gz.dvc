@@ -1,0 +1,4 @@
+outs:
+- md5: 608d1542ee4e012caa1fa8e62feea9cb
+  size: 32984
+  path: SEQC-II.wgs_contig_mean_cov_tumor.csv.gz

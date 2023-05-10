@@ -1,0 +1,4 @@
+outs:
+- md5: 0be874bbb5d997d63a7c90cc4628ea4c
+  size: 188680
+  path: sample705_CombinedVariantOutput.tsv

@@ -1,0 +1,4 @@
+outs:
+- md5: 1af64dfa050f933edddf058d7ffe3a98
+  size: 8424
+  path: SEQC-II.wgs_fine_hist_tumor.csv.gz

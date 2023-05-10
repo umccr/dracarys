@@ -1,0 +1,4 @@
+outs:
+- md5: cc4d0d65da5766daf0a6675aeb8e16f3
+  size: 167884
+  path: sample705_SampleAnalysisResults.json.gz
