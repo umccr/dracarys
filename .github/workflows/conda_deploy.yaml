@@ -36,9 +36,11 @@ jobs:
       - name: 🐍 Conda pkg build and upload
         run: |
           conda activate
-          mamba create --name cbuildenv conda-build conda-verify anaconda-client boa dvc==2.39.0 dvc-gdrive==2.19.0 funcy
+          mamba create --name cbuildenv conda-build conda-verify anaconda-client boa dvc dvc-gdrive
           conda activate cbuildenv
-          dvc pull
+          dvc config -l --show-origin
+          dvc data status
+          dvc pull -vv
           ls -l inst/extdata/*
           conda mambabuild --R 4.1 ${recipe_path} --token ${atoken}
       - name: 🔒 Conda lock
