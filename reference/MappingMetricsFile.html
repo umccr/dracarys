@@ -23,7 +23,7 @@ terms of pairs or alignments)."><!-- mathjax --><script src="https://cdnjs.cloud
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dracarys</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.9.0</span>
       </span>
     </div>
 
@@ -142,19 +142,19 @@ terms of pairs or alignments).</p>
 <span class="r-in"><span><span class="va">mm</span> <span class="op">&lt;-</span> <span class="va">MappingMetricsFile</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mm</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span> <span class="co"># or read(mm)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 218 × 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    category Phenotype RG    var                            var_a…¹   count   pct</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                          <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> summary  tumor     TOTAL Total Reads per RG             Tot      2.2 <span style="color: #949494;">e</span>9 100  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> summary  tumor     TOTAL Number of duplicate marked re… Dup      4.43<span style="color: #949494;">e</span>8  20.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> summary  tumor     TOTAL Number of duplicate marked an… Dup Rem <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>   <span style="color: #BB0000;">NA</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> summary  tumor     TOTAL Number of unique reads (excl.… Unique   1.76<span style="color: #949494;">e</span>9  79.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> summary  tumor     TOTAL Reads with mate sequenced      Mated    2.2 <span style="color: #949494;">e</span>9 100  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> summary  tumor     TOTAL Reads without mate sequenced   noMated  0   <span style="color: #949494;"> </span>    0  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> summary  tumor     TOTAL QC-failed reads                Failed   0   <span style="color: #949494;"> </span>    0  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> summary  tumor     TOTAL Mapped reads                   Mapped   2.20<span style="color: #949494;">e</span>9  99.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> summary  tumor     TOTAL Mapped reads adjusted for fil… Mapped…  2.20<span style="color: #949494;">e</span>9  99.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> summary  tumor     TOTAL Mapped reads R1                R1map    1.10<span style="color: #949494;">e</span>9 100. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 208 more rows, and abbreviated variable name ¹​var_abbrev</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    category Phenotype RG    var                         var_abbrev   count   pct</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> summary  tumor     TOTAL Total Reads per RG          Tot         2.20<span style="color: #949494;">e</span>9 100  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> summary  tumor     TOTAL Number of duplicate marked… Dup         4.43<span style="color: #949494;">e</span>8  20.2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> summary  tumor     TOTAL Number of duplicate marked… Dup Rem    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>   <span style="color: #BB0000;">NA</span>  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> summary  tumor     TOTAL Number of unique reads (ex… Unique      1.76<span style="color: #949494;">e</span>9  79.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> summary  tumor     TOTAL Reads with mate sequenced   Mated       2.20<span style="color: #949494;">e</span>9 100  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> summary  tumor     TOTAL Reads without mate sequenc… noMated     0   <span style="color: #949494;"> </span>    0  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> summary  tumor     TOTAL QC-failed reads             Failed      0   <span style="color: #949494;"> </span>    0  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> summary  tumor     TOTAL Mapped reads                Mapped      2.20<span style="color: #949494;">e</span>9  99.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> summary  tumor     TOTAL Mapped reads adjusted for … Mapped re…  2.20<span style="color: #949494;">e</span>9  99.8</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> summary  tumor     TOTAL Mapped reads R1             R1map       1.10<span style="color: #949494;">e</span>9 100. </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 208 more rows</span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

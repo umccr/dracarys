@@ -4,6 +4,9 @@
     <loc>/404.html</loc>
   </url>
   <url>
+    <loc>/CODE_OF_CONDUCT.html</loc>
+  </url>
+  <url>
     <loc>/LICENSE-text.html</loc>
   </url>
   <url>
@@ -103,6 +106,9 @@
     <loc>/reference/VCMetricsFile.html</loc>
   </url>
   <url>
+    <loc>/reference/cttso_metadata.html</loc>
+  </url>
+  <url>
     <loc>/reference/date_log.html</loc>
   </url>
   <url>
@@ -137,6 +143,12 @@
   </url>
   <url>
     <loc>/reference/match_regex.html</loc>
+  </url>
+  <url>
+    <loc>/reference/multiqc_column_map_append.html</loc>
+  </url>
+  <url>
+    <loc>/reference/multiqc_date_fmt.html</loc>
   </url>
   <url>
     <loc>/reference/multiqc_parse_gen.html</loc>

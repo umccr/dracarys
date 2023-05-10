@@ -18,7 +18,7 @@ Fusions.csv file output from TSO."><!-- mathjax --><script src="https://cdnjs.cl
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dracarys</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.8.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.9.0</span>
       </span>
     </div>
 
@@ -156,13 +156,12 @@ Fusions.csv file output from TSO."><!-- mathjax --><script src="https://cdnjs.cl
 <span class="r-in"><span><span class="va">d_parsed</span> <span class="op">&lt;-</span> <span class="va">fus</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span> <span class="co"># or read(fus)</span></span></span>
 <span class="r-in"><span><span class="va">fus</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">d_parsed</span>, out_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, prefix <span class="op">=</span> <span class="st">"sample705"</span>, out_format <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2 × 17</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Sample Name  Chr1    Pos1 Chr2    Pos2 Direc…¹ Alt_D…² BP1_D…³ BP2_D…⁴ Total…⁵</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> PTC_c… Mant… chr2  2.94<span style="color: #949494;">e</span>7 chr1  1.86<span style="color: #949494;">e</span>8 L1R2         25   <span style="text-decoration: underline;">11</span>760      14   <span style="text-decoration: underline;">11</span>760</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> PTC_c… Mant… chr10 4.36<span style="color: #949494;">e</span>7 chr10 5.16<span style="color: #949494;">e</span>7 L2R1         21    <span style="text-decoration: underline;">8</span>279      15    <span style="text-decoration: underline;">8</span>279</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># … with 6 more variables: VAF &lt;dbl&gt;, Gene1 &lt;chr&gt;, Gene2 &lt;chr&gt;, Contig &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   Filter &lt;chr&gt;, Is_Cosmic_GenePair &lt;lgl&gt;, and abbreviated variable names</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   ¹​Direction, ²​Alt_Depth, ³​BP1_Depth, ⁴​BP2_Depth, ⁵​Total_Depth</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Sample Name  Chr1    Pos1 Chr2    Pos2 Direction Alt_Depth BP1_Depth BP2_Depth</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> PTC_c… Mant… chr2  2.94<span style="color: #949494;">e</span>7 chr1  1.86<span style="color: #949494;">e</span>8 L1R2             25     <span style="text-decoration: underline;">11</span>760        14</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> PTC_c… Mant… chr10 4.36<span style="color: #949494;">e</span>7 chr10 5.16<span style="color: #949494;">e</span>7 L2R1             21      <span style="text-decoration: underline;">8</span>279        15</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 7 more variables: Total_Depth &lt;dbl&gt;, VAF &lt;dbl&gt;, Gene1 &lt;chr&gt;, Gene2 &lt;chr&gt;,</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   Contig &lt;chr&gt;, Filter &lt;chr&gt;, Is_Cosmic_GenePair &lt;lgl&gt;</span></span>
 </code></pre></div>
     </div>
   </div>
