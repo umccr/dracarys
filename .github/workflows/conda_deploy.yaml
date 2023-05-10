@@ -1,9 +1,8 @@
 name: conda-docker-docs
 
-on:
-  push:
-    branches:
-      - main
+on: push
+  #    branches:
+  #      - main
 env:
   atoken: ${{ secrets.ANACONDA_UPLOAD_TOKEN }}
   recipe_path: conda/recipe
@@ -15,7 +14,7 @@ env:
 jobs:
   condarise-dockerise-document:
     # When merging to main and the commit message starts with 'Bump version:'
-    if: "startsWith(github.event.head_commit.message, 'Bump version:')"
+    #if: "startsWith(github.event.head_commit.message, 'Bump version:')"
     name: Conda Docker Docs
     runs-on: ubuntu-latest
     defaults:
@@ -37,7 +36,7 @@ jobs:
       - name: 🐍 Conda pkg build and upload
         run: |
           conda activate
-          mamba create --name cbuildenv conda-build conda-verify anaconda-client boa dvc dvc-gdrive
+          mamba create --name cbuildenv conda-build conda-verify anaconda-client boa dvc==2.39.0 dvc-gdrive==2.19.0
           conda activate cbuildenv
           dvc pull
           ls -l inst/extdata/*
