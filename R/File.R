@@ -19,19 +19,30 @@ File <- R6::R6Class("File", public = list(
   #' @param path Name or full path of the file.
   initialize = function(path = NULL) {
     stopifnot(is.character(path), length(path) == 1)
-    self$path <- normalizePath(path)
+    is_presignedurl <- grepl("^https://stratus-gds-aps2", path)
+    self$path <- NULL
+    if (is_presignedurl) {
+      self$path <- path
+    } else {
+      self$path <- normalizePath(path)
+    }
   },
 
   #' @description Basename of the file.
   #' @return Basename of the file as a character vector.
   bname = function() {
-    basename(self$path)
+    x <- self$path
+    is_presignedurl <- grepl("^https://stratus-gds-aps2", x)
+    if (is_presignedurl) {
+      x <- strsplit(self$path, "\\?")[[1]][1]
+    }
+    basename(x)
   },
 
   #' @description Get the type of file.
   #' @return String describing the type of file (CSV, TSV, JSON or OTHER).
   type = function() {
-    nm <- self$path
+    nm <- self$bname()
     dplyr::case_when(
       grepl("\\.json", nm) ~ "JSON",
       grepl("\\.csv", nm) ~ "CSV",
