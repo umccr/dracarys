@@ -295,22 +295,22 @@ multiqc_date_fmt <- function(cdate) {
 #' parsed <- RJSONIO::fromJSON(j)
 #' }
 multiqc_parse_plots <- function(parsed) {
+  plot_funcs <- tibble::tribble(
+    ~name, ~fun,
+    "bar_graph", "multiqc_parse_bargraph_plot",
+    "xy_line", "multiqc_parse_xyline_plot"
+  )
   assertthat::assert_that(
     inherits(parsed, "list"),
     "report_plot_data" %in% names(parsed)
   )
-  x <- parsed[["report_plot_data"]]
-  purrr::map_chr(x, "plot_type") |>
-    tibble::enframe() |>
-    slice(1) |>
+  plot_data <- parsed[["report_plot_data"]]
+  purrr::map_chr(plot_data, "plot_type") |>
+    tibble::enframe(name = "name", value = "type") |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      dat = list(x[[.data$name]]),
-      dat = dplyr::case_when(
-        value == "bar_graph" ~ list(multiqc_parse_bargraph_plot(.data$dat)),
-        value == "xy_line" ~ list(multiqc_parse_xyline_plot(.data$dat)),
-        TRUE ~ list(tibble::tibble(name = NA_character_, data = NA_real_))
-      )
+      input = list(plot_data[[.data$name]]),
+      res = list(func_selector(type = .data$type, tbl = plot_funcs)(.data$input))
     )
 }
 
@@ -318,7 +318,7 @@ multiqc_parse_plots <- function(parsed) {
 #'
 #' Extracts `xy_line` data for the given plot name from a MultiQC JSON.
 #'
-#' Note that the `dragen_coverage_per_contig/non_main_contig` do not conform
+#' Note that the `dragen_coverage_per_contig/non_main_contig` plots do not conform
 #' to the normal structure of `xy_line` plots, so we handle those separately.
 #'
 #' @param dat Parsed JSON list element with specific plot data to extract.
