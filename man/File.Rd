@@ -11,8 +11,9 @@ A File has a path, a basename, a type, and a default read method for its type.
 }
 \examples{
 F1 <- File$new(readr::readr_example("mtcars.csv"))
-F1$read(col_types = readr::cols("double"))
-F1$bname()
+(parsed_f1 <- F1$read(col_types = readr::cols("double")))
+(bname_f1 <- F1$bname())
+(F2 <- File$new("https://stratus-gds-aps2/foo/bar/baz.csv?bla"))
 
 }
 \section{Public fields}{

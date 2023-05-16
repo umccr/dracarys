@@ -7,8 +7,16 @@
 #'
 #' @examples
 #' F1 <- File$new(readr::readr_example("mtcars.csv"))
-#' F1$read(col_types = readr::cols("double"))
-#' F1$bname()
+#' (parsed_f1 <- F1$read(col_types = readr::cols("double")))
+#' (bname_f1 <- F1$bname())
+#' (F2 <- File$new("https://stratus-gds-aps2/foo/bar/baz.csv?bla"))
+#'
+#' @testexamples
+#' expect_true(inherits(F1, c("File", "R6")))
+#' expect_true(inherits(parsed_f1, "data.frame"))
+#' expect_equal(bname_f1, "mtcars.csv")
+#' expect_equal(F2$bname(), "baz.csv")
+#' expect_equal(F2$type(), "CSV")
 #'
 #' @export
 File <- R6::R6Class("File", public = list(
@@ -19,19 +27,30 @@ File <- R6::R6Class("File", public = list(
   #' @param path Name or full path of the file.
   initialize = function(path = NULL) {
     stopifnot(is.character(path), length(path) == 1)
-    self$path <- normalizePath(path)
+    is_presignedurl <- grepl("^https://stratus-gds-aps2", path)
+    self$path <- NULL
+    if (is_presignedurl) {
+      self$path <- path
+    } else {
+      self$path <- normalizePath(path)
+    }
   },
 
   #' @description Basename of the file.
   #' @return Basename of the file as a character vector.
   bname = function() {
-    basename(self$path)
+    x <- self$path
+    is_presignedurl <- grepl("^https://stratus-gds-aps2", x)
+    if (is_presignedurl) {
+      x <- strsplit(self$path, "\\?")[[1]][1]
+    }
+    basename(x)
   },
 
   #' @description Get the type of file.
   #' @return String describing the type of file (CSV, TSV, JSON or OTHER).
   type = function() {
-    nm <- self$path
+    nm <- self$bname()
     dplyr::case_when(
       grepl("\\.json", nm) ~ "JSON",
       grepl("\\.csv", nm) ~ "CSV",
