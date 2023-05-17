@@ -7,7 +7,7 @@
 multiqc_tidy_json(j)
 }
 \arguments{
-\item{j}{Path to \code{multiqc_data.json}.}
+\item{j}{Path to \code{multiqc_data.json} file.}
 }
 \value{
 A tidy tibble where each column corresponds to a single metric,

@@ -47,7 +47,7 @@ MultiqcFile <- R6::R6Class(
 #'
 #' Tidies 'multiqc_data.json' output from MultiQC.
 #' Modified from the awesome <https://github.com/multimeric/TidyMultiqc>.
-#' @param j Path to `multiqc_data.json`.
+#' @param j Path to `multiqc_data.json` file.
 #' @return A tidy tibble where each column corresponds to a single metric,
 #' and each row corresponds to a single sample.
 #' @export
@@ -280,4 +280,131 @@ multiqc_date_fmt <- function(cdate) {
     strptime(format = "%Y-%m-%d, %H:%M", tz = "UTC") |>
     format("%Y-%m-%dT%H:%M:%S")
   return(res)
+}
+
+#' Parse Plot Data from MultiQC JSON
+#'
+#' @param j Path to `multiqc_data.json` file.
+#'
+#' @return Nested tibble with plot name and result as list column (use `tidyr::unnest` to access).
+#'
+#' @examples
+#' \dontrun{
+#' j <- here::here("nogit/warehouse/cttso/2023/05/wfr.ec3748db414f422381e419d367f73eec/dracarys_gds_sync/multiqc_data.json")
+#' multiqc_parse_plots(j, plot_names = c("fastqc_gc_content_mean_sequence_quality_plot", "dragen_coverage_per_contig"))
+#' multiqc_parse_plots(j, plot_names = NULL)
+#' }
+#' @export
+multiqc_parse_plots <- function(j, plot_names = NULL) {
+  parsed <- RJSONIO::fromJSON(j)
+  .funcs <- tibble::tribble(
+    ~name, ~fun,
+    "bar_graph", "multiqc_parse_bargraph_plot",
+    "xy_line", "multiqc_parse_xyline_plot"
+  )
+  assertthat::assert_that(
+    inherits(parsed, "list"),
+    "report_plot_data" %in% names(parsed)
+  )
+  plot_data <- parsed[["report_plot_data"]]
+  # I want all the plots
+  if (!is.null(plot_names) & ("everything" %in% plot_names)) {
+    plot_names <- names(plot_data)
+  }
+  # loop over each plot item and run
+  # corresponding function based on plot type.
+  final_cols <- c("plot_nm", "plot_res")
+  res <- purrr::map_chr(plot_data, "plot_type") |>
+    tibble::enframe(name = "plot_nm", value = "plot_type") |>
+    # keep only specified plots; NULL plot_names will discard everything.
+    dplyr::filter(
+      .data$plot_nm %in% plot_names,
+      .data$plot_type %in% .funcs[["name"]]
+    )
+  if (nrow(res) == 0) {
+    return(empty_tbl(cnames = final_cols))
+  }
+  res |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      input = list(plot_data[[.data$plot_nm]]),
+      plot_res = list(func_selector(type = .data$plot_type, tbl = .funcs)(.data$input))
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::select(dplyr::all_of(final_cols))
+}
+
+#' MultiQC Extract XY Line Plot Data
+#'
+#' Extracts `xy_line` data for the given plot name from a MultiQC JSON.
+#'
+#' Note that the `dragen_coverage_per_contig/non_main_contig` plots do not conform
+#' to the normal structure of `xy_line` plots, so we handle those separately.
+#'
+#' @param dat Parsed JSON list element with specific plot data to extract.
+#'
+#' @return Tibble with name and data list-column.
+#' @export
+multiqc_parse_xyline_plot <- function(dat) {
+  assertthat::assert_that(dat[["plot_type"]] == "xy_line")
+  if (dat[["config"]][["id"]] %in% c("dragen_coverage_per_contig", "dragen_coverage_per_non_main_contig")) {
+    return(multiqc_parse_xyline_plot_contig_cvg(dat))
+  }
+  dat[["datasets"]][[1]] |>
+    purrr::map(
+      function(nm_data) {
+        name <- nm_data[["name"]]
+        d <- nm_data[["data"]] |>
+          # handle NULLs in raw JSON
+          purrr::map(~ tibble::tibble(x = unlist(.x[1]) %||% NA_real_, y = unlist(.x[2]) %||% NA_real_)) |>
+          dplyr::bind_rows()
+        tibble::tibble(name = name, x = d[["x"]], y = d[["y"]])
+      }
+    ) |>
+    dplyr::bind_rows() |>
+    tidyr::nest(dat = c(x, y))
+}
+
+#' MultiQC Extract XY Line Plot Data for DRAGEN Contig Coverage
+#'
+#' @param dat Parsed JSON list element with specific plot data to extract.
+#'
+#' @return Tibble with name and data list-column.
+#' @export
+multiqc_parse_xyline_plot_contig_cvg <- function(dat) {
+  assertthat::assert_that(dat[["plot_type"]] == "xy_line")
+  assertthat::assert_that(
+    dat[["config"]][["id"]] %in% c("dragen_coverage_per_contig", "dragen_coverage_per_non_main_contig")
+  )
+  contig <- dat[["config"]][["categories"]]
+  dat[["datasets"]][[1]] |>
+    purrr::map(
+      function(nm_data) {
+        name <- nm_data[["name"]]
+        val <- nm_data[["data"]]
+        assertthat::assert_that(length(val) == length(contig))
+        tibble::tibble(name = name, contig = contig, cvg = val)
+      }
+    ) |>
+    dplyr::bind_rows() |>
+    tidyr::nest(dat = c(contig, cvg))
+}
+
+#' MultiQC Extract Bar Graph Data
+#'
+#' Extracts `bar_graph` data for the given plot name from a MultiQC JSON.
+#'
+#' @param dat Parsed JSON list element with specific plot data to extract.
+#'
+#' @return Tibble with name and data list-column.
+#' @export
+multiqc_parse_bargraph_plot <- function(dat) {
+  assertthat::assert_that(dat[["plot_type"]] == "bar_graph")
+  dat[["datasets"]] |>
+    purrr::map(function(el) {
+      el |>
+        purrr::map(~ tibble::tibble(name = .x[["name"]], data = .x[["data"]])) |>
+        dplyr::bind_rows()
+    }) |>
+    dplyr::bind_rows()
 }

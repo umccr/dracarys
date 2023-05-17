@@ -63,9 +63,13 @@ FILE_REGEX <- tibble::tribble(
   "-qc_summary\\.tsv\\.gz$", "um__qcsum", "UmQcSumFile"
 )
 
-func_selector <- function(type) {
-  l <- FILE_REGEX[["fun"]] |>
-    purrr::set_names(FILE_REGEX[["name"]])
+func_selector <- function(type, tbl = FILE_REGEX) {
+  assertthat::assert_that(
+    inherits(tbl, "data.frame"),
+    all(c("fun", "name") %in% colnames(tbl))
+  )
+  l <- tbl[["fun"]] |>
+    purrr::set_names(tbl[["name"]])
   if (!type %in% names(l)) {
     return(NULL)
   }
