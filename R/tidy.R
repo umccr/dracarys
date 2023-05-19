@@ -78,26 +78,48 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
       )
       cli::cli_abort(msg)
     }
-
-    cli::cli_alert_info("{date_log()} {e('dragon')} {.emph {prefix}}: Start tidying UMCCR dir: {.file {in_dir}}")
-    res <- d |>
-      dplyr::select("type", "path", "bname") |>
-      dplyr::rowwise() |>
-      dplyr::mutate(
-        env = list(func_selector(.data$type)),
-        obj = list(.data$env$new(.data$path)),
-        has_plot = "plot" %in% names(.data$env[["public_methods"]]),
-        obj_parsed = list(.data$obj$read()),
-        obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = prefix, out_format = out_format)),
-        plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
-      ) |>
-      dplyr::select("type", "path", "obj", dat = "obj_parsed", "plot")
-    # TODO:
-    assertthat::assert_that(
-      !any(duplicated(d[["type"]])),
-      msg = glue("Aborting - duplicated file types detected in {in_dir}")
-    )
-    cli::cli_alert_success("{date_log()} {e('tada')} {.emph {prefix}}: UMCCR tidy results at: {.file {out_dir}}")
-    return(invisible(res))
+    dups <- dup_ftypes(d)
+    if (dups$has_dup_ftypes) {
+      cli::cli_alert_danger("Aborting - the input dir {.file {in_dir}} contains duplicated file types. See JSON below:")
+      print(dups$msg_json)
+      cli::cli_abort("Aborting - the input dir {.file {in_dir}} contains duplicated file types. See JSON above!")
+    }
   }
+  cli::cli_alert_info("{date_log()} {e('dragon')} {.emph {prefix}}: Start tidying UMCCR dir: {.file {in_dir}}")
+  res <- d |>
+    dplyr::select("type", "path", "bname") |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      env = list(func_selector(.data$type)),
+      obj = list(.data$env$new(.data$path)),
+      has_plot = "plot" %in% names(.data$env[["public_methods"]]),
+      obj_parsed = list(.data$obj$read()),
+      obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = prefix, out_format = out_format)),
+      plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
+    ) |>
+    dplyr::select("type", "path", "obj", dat = "obj_parsed", "plot")
+  cli::cli_alert_success("{date_log()} {e('tada')} {.emph {prefix}}: UMCCR tidy results at: {.file {out_dir}}")
+  return(invisible(res))
+}
+
+dup_ftypes <- function(d) {
+  assertthat::assert_that(all(c("path", "type") %in% colnames(d)))
+  dups <- d |>
+    dplyr::group_by(.data$type) |>
+    dplyr::mutate(type_count = dplyr::n()) |>
+    dplyr::ungroup() |>
+    dplyr::filter(.data$type_count > 1) |>
+    dplyr::arrange(dplyr::desc(.data$type_count), .data$type, .data$path)
+  if (nrow(dups) == 0) {
+    return(list(has_dup_ftypes = FALSE, msg_json = NULL))
+  }
+  # show 2 duplicated files per type
+  msg_json <- dups |>
+    dplyr::group_by(.data$type) |>
+    dplyr::slice_head(n = 2) |>
+    dplyr::ungroup() |>
+    dplyr::select("path", "type", "type_count") |>
+    tidyr::nest(two_example_paths = .data$path) |>
+    jsonlite::toJSON(pretty = F)
+  return(list(has_dup_ftypes = TRUE, msg_json = msg_json))
 }
