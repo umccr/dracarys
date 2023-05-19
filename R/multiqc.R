@@ -285,6 +285,7 @@ multiqc_date_fmt <- function(cdate) {
 #' Parse Plot Data from MultiQC JSON
 #'
 #' @param j Path to `multiqc_data.json` file.
+#' @param plot_names Names of plots to parse.
 #'
 #' @return Nested tibble with plot name and result as list column (use `tidyr::unnest` to access).
 #'
@@ -297,7 +298,7 @@ multiqc_date_fmt <- function(cdate) {
 #' @export
 multiqc_parse_plots <- function(j, plot_names = NULL) {
   parsed <- RJSONIO::fromJSON(j)
-  .funcs <- tibble::tribble(
+  funcs <- tibble::tribble(
     ~name, ~fun,
     "bar_graph", "multiqc_parse_bargraph_plot",
     "xy_line", "multiqc_parse_xyline_plot"
@@ -314,12 +315,11 @@ multiqc_parse_plots <- function(j, plot_names = NULL) {
   # loop over each plot item and run
   # corresponding function based on plot type.
   final_cols <- c("plot_nm", "plot_res")
-  res <- purrr::map_chr(plot_data, "plot_type") |>
-    tibble::enframe(name = "plot_nm", value = "plot_type") |>
+  res <- multiqc_list_plots(plot_data) |>
     # keep only specified plots; NULL plot_names will discard everything.
     dplyr::filter(
       .data$plot_nm %in% plot_names,
-      .data$plot_type %in% .funcs[["name"]]
+      .data$plot_type %in% funcs[["name"]]
     )
   if (nrow(res) == 0) {
     return(empty_tbl(cnames = final_cols))
@@ -328,7 +328,7 @@ multiqc_parse_plots <- function(j, plot_names = NULL) {
     dplyr::rowwise() |>
     dplyr::mutate(
       input = list(plot_data[[.data$plot_nm]]),
-      plot_res = list(func_selector(type = .data$plot_type, tbl = .funcs)(.data$input))
+      plot_res = list(func_selector(type = .data$plot_type, tbl = funcs)(.data$input))
     ) |>
     dplyr::ungroup() |>
     dplyr::select(dplyr::all_of(final_cols))
@@ -362,7 +362,7 @@ multiqc_parse_xyline_plot <- function(dat) {
       }
     ) |>
     dplyr::bind_rows() |>
-    tidyr::nest(dat = c(x, y))
+    tidyr::nest(dat = c(.data$x, .data$y))
 }
 
 #' MultiQC Extract XY Line Plot Data for DRAGEN Contig Coverage
@@ -387,7 +387,7 @@ multiqc_parse_xyline_plot_contig_cvg <- function(dat) {
       }
     ) |>
     dplyr::bind_rows() |>
-    tidyr::nest(dat = c(contig, cvg))
+    tidyr::nest(dat = c(.data$contig, .data$cvg))
 }
 
 #' MultiQC Extract Bar Graph Data
@@ -407,4 +407,15 @@ multiqc_parse_bargraph_plot <- function(dat) {
         dplyr::bind_rows()
     }) |>
     dplyr::bind_rows()
+}
+
+multiqc_list_plots <- function(x) {
+  # handle both parsed and raw json input
+  if (rlang::is_bare_atomic(x) && file.exists(x)) {
+    x <- RJSONIO::fromJSON(x)[["report_plot_data"]]
+  }
+  assertthat::assert_that(inherits(x, "list"))
+  # keep unsorted as in the original json
+  purrr::map_chr(x, "plot_type") |>
+    tibble::enframe(name = "plot_nm", value = "plot_type")
 }
