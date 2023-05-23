@@ -1,9 +1,55 @@
+#' Metadata for wts_tumor_only workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' \dontrun{
+#' pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
+#' meta_wts_tumor_only(pmeta)
+#' }
+#' @export
+meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == "wts_tumor_only",
+      .data$end_status %in% dplyr::all_of(status)
+    )
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      rglb = purrr::map_chr(.data$input, \(x) unique(x[["fastq_list_rows"]][["rglb"]])),
+      rgsm = purrr::map_chr(.data$input, \(x) unique(x[["fastq_list_rows"]][["rgsm"]])),
+      lane = purrr::map_chr(.data$input, \(x) paste(x[["fastq_list_rows"]][["lane"]], collapse = ",")),
+      lane = as.character(lane),
+      gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_transcriptome_output_directory", "location"), .default = NA),
+      gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location"), .default = NA),
+      gds_outdir_arriba = purrr::map_chr(.data$output, list("arriba_output_directory", "location"), .default = NA),
+      gds_outdir_qualimap = purrr::map_chr(.data$output, list("qualimap_output_directory", "location"), .default = NA),
+      SubjectID = sub("umccr__automated__wts_tumor_only__(SBJ.*)__L.*", "\\1", .data$wfr_name)
+    )
+  d |>
+    dplyr::select(
+      tidyselect::all_of(meta_main_cols()),
+      SubjectID,
+      LibraryID = "rglb",
+      SampleID = "rgsm",
+      Lane = "lane",
+      gds_outdir_dragen,
+      gds_outdir_multiqc,
+      gds_outdir_arriba,
+      gds_outdir_qualimap
+    )
+}
+
 #' Metadata for wgs_alignment_qc workflow
 #'
 #' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
 #' @param status Workflow status to keep (default: Succeeded).
 #'
-#' @return A tibble with metadata per wgs align-qc workflow run.
+#' @return A tibble with metadata per workflow run.
 #' @examples
 #' \dontrun{
 #' pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
@@ -20,21 +66,21 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
   d <- wf |>
     meta_io_fromjson() |>
     dplyr::mutate(
-      libid1 = purrr::map_chr(.data$input, list("fastq_list_rows", "rglb")),
+      rglb = purrr::map_chr(.data$input, list("fastq_list_rows", "rglb")),
       rgsm = purrr::map_chr(.data$input, list("fastq_list_rows", "rgsm")),
+      lane = purrr::map_int(.data$input, list("fastq_list_rows", "lane")),
+      lane = as.character(lane),
       gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_alignment_output_directory", "location")),
       gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location")),
       SubjectID = sub("umccr__automated__wgs_alignment_qc__(SBJ.*)__L.*", "\\1", .data$wfr_name),
-      libid2 = sub("umccr__automated__wgs_alignment_qc__SBJ.*__(L.*)__.*", "\\1", .data$wfr_name),
-      Lane = sub(".*__(.*)", "\\1", .data$libid2),
     )
   d |>
     dplyr::select(
       tidyselect::all_of(meta_main_cols()),
       SubjectID,
-      LibraryID = "libid1",
+      LibraryID = "rglb",
       SampleID = "rgsm",
-      Lane,
+      Lane = "lane",
       gds_outdir_dragen,
       gds_outdir_multiqc,
     )
@@ -45,7 +91,7 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
 #' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
 #' @param status Workflow status to keep (default: Succeeded).
 #'
-#' @return A tibble with metadata per cttso workflow run.
+#' @return A tibble with metadata per workflow run.
 #' @examples
 #' \dontrun{
 #' pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
