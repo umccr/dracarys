@@ -1,3 +1,43 @@
+#' Metadata for bcl_convert workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' \dontrun{
+#' pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
+#' meta_bcl_convert(pmeta)
+#' }
+#' @export
+meta_bcl_convert <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == "bcl_convert",
+      .data$end_status %in% dplyr::all_of(status)
+    )
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      batch_name = purrr::map(.data$input, list("settings_by_samples", "batch_name")),
+      samples = purrr::map(.data$input, list("settings_by_samples", "samples")),
+      runfolder_name = purrr::map_chr(.data$input, "runfolder_name"),
+    ) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      samples2 = list(purrr::set_names(.data$samples, .data$batch_name)),
+      samples2 = list(.data$samples2 |> purrr::list_flatten() |> tibble::enframe(name = "batch_name", value = "sample"))
+    ) |>
+    dplyr::ungroup()
+  d |>
+    dplyr::select(
+      tidyselect::all_of(meta_main_cols()),
+      "runfolder_name",
+      samples = "samples2"
+    )
+}
+
 #' Metadata for wts_tumor_only workflow
 #'
 #' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
@@ -33,14 +73,14 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
   d |>
     dplyr::select(
       tidyselect::all_of(meta_main_cols()),
-      SubjectID,
+      "SubjectID",
       LibraryID = "rglb",
       SampleID = "rgsm",
       Lane = "lane",
-      gds_outdir_dragen,
-      gds_outdir_multiqc,
-      gds_outdir_arriba,
-      gds_outdir_qualimap
+      "gds_outdir_dragen",
+      "gds_outdir_multiqc",
+      "gds_outdir_arriba",
+      "gds_outdir_qualimap"
     )
 }
 
@@ -77,12 +117,12 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
   d |>
     dplyr::select(
       tidyselect::all_of(meta_main_cols()),
-      SubjectID,
+      "SubjectID",
       LibraryID = "rglb",
       SampleID = "rgsm",
       Lane = "lane",
-      gds_outdir_dragen,
-      gds_outdir_multiqc,
+      "gds_outdir_dragen",
+      "gds_outdir_multiqc",
     )
 }
 
@@ -123,7 +163,7 @@ meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
       SubjectID = "subjectid",
       LibraryID = "libid",
       SampleID = "sample_name2",
-      gds_outdir,
+      "gds_outdir",
       cttso_rerun = "rerun"
     )
 }
