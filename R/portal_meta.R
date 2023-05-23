@@ -1,7 +1,7 @@
-#' Metadata for wgs align-qc workflow
+#' Metadata for wgs_alignment_qc workflow
 #'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
 #' @param status Workflow status to keep (default: Succeeded).
-#' @param pmeta Portal workflows metadata table in TSV format.
 #'
 #' @return A tibble with metadata per wgs align-qc workflow run.
 #' @examples
@@ -11,36 +11,33 @@
 #' }
 #' @export
 meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
-  wf <- readr::read_csv(pmeta) |>
-    dplyr::filter(.data$type_name == "wgs_alignment_qc") |>
-    dplyr::select(-c("sample_name", "type_name", "notified", "partition_name")) |>
-    dplyr::filter(.data$end_status %in% status)
-
-  d <- wf |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
-      i1 = list(jsonlite::fromJSON(.data$input)),
-      o1 = list(jsonlite::fromJSON(.data$output))
-    ) |>
-    dplyr::ungroup() |>
-    dplyr::mutate(
-      libid = purrr::map_chr(.data$i1, list("fastq_list_rows", "rglb")),
-      rgsm = purrr::map_chr(.data$i1, list("fastq_list_rows", "rgsm")),
-      outdir_dragen = purrr::map_chr(.data$o1, list("dragen_alignment_output_directory", "location")),
-      outdir_multiqc = purrr::map_chr(.data$o1, list("multiqc_output_directory", "location")),
-      subjectid = sub("umccr__automated__wgs_alignment_qc__(SBJ.*)__L.*", "\\1", .data$wfr_name),
-      libid2 = sub("umccr__automated__wgs_alignment_qc__SBJ.*__(L.*)__.*", "\\1", .data$wfr_name),
-      lane = sub(".*__(.*)", "\\1", .data$libid2),
-    ) |>
-    dplyr::select(
-      SubjectID = "subjectid",
-      LibraryID = "libid",
-      Lane = "lane",
-      SampleID = "rgsm",
-      "wfr_name", "wfr_id", "version", "sequence_run_id", "batch_run_id",
-      "start", "end", "portal_run_id", "outdir_dragen", "outdir_multiqc"
+  # retrieve workflow runs with the given type and status
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == "wgs_alignment_qc",
+      .data$end_status %in% dplyr::all_of(status)
     )
-  d
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      libid1 = purrr::map_chr(.data$input, list("fastq_list_rows", "rglb")),
+      rgsm = purrr::map_chr(.data$input, list("fastq_list_rows", "rgsm")),
+      gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_alignment_output_directory", "location")),
+      gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location")),
+      SubjectID = sub("umccr__automated__wgs_alignment_qc__(SBJ.*)__L.*", "\\1", .data$wfr_name),
+      libid2 = sub("umccr__automated__wgs_alignment_qc__SBJ.*__(L.*)__.*", "\\1", .data$wfr_name),
+      Lane = sub(".*__(.*)", "\\1", .data$libid2),
+    )
+  d |>
+    dplyr::select(
+      tidyselect::all_of(meta_main_cols()),
+      SubjectID,
+      LibraryID = "libid1",
+      SampleID = "rgsm",
+      Lane,
+      gds_outdir_dragen,
+      gds_outdir_multiqc,
+    )
 }
 
 #' Metadata for tso_ctdna_tumor_only workflow
@@ -56,7 +53,7 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
 #' }
 #' @export
 meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
-  # retrieve cttso workflow runs with the given status (Succeeded by default)
+  # retrieve workflow runs with the given type and status
   wf <- portal_meta_read(pmeta) |>
     dplyr::filter(
       .data$type_name == "tso_ctdna_tumor_only",
