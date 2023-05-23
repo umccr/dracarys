@@ -7,10 +7,10 @@
 #' @examples
 #' \dontrun{
 #' pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
-#' wgs_alignqc_metadata(pmeta)
+#' meta_wgs_alignment_qc(pmeta)
 #' }
 #' @export
-wgs_alignqc_metadata <- function(pmeta, status = "Succeeded") {
+meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
   wf <- readr::read_csv(pmeta) |>
     dplyr::filter(.data$type_name == "wgs_alignment_qc") |>
     dplyr::select(-c("sample_name", "type_name", "notified", "partition_name")) |>
@@ -30,8 +30,7 @@ wgs_alignqc_metadata <- function(pmeta, status = "Succeeded") {
       outdir_multiqc = purrr::map_chr(.data$o1, list("multiqc_output_directory", "location")),
       subjectid = sub("umccr__automated__wgs_alignment_qc__(SBJ.*)__L.*", "\\1", .data$wfr_name),
       libid2 = sub("umccr__automated__wgs_alignment_qc__SBJ.*__(L.*)__.*", "\\1", .data$wfr_name),
-      lane = sub(".*__(\\d+)", "\\1", .data$libid2),
-      libid3 = sub("(.*)__\\d+", "\\1", .data$libid2)
+      lane = sub(".*__(.*)", "\\1", .data$libid2),
     ) |>
     dplyr::select(
       SubjectID = "subjectid",
