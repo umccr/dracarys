@@ -18,8 +18,6 @@ A tibble with metadata per workflow run.
 Metadata for wgs_alignment_qc workflow
 }
 \examples{
-\dontrun{
-pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
-meta_wgs_alignment_qc(pmeta)
-}
+pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+(m <- meta_wgs_alignment_qc(pmeta))
 }

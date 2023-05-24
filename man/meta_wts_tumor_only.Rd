@@ -18,8 +18,6 @@ A tibble with metadata per workflow run.
 Metadata for wts_tumor_only workflow
 }
 \examples{
-\dontrun{
-pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
-meta_wts_tumor_only(pmeta)
-}
+pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+(m <- meta_wts_tumor_only(pmeta))
 }

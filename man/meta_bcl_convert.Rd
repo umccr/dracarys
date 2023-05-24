@@ -18,8 +18,6 @@ A tibble with metadata per workflow run.
 Metadata for bcl_convert workflow
 }
 \examples{
-\dontrun{
-pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
-meta_bcl_convert(pmeta)
-}
+pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+(m <- meta_bcl_convert(pmeta))
 }

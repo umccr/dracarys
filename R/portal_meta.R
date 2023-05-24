@@ -5,17 +5,18 @@
 #'
 #' @return A tibble with metadata per workflow run.
 #' @examples
-#' \dontrun{
-#' pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
-#' meta_bcl_convert(pmeta)
-#' }
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_bcl_convert(pmeta))
+#' @testexamples
+#' expect_equal(sum(!is.na(m$topup_or_rerun)), 2)
+#' expect_equal(length(unique(m$portal_run_id)), 4)
 #' @export
 meta_bcl_convert <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
   wf <- portal_meta_read(pmeta) |>
     dplyr::filter(
       .data$type_name == "bcl_convert",
-      .data$end_status %in% dplyr::all_of(status)
+      .data$end_status %in% status
     )
   d <- wf |>
     meta_io_fromjson() |>
@@ -64,17 +65,18 @@ meta_bcl_convert <- function(pmeta, status = "Succeeded") {
 #'
 #' @return A tibble with metadata per workflow run.
 #' @examples
-#' \dontrun{
-#' pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
-#' meta_wts_tumor_only(pmeta)
-#' }
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_wts_tumor_only(pmeta))
+#' @testexamples
+#' expect_equal(length(unique(m$portal_run_id)), 4)
+#' expect_equal(length(unique(m$LibraryID)), 4)
 #' @export
 meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
   wf <- portal_meta_read(pmeta) |>
     dplyr::filter(
       .data$type_name == "wts_tumor_only",
-      .data$end_status %in% dplyr::all_of(status)
+      .data$end_status %in% status
     )
   d <- wf |>
     meta_io_fromjson() |>
@@ -110,17 +112,17 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
 #'
 #' @return A tibble with metadata per workflow run.
 #' @examples
-#' \dontrun{
-#' pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
-#' meta_wgs_alignment_qc(pmeta)
-#' }
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_wgs_alignment_qc(pmeta))
+#' @testexamples
+#' expect_equal("Lane" %in% colnames(m), TRUE)
 #' @export
 meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
   wf <- portal_meta_read(pmeta) |>
     dplyr::filter(
       .data$type_name == "wgs_alignment_qc",
-      .data$end_status %in% dplyr::all_of(status)
+      .data$end_status %in% status
     )
   d <- wf |>
     meta_io_fromjson() |>
@@ -152,17 +154,17 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
 #'
 #' @return A tibble with metadata per workflow run.
 #' @examples
-#' \dontrun{
-#' pmeta <- here::here("nogit/data_portal/2023-05-21_workflows.csv")
-#' meta_tso_ctdna_tumor_only(pmeta)
-#' }
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_tso_ctdna_tumor_only(pmeta))
+#' @testexamples
+#' expect_equal(length(unique(m$portal_run_id)), 4)
 #' @export
 meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
   # retrieve workflow runs with the given type and status
   wf <- portal_meta_read(pmeta) |>
     dplyr::filter(
       .data$type_name == "tso_ctdna_tumor_only",
-      .data$end_status %in% dplyr::all_of(status)
+      .data$end_status %in% status
     )
   # grab libid/sampleid from the input meta, and outdir from the output meta
   d <- wf |>
