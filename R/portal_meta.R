@@ -31,14 +31,29 @@ meta_bcl_convert <- function(pmeta, status = "Succeeded") {
       samples2 = list(purrr::set_names(.data$samples, .data$batch_name)),
       samples2 = list(.data$samples2 |> purrr::list_flatten() |> tibble::enframe(name = "batch_name", value = "sample"))
     ) |>
-    dplyr::ungroup()
+    dplyr::ungroup() |>
+    dplyr::select(-c("samples", "batch_name")) |>
+    tidyr::unnest("samples2") |>
+    tidyr::unnest("sample")
+
+  # need to take care of following patterns:
+  # - sampleid_libid
+  # - sampleid_libid_topup(2/3)
+  # - sampleid_libid_rerun(2)
+  # - sampleidA_sampleidB_libid_..
+  # So we just say .*_(L.*) will be libid1, then split that based on topup/rerun
   d |>
+    tidyr::separate_wider_regex("sample", c(sampleid = ".*", "_", libid1 = "L.*"), cols_remove = FALSE) |>
+    tidyr::separate_wider_regex("libid1", c(libid2 = ".*", "_", topup_or_rerun = ".*"), cols_remove = FALSE, too_few = "align_start") |>
     dplyr::select(
-      tidyselect::all_of(meta_main_cols()),
+      dplyr::all_of(meta_main_cols()),
+      SampleID = "sampleid",
+      LibraryID = "libid2",
+      "topup_or_rerun",
+      "batch_name",
       "runfolder_name",
       "gds_outdir_multiqc",
       "gds_outdir_multiqc_interop",
-      samples = "samples2"
     )
 }
 
@@ -67,7 +82,7 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
       rglb = purrr::map_chr(.data$input, \(x) unique(x[["fastq_list_rows"]][["rglb"]])),
       rgsm = purrr::map_chr(.data$input, \(x) unique(x[["fastq_list_rows"]][["rgsm"]])),
       lane = purrr::map_chr(.data$input, \(x) paste(x[["fastq_list_rows"]][["lane"]], collapse = ",")),
-      lane = as.character(lane),
+      lane = as.character(.data$lane),
       gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_transcriptome_output_directory", "location"), .default = NA),
       gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location"), .default = NA),
       gds_outdir_arriba = purrr::map_chr(.data$output, list("arriba_output_directory", "location"), .default = NA),
@@ -76,7 +91,7 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
     )
   d |>
     dplyr::select(
-      tidyselect::all_of(meta_main_cols()),
+      dplyr::all_of(meta_main_cols()),
       "SubjectID",
       LibraryID = "rglb",
       SampleID = "rgsm",
@@ -113,14 +128,14 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
       rglb = purrr::map_chr(.data$input, list("fastq_list_rows", "rglb")),
       rgsm = purrr::map_chr(.data$input, list("fastq_list_rows", "rgsm")),
       lane = purrr::map_int(.data$input, list("fastq_list_rows", "lane")),
-      lane = as.character(lane),
+      lane = as.character(.data$lane),
       gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_alignment_output_directory", "location")),
       gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location")),
       SubjectID = sub("umccr__automated__wgs_alignment_qc__(SBJ.*)__L.*", "\\1", .data$wfr_name),
     )
   d |>
     dplyr::select(
-      tidyselect::all_of(meta_main_cols()),
+      dplyr::all_of(meta_main_cols()),
       "SubjectID",
       LibraryID = "rglb",
       SampleID = "rgsm",
@@ -163,7 +178,7 @@ meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
     )
   d |>
     dplyr::select(
-      tidyselect::all_of(meta_main_cols()),
+      dplyr::all_of(meta_main_cols()),
       SubjectID = "subjectid",
       LibraryID = "libid",
       SampleID = "sample_name2",

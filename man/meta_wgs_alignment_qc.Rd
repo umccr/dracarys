@@ -2,20 +2,20 @@
 % Please edit documentation in R/portal_meta.R
 \name{meta_wgs_alignment_qc}
 \alias{meta_wgs_alignment_qc}
-\title{Metadata for wgs align-qc workflow}
+\title{Metadata for wgs_alignment_qc workflow}
 \usage{
 meta_wgs_alignment_qc(pmeta, status = "Succeeded")
 }
 \arguments{
-\item{pmeta}{Portal workflows metadata table in TSV format.}
+\item{pmeta}{Path to portal workflows metadata table, or tibble with already parsed data.}
 
 \item{status}{Workflow status to keep (default: Succeeded).}
 }
 \value{
-A tibble with metadata per wgs align-qc workflow run.
+A tibble with metadata per workflow run.
 }
 \description{
-Metadata for wgs align-qc workflow
+Metadata for wgs_alignment_qc workflow
 }
 \examples{
 \dontrun{
