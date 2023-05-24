@@ -11,7 +11,7 @@ test_that("Function meta_bcl_convert() @ L14", {
 })
 
 
-test_that("Function meta_wts_tumor_only() @ L74", {
+test_that("Function meta_wts_tumor_only() @ L77", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_wts_tumor_only(pmeta))
@@ -20,7 +20,16 @@ test_that("Function meta_wts_tumor_only() @ L74", {
 })
 
 
-test_that("Function meta_wgs_alignment_qc() @ L120", {
+test_that("Function meta_rnasum() @ L127", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_rnasum(pmeta))
+  expect_equal(m$rnasum_dataset[1], "BRCA")
+  expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230179.RNAseq_report.html")
+})
+
+
+test_that("Function meta_wgs_alignment_qc() @ L178", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_wgs_alignment_qc(pmeta))
@@ -28,7 +37,7 @@ test_that("Function meta_wgs_alignment_qc() @ L120", {
 })
 
 
-test_that("Function meta_tso_ctdna_tumor_only() @ L162", {
+test_that("Function meta_tso_ctdna_tumor_only() @ L223", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_tso_ctdna_tumor_only(pmeta))

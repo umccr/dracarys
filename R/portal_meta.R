@@ -13,17 +13,20 @@
 #' @export
 meta_bcl_convert <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
+  type <- "bcl_convert"
   wf <- portal_meta_read(pmeta) |>
     dplyr::filter(
-      .data$type_name == "bcl_convert",
+      .data$type_name == type,
       .data$end_status %in% status
     )
   d <- wf |>
     meta_io_fromjson() |>
     dplyr::mutate(
+      # input
       batch_name = purrr::map(.data$input, list("settings_by_samples", "batch_name")),
       samples = purrr::map(.data$input, list("settings_by_samples", "samples")),
       runfolder_name = purrr::map_chr(.data$input, "runfolder_name"),
+      # output
       gds_outdir_multiqc = purrr::map_chr(.data$output, list("bclconvert_multiqc_out", "location"), .default = NA),
       gds_outdir_multiqc_interop = purrr::map_chr(.data$output, list("interop_multiqc_out", "location"), .default = NA),
     ) |>
@@ -73,18 +76,21 @@ meta_bcl_convert <- function(pmeta, status = "Succeeded") {
 #' @export
 meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
+  type <- "wts_tumor_only"
   wf <- portal_meta_read(pmeta) |>
     dplyr::filter(
-      .data$type_name == "wts_tumor_only",
+      .data$type_name == type,
       .data$end_status %in% status
     )
   d <- wf |>
     meta_io_fromjson() |>
     dplyr::mutate(
+      # input
       rglb = purrr::map_chr(.data$input, \(x) unique(x[["fastq_list_rows"]][["rglb"]])),
       rgsm = purrr::map_chr(.data$input, \(x) unique(x[["fastq_list_rows"]][["rgsm"]])),
       lane = purrr::map_chr(.data$input, \(x) paste(x[["fastq_list_rows"]][["lane"]], collapse = ",")),
       lane = as.character(.data$lane),
+      # output
       gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_transcriptome_output_directory", "location"), .default = NA),
       gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location"), .default = NA),
       gds_outdir_arriba = purrr::map_chr(.data$output, list("arriba_output_directory", "location"), .default = NA),
@@ -105,6 +111,58 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
     )
 }
 
+#' Metadata for rnasum workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_rnasum(pmeta))
+#' @testexamples
+#' expect_equal(m$rnasum_dataset[1], "BRCA")
+#' expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230179.RNAseq_report.html")
+#' @export
+meta_rnasum <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  type <- "rnasum"
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == type,
+      .data$end_status %in% status
+    )
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      # input
+      gds_indir_dragen = purrr::map_chr(.data$input, list("dragen_transcriptome_directory", "location"), .default = NA),
+      gds_indir_umccrise = purrr::map_chr(.data$input, list("umccrise_directory", "location"), .default = NA),
+      gds_indir_arriba = purrr::map_chr(.data$input, list("arriba_directory", "location"), .default = NA),
+      rnasum_sample_name = purrr::map_chr(.data$input, "sample_name", .default = NA),
+      rnasum_dataset = purrr::map_chr(.data$input, "dataset", .default = NA),
+      rnasum_report_dir = purrr::map_chr(.data$input, "report_directory", .default = NA),
+      sbjid1 = sub("(SBJ.*)__L.*", "\\1", .data$rnasum_report_dir),
+      libid1 = sub("(SBJ.*)__(L.*)", "\\2", .data$rnasum_report_dir),
+      # output
+      gds_outfile_rnasum_html = purrr::map_chr(.data$output, list("rnasum_html", "location"), .default = NA),
+      gds_outdir_rnasum = purrr::map_chr(.data$output, list("rnasum_output_directory", "location"), .default = NA),
+    )
+  d |>
+    dplyr::select(
+      dplyr::all_of(meta_main_cols()),
+      SubjectID = "sbjid1",
+      LibraryID = "libid1",
+      SampleID = "rnasum_sample_name",
+      "rnasum_dataset",
+      "gds_indir_dragen",
+      "gds_indir_umccrise",
+      "gds_indir_arriba",
+      "gds_outdir_rnasum",
+      "gds_outfile_rnasum_html"
+    )
+}
+
 #' Metadata for wgs_alignment_qc workflow
 #'
 #' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
@@ -119,18 +177,21 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
 #' @export
 meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
+  type <- "wgs_alignment_qc"
   wf <- portal_meta_read(pmeta) |>
     dplyr::filter(
-      .data$type_name == "wgs_alignment_qc",
+      .data$type_name == type,
       .data$end_status %in% status
     )
   d <- wf |>
     meta_io_fromjson() |>
     dplyr::mutate(
+      # input
       rglb = purrr::map_chr(.data$input, list("fastq_list_rows", "rglb")),
       rgsm = purrr::map_chr(.data$input, list("fastq_list_rows", "rgsm")),
       lane = purrr::map_int(.data$input, list("fastq_list_rows", "lane")),
       lane = as.character(.data$lane),
+      # output
       gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_alignment_output_directory", "location")),
       gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location")),
       SubjectID = sub("umccr__automated__wgs_alignment_qc__(SBJ.*)__L.*", "\\1", .data$wfr_name),
@@ -161,17 +222,20 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
 #' @export
 meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
   # retrieve workflow runs with the given type and status
+  type <- "tso_ctdna_tumor_only"
   wf <- portal_meta_read(pmeta) |>
     dplyr::filter(
-      .data$type_name == "tso_ctdna_tumor_only",
+      .data$type_name == type,
       .data$end_status %in% status
     )
   # grab libid/sampleid from the input meta, and outdir from the output meta
   d <- wf |>
     meta_io_fromjson() |>
     dplyr::mutate(
+      # input
       sample_id = purrr::map_chr(.data$input, list("tso500_samples", "sample_id")),
       sample_name2 = purrr::map_chr(.data$input, list("tso500_samples", "sample_name")),
+      # output
       gds_outdir = purrr::map_chr(.data$output, list("output_results_dir", "location")),
       libid1 = sub(".*_(L.*)", "\\1", .data$sample_id),
       rerun = grepl("rerun", .data$libid1),
