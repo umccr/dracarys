@@ -37,7 +37,15 @@ test_that("Function meta_wgs_alignment_qc() @ L179", {
 })
 
 
-test_that("Function meta_umccrise() @ L224", {
+test_that("Function meta_wgs_tumor_normal() @ L224", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_wgs_tumor_normal(pmeta))
+  expect_equal("SubjectID" %in% colnames(m), TRUE)
+})
+
+
+test_that("Function meta_umccrise() @ L291", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_umccrise(pmeta))
@@ -45,7 +53,7 @@ test_that("Function meta_umccrise() @ L224", {
 })
 
 
-test_that("Function meta_tso_ctdna_tumor_only() @ L316", {
+test_that("Function meta_tso_ctdna_tumor_only() @ L383", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_tso_ctdna_tumor_only(pmeta))
