@@ -29,7 +29,7 @@ test_that("Function meta_rnasum() @ L127", {
 })
 
 
-test_that("Function meta_wgs_alignment_qc() @ L178", {
+test_that("Function meta_wgs_alignment_qc() @ L179", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_wgs_alignment_qc(pmeta))
@@ -37,7 +37,15 @@ test_that("Function meta_wgs_alignment_qc() @ L178", {
 })
 
 
-test_that("Function meta_tso_ctdna_tumor_only() @ L223", {
+test_that("Function meta_umccrise() @ L224", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_umccrise(pmeta))
+  expect_equal(all(c("LibraryID_normal", "LibraryID_tumor") %in% colnames(m)), TRUE)
+})
+
+
+test_that("Function meta_tso_ctdna_tumor_only() @ L316", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_tso_ctdna_tumor_only(pmeta))
