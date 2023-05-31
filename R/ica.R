@@ -1,3 +1,13 @@
+#' @export
+gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, include = NULL) {
+  pattern <- pattern %||% ".*" # keep all recognisable files by default
+  cols_sel <- c("file_id", "dname", "size", "path", "bname", "type", "presigned_url")
+  dracarys::gds_files_list(gdsdir, token, include = include) |>
+    dplyr::mutate(type = purrr::map_chr(.data$bname, match_regex)) |>
+    dplyr::select(dplyr::any_of(cols_sel)) |>
+    dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type))
+}
+
 #' GDS File Presigned URL
 #'
 #' Returns presigned URL of given GDS file.
@@ -61,7 +71,7 @@ gds_file_download <- function(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN")) 
 #'
 #' @return Tibble with file basename, file size, file full data path, file dir name.
 #' @export
-gds_files_list <- function(gdsdir, token) {
+gds_files_list <- function(gdsdir, token, include = NULL) {
   token <- ica_token_validate(token)
   assertthat::assert_that(grepl("^gds://", gdsdir))
   gdsdir_original <- gdsdir
@@ -72,6 +82,10 @@ gds_files_list <- function(gdsdir, token) {
   volname <- sub("gds://(.*?)/.*", "\\1", gdsdir)
   path2 <- sub("gds://(.*?)/(.*)", "\\2", gdsdir)
   query_url <- glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize=100")
+  if (!is.null(include)) {
+    assertthat::assert_that(include == "PresignedUrl")
+    query_url <- glue("{query_url}&include=PresignedUrl")
+  }
 
   res <- httr::GET(
     query_url,
@@ -91,7 +105,7 @@ gds_files_list <- function(gdsdir, token) {
     )
     cli::cli_abort(msg)
   } # endif
-  d <- purrr::map_df(j[["items"]], function(x) c(file_id = x[["id"]], path = x[["path"]], size = x[["sizeInBytes"]]))
+  d <- purrr::map_df(j[["items"]], function(x) c(file_id = x[["id"]], path = x[["path"]], size = x[["sizeInBytes"]], presigned_url = x[["presignedUrl"]]))
   d |>
     dplyr::mutate(
       size = fs::as_fs_bytes(.data$size),
@@ -99,7 +113,7 @@ gds_files_list <- function(gdsdir, token) {
       path = glue("gds://{volname}{.data$path}"),
       dname = basename(dirname(.data$path))
     ) |>
-    dplyr::select("file_id", "bname", "size", "path", "dname")
+    dplyr::select(dplyr::any_of(c("file_id", "bname", "size", "path", "dname", "presigned_url")))
 }
 
 #' List GDS Volumes
