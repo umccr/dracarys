@@ -27,28 +27,21 @@ File <- R6::R6Class("File", public = list(
   #' @param path Name or full path of the file.
   initialize = function(path = NULL) {
     stopifnot(is.character(path), length(path) == 1)
-    is_presignedurl <- grepl("^https://stratus-gds-aps2", path)
-    self$path <- NULL
-    if (is_presignedurl) {
-      self$path <- path
-    } else {
-      self$path <- normalizePath(path)
-    }
+    self$path <- base::ifelse(is_url(path), path, normalizePath(path))
   },
 
   #' @description Basename of the file.
   #' @return Basename of the file as a character vector.
   bname = function() {
     x <- self$path
-    is_presignedurl <- grepl("^https://stratus-gds-aps2", x)
-    if (is_presignedurl) {
+    if (is_url(x)) {
       x <- strsplit(self$path, "\\?")[[1]][1]
     }
     basename(x)
   },
 
   #' @description Get the type of file.
-  #' @return String describing the type of file (CSV, TSV, JSON or OTHER).
+  #' @return String describing the specific type of file (fallbacks are CSV, TSV, JSON or OTHER).
   type = function() {
     nm <- self$bname()
     x <- match_regex(nm)
@@ -102,4 +95,8 @@ File <- R6::R6Class("File", public = list(
 read.File <- function(x, ...) {
   assertthat::assert_that(inherits(x, "File"))
   x$read(...)
+}
+
+is_url <- function(x) {
+  grepl("(http|https)://[a-zA-Z0-9./?=_%:-]*", x)
 }

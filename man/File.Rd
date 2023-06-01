@@ -74,7 +74,7 @@ Get the type of file.
 }
 
 \subsection{Returns}{
-String describing the type of file (CSV, TSV, JSON or OTHER).
+String describing the specific type of file (fallbacks are CSV, TSV, JSON or OTHER).
 }
 }
 \if{html}{\out{<hr>}}
