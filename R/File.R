@@ -51,6 +51,10 @@ File <- R6::R6Class("File", public = list(
   #' @return String describing the type of file (CSV, TSV, JSON or OTHER).
   type = function() {
     nm <- self$bname()
+    x <- match_regex(nm)
+    if (!is.na(x)) {
+      return(x)
+    }
     dplyr::case_when(
       grepl("\\.json", nm) ~ "JSON",
       grepl("\\.csv", nm) ~ "CSV",
