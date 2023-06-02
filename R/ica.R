@@ -1,11 +1,24 @@
+#' List Relevant Files In GDS Directory
+#'
+#' Lists relevant files in a GDS directory.
+#'
+#' @param gdsdir GDS directory.
+#' @param token ICA access token.
+#' @param pattern Pattern to further filter the returned file type tibble.
+#' @param include Use PresignedUrl to include presigned URLs to all files within
+#' the GDS directory.
+#'
+#' @return A tibble with type, bname, size, file_id, path, and presigned URL.
 #' @export
 gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, include = NULL) {
   pattern <- pattern %||% ".*" # keep all recognisable files by default
-  cols_sel <- c("file_id", "dname", "size", "path", "bname", "type", "presigned_url")
-  dracarys::gds_files_list(gdsdir, token, include = include) |>
+  cols_sel <- c("type", "bname", "size", "file_id", "path", "presigned_url")
+  d <- dracarys::gds_files_list(gdsdir, token, include = include) |>
+    dplyr::rowwise() |>
     dplyr::mutate(type = purrr::map_chr(.data$bname, match_regex)) |>
-    dplyr::select(dplyr::any_of(cols_sel)) |>
-    dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type))
+    dplyr::ungroup() |>
+    dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
+    dplyr::select(dplyr::any_of(cols_sel))
 }
 
 #' GDS File Presigned URL

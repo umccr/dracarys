@@ -29,8 +29,6 @@ F1 <- File$new(readr::readr_example("mtcars.csv"))
 \item \href{#method-File-bname}{\code{File$bname()}}
 \item \href{#method-File-type}{\code{File$type()}}
 \item \href{#method-File-print}{\code{File$print()}}
-\item \href{#method-File-read}{\code{File$read()}}
-\item \href{#method-File-write}{\code{File$write()}}
 \item \href{#method-File-clone}{\code{File$clone()}}
 }
 }
@@ -90,42 +88,6 @@ Print details about the File.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-File-read"></a>}}
-\if{latex}{\out{\hypertarget{method-File-read}{}}}
-\subsection{Method \code{read()}}{
-Read the file based on its type. Returns NULL if not a
-dracarys-recognised file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{File$read(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Arguments passed on to appropriate read function.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-File-write"></a>}}
-\if{latex}{\out{\hypertarget{method-File-write}{}}}
-\subsection{Method \code{write()}}{
-Write the file based on its type. Returns NULL if not a
-dracarys-recognised file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{File$write(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Arguments passed on to appropriate write function.}
 }
 \if{html}{\out{</div>}}
 }

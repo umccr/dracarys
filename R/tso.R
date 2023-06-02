@@ -801,7 +801,7 @@ tso_cnv <- function(cnvs) {
 
 tso_bcftools_vcf_readr <- function(vcf) {
   # NOTE: this handles single-sample VCFs only
-  assertthat::assert_that(file.exists(vcf), grepl("vcf.gz$", vcf))
+  # bcftools works out-of-the-box on presigned URLs too
   cmd_header <- glue("bcftools view -h {vcf}")
   h <- system(cmd_header, intern = TRUE)
   # splits header sections into nice tibbles, mostly to grab available FORMAT/INFO fields

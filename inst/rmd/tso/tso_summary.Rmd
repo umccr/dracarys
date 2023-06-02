@@ -41,32 +41,38 @@ knitr::opts_chunk$set(
 ```{r data_setup, eval=FALSE}
 options(scipen = 999) # disable scientific notation
 options(width = 150)
-pmeta <- here("nogit/data_portal/2023-05-07_workflows_5f43da12-0b6a-41ce-86c9-9ee62df8792e.csv") |>
-  dracarys::cttso_metadata()
+token <- dracarys::ica_token_validate(Sys.getenv("ICA_ACCESS_TOKEN_PRO"))
+pmeta <- here("nogit/data_portal/2023-05-21_workflows.csv") |>
+  dracarys::meta_tso_ctdna_tumor_only()
 
-tso_tidyfile_regex <- tibble::tribble(
-  ~regex, ~name,
-  "AlignCollapseFusionCaller_metrics__hist", "tso__alcolfuscaller_metrics_hist",
-  "AlignCollapseFusionCaller_metrics__main", "tso__alcolfuscaller_metrics_main",
-  "SampleAnalysisResults_biomarkers", "tso__sar_biomarkers",
-  "SampleAnalysisResults_cnv", "tso__sar_cnv",
-  "SampleAnalysisResults_qc", "tso__sar_qc",
-  "SampleAnalysisResults_sample_info", "tso__sar_sampleinfo",
-  "SampleAnalysisResults_smallv", "tso__sar_smallv",
-  "SampleAnalysisResults_sw_conf_datasources", "tso__sar_swconfds",
-  "SampleAnalysisResults_sw_conf_other", "tso__sar_swconfother",
-  "TMB_Trace", "tso__tmb_trace",
-  "TargetRegionCoverage", "tso__target_region_coverage",
-  "fragment_length_hist", "tso__fraglength_hist",
-  "msi", "tso__msi",
-  "tmb", "tso__tmb",
-  "Fusions", "tso__fusions",
-  "multiqc", "tso__multiqc"
-)
+x <- pmeta |>
+  dplyr::slice(1:3) |>
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    gds_outdir_contents = list(dracarys::gds_files_list_filter_relevant(gdsdir = .data$gds_outdir, token = token, include = "PresignedUrl"))
+  )
+
+d <- x |>
+  tidyr::unnest("gds_outdir_contents") |>
+  dplyr::select("wfr_id", "portal_run_id", "start", "SubjectID", "LibraryID", "type", "bname", "size", "file_id", "path", "presigned_url")
 
 # match_regex("FOO_AlignCollapseFusionCaller_metrics__hist.tsv.gz", regexes = tso_tidyfile_regex)
 
-start <- Sys.time()
+d |>
+  slice(27) |>
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    gen = list(func_selector(.data$type)),
+    obj = list(.data$gen$new(.data$presigned_url)),
+    obj_parsed = list(.data$obj$read())
+  )
+
+
+    obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = prefix, out_format = out_format)),
+    plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
+  )
+
+  start <- Sys.time()
 d <- here("nogit/warehouse/cttso") |>
   dir_ls(type = "file", recurse = TRUE) |>
   as_tibble_col(column_name = "path") |>

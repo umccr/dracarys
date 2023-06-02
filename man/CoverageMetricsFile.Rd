@@ -34,7 +34,6 @@ read(cm2)
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize"><a href='../../dracarys/html/File.html#method-File-initialize'><code>dracarys::File$initialize()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="print"><a href='../../dracarys/html/File.html#method-File-print'><code>dracarys::File$print()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="type"><a href='../../dracarys/html/File.html#method-File-type'><code>dracarys::File$type()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="write"><a href='../../dracarys/html/File.html#method-File-write'><code>dracarys::File$write()</code></a></span></li>
 </ul>
 </details>
 }}

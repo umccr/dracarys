@@ -53,23 +53,6 @@ File <- R6::R6Class("File", public = list(
     cat(glue("Basename: {self$bname()}"), "\n")
     cat(glue("Type: {self$type()}"), "\n")
     invisible(self)
-  },
-
-  #' @description Read the file based on its type. Returns NULL if not a
-  #' dracarys-recognised file.
-  #' @param ... Arguments passed on to appropriate read function.
-  read = function(...) {
-    x <- self$path
-    t <- self$type()
-    func_selector(t)$new(x)$read(...)
-  },
-  #' @description Write the file based on its type. Returns NULL if not a
-  #' dracarys-recognised file.
-  #' @param ... Arguments passed on to appropriate write function.
-  write = function(...) {
-    x <- self$path
-    t <- self$type()
-    func_selector(t)$new(x)$write(...)
   }
 ))
 
