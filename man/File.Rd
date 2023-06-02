@@ -7,11 +7,10 @@
 File is a base R6 class representing a TSV/CSV/JSON output from
 a DRAGEN workflow.
 
-A File has a path, a basename, a type, and a default read method for its type.
+A File has a path, a basename and a type.
 }
 \examples{
 F1 <- File$new(readr::readr_example("mtcars.csv"))
-(parsed_f1 <- F1$read(col_types = readr::cols("double")))
 (bname_f1 <- F1$bname())
 (F2 <- File$new("https://stratus-gds-aps2/foo/bar/baz.csv?bla"))
 
@@ -31,6 +30,7 @@ F1 <- File$new(readr::readr_example("mtcars.csv"))
 \item \href{#method-File-type}{\code{File$type()}}
 \item \href{#method-File-print}{\code{File$print()}}
 \item \href{#method-File-read}{\code{File$read()}}
+\item \href{#method-File-write}{\code{File$write()}}
 \item \href{#method-File-clone}{\code{File$clone()}}
 }
 }
@@ -74,7 +74,7 @@ Get the type of file.
 }
 
 \subsection{Returns}{
-String describing the specific type of file (fallbacks are CSV, TSV, JSON or OTHER).
+String describing the specific type of dracarys file (NA if not a dracarys-recognised file).
 }
 }
 \if{html}{\out{<hr>}}
@@ -98,7 +98,8 @@ Print details about the File.
 \if{html}{\out{<a id="method-File-read"></a>}}
 \if{latex}{\out{\hypertarget{method-File-read}{}}}
 \subsection{Method \code{read()}}{
-Read the file based on its type.
+Read the file based on its type. Returns NULL if not a
+dracarys-recognised file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{File$read(...)}\if{html}{\out{</div>}}
 }
@@ -106,7 +107,25 @@ Read the file based on its type.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{...}}{Arguments passed on to appropriate read_* function.}
+\item{\code{...}}{Arguments passed on to appropriate read function.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-File-write"></a>}}
+\if{latex}{\out{\hypertarget{method-File-write}{}}}
+\subsection{Method \code{write()}}{
+Write the file based on its type. Returns NULL if not a
+dracarys-recognised file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{File$write(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{Arguments passed on to appropriate write function.}
 }
 \if{html}{\out{</div>}}
 }
