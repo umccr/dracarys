@@ -2,7 +2,7 @@
 
 # File R/File.R: @testexamples
 
-test_that("Function File() @ L20", {
+test_that("Function File() @ L21", {
   
   F1 <- File$new(readr::readr_example("mtcars.csv"))
   (bname_f1 <- F1$bname())
@@ -12,5 +12,6 @@ test_that("Function File() @ L20", {
   expect_equal(bname_f1, "mtcars.csv")
   expect_equal(F2$bname(), "baz.csv")
   expect_equal(F2$type(), NA_character_)
+  expect_equal(F2$is_url, TRUE)
 })
 

@@ -7,7 +7,7 @@
 File is a base R6 class representing a TSV/CSV/JSON output from
 a DRAGEN workflow.
 
-A File has a path, a basename and a type.
+A File has a path, a basename, a type, and can be a presigned URL.
 }
 \examples{
 F1 <- File$new(readr::readr_example("mtcars.csv"))
@@ -19,6 +19,8 @@ F1 <- File$new(readr::readr_example("mtcars.csv"))
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{path}}{Name or full path of the file.}
+
+\item{\code{is_url}}{Is the file a presigned URL?}
 }
 \if{html}{\out{</div>}}
 }
@@ -38,13 +40,15 @@ F1 <- File$new(readr::readr_example("mtcars.csv"))
 \subsection{Method \code{new()}}{
 Create a new File object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{File$new(path = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{File$new(path = NULL, is_url = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{path}}{Name or full path of the file.}
+
+\item{\code{is_url}}{Is the file a presigned URL?}
 }
 \if{html}{\out{</div>}}
 }

@@ -3,7 +3,7 @@
 #' @description File is a base R6 class representing a TSV/CSV/JSON output from
 #' a DRAGEN workflow.
 #'
-#' A File has a path, a basename and a type.
+#' A File has a path, a basename, a type, and can be a presigned URL.
 #'
 #' @examples
 #' F1 <- File$new(readr::readr_example("mtcars.csv"))
@@ -15,16 +15,21 @@
 #' expect_equal(bname_f1, "mtcars.csv")
 #' expect_equal(F2$bname(), "baz.csv")
 #' expect_equal(F2$type(), NA_character_)
+#' expect_equal(F2$is_url, TRUE)
 #'
 #' @export
 File <- R6::R6Class("File", public = list(
   #' @field path Name or full path of the file.
+  #' @field is_url Is the file a presigned URL?
   path = NULL,
+  is_url = NULL,
 
   #' @description Create a new File object.
+  #' @param is_url Is the file a presigned URL?
   #' @param path Name or full path of the file.
-  initialize = function(path = NULL) {
+  initialize = function(path = NULL, is_url = NULL) {
     stopifnot(is.character(path), length(path) == 1)
+    self$is_url <- is_url(path)
     self$path <- base::ifelse(is_url(path), path, normalizePath(path))
   },
 
@@ -52,6 +57,7 @@ File <- R6::R6Class("File", public = list(
     cat(glue("Path: {self$path}"), "\n")
     cat(glue("Basename: {self$bname()}"), "\n")
     cat(glue("Type: {self$type()}"), "\n")
+    cat(glue("isURL: {self$is_url}"), "\n")
     invisible(self)
   }
 ))
