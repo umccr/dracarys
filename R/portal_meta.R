@@ -318,8 +318,8 @@ meta_umccrise <- function(pmeta, status = "Succeeded") {
       umccrise_outdir_name2 = purrr::map_chr(.data$input, "output_directory_name", .default = NA),
       umccrise_genomes_tar2 = purrr::map_chr(.data$input, list("genomes_tar", "location"), .default = NA),
       sbjid2 = purrr::map_chr(.data$input, "subject_identifier", .default = NA),
-      dragen_normal_libid2 = sub("(L.*)__(L.*)", "\\1", .data$umccrise_outdir_name2),
-      dragen_tumor_libid2 = sub("(L.*)__(L.*)", "\\2", .data$umccrise_outdir_name2),
+      dragen_tumor_libid2 = sub("(L.*)__(L.*)", "\\1", .data$umccrise_outdir_name2),
+      dragen_normal_libid2 = sub("(L.*)__(L.*)", "\\2", .data$umccrise_outdir_name2),
       # old runs
       dragen_normal_sampleid1 = purrr::map_chr(.data$input, extract_fqlist_el, "rgsm"),
       dragen_normal_lane1 = purrr::map_chr(.data$input, extract_fqlist_el, "lane"),
