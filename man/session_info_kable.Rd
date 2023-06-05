@@ -4,10 +4,10 @@
 \alias{session_info_kable}
 \title{Session Information Kable}
 \usage{
-session_info_kable(pkgs)
+session_info_kable(pkgs = NULL)
 }
 \arguments{
-\item{pkgs}{Vector of R packages to display in the vignette.}
+\item{pkgs}{Vector of R packages to display in the vignette. By default returns all.}
 }
 \value{
 A list with two kables containing information about the platform and
