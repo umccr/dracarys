@@ -1,0 +1,105 @@
+---
+author: "Peter Diakumis"
+date: "`r lubridate::date()`"
+output:
+  html_document:
+    toc: true
+description: "R and Spark"
+title: "R and Spark"
+---
+
+```{r knitr_opts, include=F}
+knitr::opts_chunk$set(
+  echo = TRUE
+)
+```
+
+## Intro
+
+```{r pkgs, message=F}
+require(sparklyr)
+require(sparklyr.nested)
+require(DBI)
+require(dplyr)
+require(sessioninfo)
+```
+
+- Install Spark
+
+```{r}
+# sparklyr::spark_available_versions()
+# sparklyr::spark_install("3.3")
+sparklyr::spark_installed_versions()
+```
+
+- Connect to Spark
+
+```{r}
+sc <- sparklyr::spark_connect(master = "local", version = "3.3.2")
+```
+
+- Transfer data
+
+```{r}
+cars <- sparklyr::copy_to(sc, datasets::mtcars, name = "mtcars")
+```
+
+- Analysis
+
+```{r}
+DBI::dbGetQuery(
+  sc,
+  # "show tables;"
+  "SELECT count(*) FROM mtcars"
+)
+
+dplyr::count(cars)
+
+cars |>
+  dplyr::select(hp, mpg) |>
+  dplyr::sample_n(100) |>
+  dplyr::collect() |>
+  base::plot()
+```
+
+- Modeling
+  
+```{r}
+mod1 <- sparklyr::ml_linear_regression(cars, mpg ~ hp)
+mod1
+mod1 |>
+  sparklyr::ml_predict(
+    sparklyr::copy_to(sc, data.frame(hp = 250 + 10 * 1:10))
+  ) |>
+  dplyr::mutate(hp = hp, mpg = prediction, .keep = "none") |>
+  dplyr::full_join(cars |> dplyr::select(hp, mpg)) |>
+  dplyr::collect() |>
+  base::plot()
+```
+
+- Data
+
+```{r}
+sparklyr::spark_write_csv(cars, "cars.csv")
+cars2 <- sparklyr::spark_read_csv(sc = sc, path = "cars.csv")
+cars2
+```
+
+- Nested
+
+```{r}
+cars |>
+  sparklyr.nested::sdf_nest(hp) |>
+  dplyr::group_by(cyl) |>
+  dplyr::summarise(data = collect_list(data))
+```
+
+## Addendum
+
+```{r}
+details::details(
+  sessioninfo::session_info(include_base = TRUE, dependencies = T),
+  summary = "Session Info"
+)
+```
+

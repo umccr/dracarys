@@ -1,0 +1,77 @@
+---
+author: "Peter Diakumis"
+date: "`r lubridate::date()`"
+output:
+  html_document:
+    toc: true
+description: "R and Spark"
+title: "R and Spark - Data"
+---
+
+```{r knitr_opts, include=F}
+knitr::opts_chunk$set(
+  echo = TRUE
+)
+```
+
+## Intro
+
+```{r pkgs, message=F}
+require(sparklyr)
+require(dplyr)
+require(readr)
+require(here, include.only = "here")
+require(glue, include.only = "glue")
+require(fs)
+```
+
+- Connect to Spark
+
+```{r}
+sc <- sparklyr::spark_connect(master = "local", version = "3.3.2")
+```
+
+- Data generation
+
+```{r}
+dat1 <- dplyr::tibble(x = letters, y = seq_along(letters))
+dir1 <- here("nogit/tmp/data-csv") |> fs::dir_create()
+dplyr::slice(dat1, 1:3) |> readr::write_csv(file.path(dir1, "let1.csv"))
+dplyr::slice(dat1, 10:13) |> readr::write_csv(file.path(dir1, "let2.csv"))
+```
+
+- Data reading (old-fashioned way)
+
+```{r}
+fs::dir_ls(dir1, glob = "*.csv", type = "file", recurse = TRUE) |>
+  purrr::map(readr::read_csv, col_types = readr::cols(x = "c", y = "i")) |>
+  purrr::list_rbind()
+```
+
+- Data reading (spark way)
+
+```{r}
+ctypes1 <- c(x = "character", y = "integer")
+# change col names
+ctypes2 <- c(foo = "character", bar = "integer")
+# char is not num, so will get NAs
+ctypes3 <- c(foo = "numeric", bar = "integer")
+sparklyr::spark_read_csv(sc, path = dir1, name = "dat2", columns = ctypes1)
+sparklyr::spark_read_csv(sc, path = dir1, name = "dat2", columns = ctypes2)
+sparklyr::spark_read_csv(sc, path = dir1, name = "dat2", columns = ctypes3)
+```
+
+- Benchmark write speed for Parquet, ORC, CSV, JSON:
+
+```{r eval=F}
+numeric <- copy_to(sc, data.frame(nums = runif(10^6)))
+bench::mark(
+  CSV = spark_write_csv(numeric, "data.csv", mode = "overwrite"),
+  JSON = spark_write_json(numeric, "data.json", mode = "overwrite"),
+  Parquet = spark_write_parquet(numeric, "data.parquet", mode = "overwrite"),
+  ORC = spark_write_parquet(numeric, "data.orc", mode = "overwrite"),
+  iterations = 20
+) |>
+  ggplot2::autoplot()
+```
+

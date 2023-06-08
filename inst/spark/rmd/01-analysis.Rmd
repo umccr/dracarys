@@ -1,0 +1,89 @@
+---
+author: "Peter Diakumis"
+date: "`r lubridate::date()`"
+output:
+  html_document:
+    toc: true
+description: "R and Spark"
+title: "R and Spark - Analysis"
+---
+
+```{r knitr_opts, include=F}
+knitr::opts_chunk$set(
+  echo = TRUE
+)
+```
+
+## Intro
+
+```{r pkgs, message=F}
+require(sparklyr)
+require(dplyr)
+require(ggplot2)
+require(dbplot)
+require(rmarkdown)
+```
+
+- Connect to Spark
+
+```{r}
+sc <- sparklyr::spark_connect(master = "local", version = "3.3.2")
+```
+
+- Analysis
+
+```{r}
+cars <- copy_to(sc, mtcars, name = "mtcars")
+cars |>
+  dplyr::summarise(dplyr::across(dplyr::everything(), \(x) base::mean(x, na.rm = TRUE))) |>
+  dplyr::show_query()
+
+cars |>
+  dplyr::mutate(transmission = dplyr::if_else(am == 0, "automatic", "manual")) |>
+  dplyr::group_by(transmission) |>
+  dplyr::summarise(dplyr::across(dplyr::everything(), \(x) base::mean(x, na.rm = TRUE))) |>
+  dplyr::show_query()
+
+# array/explode/percentile are passed on to SQL as-is
+cars |>
+  dplyr::summarise(mpg_percentile = percentile(mpg, array(0.25, 0.5, 0.75))) |>
+  dplyr::mutate(mpg_percentile = explode(mpg_percentile)) |>
+  dplyr::show_query()
+
+sparklyr::ml_corr(cars)
+corrr::correlate(cars, use = "pairwise.complete.obs", method = "pearson", quiet = TRUE) |>
+  corrr::shave() |>
+  corrr::rplot()
+```
+
+- Plotting
+
+```{r}
+# first in R
+mtcars |>
+  dplyr::mutate(cyl = as.factor(cyl)) |>
+  ggplot2::ggplot(aes(cyl, mpg)) +
+  ggplot2::geom_col()
+```
+
+```{r}
+# first in Spark
+car_group <- cars |>
+  dplyr::group_by(cyl) |>
+  dplyr::summarise(mpg_sum = sum(mpg, na.rm = TRUE)) |>
+  sparklyr::collect() |> # this brings it back to R
+  print()
+
+car_group |>
+  ggplot2::ggplot(aes(cyl, mpg_sum)) +
+  ggplot2::geom_col(fill = "#0F0FF0") +
+  ggplot2::coord_flip()
+
+cars |>
+  dbplot::dbplot_histogram(mpg, binwidth = 3) +
+  ggplot2::labs(title = "MPG Distribution", subtitle = "Histogram over miles per gallon")
+
+cars |>
+  dbplot::dbplot_raster(mpg, wt, resolution = 16)
+```
+
