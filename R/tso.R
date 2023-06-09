@@ -22,9 +22,6 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
     #' @return tibble with variants.
     read = function() {
       x <- self$path
-      if (self$is_url) {
-        x <- glue("'{x}'")
-      }
       tso_bcftools_vcf_readr(x)
     },
     #' @description
@@ -121,7 +118,7 @@ TsoFragmentLengthHistFile <- R6::R6Class(
     #' * Count
     read = function() {
       x <- self$path
-      j <- jsonlite::read_json(x)
+      j <- read_jsongz_jsonlite(x)
       assertthat::assert_that(
         all(names(j[[1]] %in% c("FragmentLength", "Count")))
       )
@@ -205,7 +202,7 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
         tibble::as_tibble(l) |>
           dplyr::mutate(dplyr::across(dplyr::everything(), ~ as.character(.)))
       }
-      j <- jsonlite::read_json(x)
+      j <- read_jsongz_jsonlite(x)
       assertthat::assert_that(
         all(names(j[[1]] %in% c("ConsensusReadDepth", "BasePair", "Percentage")))
       )
@@ -308,7 +305,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           dplyr::bind_rows()
       }
       # j <- jsonlite::read_json(x) # cannot handle Infinity
-      j <- RJSONIO::fromJSON(x, simplify = FALSE) # turns Infinity to NULL
+      j <- read_jsongz_rjsonio(x, simplify = FALSE) # turns Infinity to NULL
       j |>
         purrr::map(l2tib) |>
         dplyr::bind_rows(.id = "section")
@@ -439,7 +436,7 @@ TsoTmbFile <- R6::R6Class(
     read = function() {
       x <- self$path
       # j <- jsonlite::read_json(x) # cannot handle NaN
-      j <- RJSONIO::fromJSON(x) # turns NaN to NULL
+      j <- read_jsongz_rjsonio(x) # turns NaN to NULL
       # not interested in Settings element
       j[["Settings"]] <- NULL
       # handle silly NULLs
@@ -535,7 +532,7 @@ TsoMsiFile <- R6::R6Class(
     #'   - label:
     read = function() {
       x <- self$path
-      j <- jsonlite::read_json(x)
+      j <- read_jsongz_jsonlite(x)
       # not interested in Settings element
       j[["Settings"]] <- NULL
       j[["ResultMessage"]] <- j[["ResultMessage"]] %||% NA_character_
@@ -585,7 +582,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
     #' @return list of tibbles
     read = function() {
       x <- self$path
-      j <- jsonlite::read_json(x)
+      j <- read_jsongz_jsonlite(x)
       dat <- j[["data"]]
       ## sampleInformation
       sample_info <- dat[["sampleInformation"]] |>
@@ -803,8 +800,11 @@ tso_cnv <- function(cnvs) {
 }
 
 tso_bcftools_vcf_readr <- function(vcf) {
-  # NOTE: this handles single-sample VCFs only
+  # NOTE (PD): this handles single-sample VCFs only
   # bcftools works out-of-the-box on presigned URLs too
+  if (is_url(vcf)) {
+    vcf <- glue("'{vcf}'")
+  }
   cmd_header <- glue("bcftools view -h {vcf}")
   h <- system(cmd_header, intern = TRUE)
   # splits header sections into nice tibbles, mostly to grab available FORMAT/INFO fields
@@ -840,4 +840,27 @@ tso_bcftools_vcf_readr <- function(vcf) {
       "QUAL" = "d"
     )
   )
+}
+
+read_jsongz_jsonlite <- function(x, ...) {
+  if (is_url(x)) {
+    # https://github.com/jeroen/jsonlite/issues/414
+    res <- base::url(x) |>
+      base::gzcon() |>
+      jsonlite::parse_json(...)
+    return(res)
+  }
+  jsonlite::read_json(x, ...)
+}
+
+read_jsongz_rjsonio <- function(x, ...) {
+  if (is_url(x)) {
+    # https://github.com/umccr/dracarys/issues/74
+    res <- base::url(x) |>
+      base::gzcon() |>
+      readr::read_lines() |>
+      RJSONIO::fromJSON(...)
+    return(res)
+  }
+  RJSONIO::fromJSON(x, ...)
 }

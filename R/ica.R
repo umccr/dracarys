@@ -81,6 +81,8 @@ gds_file_download <- function(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN")) 
 #'
 #' @param gdsdir Full path to GDS directory.
 #' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+#' @param include Use PresignedUrl to include presigned URLs to all files within
+#' the GDS directory.
 #'
 #' @return Tibble with file basename, file size, file full data path, file dir name.
 #' @export
@@ -96,10 +98,12 @@ gds_files_list <- function(gdsdir, token, include = NULL) {
   path2 <- sub("gds://(.*?)/(.*)", "\\2", gdsdir)
   query_url <- glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize=100")
   if (!is.null(include)) {
-    assertthat::assert_that(include == "PresignedUrl")
-    query_url <- glue("{query_url}&include=PresignedUrl")
+    .url_include_presignedurl <- function(x, incl) {
+      assertthat::assert_that(incl == "PresignedUrl")
+      glue("{x}&include=PresignedUrl")
+    }
+    query_url <- .url_include_presignedurl(query_url, include)
   }
-
   res <- httr::GET(
     query_url,
     httr::add_headers(Authorization = glue("Bearer {token}")),
