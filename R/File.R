@@ -3,60 +3,51 @@
 #' @description File is a base R6 class representing a TSV/CSV/JSON output from
 #' a DRAGEN workflow.
 #'
-#' A File has a path, a basename, a type, and a default read method for its type.
+#' A File has a path, a basename, a type, and can be a presigned URL.
 #'
 #' @examples
 #' F1 <- File$new(readr::readr_example("mtcars.csv"))
-#' (parsed_f1 <- F1$read(col_types = readr::cols("double")))
 #' (bname_f1 <- F1$bname())
 #' (F2 <- File$new("https://stratus-gds-aps2/foo/bar/baz.csv?bla"))
 #'
 #' @testexamples
 #' expect_true(inherits(F1, c("File", "R6")))
-#' expect_true(inherits(parsed_f1, "data.frame"))
 #' expect_equal(bname_f1, "mtcars.csv")
 #' expect_equal(F2$bname(), "baz.csv")
-#' expect_equal(F2$type(), "CSV")
+#' expect_equal(F2$type(), NA_character_)
+#' expect_equal(F2$is_url, TRUE)
 #'
 #' @export
 File <- R6::R6Class("File", public = list(
   #' @field path Name or full path of the file.
+  #' @field is_url Is the file a presigned URL?
   path = NULL,
+  is_url = NULL,
 
   #' @description Create a new File object.
+  #' @param is_url Is the file a presigned URL?
   #' @param path Name or full path of the file.
-  initialize = function(path = NULL) {
+  initialize = function(path = NULL, is_url = NULL) {
     stopifnot(is.character(path), length(path) == 1)
-    is_presignedurl <- grepl("^https://stratus-gds-aps2", path)
-    self$path <- NULL
-    if (is_presignedurl) {
-      self$path <- path
-    } else {
-      self$path <- normalizePath(path)
-    }
+    self$is_url <- is_url(path)
+    self$path <- base::ifelse(is_url(path), path, normalizePath(path))
   },
 
   #' @description Basename of the file.
   #' @return Basename of the file as a character vector.
   bname = function() {
     x <- self$path
-    is_presignedurl <- grepl("^https://stratus-gds-aps2", x)
-    if (is_presignedurl) {
+    if (is_url(x)) {
       x <- strsplit(self$path, "\\?")[[1]][1]
     }
     basename(x)
   },
 
   #' @description Get the type of file.
-  #' @return String describing the type of file (CSV, TSV, JSON or OTHER).
+  #' @return String describing the specific type of dracarys file (NA if not a dracarys-recognised file).
   type = function() {
     nm <- self$bname()
-    dplyr::case_when(
-      grepl("\\.json", nm) ~ "JSON",
-      grepl("\\.csv", nm) ~ "CSV",
-      grepl("\\.tsv", nm) ~ "TSV",
-      TRUE ~ "OTHER"
-    )
+    match_regex(nm)
   },
 
   #' @description Print details about the File.
@@ -66,25 +57,8 @@ File <- R6::R6Class("File", public = list(
     cat(glue("Path: {self$path}"), "\n")
     cat(glue("Basename: {self$bname()}"), "\n")
     cat(glue("Type: {self$type()}"), "\n")
+    cat(glue("isURL: {self$is_url}"), "\n")
     invisible(self)
-  },
-
-  #' @description Read the file based on its type.
-  #' @param ... Arguments passed on to appropriate read_* function.
-  read = function(...) {
-    x <- self$path
-    t <- self$type()
-    possible_types <- c("CSV", "TSV", "JSON", "OTHER")
-    assertthat::assert_that(t %in% possible_types)
-    if (t == "CSV") {
-      readr::read_csv(x, ...)
-    } else if (t == "TSV") {
-      readr::read_tsv(x, ...)
-    } else if (t == "JSON") {
-      jsonlite::read_json(x, ...)
-    } else {
-      stop(glue("Don't know how to read file of type {t}."))
-    }
   }
 ))
 
@@ -98,4 +72,8 @@ File <- R6::R6Class("File", public = list(
 read.File <- function(x, ...) {
   assertthat::assert_that(inherits(x, "File"))
   x$read(...)
+}
+
+is_url <- function(x) {
+  grepl("(http|https)://[a-zA-Z0-9./?=_%:-]*", x)
 }

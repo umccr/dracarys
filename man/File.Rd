@@ -7,11 +7,10 @@
 File is a base R6 class representing a TSV/CSV/JSON output from
 a DRAGEN workflow.
 
-A File has a path, a basename, a type, and a default read method for its type.
+A File has a path, a basename, a type, and can be a presigned URL.
 }
 \examples{
 F1 <- File$new(readr::readr_example("mtcars.csv"))
-(parsed_f1 <- F1$read(col_types = readr::cols("double")))
 (bname_f1 <- F1$bname())
 (F2 <- File$new("https://stratus-gds-aps2/foo/bar/baz.csv?bla"))
 
@@ -20,6 +19,8 @@ F1 <- File$new(readr::readr_example("mtcars.csv"))
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{path}}{Name or full path of the file.}
+
+\item{\code{is_url}}{Is the file a presigned URL?}
 }
 \if{html}{\out{</div>}}
 }
@@ -30,7 +31,6 @@ F1 <- File$new(readr::readr_example("mtcars.csv"))
 \item \href{#method-File-bname}{\code{File$bname()}}
 \item \href{#method-File-type}{\code{File$type()}}
 \item \href{#method-File-print}{\code{File$print()}}
-\item \href{#method-File-read}{\code{File$read()}}
 \item \href{#method-File-clone}{\code{File$clone()}}
 }
 }
@@ -40,13 +40,15 @@ F1 <- File$new(readr::readr_example("mtcars.csv"))
 \subsection{Method \code{new()}}{
 Create a new File object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{File$new(path = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{File$new(path = NULL, is_url = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{path}}{Name or full path of the file.}
+
+\item{\code{is_url}}{Is the file a presigned URL?}
 }
 \if{html}{\out{</div>}}
 }
@@ -74,7 +76,7 @@ Get the type of file.
 }
 
 \subsection{Returns}{
-String describing the type of file (CSV, TSV, JSON or OTHER).
+String describing the specific type of dracarys file (NA if not a dracarys-recognised file).
 }
 }
 \if{html}{\out{<hr>}}
@@ -90,23 +92,6 @@ Print details about the File.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-File-read"></a>}}
-\if{latex}{\out{\hypertarget{method-File-read}{}}}
-\subsection{Method \code{read()}}{
-Read the file based on its type.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{File$read(...)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{...}}{Arguments passed on to appropriate read_* function.}
 }
 \if{html}{\out{</div>}}
 }

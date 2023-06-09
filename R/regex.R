@@ -38,6 +38,7 @@ FILE_REGEX <- tibble::tribble(
   "TMB_Trace\\.tsv$", "tso__tmb_trace_tsv", "TsoTmbTraceTsvFile",
   "_Fusions\\.csv$", "tso__fusions_csv", "TsoFusionsCsvFile",
   "SampleAnalysisResults\\.json\\.gz$", "tso__sample_analysis_results", "TsoSampleAnalysisResultsFile",
+  "MergedSmallVariants\\.vcf\\.gz$", "tso__mergedsmallvariants_vcf", "TsoMergedSmallVariantsVcfFile",
   "fastqc_metrics\\.csv$", "dragen/fastqc_metrics", NULL,
   "insert-stats\\.tab$", "dragen/insert_stats", NULL,
   "sv_metrics\\.csv$", "dragen/sv_metrics", NULL,

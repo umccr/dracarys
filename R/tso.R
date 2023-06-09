@@ -1,3 +1,51 @@
+#' TsoMergedSmallVariantsVcfFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `MergedSmallVariants.vcf.gz` file output from TSO.
+#'
+#' @examples
+#' \dontrun{
+#' x <- here::here("nogit/tso/2023-05-30/SBJ00595_L2100178/PTC_SrSqCMM1pc_L2100178_rerun_MergedSmallVariants.vcf.gz")
+#' d <- TsoMergedSmallVariantsVcfFile$new(x)
+#' d_parsed <- d$read() # or read(d)
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' }
+#' @export
+TsoMergedSmallVariantsVcfFile <- R6::R6Class(
+  "TsoMergedSmallVariantsVcfFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `MergedSmallVariants.vcf.gz` file output from TSO.
+    #'
+    #' @return tibble with variants.
+    read = function() {
+      x <- self$path
+      if (self$is_url) {
+        x <- glue("'{x}'")
+      }
+      tso_bcftools_vcf_readr(x)
+    },
+    #' @description
+    #' Writes a tidy version of the `MergedSmallVariants.vcf.gz` file output from TSO.
+    #'
+    #' @param d Parsed object from `self$read()`.
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
+    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
+    #' 'parquet', 'both').
+    write = function(d, out_dir, prefix, out_format = "tsv") {
+      prefix <- file.path(out_dir, prefix)
+      prefix2 <- glue("{prefix}_merged_small_variants")
+      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    }
+  )
+)
+
+
+
+
 #' TsoTmbTraceTsvFile R6 Class
 #'
 #' @description
@@ -752,4 +800,44 @@ tso_snv <- function(snvs) {
 
 tso_cnv <- function(cnvs) {
   purrr::map_dfr(cnvs, tibble::as_tibble)
+}
+
+tso_bcftools_vcf_readr <- function(vcf) {
+  # NOTE: this handles single-sample VCFs only
+  # bcftools works out-of-the-box on presigned URLs too
+  cmd_header <- glue("bcftools view -h {vcf}")
+  h <- system(cmd_header, intern = TRUE)
+  # splits header sections into nice tibbles, mostly to grab available FORMAT/INFO fields
+  split_hdr <- function(pat) {
+    h[grepl(pat, h)] |>
+      tibble::as_tibble_col(column_name = "x") |>
+      dplyr::mutate(x = sub(pat, "", .data$x)) |>
+      tidyr::separate_wider_delim("x", delim = ",", names = c("ID", "Number", "Type", "Description")) |>
+      dplyr::mutate(
+        ID = sub("ID=", "", .data$ID),
+        Number = sub("Number=", "", .data$Number),
+        Type = sub("Type=", "", .data$Type),
+        Description = sub("Description=\\\"(.*)\\\">", "\\1", .data$Description)
+      )
+  }
+  fmt <- split_hdr("##FORMAT=<") |> dplyr::pull(.data$ID)
+  info <- split_hdr("##INFO=<") |> dplyr::pull(.data$ID)
+  main <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER")
+  main_cols <- paste0("%", main) |>
+    paste(collapse = "\\t")
+  info_cols <- paste0("%INFO/", info, collapse = "\\t")
+  fmt_cols <- paste0("[\\t", paste0(paste0("%", fmt), collapse = "\\t"), "]\\n")
+  q <- paste0(main_cols, "\\t", info_cols, fmt_cols)
+  cmd_body <- glue("bcftools query -f \"{q}\" {vcf}")
+  b <- system(cmd_body, intern = TRUE)
+  cnames <- c(main, paste0("INFO_", info), fmt)
+  readr::read_tsv(
+    I(b),
+    col_names = cnames,
+    col_types = readr::cols(
+      .default = "c",
+      "POS" = "i",
+      "QUAL" = "d"
+    )
+  )
 }
