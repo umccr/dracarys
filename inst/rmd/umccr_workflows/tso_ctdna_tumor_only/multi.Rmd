@@ -68,11 +68,11 @@ d |>
   )
 
 
-    obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = prefix, out_format = out_format)),
-    plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
-  )
-
-  start <- Sys.time()
+#    obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = prefix, out_format = out_format)),
+#    plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
+#  )
+#
+#  start <- Sys.time()
 d <- here("nogit/warehouse/cttso") |>
   dir_ls(type = "file", recurse = TRUE) |>
   as_tibble_col(column_name = "path") |>
