@@ -22,6 +22,9 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
     #' @return tibble with variants.
     read = function() {
       x <- self$path
+      if (self$is_url) {
+        x <- glue("'{x}'")
+      }
       tso_bcftools_vcf_readr(x)
     },
     #' @description
