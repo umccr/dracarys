@@ -22,7 +22,7 @@ PcgrJsonFile <- R6::R6Class(
     #' @return List of tibbles.
     read = function() {
       x <- self$path
-      j <- jsonlite::read_json(x)
+      j <- read_jsongz_jsonlite(x)
       # l2tib <- function(el) {
       #   purrr::flatten(el) |>
       #     dplyr::bind_rows() |>
