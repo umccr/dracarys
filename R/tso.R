@@ -40,9 +40,6 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
   )
 )
 
-
-
-
 #' TsoTmbTraceTsvFile R6 Class
 #'
 #' @description
