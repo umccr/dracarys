@@ -11,7 +11,7 @@ session_info_kable(pkgs = NULL)
 }
 \value{
 A list with two kables containing information about the platform and
-the specified packages (\code{pkgs}).
+the specified packages.
 }
 \description{
 Session information kables for vignettes.
