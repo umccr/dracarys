@@ -36,8 +36,6 @@ requirements:
     - r-cli
     - r-emojifont
     - r-fs
-    - r-googledrive,
-    - r-googlesheets4,
     - r-here
     - r-httr
     - r-jose
@@ -68,8 +66,6 @@ requirements:
     - r-cli
     - r-emojifont
     - r-fs
-    - r-googledrive,
-    - r-googlesheets4,
     - r-here
     - r-httr
     - r-jose

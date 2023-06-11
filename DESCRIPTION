@@ -37,8 +37,6 @@ Suggests:
     cli,
     emojifont,
     fs,
-    googledrive,
-    googlesheets4,
     here,
     httr,
     jose,
