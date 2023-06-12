@@ -461,8 +461,8 @@ portal_meta_read <- function(pmeta) {
   # keep all character except start/end
   ctypes <- readr::cols(
     .default = "c",
-    start = readr::col_datetime(format = ""),
-    end = readr::col_datetime(format = ""),
+    start = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
+    end = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
   )
   readr::read_csv(pmeta, col_types = ctypes)
 }
