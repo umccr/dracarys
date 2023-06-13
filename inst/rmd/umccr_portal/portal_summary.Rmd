@@ -1,0 +1,440 @@
+---
+author: "University of Melbourne Centre for Cancer Research"
+date: "`r lubridate::date()`"
+output:
+  html_document:
+    toc: true
+params:
+  title: "UMCCR Portal Workflow Summary"
+description: "UMCCR Portal Workflow Summary"
+title: "`r params$title`"
+---
+
+```{css echo=FALSE}
+.main-container {
+  max-width: 1400px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+```
+
+```{r knitr_opts, include=F}
+knitr::opts_chunk$set(
+  collapse = TRUE, echo = FALSE,
+  warning = FALSE, message = FALSE
+)
+```
+
+```{r load_pkgs}
+{
+  require(dplyr)
+  require(tidyr)
+  require(purrr)
+  require(tibble)
+  require(readr)
+  require(dracarys)
+  require(glue, include.only = "glue")
+  require(here, include.only = "here")
+  require(kableExtra)
+  require(knitr, include.only = "kable")
+  require(DT)
+  require(fs)
+  require(vistime)
+}
+```
+
+```{r funcs}
+kable_empty_wf <- function(wf) {
+  kableExtra::kbl(NULL, caption = glue("<strong>NO {wf} WORKFLOWS WERE RUN</strong>"), escape = FALSE) |>
+    kableExtra::kable_minimal(full_width = TRUE, position = "left")
+}
+
+glims_read <- function() {
+  lims_key <- googledrive::drive_find("^Google LIMS$", shared_drive = "LIMS")$id
+  lims <- lims_key |>
+    googlesheets4::read_sheet("Sheet1", na = c(".", "", "-"), col_types = "c")
+  lims |> readr::type_convert(col_types = readr::cols(.default = "c", Timestamp = "T"))
+}
+
+dt_view <- function(x, ...) {
+  x |>
+    DT::datatable(
+      filter = list(position = "top", clear = FALSE, plain = TRUE),
+      class = "cell-border display compact",
+      rownames = FALSE,
+      extensions = c("Scroller", "Buttons", "KeyTable"),
+      options = list(
+        scroller = TRUE, scrollY = 400, scrollX = TRUE,
+        autoWidth = FALSE, keys = TRUE,
+        buttons = c("csv"), dom = "Blfrtip"
+      ),
+      escape = FALSE,
+      ...
+    )
+}
+
+blank_lines <- function(n = 10) {
+  cat(rep("&nbsp;  ", n), sep = "\n")
+}
+
+get_colours <- function(nc) {
+  max1 <- 12
+  cols1 <- RColorBrewer::brewer.pal(n = max1, name = "Set3")
+  if (nc > max1) {
+    cols1 <- colorRampPalette(cols1)(nc)
+  }
+  cols1[seq_len(nc)]
+}
+
+get_sbj_url <- function(x, colour = NULL) {
+  sbj_url <- glue("https://portal.umccr.org/subjects/{x}/overview")
+  if (!is.null(colour)) {
+    return(glue("<a href={sbj_url} style='background-color:{colour}'>{x}</a>"))
+  }
+  sbj_url <- glue("<a href={sbj_url}>{x}</a>")
+  sbj_url
+}
+```
+
+```{r vars}
+# options(width = 150)
+start_date <- "2023-06-09"
+wf_order <- c(
+  "bcl_convert",
+  "tso_ctdna_tumor_only",
+  "wgs_alignment_qc",
+  "wts_tumor_only",
+  "wgs_tumor_normal",
+  "umccrise",
+  "rnasum"
+)
+
+lims_rds <- here::here(glue("nogit/data_portal/lims/2023-06-11.rds"))
+# lims_raw <- dracarys::glims_read()
+# saveRDS(lims, file = lims_rds)
+lims_raw <- readr::read_rds(lims_rds)
+pmeta <- here::here("nogit/data_portal/workflows/2023-06-11_subset.csv") |>
+  dracarys:::portal_meta_read() |>
+  # change to AEST timezone
+  dplyr::mutate(
+    start = base::format(.data$start, tz = "Australia/Melbourne"),
+    end = base::format(.data$end, tz = "Australia/Melbourne")
+  ) |>
+  dplyr::filter(start >= start_date) |>
+  # get rid of a couple wf runs before bcl_convert
+  dplyr::mutate(type_name = factor(.data$type_name, levels = wf_order))
+lims <- lims_raw |>
+  dplyr::select(
+    Timestamp, SubjectID, SampleID, SampleName, LibraryID, ExternalSubjectID, ExternalSampleID,
+    ProjectOwner, ProjectName, Type, Assay, Phenotype, Source, Quality, Topup, Workflow
+  )
+```
+
+## Summary for Workflows Run after `r start_date`
+
+```{r data_setup}
+pmeta_sumy <- pmeta |>
+  dplyr::select(
+    start, end, wfr_name, type_name, wfr_id, portal_run_id
+  ) |>
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    sbj_lib = as.character(glue("umccr__automated__{.data$type_name}__")),
+    sbj_lib = sub(paste0(.data$sbj_lib, "(.*)__2023.*"), "\\1", .data$wfr_name),
+    sbjid = sub("(SBJ.*)__L.*", "\\1", .data$sbj_lib)
+  ) |>
+  dplyr::ungroup()
+unique_sbj <- sort(unique(pmeta_sumy$sbjid))
+clrs1 <- get_colours(length(unique_sbj)) |>
+  purrr::set_names(unique_sbj) |>
+  tibble::enframe(name = "sbjid", value = "color") |>
+  dplyr::mutate(sbj_url = get_sbj_url(.data$sbjid, colour = .data$color))
+pmeta_sumy_count <- pmeta_sumy |>
+  dplyr::count(type_name, .drop = FALSE) |>
+  tibble::deframe()
+chunks1 <- as.list(pmeta_sumy_count > 0)
+```
+
+```{r}
+pmeta_sumy_count |>
+  tibble::enframe(name = "workflow", value = "count") |>
+  kableExtra::kbl(caption = "Workflow Type Count", row.names = TRUE) |>
+  kableExtra::kable_minimal(full_width = FALSE, position = "float_left")
+sbj_sumy <- pmeta_sumy |>
+  dplyr::count(sbjid) |>
+  dplyr::filter(grepl("SBJ", .data$sbjid)) |>
+  dplyr::arrange(desc(sbjid)) |>
+  dplyr::left_join(clrs1, by = "sbjid")
+sbj_sumy |>
+  dplyr::select(sbj_url, n) |>
+  kableExtra::kbl(caption = "Subjects processed via one or more workflows", row.names = TRUE, escape = FALSE) |>
+  kableExtra::kable_minimal(full_width = FALSE, position = "left")
+```
+
+## RuntimeVis
+
+```{r vistime, fig.width=13, fig.height = 8}
+p1 <- pmeta_sumy |>
+  dplyr::group_by(sbj_lib, type_name) |>
+  dplyr::mutate(
+    n_type = n(),
+    is_dup_type = n_type > 1,
+  ) |>
+  dplyr::ungroup() |>
+  # take care of rnasum re-runs
+  dplyr::mutate(sbj_lib = if_else(is_dup_type, paste0(sbj_lib, "_", portal_run_id), sbj_lib)) |>
+  dplyr::left_join(clrs1, by = "sbjid") |>
+  dplyr::mutate(sbjid = factor(.data$sbjid, levels = clrs1$sbjid))
+vistime1 <- p1 |>
+  vistime::vistime(
+    col.event = "sbj_lib",
+    col.group = "type_name",
+    col.color = "color",
+    show_labels = TRUE,
+    optimize_y = FALSE,
+    linewidth = 15
+  )
+
+# Decrease font size
+pp <- plotly::plotly_build(vistime1)
+font_size <- 10
+# text_pos <- "center"
+for (i in seq_along(pp$x$data)) {
+  if (pp$x$data[[i]]$mode == "text") {
+    pp$x$data[[i]]$textfont$size <- font_size
+    # pp$x$data[[i]]$textposition <- text_pos
+  }
+}
+pp
+```
+
+## Workflow Metadata {.tabset .tabset-pills}
+
+```{r echo=FALSE}
+wf <- "bcl_convert"
+```
+
+### 1. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_bcl_convert() |>
+  dplyr::select(
+    runfolder_name, LibraryID, SampleID, batch_name, start, end
+  ) |>
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::select(
+    runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    ProjectOwner, ProjectName, batch_name, Type, Assay, Source, Quality, Workflow,
+    start, end
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r}
+wf <- "tso_ctdna_tumor_only"
+```
+
+### 2. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_tso_ctdna_tumor_only() |>
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::select(
+    SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
+    wfr_id, start, end, gds_outdir
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "wgs_alignment_qc"
+```
+
+### 3. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_wgs_alignment_qc() |>
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::select(
+    SubjectID, LibraryID, SampleID, Phenotype, Lane, ExternalSubjectID,
+    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
+    wfr_id, start, end, gds_outdir_dragen
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "wts_tumor_only"
+```
+
+### 4. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_wts_tumor_only() |>
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::select(
+    SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    Type, Assay, Source, Quality, Workflow,
+    wfr_id, start, end, gds_outdir_dragen
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "wgs_tumor_normal"
+```
+
+### 5. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_wgs_tumor_normal() |>
+  tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
+  tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
+  tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
+  tidyr::separate_wider_delim("SampleID__LibraryID", delim = "__", names = c("SampleID", "LibraryID")) |>
+  # include Phenotype to double-check join
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID", "Phenotype")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::select(
+    SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    Type, Assay, Source, Quality, Workflow,
+    wfr_id, start, end, gds_outdir_dragen_somatic, gds_outdir_dragen_germline
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "umccrise"
+```
+
+### 6. `r wf` {.active}
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[["umccrise"]]}
+pmeta |>
+  dracarys::meta_umccrise() |>
+  tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
+  tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
+  tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
+  tidyr::separate_wider_delim("SampleID__LibraryID", delim = "__", names = c("SampleID", "LibraryID")) |>
+  # include Phenotype to double-check join
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID", "Phenotype")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::select(
+    SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
+    wfr_id, start, end, gds_outdir_umccrise
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "rnasum"
+```
+
+### 7. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[["rnasum"]]}
+pmeta |>
+  dracarys::meta_rnasum() |>
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::select(
+    SubjectID, LibraryID, SampleID, Phenotype, rnasum_dataset, ExternalSubjectID,
+    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
+    wfr_id, start, end, gds_outdir_rnasum,
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+## Session Info {.tabset .tabset-pills}
+
+```{r}
+si <- dracarys:::session_info_tbls(
+  pkgs = c("dracarys", "base", "dplyr", "DT", "readr", "purrr", "tidyr", "tibble", "vistime", "kableExtra")
+)
+si_pkg <- si$si_pkg |>
+  kableExtra::kbl(full_width = FALSE, position = "left") |>
+  kableExtra::kable_styling(fixed_thead = T)
+si_pl <- si$si_pl |>
+  kableExtra::kbl(full_width = FALSE, position = "left") |>
+  kableExtra::kable_minimal()
+```
+
+### Platform
+
+```{r}
+si_pl
+```
+
+### Packages
+
+```{r}
+si_pkg
+```
+

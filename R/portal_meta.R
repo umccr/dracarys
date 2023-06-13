@@ -19,6 +19,9 @@ meta_bcl_convert <- function(pmeta, status = "Succeeded") {
       .data$type_name == type,
       .data$end_status %in% status
     )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
   d <- wf |>
     meta_io_fromjson() |>
     dplyr::mutate(
@@ -83,6 +86,9 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
       .data$type_name == type,
       .data$end_status %in% status
     )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
   d <- wf |>
     meta_io_fromjson() |>
     dplyr::mutate(
@@ -133,6 +139,9 @@ meta_rnasum <- function(pmeta, status = "Succeeded") {
       .data$type_name == type,
       .data$end_status %in% status
     )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
   d <- wf |>
     meta_io_fromjson() |>
     dplyr::mutate(
@@ -185,6 +194,9 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
       .data$type_name == type,
       .data$end_status %in% status
     )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
   d <- wf |>
     meta_io_fromjson() |>
     dplyr::mutate(
@@ -237,6 +249,9 @@ meta_wgs_tumor_normal <- function(pmeta, status = "Succeeded") {
     } else {
       return(NA)
     }
+  }
+  if (nrow(wf) == 0) {
+    return(wf)
   }
   d <- wf |>
     meta_io_fromjson() |>
@@ -305,6 +320,9 @@ meta_umccrise <- function(pmeta, status = "Succeeded") {
     } else {
       return(NA)
     }
+  }
+  if (nrow(wf) == 0) {
+    return(wf)
   }
   d <- wf |>
     meta_io_fromjson() |>
@@ -389,6 +407,9 @@ meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
       .data$type_name == type,
       .data$end_status %in% status
     )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
   # grab libid/sampleid from the input meta, and outdir from the output meta
   d <- wf |>
     meta_io_fromjson() |>
@@ -440,8 +461,8 @@ portal_meta_read <- function(pmeta) {
   # keep all character except start/end
   ctypes <- readr::cols(
     .default = "c",
-    start = readr::col_datetime(format = ""),
-    end = readr::col_datetime(format = ""),
+    start = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
+    end = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
   )
   readr::read_csv(pmeta, col_types = ctypes)
 }

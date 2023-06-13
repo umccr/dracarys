@@ -19,6 +19,7 @@ gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, includ
     dplyr::ungroup() |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
     dplyr::select(dplyr::any_of(cols_sel))
+  d
 }
 
 #' GDS File Presigned URL

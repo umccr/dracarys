@@ -13,9 +13,19 @@ date_log <- function() {
 #' @param pkgs Vector of R packages to display in the vignette. By default returns all.
 #'
 #' @return A list with two kables containing information about the platform and
-#' the specified packages (`pkgs`).
+#' the specified packages.
 #' @export
 session_info_kable <- function(pkgs = NULL) {
+  si <- session_info_tbls(pkgs)
+  si_pl <- si$si_pl
+  si_pkg <- si$si_pkg
+  list(
+    si_pl = knitr::kable(si_pl, caption = "Platform information."),
+    si_pkg = knitr::kable(si_pkg, caption = "Main packages used.")
+  )
+}
+
+session_info_tbls <- function(pkgs = NULL) {
   si <- sessioninfo::session_info(include_base = TRUE)
   assertthat::assert_that(all(c("platform", "packages") %in% names(si)))
   si_pl <- unclass(si[["platform"]]) |>
@@ -32,8 +42,8 @@ session_info_kable <- function(pkgs = NULL) {
       dplyr::filter(.data$package %in% pkgs)
   }
   list(
-    si_pl = knitr::kable(si_pl, caption = "Platform information."),
-    si_pkg = knitr::kable(si_pkg, caption = "Main packages used.")
+    si_pl = si_pl,
+    si_pkg = si_pkg
   )
 }
 
