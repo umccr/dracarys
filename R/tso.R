@@ -796,7 +796,13 @@ tso_cnv <- function(cnvs) {
   purrr::map_dfr(cnvs, tibble::as_tibble)
 }
 
-tso_bcftools_vcf_readr <- function(vcf) {
+#' Parse Single-Sample VCF with bcftools
+#'
+#' @param vcf VCF with a single sample.
+#'
+#' @return Tibble with all the main, FORMAT, and INFO fields detected in the VCF header as columns.
+#' @export
+bcftools_parse_single_vcf <- function(vcf) {
   # NOTE (PD): this handles single-sample VCFs only
   # bcftools works out-of-the-box on presigned URLs too
   if (is_url(vcf)) {
