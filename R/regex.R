@@ -17,60 +17,60 @@
 match_regex <- function(x, regexes = FILE_REGEX) {
   assertthat::assert_that(
     inherits(regexes, "data.frame"),
-    all(c("regex", "name") %in% colnames(regexes))
+    all(c("regex", "fun") %in% colnames(regexes))
   )
   # d[grepl(FILE_REGEX[["regex"]][i], d[["path"]]), "type"] <- FILE_REGEX[["name"]][i]
   for (i in seq_len(nrow(regexes))) {
     if (grepl(regexes[["regex"]][i], x)) {
-      return(regexes[["name"]][i])
+      return(regexes[["fun"]][i])
     }
   }
   return(NA_character_)
 }
 
 FILE_REGEX <- tibble::tribble(
-  ~regex, ~name, ~fun,
-  "AlignCollapseFusionCaller_metrics\\.json\\.gz$", "tso__align_collapse_fusion_caller_metrics", "TsoAlignCollapseFusionCallerMetricsFile",
-  "TargetRegionCoverage\\.json\\.gz$", "tso__target_region_coverage", "TsoTargetRegionCoverageFile",
-  "fragment_length_hist\\.json\\.gz$", "tso__fragment_length_hist", "TsoFragmentLengthHistFile",
-  "msi\\.json\\.gz$", "tso__msi", "TsoMsiFile",
-  "tmb\\.json\\.gz$", "tso__tmb", "TsoTmbFile",
-  "TMB_Trace\\.tsv$", "tso__tmb_trace_tsv", "TsoTmbTraceTsvFile",
-  "_Fusions\\.csv$", "tso__fusions_csv", "TsoFusionsCsvFile",
-  "SampleAnalysisResults\\.json\\.gz$", "tso__sample_analysis_results", "TsoSampleAnalysisResultsFile",
-  "MergedSmallVariants\\.vcf\\.gz$", "tso__mergedsmallvariants_vcf", "TsoMergedSmallVariantsVcfFile",
-  "fastqc_metrics\\.csv$", "dragen/fastqc_metrics", NULL,
-  "insert-stats\\.tab$", "dragen/insert_stats", NULL,
-  "sv_metrics\\.csv$", "dragen/sv_metrics", NULL,
-  "trimmer_metrics\\.csv$", "dragen/trimmer_metrics", NULL,
-  "wgs_contig_mean_cov(_tumor|_normal|)\\.csv$", "dragen/contig_mean_cov", NULL,
-  "wgs_fine_hist(_tumor|_normal|)\\.csv$", "dragen/fine_hist", NULL,
-  "wgs_hist(_tumor|_normal|)\\.csv$", "dragen/hist", NULL,
-  "wgs_overall_mean_cov(_tumor|_normal|)\\.csv$", "dragen/coverage_overall", NULL,
-  "wgs_coverage_metrics(_tumor|_normal|)\\.csv$", "dragen/coverage_metrics", NULL,
-  "fragment_length_hist\\.csv$", "dragen/fragment_length_hist", NULL,
-  "mapping_metrics\\.csv$", "dragen/mapping_metrics", NULL,
-  "ploidy_estimation_metrics\\.csv$", "dragen/ploidy_estimation_metrics", NULL,
-  "replay\\.json$", "dragen/replay", NULL,
-  "time_metrics\\.csv$", "dragen/time_metrics", NULL,
-  "vc_metrics\\.csv$", "dragen/vc_metrics", NULL,
-  "multiqc_data\\.json", "multiqc", "MultiqcFile",
-  "somatic\\.pcgr\\.json\\.gz$", "pcgr__json", "PcgrJsonFile",
-  "somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$", "pcgr__tiers", "PcgrTiersFile",
-  "chord\\.tsv\\.gz$", "um__chord", "UmChordTsvFile",
-  "hrdetect\\.tsv\\.gz$", "um__hrdetect", "UmHrdetectTsvFile",
-  "snv_2015\\.tsv\\.gz$", "um__sigs2015_snv", "UmSigsSnvFile",
-  "snv_2020\\.tsv\\.gz$", "um__sigs2020_snv", "UmSigsSnvFile",
-  "-qc_summary\\.tsv\\.gz$", "um__qcsum", "UmQcSumFile"
+  ~regex, ~fun,
+  "AlignCollapseFusionCaller_metrics\\.json\\.gz$", "TsoAlignCollapseFusionCallerMetricsFile",
+  "TargetRegionCoverage\\.json\\.gz$", "TsoTargetRegionCoverageFile",
+  "fragment_length_hist\\.json\\.gz$", "TsoFragmentLengthHistFile",
+  "msi\\.json\\.gz$", "TsoMsiFile",
+  "tmb\\.json\\.gz$", "TsoTmbFile",
+  "TMB_Trace\\.tsv$", "TsoTmbTraceTsvFile",
+  "_Fusions\\.csv$", "TsoFusionsCsvFile",
+  "SampleAnalysisResults\\.json\\.gz$", "TsoSampleAnalysisResultsFile",
+  "MergedSmallVariants\\.vcf\\.gz$", "TsoMergedSmallVariantsVcfFile",
+  "fastqc_metrics\\.csv$", "NULL",
+  "insert-stats\\.tab$", "NULL",
+  "sv_metrics\\.csv$", "NULL",
+  "trimmer_metrics\\.csv$", "NULL",
+  "wgs_contig_mean_cov(_tumor|_normal|)\\.csv$", "ContigMeanCovFile",
+  "wgs_fine_hist(_tumor|_normal|)\\.csv$", "FineHistFile",
+  "wgs_hist(_tumor|_normal|)\\.csv$", "NULL",
+  "wgs_overall_mean_cov(_tumor|_normal|)\\.csv$", "NULL",
+  "wgs_coverage_metrics(_tumor|_normal|)\\.csv$", "CoverageMetricsFile",
+  "fragment_length_hist\\.csv$", "FragmentLengthHistFile",
+  "mapping_metrics\\.csv$", "MappingMetricsFile",
+  "ploidy_estimation_metrics\\.csv$", "PloidyEstimationMetricsFile",
+  "replay\\.json$", "ReplayFile",
+  "time_metrics\\.csv$", "TimeMetricsFile",
+  "vc_metrics\\.csv$", "VCMetricsFile",
+  "multiqc_data\\.json", "MultiqcFile",
+  "somatic\\.pcgr\\.json\\.gz$", "PcgrJsonFile",
+  "somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$", "PcgrTiersFile",
+  "chord\\.tsv\\.gz$", "UmChordTsvFile",
+  "hrdetect\\.tsv\\.gz$", "UmHrdetectTsvFile",
+  "snv_2015\\.tsv\\.gz$", "UmSigsSnv2015File",
+  "snv_2020\\.tsv\\.gz$", "UmSigsSnv2020File",
+  "-qc_summary\\.tsv\\.gz$", "UmQcSumFile"
 )
 
 func_selector <- function(type, tbl = FILE_REGEX) {
   assertthat::assert_that(
     inherits(tbl, "data.frame"),
-    all(c("fun", "name") %in% colnames(tbl))
+    "fun" %in% colnames(tbl)
   )
   l <- tbl[["fun"]] |>
-    purrr::set_names(tbl[["name"]])
+    purrr::set_names(tbl[["fun"]])
   if (!type %in% names(l)) {
     return(NULL)
   }
