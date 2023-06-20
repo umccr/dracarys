@@ -66,7 +66,7 @@ write_dracarys <- function(obj, prefix, out_format) {
     parquet_out <- glue("{prefix}.parquet")
     arrow::write_parquet(obj, parquet_out)
   }
-  obj
+  invisible(obj)
 }
 
 

@@ -301,11 +301,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           purrr::map(fun1) |>
           dplyr::bind_rows()
       }
-      # j <- jsonlite::read_json(x) # cannot handle Infinity
-      j <- read_jsongz_rjsonio(x, simplify = FALSE) # turns Infinity to NULL
+      j <- read_jsongz_rjsonio(x, simplify = FALSE)
       j |>
         purrr::map(l2tib) |>
-        dplyr::bind_rows(.id = "section")
+        tibble::enframe(name = "section")
     },
 
     #' @description
@@ -324,15 +323,26 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #'
     write = function(d, out_dir, prefix, out_format = "tsv") {
       prefix <- file.path(out_dir, prefix)
-      dhist <- self$histoprep(d)
-      dmain <- d |>
-        dplyr::filter(!grepl("Hist", .data$name))
-
-      p <- glue("{prefix}_AlignCollapseFusionCaller_metrics_")
+      # first handle umi hist
+      d_umi_hist <- self$histoprep(d)
+      d_umi_nonhist <- d |>
+        dplyr::filter(.data$section == "UmiStatistics") |>
+        tidyr::unnest("value") |>
+        dplyr::filter(!grepl("Hist", .data$name)) |>
+        dplyr::select("name", "value", "percent")
+      d_main <- d |>
+        dplyr::filter(.data$section != "UmiStatistics")
+      d_main_write <- d_main |>
+        dplyr::rowwise() |>
+        dplyr::mutate(
+          p = glue("{prefix}_ACFC_metrics_{.data$section}"),
+          out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format))
+        )
+      p <- glue("{prefix}_ACFC_metrics_UmiStatistics")
       p_hist <- glue("{p}_hist")
-      p_main <- glue("{p}_main")
-      write_dracarys(obj = dhist, prefix = p_hist, out_format = out_format)
-      write_dracarys(obj = dmain, prefix = p_main, out_format = out_format)
+      p_nonhist <- glue("{p}_nonhist")
+      write_dracarys(obj = d_umi_hist, prefix = p_hist, out_format = out_format)
+      write_dracarys(obj = d_umi_nonhist, prefix = p_nonhist, out_format = out_format)
     },
     #' @description
     #' Prepares the UmiStatistics histogram data from the
@@ -344,9 +354,11 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #'
     #' @param d Parsed object from `self$read()`.
     histoprep = function(d) {
+      assertthat::assert_that("UmiStatistics" %in% d[["section"]])
       dhist <- d |>
+        dplyr::filter(.data$section == "UmiStatistics") |>
+        tidyr::unnest("value") |>
         dplyr::filter(grepl("Hist", .data$name))
-      assertthat::assert_that(all(dhist[["section"]] == "UmiStatistics"))
       assertthat::assert_that(all(dhist[["percent"]] %in% NA))
       dhist |>
         dplyr::mutate(
