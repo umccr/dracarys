@@ -30,7 +30,7 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
     #'
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory. Leave NULL if using on Databricks.
+    #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
@@ -38,8 +38,8 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      prefix2 <- glue("{prefix}merged_small_variants")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format, drid = drid)
+      # prefix2 <- glue("{prefix}merged_small_variants")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -91,8 +91,8 @@ TsoTmbTraceTsvFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      prefix2 <- glue("{prefix}tmb_trace")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format, drid = drid)
+      # prefix2 <- glue("{prefix}tmb_trace")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -145,8 +145,8 @@ TsoFragmentLengthHistFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      prefix2 <- glue("{prefix}fragment_length_hist")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format, drid = drid)
+      # prefix2 <- glue("{prefix}fragment_length_hist")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     },
 
 
@@ -232,8 +232,8 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      prefix2 <- glue("{prefix}target_region_coverage")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format, drid = drid)
+      # prefix2 <- glue("{prefix}target_region_coverage")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     },
 
     #' @description Plots the `TargetRegionCoverage.json.gz` file.
@@ -481,8 +481,8 @@ TsoTmbFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      prefix2 <- glue("{prefix}tmb")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format, drid = drid)
+      # prefix2 <- glue("{prefix}tmb")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -531,8 +531,8 @@ TsoFusionsCsvFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      prefix2 <- glue("{prefix}fusions")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format, drid = drid)
+      # prefix2 <- glue("{prefix}fusions")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -584,8 +584,8 @@ TsoMsiFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      prefix2 <- glue("{prefix}msi")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format, drid = drid)
+      # prefix2 <- glue("{prefix}msi")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -754,7 +754,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      p <- glue("{prefix}sar")
+      p <- prefix
       l <- list(
         sample_info = list(
           obj = d[["sample_info"]],
