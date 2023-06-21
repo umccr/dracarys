@@ -34,11 +34,13 @@ MultiqcFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    #'
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_multiqc")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}multiqc")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
