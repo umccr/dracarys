@@ -72,6 +72,10 @@ output_format_valid <- function(x) {
 #' }
 rdf2tab <- function(rdf, outpath, drid = NULL, ...) {
   assertthat::assert_that(!is.null(drid))
+  if (nrow(rdf) == 0) {
+    # don't write empty dataframes
+    return(NULL)
+  }
   rdf <- rdf |>
     dplyr::mutate(dr_id = drid) |>
     dplyr::select("dr_id", dplyr::everything())
