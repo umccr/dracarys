@@ -18,7 +18,7 @@ TMB_Trace.tsv file output from TSO."><!-- mathjax --><script src="https://cdnjs.
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dracarys</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.0</span>
       </span>
     </div>
 
@@ -104,7 +104,13 @@ TMB_Trace.tsv file output from TSO."><!-- mathjax --><script src="https://cdnjs.
 <h3 id="method-write-">Method <code><a href="https://rdrr.io/r/base/write.html" class="external-link">write()</a></code><a class="anchor" aria-label="anchor" href="#method-write-"></a></h3>
 <p>Writes a tidy version of the <code>TMB_Trace.tsv</code> file output from TSO.</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">TsoTmbTraceTsvFile</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">d</span>, <span class="va">out_dir</span>, <span class="va">prefix</span>, out_format <span class="op">=</span> <span class="st">"tsv"</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">TsoTmbTraceTsvFile</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span></span>
+<span>  <span class="va">d</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">prefix</span>,</span>
+<span>  out_format <span class="op">=</span> <span class="st">"tsv"</span>,</span>
+<span>  drid <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -124,6 +130,10 @@ TMB_Trace.tsv file output from TSO."><!-- mathjax --><script src="https://cdnjs.
 <dt><code>out_format</code></dt>
 <dd><p>Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').</p></dd>
+
+
+<dt><code>drid</code></dt>
+<dd><p>dracarys ID to use for the dataset (e.g. <code>wfrid.123</code>, <code>prid.456</code>).</p></dd>
 
 
 </dl><p></p></div>
@@ -155,26 +165,6 @@ TMB_Trace.tsv file output from TSO."><!-- mathjax --><script src="https://cdnjs.
 <span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">TsoTmbTraceTsvFile</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d_parsed</span> <span class="op">&lt;-</span> <span class="va">d</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span> <span class="co"># or read(d)</span></span></span>
 <span class="r-in"><span><span class="va">d</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">d_parsed</span>, out_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, prefix <span class="op">=</span> <span class="st">"sample705"</span>, out_format <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 2,186 × 20</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    Chromosome Position RefCall AltCall    VAF Depth CytoBand GeneName           </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> chr1        2<span style="text-decoration: underline;">488</span>153 A       G       0.488   <span style="text-decoration: underline;">4</span>917 1p36.32  LOC100133445:TNFRS…</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> chr1        4<span style="text-decoration: underline;">367</span>323 G       A       1.00    <span style="text-decoration: underline;">5</span>272 1p36.32  <span style="color: #BB0000;">NA</span>                 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> chr1        9<span style="text-decoration: underline;">778</span>888 G       A       0.001<span style="text-decoration: underline;">6</span>  <span style="text-decoration: underline;">7</span>923 1p36.22  PIK3CD             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> chr1        9<span style="text-decoration: underline;">781</span>605 G       A       0.001<span style="text-decoration: underline;">7</span>  <span style="text-decoration: underline;">7</span>471 1p36.22  PIK3CD             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> chr1        9<span style="text-decoration: underline;">781</span>637 G       A       0.001<span style="text-decoration: underline;">3</span>  <span style="text-decoration: underline;">6</span>136 1p36.22  PIK3CD             </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> chr1        9<span style="text-decoration: underline;">784</span>354 C       T       0.001<span style="text-decoration: underline;">9</span>  <span style="text-decoration: underline;">4</span>699 1p36.22  CLSTN1:PIK3CD      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> chr1       11<span style="text-decoration: underline;">205</span>058 C       T       1.00    <span style="text-decoration: underline;">5</span>856 1p36.22  MTOR:MTOR-AS1      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> chr1       11<span style="text-decoration: underline;">276</span>255 C       G       0.003<span style="text-decoration: underline;">2</span>   950 1p36.22  MTOR               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> chr1       11<span style="text-decoration: underline;">288</span>758 G       A       1.00    <span style="text-decoration: underline;">8</span>997 1p36.22  MTOR               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> chr1       11<span style="text-decoration: underline;">292</span>504 C       T       0.002<span style="text-decoration: underline;">1</span>  <span style="text-decoration: underline;">3</span>809 1p36.22  MTOR               </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 2,176 more rows</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 12 more variables: VariantType &lt;chr&gt;, CosmicIDs &lt;chr&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   MaxCosmicCount &lt;dbl&gt;, AlleleCountsGnomadExome &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   AlleleCountsGnomadGenome &lt;dbl&gt;, AlleleCounts1000Genomes &lt;dbl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   MaxDatabaseAlleleCounts &lt;dbl&gt;, GermlineFilterDatabase &lt;lgl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   GermlineFilterProxi &lt;lgl&gt;, CodingVariant &lt;lgl&gt;, Nonsynonymous &lt;lgl&gt;,</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;">#   IncludedInTMBNumerator &lt;lgl&gt;</span></span>
 </code></pre></div>
     </div>
   </div>

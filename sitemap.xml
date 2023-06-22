@@ -76,6 +76,9 @@
     <loc>/reference/TsoFusionsCsvFile.html</loc>
   </url>
   <url>
+    <loc>/reference/TsoMergedSmallVariantsVcfFile.html</loc>
+  </url>
+  <url>
     <loc>/reference/TsoMsiFile.html</loc>
   </url>
   <url>
@@ -106,7 +109,7 @@
     <loc>/reference/VCMetricsFile.html</loc>
   </url>
   <url>
-    <loc>/reference/cttso_metadata.html</loc>
+    <loc>/reference/bcftools_parse_single_vcf.html</loc>
   </url>
   <url>
     <loc>/reference/date_log.html</loc>
@@ -116,6 +119,9 @@
   </url>
   <url>
     <loc>/reference/dracarys-package.html</loc>
+  </url>
+  <url>
+    <loc>/reference/empty_tbl.html</loc>
   </url>
   <url>
     <loc>/reference/file_regex_getter.html</loc>
@@ -133,6 +139,9 @@
     <loc>/reference/gds_files_list.html</loc>
   </url>
   <url>
+    <loc>/reference/gds_files_list_filter_relevant.html</loc>
+  </url>
+  <url>
     <loc>/reference/gds_volumes_list.html</loc>
   </url>
   <url>
@@ -145,19 +154,55 @@
     <loc>/reference/match_regex.html</loc>
   </url>
   <url>
+    <loc>/reference/meta_bcl_convert.html</loc>
+  </url>
+  <url>
+    <loc>/reference/meta_rnasum.html</loc>
+  </url>
+  <url>
+    <loc>/reference/meta_tso_ctdna_tumor_only.html</loc>
+  </url>
+  <url>
+    <loc>/reference/meta_umccrise.html</loc>
+  </url>
+  <url>
+    <loc>/reference/meta_wgs_alignment_qc.html</loc>
+  </url>
+  <url>
+    <loc>/reference/meta_wgs_tumor_normal.html</loc>
+  </url>
+  <url>
+    <loc>/reference/meta_wts_tumor_only.html</loc>
+  </url>
+  <url>
     <loc>/reference/multiqc_column_map_append.html</loc>
   </url>
   <url>
     <loc>/reference/multiqc_date_fmt.html</loc>
   </url>
   <url>
+    <loc>/reference/multiqc_parse_bargraph_plot.html</loc>
+  </url>
+  <url>
     <loc>/reference/multiqc_parse_gen.html</loc>
+  </url>
+  <url>
+    <loc>/reference/multiqc_parse_plots.html</loc>
   </url>
   <url>
     <loc>/reference/multiqc_parse_raw.html</loc>
   </url>
   <url>
+    <loc>/reference/multiqc_parse_xyline_plot.html</loc>
+  </url>
+  <url>
+    <loc>/reference/multiqc_parse_xyline_plot_contig_cvg.html</loc>
+  </url>
+  <url>
     <loc>/reference/multiqc_tidy_json.html</loc>
+  </url>
+  <url>
+    <loc>/reference/rdf2tab.html</loc>
   </url>
   <url>
     <loc>/reference/read.File.html</loc>

@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dracarys</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.0</span>
       </span>
     </div>
 
@@ -69,13 +69,13 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">session_info_kable</span><span class="op">(</span><span class="va">pkgs</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">session_info_kable</span><span class="op">(</span>pkgs <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>pkgs</dt>
-<dd><p>Vector of R packages to display in the vignette.</p></dd>
+<dd><p>Vector of R packages to display in the vignette. By default returns all.</p></dd>
 
 </dl></div>
     <div id="value">
@@ -83,7 +83,7 @@
     
 
 <p>A list with two kables containing information about the platform and
-the specified packages (<code>pkgs</code>).</p>
+the specified packages.</p>
     </div>
 
   </div>

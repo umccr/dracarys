@@ -18,7 +18,7 @@ TargetRegionCoverage.json.gz file output from TSO."><!-- mathjax --><script src=
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dracarys</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.0</span>
       </span>
     </div>
 
@@ -108,7 +108,13 @@ TargetRegionCoverage.json.gz file output from TSO."><!-- mathjax --><script src=
 <p>Writes a tidy version of the <code>TargetRegionCoverage.json.gz</code> file output
 from TSO.</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">TsoTargetRegionCoverageFile</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">d</span>, <span class="va">out_dir</span>, <span class="va">prefix</span>, out_format <span class="op">=</span> <span class="st">"tsv"</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">TsoTargetRegionCoverageFile</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span></span>
+<span>  <span class="va">d</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">prefix</span>,</span>
+<span>  out_format <span class="op">=</span> <span class="st">"tsv"</span>,</span>
+<span>  drid <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -128,6 +134,10 @@ from TSO.</p><div class="section">
 <dt><code>out_format</code></dt>
 <dd><p>Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').</p></dd>
+
+
+<dt><code>drid</code></dt>
+<dd><p>dracarys ID to use for the dataset (e.g. <code>wfrid.123</code>, <code>prid.456</code>).</p></dd>
 
 
 </dl><p></p></div>
@@ -186,23 +196,6 @@ covered on Y axis.</p>
 <span class="r-in"><span><span class="va">trc</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="va">d_parsed</span>, <span class="fl">90</span><span class="op">)</span> <span class="co"># or plot(trc, d_parsed, 90)</span></span></span>
 <span class="r-plt img"><img src="TsoTargetRegionCoverageFile-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">trc</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">d_parsed</span>, out_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, prefix <span class="op">=</span> <span class="st">"sample705"</span>, out_format <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 14 × 3</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    ConsensusReadDepth BasePair Percentage</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> TargetRegion       1970825      100   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> 100X               1953719       99.1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> 250X               1940233       98.4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> 500X               1922662       97.6 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> 750X               1907303       96.8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> 1000X              1891110       96.0 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> 1500X              1848614       93.8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> 2000X              1795480       91.1 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> 2500X              1729811       87.8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> 3000X              1651245       83.8 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">11</span> 4000X              1445949       73.4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">12</span> 5000X              1209504       61.4 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">13</span> 8000X              522143        26.5 </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">14</span> 10000X             192278         9.76</span>
 </code></pre></div>
     </div>
   </div>

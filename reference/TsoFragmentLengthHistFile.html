@@ -18,7 +18,7 @@ fragment_length_hist.json.gz file output from TSO."><!-- mathjax --><script src=
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dracarys</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.0</span>
       </span>
     </div>
 
@@ -107,7 +107,13 @@ fragment_length_hist.json.gz file output from TSO."><!-- mathjax --><script src=
 <p>Writes a tidy version of the <code>fragment_length_hist.json.gz</code> file output
 from TSO.</p><div class="section">
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
-<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">TsoFragmentLengthHistFile</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">d</span>, <span class="va">out_dir</span>, <span class="va">prefix</span>, out_format <span class="op">=</span> <span class="st">"tsv"</span><span class="op">)</span></span></code></pre></div><p></p></div>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">TsoFragmentLengthHistFile</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span></span>
+<span>  <span class="va">d</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">prefix</span>,</span>
+<span>  out_format <span class="op">=</span> <span class="st">"tsv"</span>,</span>
+<span>  drid <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
@@ -127,6 +133,10 @@ from TSO.</p><div class="section">
 <dt><code>out_format</code></dt>
 <dd><p>Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').</p></dd>
+
+
+<dt><code>drid</code></dt>
+<dd><p>dracarys ID to use for the dataset (e.g. <code>wfrid.123</code>, <code>prid.456</code>).</p></dd>
 
 
 </dl><p></p></div>
@@ -186,20 +196,6 @@ on Y axis for each sample.</p>
 <span class="r-in"><span><span class="va">fl</span><span class="op">$</span><span class="fu">plot</span><span class="op">(</span><span class="va">d_parsed</span>, <span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-plt img"><img src="TsoFragmentLengthHistFile-1.png" alt="" width="700" height="433"></span>
 <span class="r-in"><span><span class="va">fl</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">d_parsed</span>, out_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, prefix <span class="op">=</span> <span class="st">"sample705"</span>, out_format <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 38,587 × 2</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    FragmentLength Count</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span>             38     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span>             39     1</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span>             40     3</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span>             41     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span>             42     0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span>             43     0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span>             44     2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span>             45     0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span>             46     0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span>             47     0</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 38,577 more rows</span></span>
 </code></pre></div>
     </div>
   </div>

@@ -18,7 +18,7 @@ AlignCollapseFusionCaller_metrics.json.gz file output from TSO."><!-- mathjax --
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">dracarys</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.9.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.10.0</span>
       </span>
     </div>
 
@@ -115,9 +115,10 @@ Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.</p><
 <h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">TsoAlignCollapseFusionCallerMetricsFile</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span></span>
 <span>  <span class="va">d</span>,</span>
-<span>  <span class="va">out_dir</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">prefix</span>,</span>
-<span>  out_format <span class="op">=</span> <span class="st">"tsv"</span></span>
+<span>  out_format <span class="op">=</span> <span class="st">"tsv"</span>,</span>
+<span>  drid <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
@@ -138,6 +139,10 @@ Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.</p><
 <dt><code>out_format</code></dt>
 <dd><p>Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').</p></dd>
+
+
+<dt><code>drid</code></dt>
+<dd><p>dracarys ID to use for the dataset (e.g. <code>wfrid.123</code>, <code>prid.456</code>).</p></dd>
 
 
 </dl><p></p></div>
@@ -219,20 +224,6 @@ Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.</p><
 <span class="r-in"><span><span class="va">m</span> <span class="op">&lt;-</span> <span class="va">TsoAlignCollapseFusionCallerMetricsFile</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">d_parsed</span> <span class="op">&lt;-</span> <span class="va">m</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span> <span class="co"># or read(m)</span></span></span>
 <span class="r-in"><span><span class="va">m</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">d_parsed</span>, out_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, prefix <span class="op">=</span> <span class="st">"sample705"</span>, out_format <span class="op">=</span> <span class="st">"both"</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 185 × 4</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    section              name                                       value percent</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                                      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> MappingAligningPerRg Total reads in RG                          1063… 100    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> MappingAligningPerRg Number of duplicate marked reads           0     0      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> MappingAligningPerRg Number of duplicate marked and mate reads… 0     0      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> MappingAligningPerRg Number of unique reads (excl. duplicate m… 1063… 100    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> MappingAligningPerRg Reads with mate sequenced                  1063… 100    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> MappingAligningPerRg Reads without mate sequenced               0     0      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> MappingAligningPerRg QC-failed reads                            0     0      </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> MappingAligningPerRg Mapped reads                               1057… 99.48  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> MappingAligningPerRg Mapped reads R1                            5294… 99.6   </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> MappingAligningPerRg Mapped reads R2                            5281… 99.35  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 175 more rows</span></span>
 </code></pre></div>
     </div>
   </div>
