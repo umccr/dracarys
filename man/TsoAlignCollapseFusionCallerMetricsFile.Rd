@@ -70,9 +70,10 @@ Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$write(
   d,
-  out_dir,
+  out_dir = NULL,
   prefix,
-  out_format = "tsv"
+  out_format = "tsv",
+  drid = NULL
 )}\if{html}{\out{</div>}}
 }
 
@@ -87,6 +88,8 @@ Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }
 \if{html}{\out{</div>}}
 }

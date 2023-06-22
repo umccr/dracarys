@@ -53,7 +53,13 @@ tibble with variants.
 \subsection{Method \code{write()}}{
 Writes a tidy version of the \code{TMB_Trace.tsv} file output from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoTmbTraceTsvFile$write(d, out_dir, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoTmbTraceTsvFile$write(
+  d,
+  out_dir = NULL,
+  prefix,
+  out_format = "tsv",
+  drid = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -67,6 +73,8 @@ Writes a tidy version of the \code{TMB_Trace.tsv} file output from TSO.
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }
 \if{html}{\out{</div>}}
 }

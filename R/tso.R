@@ -10,6 +10,7 @@
 #' d <- TsoMergedSmallVariantsVcfFile$new(x)
 #' d_parsed <- d$read() # or read(d)
 #' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' d$write(d_parsed, prefix = "FOO", out_format = "delta", drid = "wfr.123")
 #' }
 #' @export
 TsoMergedSmallVariantsVcfFile <- R6::R6Class(
@@ -22,7 +23,7 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
     #' @return tibble with variants.
     read = function() {
       x <- self$path
-      tso_bcftools_vcf_readr(x)
+      bcftools_parse_single_vcf(x)
     },
     #' @description
     #' Writes a tidy version of the `MergedSmallVariants.vcf.gz` file output from TSO.
@@ -32,10 +33,13 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_merged_small_variants")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}merged_small_variants")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -82,10 +86,13 @@ TsoTmbTraceTsvFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_TMB_Trace")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}tmb_trace")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -133,11 +140,13 @@ TsoFragmentLengthHistFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    #'
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_fragment_length_hist")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}fragment_length_hist")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     },
 
 
@@ -218,11 +227,13 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    #'
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_TargetRegionCoverage")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}target_region_coverage")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     },
 
     #' @description Plots the `TargetRegionCoverage.json.gz` file.
@@ -301,11 +312,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           purrr::map(fun1) |>
           dplyr::bind_rows()
       }
-      # j <- jsonlite::read_json(x) # cannot handle Infinity
-      j <- read_jsongz_rjsonio(x, simplify = FALSE) # turns Infinity to NULL
+      j <- read_jsongz_rjsonio(x, simplify = FALSE)
       j |>
         purrr::map(l2tib) |>
-        dplyr::bind_rows(.id = "section")
+        tibble::enframe(name = "section")
     },
 
     #' @description
@@ -321,18 +331,32 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    #'
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      dhist <- self$histoprep(d)
-      dmain <- d |>
-        dplyr::filter(!grepl("Hist", .data$name))
-
-      p <- glue("{prefix}_AlignCollapseFusionCaller_metrics_")
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # first handle umi hist
+      d_umi_hist <- self$histoprep(d)
+      d_umi_nonhist <- d |>
+        dplyr::filter(.data$section == "UmiStatistics") |>
+        tidyr::unnest("value") |>
+        dplyr::filter(!grepl("Hist", .data$name)) |>
+        dplyr::select("name", "value", "percent")
+      d_main <- d |>
+        dplyr::filter(.data$section != "UmiStatistics")
+      d_main_write <- d_main |>
+        dplyr::rowwise() |>
+        dplyr::mutate(
+          section = tolower(.data$section),
+          p = glue("{prefix}acfc_metrics_{.data$section}"),
+          out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
+        )
+      p <- glue("{prefix}acfc_metrics_umistatistics")
       p_hist <- glue("{p}_hist")
-      p_main <- glue("{p}_main")
-      write_dracarys(obj = dhist, prefix = p_hist, out_format = out_format)
-      write_dracarys(obj = dmain, prefix = p_main, out_format = out_format)
+      p_nonhist <- glue("{p}_nonhist")
+      write_dracarys(obj = d_umi_hist, prefix = p_hist, out_format = out_format, drid = drid)
+      write_dracarys(obj = d_umi_nonhist, prefix = p_nonhist, out_format = out_format, drid = drid)
     },
     #' @description
     #' Prepares the UmiStatistics histogram data from the
@@ -344,9 +368,11 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #'
     #' @param d Parsed object from `self$read()`.
     histoprep = function(d) {
+      assertthat::assert_that("UmiStatistics" %in% d[["section"]])
       dhist <- d |>
+        dplyr::filter(.data$section == "UmiStatistics") |>
+        tidyr::unnest("value") |>
         dplyr::filter(grepl("Hist", .data$name))
-      assertthat::assert_that(all(dhist[["section"]] == "UmiStatistics"))
       assertthat::assert_that(all(dhist[["percent"]] %in% NA))
       dhist |>
         dplyr::mutate(
@@ -450,11 +476,13 @@ TsoTmbFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    #'
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_tmb")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}tmb")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -498,10 +526,13 @@ TsoFusionsCsvFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_Fusions")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}fusions")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -548,11 +579,13 @@ TsoMsiFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    #'
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_msi")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}msi")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -716,10 +749,12 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
-    #'
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      p <- glue("{prefix}_SampleAnalysisResults")
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      p <- prefix
       l <- list(
         sample_info = list(
           obj = d[["sample_info"]],
@@ -751,7 +786,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
         )
       )
       purrr::map(l, function(k) {
-        write_dracarys(obj = k[["obj"]], prefix = k[["pref"]], out_format = out_format)
+        write_dracarys(obj = k[["obj"]], prefix = k[["pref"]], out_format = out_format, drid = drid)
       })
     }
   )

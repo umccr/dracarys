@@ -13,6 +13,7 @@ x <- here::here("nogit/tso/2023-05-30/SBJ00595_L2100178/PTC_SrSqCMM1pc_L2100178_
 d <- TsoMergedSmallVariantsVcfFile$new(x)
 d_parsed <- d$read() # or read(d)
 d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+d$write(d_parsed, prefix = "FOO", out_format = "delta", drid = "wfr.123")
 }
 }
 \section{Super class}{
@@ -55,7 +56,13 @@ tibble with variants.
 \subsection{Method \code{write()}}{
 Writes a tidy version of the \code{MergedSmallVariants.vcf.gz} file output from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoMergedSmallVariantsVcfFile$write(d, out_dir, prefix, out_format = "tsv")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoMergedSmallVariantsVcfFile$write(
+  d,
+  out_dir = NULL,
+  prefix,
+  out_format = "tsv",
+  drid = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -63,12 +70,14 @@ Writes a tidy version of the \code{MergedSmallVariants.vcf.gz} file output from 
 \describe{
 \item{\code{d}}{Parsed object from \code{self$read()}.}
 
-\item{\code{out_dir}}{Output directory.}
+\item{\code{out_dir}}{Output directory. Leave NULL if using on Databricks.}
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
 \item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
 'parquet', 'both').}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }
 \if{html}{\out{</div>}}
 }

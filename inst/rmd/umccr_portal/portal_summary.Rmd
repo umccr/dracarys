@@ -98,7 +98,7 @@ get_sbj_url <- function(x, colour = NULL) {
 
 ```{r vars}
 # options(width = 150)
-start_date <- "2023-06-09"
+start_date <- "2023-06-18"
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -109,11 +109,11 @@ wf_order <- c(
   "rnasum"
 )
 
-lims_rds <- here::here(glue("nogit/data_portal/lims/2023-06-11.rds"))
-# lims_raw <- dracarys::glims_read()
-# saveRDS(lims, file = lims_rds)
+lims_rds <- here::here(glue("nogit/data_portal/lims/2023-06-19.rds"))
+# lims_raw <- glims_read()
+# saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
-pmeta <- here::here("nogit/data_portal/workflows/2023-06-11_subset.csv") |>
+pmeta <- here::here("nogit/data_portal/workflows/2023-06-19_subset.csv") |>
   dracarys:::portal_meta_read() |>
   # change to AEST timezone
   dplyr::mutate(
@@ -121,7 +121,6 @@ pmeta <- here::here("nogit/data_portal/workflows/2023-06-11_subset.csv") |>
     end = base::format(.data$end, tz = "Australia/Melbourne")
   ) |>
   dplyr::filter(start >= start_date) |>
-  # get rid of a couple wf runs before bcl_convert
   dplyr::mutate(type_name = factor(.data$type_name, levels = wf_order))
 lims <- lims_raw |>
   dplyr::select(
@@ -173,7 +172,7 @@ sbj_sumy |>
 
 ## RuntimeVis
 
-```{r vistime, fig.width=13, fig.height = 8}
+```{r vistime, fig.width=13, fig.height = 13}
 p1 <- pmeta_sumy |>
   dplyr::group_by(sbj_lib, type_name) |>
   dplyr::mutate(

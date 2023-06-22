@@ -229,6 +229,11 @@ ica_token_validate <- function(token = Sys.getenv("ICA_ACCESS_TOKEN")) {
   token
 }
 
+ica_token_exp <- function(token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+  l <- jose::jwt_split(token)
+  structure(l$payload$exp, class = c("POSIXct", "POSIXt"))
+}
+
 likely_file <- function(x) {
   e <- c(
     "txt", "tsv", "csv", "html", "json", "stdout", "stderr", "stdouterr",
