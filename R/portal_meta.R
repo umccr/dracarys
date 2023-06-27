@@ -459,12 +459,13 @@ portal_meta_read <- function(pmeta) {
   }
   assertthat::assert_that(file.exists(pmeta))
   # keep all character except start/end
-  ctypes <- readr::cols(
-    .default = "c",
-    start = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
-    end = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
-  )
-  readr::read_csv(pmeta, col_types = ctypes)
+  ctypes <- readr::cols(.default = "c")
+  fmt <- "%Y-%m-%dT%H:%M:%S"
+  readr::read_csv(pmeta, col_types = ctypes) |>
+    dplyr::mutate(
+      start = as.POSIXct(.data$start, format = fmt),
+      end = as.POSIXct(.data$end, format = fmt)
+    )
 }
 
 meta_main_cols <- function() {
