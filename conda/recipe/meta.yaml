@@ -23,6 +23,7 @@ requirements:
     - r-ggplot2
     - r-ggrepel
     - r-glue
+    - r-jose
     - r-purrr
     - r-r6
     - r-rjsonio
@@ -38,7 +39,6 @@ requirements:
     - r-fs
     - r-here
     - r-httr
-    - r-jose
     - r-jsonlite
     - r-knitr
     - r-rmarkdown
@@ -53,6 +53,7 @@ requirements:
     - r-ggplot2
     - r-ggrepel
     - r-glue
+    - r-jose
     - r-purrr
     - r-r6
     - r-rjsonio
@@ -68,7 +69,6 @@ requirements:
     - r-fs
     - r-here
     - r-httr
-    - r-jose
     - r-jsonlite
     - r-knitr
     - r-rmarkdown
