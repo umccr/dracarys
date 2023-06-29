@@ -831,26 +831,52 @@ tso_cnv <- function(cnvs) {
   purrr::map_dfr(cnvs, tibble::as_tibble)
 }
 
-#' Parse Single-Sample VCF with bcftools
+#' Parse VCF with bcftools
 #'
-#' @param vcf VCF with a single sample.
+#' Parse VCF with bcftools.
+#' Uses bcftools under the hood to do the heavy lifting with field splitting,
+#' then converts the parsed character vector to a tibble.
 #'
-#' @return Tibble with all the main, FORMAT, and INFO fields detected in the VCF header as columns.
+#' @param vcf VCF with one or more samples.
+#'
+#' @return A tibble with all the main, FORMAT, and INFO fields detected in
+#' the VCF header as columns.
 #' @export
-bcftools_parse_single_vcf <- function(vcf) {
-  # NOTE (PD): this handles single-sample VCFs only
-  # bcftools works out-of-the-box on presigned URLs too
+bcftools_parse_vcf <- function(vcf) {
   if (is_url(vcf)) {
     vcf <- glue("'{vcf}'")
   }
   cmd_header <- glue("bcftools view -h {vcf}")
   h <- system(cmd_header, intern = TRUE)
-  # splits header sections into nice tibbles, mostly to grab available FORMAT/INFO fields
+  main <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER")
+  get_samples <- function() {
+    final_header_row <- length(h)
+    x <- strsplit(h[final_header_row], "\t")[[1]]
+    main_len <- length(main) + length(c("INFO", "FORMAT"))
+    if (length(x) <= main_len) {
+      msg <- paste(c(main, "INFO", "FORMAT"), collapse = ", ")
+      stop(
+        "What on earth. Check that your VCF has the following VCF columns, followed by sample columns:\n",
+        msg, "\nCall me if everything seems fine on 1800-OMG-LOL."
+      )
+    }
+    samples <- x[-(1:main_len)]
+    nsamples <- length(samples)
+    aliases <- paste0("S", seq_len(nsamples))
+    list(
+      samples = samples,
+      n = nsamples,
+      aliases = aliases
+    )
+  }
+  samp <- get_samples()
+  # splits header sections into tbls, mostly to grab available FORMAT/INFO fields
   split_hdr <- function(pat) {
     h[grepl(pat, h)] |>
       tibble::as_tibble_col(column_name = "x") |>
       dplyr::mutate(x = sub(pat, "", .data$x)) |>
-      tidyr::separate_wider_delim("x", delim = ",", names = c("ID", "Number", "Type", "Description")) |>
+      # Description is likely to have a comma
+      tidyr::separate_wider_delim("x", delim = ",", names = c("ID", "Number", "Type", "Description"), too_many = "merge") |>
       dplyr::mutate(
         ID = sub("ID=", "", .data$ID),
         Number = sub("Number=", "", .data$Number),
@@ -860,7 +886,6 @@ bcftools_parse_single_vcf <- function(vcf) {
   }
   fmt <- split_hdr("##FORMAT=<") |> dplyr::pull(.data$ID)
   info <- split_hdr("##INFO=<") |> dplyr::pull(.data$ID)
-  main <- c("CHROM", "POS", "ID", "REF", "ALT", "QUAL", "FILTER")
   main_cols <- paste0("%", main) |>
     paste(collapse = "\\t")
   info_cols <- paste0("%INFO/", info, collapse = "\\t")
@@ -868,16 +893,25 @@ bcftools_parse_single_vcf <- function(vcf) {
   q <- paste0(main_cols, "\\t", info_cols, fmt_cols)
   cmd_body <- glue("bcftools query -f \"{q}\" {vcf}")
   b <- system(cmd_body, intern = TRUE)
-  cnames <- c(main, paste0("INFO_", info), fmt)
-  readr::read_tsv(
-    I(b),
-    col_names = cnames,
-    col_types = readr::cols(
-      .default = "c",
-      "POS" = "i",
-      "QUAL" = "d"
-    )
+  # create column names using the main columns, an INFO prefix for the INFO
+  # columns, and a S1/2/.._X prefix for the sample columns.
+  cnames <- c(
+    main,
+    paste0("INFO_", info),
+    paste0(rep(samp$aliases, each = length(fmt)), "_", fmt)
   )
+  cclasses <- list(
+    POS = "character",
+    QUAL = "integer"
+  )
+  data.table::fread(
+    cmd = cmd_body,
+    header = FALSE,
+    col.names = cnames,
+    data.table = FALSE,
+    na.strings = "."
+  ) |>
+    tibble::as_tibble()
 }
 
 read_jsongz_jsonlite <- function(x, ...) {

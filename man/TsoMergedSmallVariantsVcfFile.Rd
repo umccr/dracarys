@@ -70,7 +70,7 @@ Writes a tidy version of the \code{MergedSmallVariants.vcf.gz} file output from 
 \describe{
 \item{\code{d}}{Parsed object from \code{self$read()}.}
 
-\item{\code{out_dir}}{Output directory. Leave NULL if using on Databricks.}
+\item{\code{out_dir}}{Output directory.}
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
