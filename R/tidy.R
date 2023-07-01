@@ -90,7 +90,7 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
     dplyr::select("type", "path", "bname") |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      env = list(func_selector(.data$type)),
+      env = list(dr_func_eval(.data$type)),
       obj = list(.data$env$new(.data$path)),
       has_plot = "plot" %in% names(.data$env[["public_methods"]]),
       obj_parsed = list(.data$obj$read()),

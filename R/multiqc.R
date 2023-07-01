@@ -300,10 +300,9 @@ multiqc_date_fmt <- function(cdate) {
 #' @export
 multiqc_parse_plots <- function(j, plot_names = NULL) {
   parsed <- RJSONIO::fromJSON(j)
-  funcs <- tibble::tribble(
-    ~name, ~fun,
-    "bar_graph", "multiqc_parse_bargraph_plot",
-    "xy_line", "multiqc_parse_xyline_plot"
+  funcs <- c(
+    bar_graph = "multiqc_parse_bargraph_plot",
+    xy_line = "multiqc_parse_xyline_plot"
   )
   assertthat::assert_that(
     inherits(parsed, "list"),
@@ -321,7 +320,7 @@ multiqc_parse_plots <- function(j, plot_names = NULL) {
     # keep only specified plots; NULL plot_names will discard everything.
     dplyr::filter(
       .data$plot_nm %in% plot_names,
-      .data$plot_type %in% funcs[["name"]]
+      .data$plot_type %in% names(funcs)
     )
   if (nrow(res) == 0) {
     return(empty_tbl(cnames = final_cols))
@@ -330,7 +329,7 @@ multiqc_parse_plots <- function(j, plot_names = NULL) {
     dplyr::rowwise() |>
     dplyr::mutate(
       input = list(plot_data[[.data$plot_nm]]),
-      plot_res = list(func_selector(type = .data$plot_type, tbl = funcs)(.data$input))
+      plot_res = list(dr_func_eval(f = funcs[.data$plot_type], v = funcs)(.data$input))
     ) |>
     dplyr::ungroup() |>
     dplyr::select(dplyr::all_of(final_cols))

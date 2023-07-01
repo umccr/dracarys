@@ -4,10 +4,10 @@
 #' a match, it returns the 'name' of that match.
 #'
 #' @param x File to match.
-#' @param regexes Tibble with regex and name.
+#' @param regexes Tibble with regex and function name.
 #'
-#' @return The 'name' of the matching regex from FILE_REGEX, or NA if there is
-#' no match made.
+#' @return The function corresponding to the matching regex from FILE_REGEX, or
+#' NA if there is no match made.
 #'
 #' @examples
 #' match_regex("foo.msi.json.gz")
@@ -64,16 +64,30 @@ FILE_REGEX <- tibble::tribble(
   "-qc_summary\\.tsv\\.gz$", "UmQcSumFile"
 )
 
-func_selector <- function(type, tbl = FILE_REGEX) {
-  assertthat::assert_that(
-    inherits(tbl, "data.frame"),
-    "fun" %in% colnames(tbl)
-  )
-  l <- tbl[["fun"]] |>
-    purrr::set_names(tbl[["fun"]])
-  if (!type %in% names(l)) {
+#' Evaluate dracarys Function
+#'
+#' This is somewhat a hack for getting a function to evaluate based on a lookup
+#' vector. If the function is not found, it returns NULL.
+#'
+#' @param f Name of function to evaluate.
+#' @param v Character vector of strings evaluating to functions. By default,
+#' this points to the functions in the FILE_REGEX dracarys tibble.
+#'
+#' @return Evaluated function.
+#' @examples
+#' mean_1_to_10 <- dr_func_eval("mean", v = c("mean", "sd"))(1:10)
+#' x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
+#' obj <- dr_func_eval("TsoFragmentLengthHistFile")$new(x)
+#' @testexamples
+#' expect_equal("sample705.fragment_length_hist.json.gz", obj$bname())
+#' expect_equal(mean_1_to_10, base::mean(1:10))
+#' expect_null(dr_func_eval("foo"))
+#' @export
+dr_func_eval <- function(f, v = NULL) {
+  v <- v %||% FILE_REGEX[["fun"]]
+  if (!f %in% v) {
     return(NULL)
   }
-  # need this workaround to evaluate string as function
-  eval(parse(text = l[[type]]))
+  # evaluate string
+  eval(parse(text = f))
 }
