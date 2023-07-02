@@ -13,13 +13,14 @@ knitr::opts_chunk$set(
 ```{r pkg_load, warning=FALSE, message=FALSE, echo=FALSE}
 require(dracarys)
 require(DT)
+require(dplyr)
 ```
 
 Below are the files output from UMCCR workflows that are supported by {dracarys}.
 
 ```{r echo=FALSE}
 dracarys::file_regex_getter() |>
-  dplyr::arrange(dplyr::desc("name")) |>
+  dplyr::arrange(.data$fun) |>
   DT::datatable(
     filter = list(position = "top", clear = FALSE, plain = TRUE),
     class = "cell-border display compact",

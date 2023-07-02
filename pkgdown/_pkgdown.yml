@@ -1,6 +1,8 @@
 template:
   bootstrap: 5
   bootswatch: simplex #sketchy
+  bslib:
+    pkgdown-nav-height: 100px
 url: https://umccr.github.io/dracarys/
 title: dracarys
 authors:
