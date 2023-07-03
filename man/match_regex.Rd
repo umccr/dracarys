@@ -9,11 +9,11 @@ match_regex(x, regexes = FILE_REGEX)
 \arguments{
 \item{x}{File to match.}
 
-\item{regexes}{Tibble with regex and name.}
+\item{regexes}{Tibble with regex and function name.}
 }
 \value{
-The 'name' of the matching regex from FILE_REGEX, or NA if there is
-no match made.
+The function corresponding to the matching regex from FILE_REGEX, or
+NA if there is no match made.
 }
 \description{
 Matches a given file with the regexes found in FILE_REGEX and if there is

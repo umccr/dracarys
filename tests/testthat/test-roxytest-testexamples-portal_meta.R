@@ -6,7 +6,7 @@ test_that("Function meta_bcl_convert() @ L14", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_bcl_convert(pmeta))
-  expect_equal(sum(!is.na(m$topup_or_rerun)), 2)
+  expect_equal(sum(!is.na(m$topup_or_rerun)), 13)
   expect_equal(length(unique(m$portal_run_id)), 4)
 })
 
@@ -24,8 +24,8 @@ test_that("Function meta_rnasum() @ L134", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_rnasum(pmeta))
-  expect_equal(m$rnasum_dataset[1], "BRCA")
-  expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230179.RNAseq_report.html")
+  expect_equal(m$rnasum_dataset[1], "PANCAN")
+  expect_equal(basename(m$gds_outfile_rnasum_html[4]), "PRJ230724.RNAseq_report.html")
 })
 
 
