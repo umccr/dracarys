@@ -8,7 +8,7 @@
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_bcl_convert(pmeta))
 #' @testexamples
-#' expect_equal(sum(!is.na(m$topup_or_rerun)), 2)
+#' expect_equal(sum(!is.na(m$topup_or_rerun)), 13)
 #' expect_equal(length(unique(m$portal_run_id)), 4)
 #' @export
 meta_bcl_convert <- function(pmeta, status = "Succeeded") {
@@ -128,8 +128,8 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_rnasum(pmeta))
 #' @testexamples
-#' expect_equal(m$rnasum_dataset[1], "BRCA")
-#' expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230179.RNAseq_report.html")
+#' expect_equal(m$rnasum_dataset[1], "PANCAN")
+#' expect_equal(basename(m$gds_outfile_rnasum_html[4]), "PRJ230724.RNAseq_report.html")
 #' @export
 meta_rnasum <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
@@ -459,13 +459,12 @@ portal_meta_read <- function(pmeta) {
   }
   assertthat::assert_that(file.exists(pmeta))
   # keep all character except start/end
-  ctypes <- readr::cols(.default = "c")
-  fmt <- "%Y-%m-%dT%H:%M:%S"
-  readr::read_csv(pmeta, col_types = ctypes) |>
-    dplyr::mutate(
-      start = as.POSIXct(.data$start, format = fmt),
-      end = as.POSIXct(.data$end, format = fmt)
-    )
+  ctypes <- readr::cols(
+    .default = "c",
+    start = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
+    end = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
+  )
+  readr::read_csv(pmeta, col_types = ctypes)
 }
 
 meta_main_cols <- function() {
