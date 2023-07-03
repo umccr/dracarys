@@ -40,7 +40,10 @@ knitr::opts_chunk$set(
   require(DT)
   require(fs)
   require(vistime)
+  require(colorspace)
+  require(RColorBrewer)
 }
+set.seed(4)
 ```
 
 ```{r funcs}
@@ -77,6 +80,11 @@ blank_lines <- function(n = 10) {
   cat(rep("&nbsp;  ", n), sep = "\n")
 }
 
+get_colours2 <- function(nc) {
+  qual_col_pals <- RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == "qual", ]
+  col_vector <- unlist(mapply(RColorBrewer::brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
+  colorspace::adjust_transparency(sample(col_vector, nc), alpha = 0.75)
+}
 get_colours <- function(nc) {
   max1 <- 12
   cols1 <- RColorBrewer::brewer.pal(n = max1, name = "Set3")
@@ -98,7 +106,7 @@ get_sbj_url <- function(x, colour = NULL) {
 
 ```{r vars}
 # options(width = 150)
-start_date <- "2023-06-18"
+start_date <- "2023-06-30"
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -109,11 +117,11 @@ wf_order <- c(
   "rnasum"
 )
 
-lims_rds <- here::here(glue("nogit/data_portal/lims/2023-06-19.rds"))
+lims_rds <- here::here(glue("nogit/data_portal/lims/2023-07-02.rds"))
 # lims_raw <- glims_read()
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
-pmeta <- here::here("nogit/data_portal/workflows/2023-06-19_subset.csv") |>
+pmeta <- here::here("nogit/data_portal/workflows/2023-07-02.csv") |>
   dracarys:::portal_meta_read() |>
   # change to AEST timezone
   dplyr::mutate(
@@ -144,7 +152,7 @@ pmeta_sumy <- pmeta |>
   ) |>
   dplyr::ungroup()
 unique_sbj <- sort(unique(pmeta_sumy$sbjid))
-clrs1 <- get_colours(length(unique_sbj)) |>
+clrs1 <- get_colours2(length(unique_sbj)) |>
   purrr::set_names(unique_sbj) |>
   tibble::enframe(name = "sbjid", value = "color") |>
   dplyr::mutate(sbj_url = get_sbj_url(.data$sbjid, colour = .data$color))
@@ -154,7 +162,7 @@ pmeta_sumy_count <- pmeta_sumy |>
 chunks1 <- as.list(pmeta_sumy_count > 0)
 ```
 
-```{r}
+```{r show_sumy_tbls}
 pmeta_sumy_count |>
   tibble::enframe(name = "workflow", value = "count") |>
   kableExtra::kbl(caption = "Workflow Type Count", row.names = TRUE) |>
@@ -172,7 +180,7 @@ sbj_sumy |>
 
 ## RuntimeVis
 
-```{r vistime, fig.width=13, fig.height = 13}
+```{r vistime, fig.width=13, fig.height = 14}
 p1 <- pmeta_sumy |>
   dplyr::group_by(sbj_lib, type_name) |>
   dplyr::mutate(
