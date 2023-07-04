@@ -117,3 +117,26 @@ write_dracarys <- function(obj, prefix, out_format, drid = NULL) {
 empty_tbl <- function(cnames, ctypes = readr::cols(.default = "c")) {
   readr::read_csv("\n", col_names = cnames, col_types = ctypes)
 }
+
+read_jsongz_jsonlite <- function(x, ...) {
+  if (is_url(x)) {
+    # https://github.com/jeroen/jsonlite/issues/414
+    res <- base::url(x) |>
+      base::gzcon() |>
+      jsonlite::parse_json(...)
+    return(res)
+  }
+  jsonlite::read_json(x, ...)
+}
+
+read_jsongz_rjsonio <- function(x, ...) {
+  if (is_url(x)) {
+    # https://github.com/umccr/dracarys/issues/74
+    res <- base::url(x) |>
+      base::gzcon() |>
+      readr::read_lines() |>
+      RJSONIO::fromJSON(...)
+    return(res)
+  }
+  RJSONIO::fromJSON(x, ...)
+}
