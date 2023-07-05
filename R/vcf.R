@@ -80,3 +80,34 @@ bcftools_parse_vcf <- function(vcf) {
   ) |>
     tibble::as_tibble()
 }
+
+#' Parse VCF regions with bcftools
+#'
+#' Parses VCF regions with bcftools. The VCF subset is written to a temporary
+#' file in the local filesystem, then parsed into a tibble object.
+#' @param vcf Path to VCF. Can be S3, http or local. If presigned URL, need to
+#' also concatenate the VCF index as in 'vcf_url##idx##vcfi_url'.
+#' @param r Character vector of regions to subset (e.g. c('chr1:123-456', 'chr2:789-1000'))
+#'
+#' @return A tibble with all the main, FORMAT, and INFO fields detected in
+#' the VCF header as columns, for the regions specified in `r` (if any).
+#'
+#' @examples
+#' \dontrun{
+#' vcf_local <- here::here("nogit/tso/2023-05-30/SBJ00595_L2100178/PTC_SrSqCMM1pc_L2100178_rerun_MergedSmallVariants.vcf.gz")
+#' r <- c("chr1:115256529-115256529", "chr2:29443613-29443613")
+#' bcftools_parse_vcf_regions(vcf_local, r)
+#' }
+#' @export
+bcftools_parse_vcf_regions <- function(vcf, r) {
+  assertthat::assert_that(is.character(r))
+  if (is_url(vcf)) {
+    vcf <- glue("'{vcf}'")
+  }
+  r <- paste(r, collapse = ",")
+  # write to temp then parse into R
+  out <- tempfile(fileext = ".vcf")
+  cmd <- glue("bcftools view {vcf} -r {r} > {out}")
+  system(cmd, intern = TRUE)
+  bcftools_parse_vcf(out)
+}

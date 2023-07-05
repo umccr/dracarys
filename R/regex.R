@@ -39,7 +39,7 @@ FILE_REGEX <- tibble::tribble(
   "_Fusions\\.csv$", "TsoFusionsCsvFile",
   "SampleAnalysisResults\\.json\\.gz$", "TsoSampleAnalysisResultsFile",
   "MergedSmallVariants\\.vcf\\.gz$", "TsoMergedSmallVariantsVcfFile",
-  "MergedSmallVariants\\.vcf\\.gz.tbi$", "TsoMergedSmallVariantsVcfIndexFile",
+  "MergedSmallVariants\\.vcf\\.gz\\.tbi$", "TsoMergedSmallVariantsVcfIndexFile",
   "fastqc_metrics\\.csv$", "NULL",
   "insert-stats\\.tab$", "NULL",
   "sv_metrics\\.csv$", "NULL",
