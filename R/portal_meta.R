@@ -415,10 +415,10 @@ meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
     meta_io_fromjson() |>
     dplyr::mutate(
       # input
-      sample_id = purrr::map_chr(.data$input, list("tso500_samples", "sample_id")),
-      sample_name2 = purrr::map_chr(.data$input, list("tso500_samples", "sample_name")),
+      sample_id = purrr::map_chr(.data$input, list("tso500_samples", "sample_id"), .default = NA),
+      sample_name2 = purrr::map_chr(.data$input, list("tso500_samples", "sample_name"), .default = NA),
       # output
-      gds_outdir = purrr::map_chr(.data$output, list("output_results_dir", "location")),
+      gds_outdir = purrr::map_chr(.data$output, list("output_results_dir", "location"), .default = NA),
       libid1 = sub(".*_(L.*)", "\\1", .data$sample_id),
       rerun = grepl("rerun", .data$libid1),
       subjectid = sub("umccr__automated__tso_ctdna_tumor_only__(SBJ.*)__L.*", "\\1", .data$wfr_name),
@@ -441,7 +441,7 @@ meta_io_fromjson <- function(pmeta) {
     dplyr::rowwise() |>
     dplyr::mutate(
       input = list(jsonlite::fromJSON(.data$input)),
-      output = list(jsonlite::fromJSON(.data$output))
+      output = ifelse(!is.na(.data$output), list(jsonlite::fromJSON(.data$output)), NA)
     ) |>
     dplyr::ungroup()
 }
@@ -469,7 +469,7 @@ portal_meta_read <- function(pmeta) {
 
 meta_main_cols <- function() {
   c(
-    "id", "wfr_name", "wfr_id", "version", "sequence_run_id", "batch_run_id",
+    "id", "wfr_name", "wfr_id", "version", "end_status", "sequence_run_id", "batch_run_id",
     "start", "end", "portal_run_id"
   )
 }
