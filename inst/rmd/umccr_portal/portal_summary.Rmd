@@ -73,6 +73,10 @@ dt_view <- function(x, ...) {
       ),
       escape = FALSE,
       ...
+    ) |>
+    DT::formatStyle(
+      "end_status",
+      backgroundColor = DT::styleEqual(levels = c("Succeeded", "Failed"), c("lightgreen", "red"))
     )
 }
 
@@ -80,6 +84,24 @@ blank_lines <- function(n = 10) {
   cat(rep("&nbsp;  ", n), sep = "\n")
 }
 
+get_colours3 <- function(nc) {
+  clrs <- RColorBrewer::brewer.pal.info |>
+    tibble::rownames_to_column(var = "name") |>
+    tibble::as_tibble() |>
+    dplyr::filter(name %in% c("Set3", "Set2", "Pastel2", "Pastel1")) |>
+    dplyr::select(name, maxcolors) |>
+    dplyr::arrange(dplyr::desc(name)) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      clrs = list(RColorBrewer::brewer.pal(n = .data$maxcolors, name = .data$name))
+    ) |>
+    dplyr::ungroup() |>
+    tidyr::unnest(clrs) |>
+    dplyr::pull(clrs)
+  max_col <- length(clrs)
+  assertthat::assert_that(nc <= max_col, nc > 0, msg = glue::glue("Number of colours should be a positive number less than {max_col + 1}!"))
+  clrs[seq_len(nc)]
+}
 get_colours2 <- function(nc) {
   qual_col_pals <- RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == "qual", ]
   col_vector <- unlist(mapply(RColorBrewer::brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
@@ -106,7 +128,7 @@ get_sbj_url <- function(x, colour = NULL) {
 
 ```{r vars}
 # options(width = 150)
-start_date <- "2023-06-30"
+start_date <- "2023-07-06"
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -117,11 +139,11 @@ wf_order <- c(
   "rnasum"
 )
 
-lims_rds <- here::here(glue("nogit/data_portal/lims/2023-07-02.rds"))
+lims_rds <- here::here(glue("nogit/data_portal/lims/2023-07-10.rds"))
 # lims_raw <- glims_read()
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
-pmeta <- here::here("nogit/data_portal/workflows/2023-07-02.csv") |>
+pmeta <- here::here("nogit/data_portal/workflows/2023-07-10_subset.csv") |>
   dracarys:::portal_meta_read() |>
   # change to AEST timezone
   dplyr::mutate(
@@ -152,7 +174,7 @@ pmeta_sumy <- pmeta |>
   ) |>
   dplyr::ungroup()
 unique_sbj <- sort(unique(pmeta_sumy$sbjid))
-clrs1 <- get_colours2(length(unique_sbj)) |>
+clrs1 <- get_colours3(length(unique_sbj)) |>
   purrr::set_names(unique_sbj) |>
   tibble::enframe(name = "sbjid", value = "color") |>
   dplyr::mutate(sbj_url = get_sbj_url(.data$sbjid, colour = .data$color))
@@ -180,7 +202,7 @@ sbj_sumy |>
 
 ## RuntimeVis
 
-```{r vistime, fig.width=13, fig.height = 14}
+```{r vistime, fig.width=13, fig.height = 12}
 p1 <- pmeta_sumy |>
   dplyr::group_by(sbj_lib, type_name) |>
   dplyr::mutate(
@@ -233,13 +255,13 @@ if (!chunks1[[wf]]) {
 pmeta |>
   dracarys::meta_bcl_convert() |>
   dplyr::select(
-    runfolder_name, LibraryID, SampleID, batch_name, start, end
+    end_status, runfolder_name, LibraryID, SampleID, batch_name, start, end
   ) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
   dplyr::select(
-    runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, batch_name, Type, Assay, Source, Quality, Workflow,
     start, end
   ) |>
@@ -261,12 +283,12 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_tso_ctdna_tumor_only() |>
+  dracarys::meta_tso_ctdna_tumor_only(status = c("Succeeded", "Failed")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
   dplyr::select(
-    SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
     wfr_id, start, end, gds_outdir
   ) |>
@@ -293,7 +315,7 @@ pmeta |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
   dplyr::select(
-    SubjectID, LibraryID, SampleID, Phenotype, Lane, ExternalSubjectID,
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, Lane, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
     wfr_id, start, end, gds_outdir_dragen
   ) |>
@@ -320,7 +342,7 @@ pmeta |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
   dplyr::select(
-    SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
     Type, Assay, Source, Quality, Workflow,
     wfr_id, start, end, gds_outdir_dragen
   ) |>
@@ -352,7 +374,7 @@ pmeta |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
   dplyr::select(
-    SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
     Type, Assay, Source, Quality, Workflow,
     wfr_id, start, end, gds_outdir_dragen_somatic, gds_outdir_dragen_germline
   ) |>
@@ -384,7 +406,7 @@ pmeta |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
   dplyr::select(
-    SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
     wfr_id, start, end, gds_outdir_umccrise
   ) |>
@@ -411,7 +433,7 @@ pmeta |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
   dplyr::select(
-    SubjectID, LibraryID, SampleID, Phenotype, rnasum_dataset, ExternalSubjectID,
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, rnasum_dataset, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
     wfr_id, start, end, gds_outdir_rnasum,
   ) |>
