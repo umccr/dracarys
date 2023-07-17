@@ -61,6 +61,7 @@ glims_read <- function() {
 
 dt_view <- function(x, ...) {
   x |>
+    dplyr::mutate(across(where(is.character), as.factor)) |>
     DT::datatable(
       filter = list(position = "top", clear = FALSE, plain = TRUE),
       class = "cell-border display compact",
@@ -128,7 +129,7 @@ get_sbj_url <- function(x, colour = NULL) {
 
 ```{r vars}
 # options(width = 150)
-start_date <- "2023-07-06"
+start_date <- "2023-07-14"
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -139,11 +140,11 @@ wf_order <- c(
   "rnasum"
 )
 
-lims_rds <- here::here(glue("nogit/data_portal/lims/2023-07-10.rds"))
+lims_rds <- here::here(glue("nogit/data_portal/lims/2023-07-17.rds"))
 # lims_raw <- glims_read()
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
-pmeta <- here::here("nogit/data_portal/workflows/2023-07-10_subset.csv") |>
+pmeta <- here::here("nogit/data_portal/workflows/2023-07-17_subset.csv") |>
   dracarys:::portal_meta_read() |>
   # change to AEST timezone
   dplyr::mutate(
@@ -202,7 +203,7 @@ sbj_sumy |>
 
 ## RuntimeVis
 
-```{r vistime, fig.width=13, fig.height = 12}
+```{r vistime, fig.width=12, fig.height = 11}
 p1 <- pmeta_sumy |>
   dplyr::group_by(sbj_lib, type_name) |>
   dplyr::mutate(
@@ -226,7 +227,7 @@ vistime1 <- p1 |>
 
 # Decrease font size
 pp <- plotly::plotly_build(vistime1)
-font_size <- 10
+font_size <- 11
 # text_pos <- "center"
 for (i in seq_along(pp$x$data)) {
   if (pp$x$data[[i]]$mode == "text") {
@@ -310,7 +311,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_wgs_alignment_qc() |>
+  dracarys::meta_wgs_alignment_qc(status = c("Succeeded", "Failed")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
@@ -337,7 +338,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_wts_tumor_only() |>
+  dracarys::meta_wts_tumor_only(status = c("Succeeded", "Failed")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
@@ -364,7 +365,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_wgs_tumor_normal() |>
+  dracarys::meta_wgs_tumor_normal(status = c("Succeeded", "Failed")) |>
   tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
   tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
   tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
@@ -396,7 +397,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[["umccrise"]]}
 pmeta |>
-  dracarys::meta_umccrise() |>
+  dracarys::meta_umccrise(status = c("Succeeded", "Failed")) |>
   tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
   tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
   tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
@@ -428,7 +429,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[["rnasum"]]}
 pmeta |>
-  dracarys::meta_rnasum() |>
+  dracarys::meta_rnasum(status = c("Succeeded", "Failed")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
@@ -466,4 +467,3 @@ si_pl
 ```{r}
 si_pkg
 ```
-
