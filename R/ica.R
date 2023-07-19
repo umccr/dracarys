@@ -82,12 +82,13 @@ gds_file_download <- function(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN")) 
 #'
 #' @param gdsdir Full path to GDS directory.
 #' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+#' @param page_size Page size (def: 100).
 #' @param include Use PresignedUrl to include presigned URLs to all files within
 #' the GDS directory.
 #'
 #' @return Tibble with file basename, file size, file full data path, file dir name.
 #' @export
-gds_files_list <- function(gdsdir, token, include = NULL) {
+gds_files_list <- function(gdsdir, token, page_size = 100, include = NULL) {
   token <- ica_token_validate(token)
   assertthat::assert_that(grepl("^gds://", gdsdir))
   gdsdir_original <- gdsdir
@@ -97,7 +98,7 @@ gds_files_list <- function(gdsdir, token, include = NULL) {
   base_url <- "https://aps2.platform.illumina.com/v1"
   volname <- sub("gds://(.*?)/.*", "\\1", gdsdir)
   path2 <- sub("gds://(.*?)/(.*)", "\\2", gdsdir)
-  query_url <- glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize=100")
+  query_url <- glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize={page_size}")
   if (!is.null(include)) {
     .url_include_presignedurl <- function(x, incl) {
       assertthat::assert_that(incl == "PresignedUrl")
