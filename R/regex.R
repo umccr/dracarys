@@ -92,3 +92,11 @@ dr_func_eval <- function(f, v = NULL) {
   # evaluate string
   eval(parse(text = f))
 }
+
+#' Get dracarys `FILE_REGEX``
+#'
+#' @return `FILE_REGEX` R tibble object.
+#' @export
+file_regex_getter <- function() {
+  FILE_REGEX
+}
