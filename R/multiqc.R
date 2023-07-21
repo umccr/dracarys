@@ -65,6 +65,14 @@ multiqc_tidy_json <- function(j) {
     # https://stackoverflow.com/questions/35292757/replace-values-in-list
     d <- rapply(d, function(x) ifelse(x == "NA", NA, x), how = "replace")
   }
+  if (workflow == "bcl_convert") {
+    # general_stats_data is empty
+    warning(
+      "MultiQC for bcl_convert does not contain general stats",
+      " - use plotter functionality instead!"
+    )
+    quit(status = 0, save = "no")
+  }
   d <- d |>
     dplyr::bind_rows(.id = "umccr_id") |>
     dplyr::mutate(
@@ -164,6 +172,9 @@ multiqc_tidy_json <- function(j) {
       return("dragen_unknown")
     }
   }
+  if (length(ds) == 1 && ds == "bclconvert") {
+    return("bcl_convert")
+  }
   return("UNKNOWN")
 }
 
@@ -177,6 +188,9 @@ multiqc_tidy_json <- function(j) {
 multiqc_parse_gen <- function(p) {
   el <- "report_general_stats_data"
   assertthat::assert_that(inherits(p, "list"), el %in% names(p))
+  if (length(p[[el]]) == 0) {
+    return(list(NA))
+  }
   p[[el]] |> purrr::reduce(~ purrr::list_merge(.x, !!!.y))
 }
 
@@ -287,7 +301,8 @@ multiqc_date_fmt <- function(cdate) {
 #' Parse Plot Data from MultiQC JSON
 #'
 #' @param j Path to `multiqc_data.json` file.
-#' @param plot_names Names of plots to parse.
+#' @param plot_names Names of plots to parse. Use "everything" if you wantz all
+#' the plotz.
 #'
 #' @return Nested tibble with plot name and result as list column (use `tidyr::unnest` to access).
 #'
@@ -394,20 +409,50 @@ multiqc_parse_xyline_plot_contig_cvg <- function(dat) {
 #' MultiQC Extract Bar Graph Data
 #'
 #' Extracts `bar_graph` data for the given plot name from a MultiQC JSON.
+#' Each `bar_graph` element in the JSON object contains:
+#'
+#' - a `samples` array of N subarrays (of strings) of length A.
+#' - a `datasets` array of N subarrays (of objects) of length B.
+#' Each of the subarrays contains name (single string) and data (array of length
+#' equal to the length of the index-corresponding `samples` subarray).
 #'
 #' @param dat Parsed JSON list element with specific plot data to extract.
 #'
 #' @return Tibble with name and data list-column.
+#' @examples
+#' j1 <- here::here("nogit/bcl_convert/multiqc_data.json")
+#' j2 <- here::here("nogit/warehouse/wgs_tumor_normal/SBJ03173/2023-04-23_d184ee/dracarys_gds_sync/multiqc_data.json")
+#' j <- j1
+#' j <- j2
+#' multiqc_list_plots(j)
+#' parsed <- RJSONIO::fromJSON(j)
+#' dat <- parsed$report_plot_data$mapping_dup_percentage_plot
+#' dat <- parsed$report_plot_data$time_metrics_plot
+#' dat <- parsed$report_plot_data$bclconvert_lane_counts
+#' multiqc_parse_bargraph_plot(dat)
 #' @export
 multiqc_parse_bargraph_plot <- function(dat) {
-  assertthat::assert_that(dat[["plot_type"]] == "bar_graph")
-  dat[["datasets"]] |>
-    purrr::map(function(el) {
-      el |>
-        purrr::map(~ tibble::tibble(name = .x[["name"]], data = .x[["data"]])) |>
-        dplyr::bind_rows()
-    }) |>
-    dplyr::bind_rows()
+  assertthat::assert_that(
+    dat[["plot_type"]] == "bar_graph",
+    all(c("samples", "datasets") %in% names(dat))
+  )
+  samp <- dat[["samples"]]
+  d <- NULL # binding x to NULL gives us x
+  # for each dataset subarray
+  for (i in seq_len(length(dat[["datasets"]]))) {
+    ds <- dat[["datasets"]][[i]]
+    # for each object in the subarray
+    for (y in seq_len(length(ds))) {
+      assertthat::assert_that(length(ds[[y]][["data"]]) == length(samp[[i]]))
+      d <- tibble::tibble(
+        sample = samp[[i]],
+        name = ds[[y]][["name"]],
+        data = ds[[y]][["data"]]
+      ) |>
+        dplyr::bind_rows(d)
+    }
+  }
+  d
 }
 
 multiqc_list_plots <- function(x) {

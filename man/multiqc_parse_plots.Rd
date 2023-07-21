@@ -9,7 +9,8 @@ multiqc_parse_plots(j, plot_names = NULL)
 \arguments{
 \item{j}{Path to \code{multiqc_data.json} file.}
 
-\item{plot_names}{Names of plots to parse.}
+\item{plot_names}{Names of plots to parse. Use "everything" if you wantz all
+the plotz.}
 }
 \value{
 Nested tibble with plot name and result as list column (use \code{tidyr::unnest} to access).

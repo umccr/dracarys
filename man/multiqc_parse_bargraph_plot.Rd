@@ -14,4 +14,24 @@ Tibble with name and data list-column.
 }
 \description{
 Extracts \code{bar_graph} data for the given plot name from a MultiQC JSON.
+Each \code{bar_graph} element in the JSON object contains:
+}
+\details{
+\itemize{
+\item a \code{samples} array of N subarrays (of strings) of length A.
+\item a \code{datasets} array of N subarrays (of objects) of length B.
+Each of the subarrays contains name (single string) and data (array of length
+equal to the length of the index-corresponding \code{samples} subarray).
+}
+}
+\examples{
+j1 <- here::here("nogit/bcl_convert/multiqc_data.json")
+j2 <- here::here("nogit/warehouse/wgs_tumor_normal/SBJ03173/2023-04-23_d184ee/dracarys_gds_sync/multiqc_data.json")
+j <- j1
+j <- j2
+multiqc_list_plots(j)
+parsed <- RJSONIO::fromJSON(j)
+dat <- parsed$report_plot_data$mapping_dup_percentage_plot
+dat <- parsed$report_plot_data$bclconvert_lane_counts
+multiqc_parse_bargraph_plot(dat)
 }
