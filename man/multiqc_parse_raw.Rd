@@ -4,17 +4,14 @@
 \alias{multiqc_parse_raw}
 \title{Parse MultiQC 'report_saved_raw_data' JSON Element}
 \usage{
-multiqc_parse_raw(p, tools2delete = NULL)
+multiqc_parse_raw(p)
 }
 \arguments{
 \item{p}{Parsed MultiQC JSON.}
-
-\item{tools2delete}{Character vector of tools to delete from the parsed JSON.}
 }
 \value{
 A list.
 }
 \description{
-Parses MultiQC 'report_saved_raw_data' JSON Element. Modified from the
-awesome \url{https://github.com/multimeric/TidyMultiqc}.
+Parses MultiQC 'report_saved_raw_data' JSON Element.
 }

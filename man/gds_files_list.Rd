@@ -4,12 +4,14 @@
 \alias{gds_files_list}
 \title{GDS Files List}
 \usage{
-gds_files_list(gdsdir, token, include = NULL)
+gds_files_list(gdsdir, token, page_size = 100, include = NULL)
 }
 \arguments{
 \item{gdsdir}{Full path to GDS directory.}
 
 \item{token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{page_size}{Page size (def: 100).}
 
 \item{include}{Use PresignedUrl to include presigned URLs to all files within
 the GDS directory.}
