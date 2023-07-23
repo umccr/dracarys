@@ -67,11 +67,8 @@ multiqc_tidy_json <- function(j) {
   }
   if (workflow == "bcl_convert") {
     # general_stats_data is empty
-    warning(
-      "MultiQC for bcl_convert does not contain general stats",
-      " - use plotter functionality instead!"
-    )
-    quit(status = 0, save = "no")
+    # use raw instead
+    return(dracarys::multiqc_parse_raw(p))
   }
   d <- d |>
     dplyr::bind_rows(.id = "umccr_id") |>
@@ -196,49 +193,40 @@ multiqc_parse_gen <- function(p) {
 
 #' Parse MultiQC 'report_saved_raw_data' JSON Element
 #'
-#' Parses MultiQC 'report_saved_raw_data' JSON Element. Modified from the
-#' awesome <https://github.com/multimeric/TidyMultiqc>.
+#' Parses MultiQC 'report_saved_raw_data' JSON Element.
 #' @param p Parsed MultiQC JSON.
-#' @param tools2delete Character vector of tools to delete from the parsed JSON.
 #' @return A list.
 #' @export
-multiqc_parse_raw <- function(p, tools2delete = NULL) {
-  el <- "report_saved_raw_data"
-  assertthat::assert_that(inherits(p, "list"), el %in% names(p))
-  tool_nms <- names(p[[el]])
-  if (!is.null(tools2delete)) {
-    assertthat::assert_that(
-      is.vector(tools2delete), !is.list(tools2delete),
-      all(tools2delete %in% tool_nms)
-    )
-    # remove given elements from list
-    p[[el]] <- base::within(p[[el]], rm(list = tools2delete))
+multiqc_parse_raw <- function(p) {
+  x <- p[["report_saved_raw_data"]]
+  tool_nms <- names(x)
+  res <- list()
+  # some elements can be empty dicts
+  replace_empty_with_na <- function(x) {
+    ifelse(length(x) == 0, NA_real_, x)
   }
-  # For each tool
-  p[[el]] |>
-    purrr::imap(function(samples, tool) {
-      # For each sample
-      samples |> multiqc_kv_map(function(metrics, sample) {
-        # For each metric in the above tool
-        list(
-          key = sample,
-          value = metrics |> multiqc_kv_map(function(mvalue, mname) {
-            # Sanitise metric names
-            combined_metric <- list(
-              # key = paste0(tool, ".", mname),
-              key = mname,
-              value = mvalue
-            )
-          })
-        )
-      })
-    }) |>
-    purrr::reduce(utils::modifyList)
+  for (tool in tool_nms) {
+    tool_d <- x[[tool]]
+    sample_nms <- names(tool_d)
+    for (sample in sample_nms) {
+      d <- tool_d[[sample]]
+      if (is.list(d)) {
+        d <- purrr::map(d, replace_empty_with_na)
+      }
+      res[[tool]][[sample]] <- tibble::as_tibble_row(d)
+    }
+    res[[tool]] <- res[[tool]] |>
+      dplyr::bind_rows(.id = "multiqc_sample")
+  }
+  res |>
+    dplyr::bind_rows(.id = "multiqc_tool") |>
+    tidyr::nest(.by = "multiqc_tool")
 }
 
-multiqc_kv_map <- function(l, func) {
-  mapped <- purrr::imap(l, func) |>
-    purrr::set_names(nm = NULL)
+# From https://github.com/multimeric/TidyMultiqc
+multiqc_kv_map <- function(l, func, map_keys = FALSE) {
+  mapper <- ifelse(map_keys, purrr::imap, purrr::map)
+  mapped <- mapper(l, func) |> purrr::set_names(nm = NULL)
   keys <- mapped |> purrr::map_chr("key")
   vals <- mapped |> purrr::map("value")
   vals |> purrr::set_names(keys)
@@ -420,8 +408,9 @@ multiqc_parse_xyline_plot_contig_cvg <- function(dat) {
 #'
 #' @return Tibble with name and data list-column.
 #' @examples
+#' \dontrun{
 #' j1 <- here::here("nogit/bcl_convert/multiqc_data.json")
-#' j2 <- here::here("nogit/warehouse/wgs_tumor_normal/SBJ03173/2023-04-23_d184ee/dracarys_gds_sync/multiqc_data.json")
+#' j2 <- here::here("nogit/warehouse/wgs_tumor_normal/SBJ03197/2023-04-30_0813ce/dracarys_gds_sync/multiqc_data.json")
 #' j <- j1
 #' j <- j2
 #' multiqc_list_plots(j)
@@ -429,7 +418,9 @@ multiqc_parse_xyline_plot_contig_cvg <- function(dat) {
 #' dat <- parsed$report_plot_data$mapping_dup_percentage_plot
 #' dat <- parsed$report_plot_data$time_metrics_plot
 #' dat <- parsed$report_plot_data$bclconvert_lane_counts
+#' dat <- parsed$report_plot_data$bclconvert_sample_counts
 #' multiqc_parse_bargraph_plot(dat)
+#' }
 #' @export
 multiqc_parse_bargraph_plot <- function(dat) {
   assertthat::assert_that(
@@ -437,6 +428,11 @@ multiqc_parse_bargraph_plot <- function(dat) {
     all(c("samples", "datasets") %in% names(dat))
   )
   samp <- dat[["samples"]]
+  ds_labs <- rep(NA, length(samp))
+  if (!is.null(dat[["config"]][["data_labels"]])) {
+    ds_labs <- dat[["config"]][["data_labels"]] |>
+      purrr::map_chr("name", .default = NA)
+  }
   d <- NULL # binding x to NULL gives us x
   # for each dataset subarray
   for (i in seq_len(length(dat[["datasets"]]))) {
@@ -445,6 +441,7 @@ multiqc_parse_bargraph_plot <- function(dat) {
     for (y in seq_len(length(ds))) {
       assertthat::assert_that(length(ds[[y]][["data"]]) == length(samp[[i]]))
       d <- tibble::tibble(
+        label = ds_labs[[i]],
         sample = samp[[i]],
         name = ds[[y]][["name"]],
         data = ds[[y]][["data"]]
@@ -452,7 +449,8 @@ multiqc_parse_bargraph_plot <- function(dat) {
         dplyr::bind_rows(d)
     }
   }
-  d
+  d |>
+    tidyr::pivot_wider(names_from = "name", values_from = "data")
 }
 
 multiqc_list_plots <- function(x) {
