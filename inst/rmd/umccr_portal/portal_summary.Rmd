@@ -27,26 +27,53 @@ knitr::opts_chunk$set(
 
 ```{r load_pkgs}
 {
+  require(assertthat, include.only = "assert_that")
+  require(aws.signature, include.only = "locate_credentials")
   require(dplyr)
-  require(tidyr)
-  require(purrr)
-  require(tibble)
-  require(readr)
   require(dracarys)
+  require(DT, include.only = "datatable")
   require(glue, include.only = "glue")
+  require(googledrive, include.only = "drive_find")
+  require(googlesheets4, include.only = "read_sheet")
   require(here, include.only = "here")
-  require(kableExtra)
+  require(jsonlite, include.only = "fromJSON")
+  require(kableExtra, include.only = "kbl")
+  require(lubridate, include.only = "with_tz")
+  require(purrr, include.only = "map")
+  require(RColorBrewer, include.only = "brewer.pal")
+  require(readr, include.only = "cols")
+  require(tibble, include.only = "as_tibble")
+  require(tidyr, include.only = "unnest")
   require(knitr, include.only = "kable")
-  require(DT)
-  require(fs)
-  require(vistime)
-  require(colorspace)
-  require(RColorBrewer)
+  require(vistime, include.only = "vistime")
 }
 set.seed(4)
 ```
 
 ```{r funcs}
+get_workflows <- function(rows = 100) {
+  url1 <- utils::URLencode(glue("https://api.portal.prod.umccr.org/iam/workflows?rowsPerPage={rows}"))
+  creds <- aws.signature::locate_credentials()
+  AWS_REGION <- creds$region
+  AWS_ACCESS_KEY_ID <- creds$key
+  AWS_SECRET_ACCESS_KEY <- creds$secret
+  AWS_SESSION_TOKEN <- creds$session_token
+
+  curl_cmd <- glue(
+    "curl '{url1}' ",
+    "--aws-sigv4 'aws:amz:{AWS_REGION}:execute-api' ",
+    "--user '{AWS_ACCESS_KEY_ID}:{AWS_SECRET_ACCESS_KEY}' ",
+    "--header 'x-amz-security-token: {AWS_SESSION_TOKEN}' ",
+    "--header 'Accept: application/json'"
+  )
+  j <- system(curl_cmd, intern = TRUE)
+  d <- j |>
+    jsonlite::fromJSON() |>
+    purrr::pluck("results") |>
+    tibble::as_tibble()
+  d
+}
+
 kable_empty_wf <- function(wf) {
   kableExtra::kbl(NULL, caption = glue("<strong>NO {wf} WORKFLOWS WERE RUN</strong>"), escape = FALSE) |>
     kableExtra::kable_minimal(full_width = TRUE, position = "left")
@@ -85,7 +112,7 @@ blank_lines <- function(n = 10) {
   cat(rep("&nbsp;  ", n), sep = "\n")
 }
 
-get_colours3 <- function(nc) {
+get_colours <- function(nc) {
   clrs <- RColorBrewer::brewer.pal.info |>
     tibble::rownames_to_column(var = "name") |>
     tibble::as_tibble() |>
@@ -100,21 +127,8 @@ get_colours3 <- function(nc) {
     tidyr::unnest(clrs) |>
     dplyr::pull(clrs)
   max_col <- length(clrs)
-  assertthat::assert_that(nc <= max_col, nc > 0, msg = glue::glue("Number of colours should be a positive number less than {max_col + 1}!"))
+  assertthat::assert_that(nc <= max_col, nc > 0, msg = glue("Number of colours should be a positive number less than {max_col + 1}!"))
   clrs[seq_len(nc)]
-}
-get_colours2 <- function(nc) {
-  qual_col_pals <- RColorBrewer::brewer.pal.info[RColorBrewer::brewer.pal.info$category == "qual", ]
-  col_vector <- unlist(mapply(RColorBrewer::brewer.pal, qual_col_pals$maxcolors, rownames(qual_col_pals)))
-  colorspace::adjust_transparency(sample(col_vector, nc), alpha = 0.75)
-}
-get_colours <- function(nc) {
-  max1 <- 12
-  cols1 <- RColorBrewer::brewer.pal(n = max1, name = "Set3")
-  if (nc > max1) {
-    cols1 <- colorRampPalette(cols1)(nc)
-  }
-  cols1[seq_len(nc)]
 }
 
 get_sbj_url <- function(x, colour = NULL) {
@@ -129,7 +143,8 @@ get_sbj_url <- function(x, colour = NULL) {
 
 ```{r vars}
 # options(width = 150)
-start_date <- "2023-07-14"
+start_date <- "2023-07-21"
+today <- "2023-07-24"
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -140,16 +155,26 @@ wf_order <- c(
   "rnasum"
 )
 
-lims_rds <- here::here(glue("nogit/data_portal/lims/2023-07-17.rds"))
+lims_rds <- here::here(glue("nogit/data_portal/lims/{today}.rds"))
 # lims_raw <- glims_read()
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
-pmeta <- here::here("nogit/data_portal/workflows/2023-07-17_subset.csv") |>
+pmeta_rds <- here::here(glue("nogit/data_portal/workflows/{today}.rds"))
+# pmeta_raw <- get_workflows(60)
+# saveRDS(pmeta, file = pmeta_rds)
+pmeta_raw <- readr::read_rds(pmeta_rds)
+date_fmt <- "%Y-%m-%dT%H:%M:%S"
+au_tz <- "Australia/Melbourne"
+utc_tz <- "UTC"
+pmeta <- pmeta_raw |>
   dracarys:::portal_meta_read() |>
-  # change to AEST timezone
   dplyr::mutate(
-    start = base::format(.data$start, tz = "Australia/Melbourne"),
-    end = base::format(.data$end, tz = "Australia/Melbourne")
+    # portal has UTC timezone
+    start = as.POSIXct(.data$start, format = date_fmt, tz = utc_tz),
+    end = as.POSIXct(.data$end, format = date_fmt, tz = utc_tz),
+    # change to AEST timezone
+    start = lubridate::with_tz(.data$start, tz = au_tz),
+    end = lubridate::with_tz(.data$end, tz = au_tz)
   ) |>
   dplyr::filter(start >= start_date) |>
   dplyr::mutate(type_name = factor(.data$type_name, levels = wf_order))
@@ -175,7 +200,7 @@ pmeta_sumy <- pmeta |>
   ) |>
   dplyr::ungroup()
 unique_sbj <- sort(unique(pmeta_sumy$sbjid))
-clrs1 <- get_colours3(length(unique_sbj)) |>
+clrs1 <- get_colours(length(unique_sbj)) |>
   purrr::set_names(unique_sbj) |>
   tibble::enframe(name = "sbjid", value = "color") |>
   dplyr::mutate(sbj_url = get_sbj_url(.data$sbjid, colour = .data$color))
@@ -203,7 +228,7 @@ sbj_sumy |>
 
 ## RuntimeVis
 
-```{r vistime, fig.width=12, fig.height = 11}
+```{r vistime, fig.width=15, fig.height = 12}
 p1 <- pmeta_sumy |>
   dplyr::group_by(sbj_lib, type_name) |>
   dplyr::mutate(
@@ -256,6 +281,7 @@ if (!chunks1[[wf]]) {
 pmeta |>
   dracarys::meta_bcl_convert() |>
   dplyr::select(
+    gds_outdir_multiqc, gds_outdir_multiqc_interop,
     end_status, runfolder_name, LibraryID, SampleID, batch_name, start, end
   ) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID")) |>

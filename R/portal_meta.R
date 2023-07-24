@@ -54,7 +54,7 @@ meta_bcl_convert <- function(pmeta, status = "Succeeded") {
     tidyr::separate_wider_regex("libid1", c(libid2 = ".*", "_", topup_or_rerun = ".*"), cols_remove = FALSE, too_few = "align_start") |>
     dplyr::select(
       dplyr::all_of(meta_main_cols()),
-      -c("batch_run_id"), # NA for bcl_convert
+      -c("batch_run"), # NA for bcl_convert
       SampleID = "sampleid",
       LibraryID = "libid2",
       "topup_or_rerun",
@@ -161,7 +161,7 @@ meta_rnasum <- function(pmeta, status = "Succeeded") {
   d |>
     dplyr::select(
       dplyr::all_of(meta_main_cols()),
-      -c("sequence_run_id", "batch_run_id"), # NA for rnasum
+      -c("sequence_run", "batch_run"), # NA for rnasum
       SubjectID = "sbjid1",
       LibraryID = "libid1",
       SampleID = "rnasum_sample_name",
@@ -275,7 +275,7 @@ meta_wgs_tumor_normal <- function(pmeta, status = "Succeeded") {
   d |>
     dplyr::select(
       dplyr::all_of(meta_main_cols()),
-      -c("sequence_run_id", "batch_run_id"), # NA for wgs_tumor_normal
+      -c("sequence_run", "batch_run"), # NA for wgs_tumor_normal
       "SubjectID",
       "LibraryID_tumor",
       "LibraryID_normal",
@@ -373,7 +373,7 @@ meta_umccrise <- function(pmeta, status = "Succeeded") {
   d |>
     dplyr::select(
       meta_main_cols(),
-      -c("sequence_run_id", "batch_run_id"), # NA for umccrise
+      -c("sequence_run", "batch_run"), # NA for umccrise
       "SubjectID",
       "LibraryID_tumor",
       "LibraryID_normal",
@@ -469,7 +469,7 @@ portal_meta_read <- function(pmeta) {
 
 meta_main_cols <- function() {
   c(
-    "id", "wfr_name", "wfr_id", "version", "end_status", "sequence_run_id", "batch_run_id",
+    "id", "wfr_name", "wfr_id", "version", "end_status", "sequence_run", "batch_run",
     "start", "end", "portal_run_id"
   )
 }
