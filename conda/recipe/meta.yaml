@@ -25,6 +25,7 @@ requirements:
     - r-ggrepel
     - r-glue
     - r-jose
+    - r-lubridate
     - r-purrr
     - r-r6
     - r-rjsonio

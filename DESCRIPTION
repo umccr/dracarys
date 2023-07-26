@@ -26,6 +26,7 @@ Imports:
     ggrepel,
     glue,
     jose,
+    lubridate,
     purrr,
     R6,
     RJSONIO,

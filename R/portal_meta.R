@@ -8,7 +8,7 @@
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_bcl_convert(pmeta))
 #' @testexamples
-#' expect_equal(sum(!is.na(m$topup_or_rerun)), 13)
+#' expect_equal(sum(!is.na(m$topup_or_rerun)), 22)
 #' expect_equal(length(unique(m$portal_run_id)), 4)
 #' @export
 meta_bcl_convert <- function(pmeta, status = "Succeeded") {
@@ -128,8 +128,8 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_rnasum(pmeta))
 #' @testexamples
-#' expect_equal(m$rnasum_dataset[1], "PANCAN")
-#' expect_equal(basename(m$gds_outfile_rnasum_html[4]), "PRJ230724.RNAseq_report.html")
+#' expect_equal(m$rnasum_dataset[1], "LAML")
+#' expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230277.RNAseq_report.html")
 #' @export
 meta_rnasum <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
@@ -446,30 +446,93 @@ meta_io_fromjson <- function(pmeta) {
     dplyr::ungroup()
 }
 
-portal_meta_read <- function(pmeta) {
-  # if already parsed, just return it
-  if (inherits(pmeta, "data.frame")) {
-    assertthat::assert_that(
-      all(c(
-        "wfr_name", "type_name", "start", "end", "input", "output",
-        "portal_run_id", "wfr_id", "wfl_id", "wfv_id", "version", "end_status"
-      ) %in% colnames(pmeta))
-    )
-    return(pmeta)
-  }
-  assertthat::assert_that(file.exists(pmeta))
-  # keep all character except start/end
-  ctypes <- readr::cols(
-    .default = "c",
-    start = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
-    end = readr::col_datetime(format = "%Y-%m-%d %H:%M:%S"),
-  )
-  readr::read_csv(pmeta, col_types = ctypes)
-}
-
 meta_main_cols <- function() {
   c(
     "id", "wfr_name", "wfr_id", "version", "end_status", "sequence_run", "batch_run",
     "start", "end", "portal_run_id"
   )
+}
+
+#' Read ICA Workflows Metadata via Portal API
+#'
+#' Reads ICA Workflows Metadata via Portal API
+#'
+#' @param rows Number of rows to return.
+#' @param params String containing additional params to pass to the `/workflows`
+#' endpoint, e.g. `'&type_name=bclconvert'`.
+#' @param AWS_REGION `AWS_REGION`, uses env var by default.
+#' @param AWS_ACCESS_KEY_ID `AWS_ACCESS_KEY_ID`, uses env var by default.
+#' @param AWS_SECRET_ACCESS_KEY `AWS_SECRET_ACCESS_KEY`, uses env var by default.
+#' @param AWS_SESSION_TOKEN `AWS_SESSION_TOKEN`, uses env var by default.
+#' @param pmeta Path to downloaded portal metadata file, or already parsed metadata tibble.
+#'
+#' @return A tibble of the results from the given query.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' portal_meta_read(params = "&type_name=bcl_convert", rows = 4)
+#' }
+portal_meta_read <- function(pmeta = NULL, rows = 100,
+                             params = "",
+                             AWS_REGION = Sys.getenv("AWS_REGION"),
+                             AWS_ACCESS_KEY_ID = Sys.getenv("AWS_ACCESS_KEY_ID"),
+                             AWS_SECRET_ACCESS_KEY = Sys.getenv("AWS_SECRET_ACCESS_KEY"),
+                             AWS_SESSION_TOKEN = Sys.getenv("AWS_SESSION_TOKEN")) {
+  au_tz <- "Australia/Melbourne"
+  utc_tz <- "UTC"
+  if (!is.null(pmeta)) {
+    # if already parsed, just return it
+    if (inherits(pmeta, "data.frame")) {
+      assertthat::assert_that(
+        all(c(
+          "wfr_name", "type_name", "start", "end", "input", "output",
+          "portal_run_id", "wfr_id", "wfl_id", "wfv_id", "version", "end_status"
+        ) %in% colnames(pmeta))
+      )
+      return(pmeta)
+    } else if (file.exists(pmeta)) {
+      # local file downloaded via Portal
+      # keep all character except start/end
+      # and change to AEST timezone
+      date_fmt_z <- "%Y-%m-%dT%H:%M:%SZ"
+      ctypes <- readr::cols(
+        .default = "c",
+        start = readr::col_datetime(format = date_fmt_z),
+        end = readr::col_datetime(format = date_fmt_z),
+      )
+      res <- pmeta |>
+        readr::read_csv(col_types = ctypes) |>
+        dplyr::mutate(
+          start = lubridate::with_tz(.data$start, tz = au_tz),
+          end = lubridate::with_tz(.data$end, tz = au_tz)
+        )
+      return(res)
+    } else {
+      stop("pmeta should be an already parsed dataframe or a local file.")
+    }
+  } # else pmeta is NULL, so read via portal API
+
+  base_url <- "https://api.portal.prod.umccr.org/iam"
+  url1 <- utils::URLencode(glue("{base_url}/workflows?rowsPerPage={rows}{params}"))
+  curl_cmd <- glue(
+    "curl '{url1}' ",
+    "--aws-sigv4 'aws:amz:{AWS_REGION}:execute-api' ",
+    "--user '{AWS_ACCESS_KEY_ID}:{AWS_SECRET_ACCESS_KEY}' ",
+    "--header 'x-amz-security-token: {AWS_SESSION_TOKEN}' ",
+    "--header 'Accept: application/json'"
+  )
+  j <- system(curl_cmd, intern = TRUE)
+  date_fmt <- "%Y-%m-%dT%H:%M:%S"
+  d <- j |>
+    jsonlite::fromJSON() |>
+    purrr::pluck("results") |>
+    tibble::as_tibble()
+  d |>
+    dplyr::mutate(
+      start = as.POSIXct(.data$start, tz = utc_tz, format = date_fmt),
+      end = as.POSIXct(.data$end, tz = utc_tz, format = date_fmt),
+      start = lubridate::with_tz(.data$start, tz = au_tz),
+      end = lubridate::with_tz(.data$end, tz = au_tz)
+    )
 }
