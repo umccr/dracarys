@@ -28,7 +28,6 @@ knitr::opts_chunk$set(
 ```{r load_pkgs}
 {
   require(assertthat, include.only = "assert_that")
-  require(aws.signature, include.only = "locate_credentials")
   require(dplyr)
   require(dracarys)
   require(DT, include.only = "datatable")
@@ -51,29 +50,6 @@ set.seed(4)
 ```
 
 ```{r funcs}
-get_workflows <- function(rows = 100) {
-  url1 <- utils::URLencode(glue("https://api.portal.prod.umccr.org/iam/workflows?rowsPerPage={rows}"))
-  creds <- aws.signature::locate_credentials()
-  AWS_REGION <- creds$region
-  AWS_ACCESS_KEY_ID <- creds$key
-  AWS_SECRET_ACCESS_KEY <- creds$secret
-  AWS_SESSION_TOKEN <- creds$session_token
-
-  curl_cmd <- glue(
-    "curl '{url1}' ",
-    "--aws-sigv4 'aws:amz:{AWS_REGION}:execute-api' ",
-    "--user '{AWS_ACCESS_KEY_ID}:{AWS_SECRET_ACCESS_KEY}' ",
-    "--header 'x-amz-security-token: {AWS_SESSION_TOKEN}' ",
-    "--header 'Accept: application/json'"
-  )
-  j <- system(curl_cmd, intern = TRUE)
-  d <- j |>
-    jsonlite::fromJSON() |>
-    purrr::pluck("results") |>
-    tibble::as_tibble()
-  d
-}
-
 kable_empty_wf <- function(wf) {
   kableExtra::kbl(NULL, caption = glue("<strong>NO {wf} WORKFLOWS WERE RUN</strong>"), escape = FALSE) |>
     kableExtra::kable_minimal(full_width = TRUE, position = "left")
@@ -143,8 +119,9 @@ get_sbj_url <- function(x, colour = NULL) {
 
 ```{r vars}
 # options(width = 150)
-start_date <- "2023-07-21"
-today <- "2023-07-24"
+fmt1 <- "%Y-%m-%dT%H:%M:%S"
+date_start <- as.POSIXct("2023-07-21T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2023-07-24T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -155,28 +132,16 @@ wf_order <- c(
   "rnasum"
 )
 
-lims_rds <- here::here(glue("nogit/data_portal/lims/{today}.rds"))
+lims_rds <- here::here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # lims_raw <- glims_read()
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
-pmeta_rds <- here::here(glue("nogit/data_portal/workflows/{today}.rds"))
-# pmeta_raw <- get_workflows(60)
-# saveRDS(pmeta, file = pmeta_rds)
+pmeta_rds <- here::here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
+# pmeta_raw <- dracarys::portal_meta_read(rows = 100)
+# saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
-date_fmt <- "%Y-%m-%dT%H:%M:%S"
-au_tz <- "Australia/Melbourne"
-utc_tz <- "UTC"
 pmeta <- pmeta_raw |>
-  dracarys:::portal_meta_read() |>
-  dplyr::mutate(
-    # portal has UTC timezone
-    start = as.POSIXct(.data$start, format = date_fmt, tz = utc_tz),
-    end = as.POSIXct(.data$end, format = date_fmt, tz = utc_tz),
-    # change to AEST timezone
-    start = lubridate::with_tz(.data$start, tz = au_tz),
-    end = lubridate::with_tz(.data$end, tz = au_tz)
-  ) |>
-  dplyr::filter(start >= start_date) |>
+  dplyr::filter(start >= date_start, end <= date_end) |>
   dplyr::mutate(type_name = factor(.data$type_name, levels = wf_order))
 lims <- lims_raw |>
   dplyr::select(
@@ -185,7 +150,7 @@ lims <- lims_raw |>
   )
 ```
 
-## Summary for Workflows Run after `r start_date`
+## Summary for Workflows Run between `r date_start` AEST and `r date_end` AEST
 
 ```{r data_setup}
 pmeta_sumy <- pmeta |>
