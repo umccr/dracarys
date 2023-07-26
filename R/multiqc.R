@@ -219,8 +219,8 @@ multiqc_parse_raw <- function(p) {
       dplyr::bind_rows(.id = "multiqc_sample")
   }
   res |>
-    dplyr::bind_rows(.id = "multiqc_tool") |>
-    tidyr::nest(.by = "multiqc_tool")
+    purrr::map(\(x) tidyr::nest(x, .by = "multiqc_sample")) |>
+    dplyr::bind_rows(.id = "multiqc_tool")
 }
 
 # From https://github.com/multimeric/TidyMultiqc

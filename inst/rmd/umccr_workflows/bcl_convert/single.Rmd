@@ -1,0 +1,145 @@
+---
+author: "University of Melbourne Centre for Cancer Research"
+date: "`r date()`"
+output:
+  html_document:
+    theme: cosmo
+    code_download: true
+    toc: true
+  rmdformats::material:
+    highlight: kate
+params:
+  title: "UMCCR bcl_convert Report"
+  gds_outdir: "X"
+description: "UMCCR bcl_convert Report"
+title: "`r params$title`"
+---
+
+```{r knitr_opts, include=F}
+knitr::opts_chunk$set(
+  collapse = TRUE, echo = FALSE,
+  warning = FALSE, message = FALSE
+)
+```
+
+```{css}
+.navbar-brand {
+  padding: 5px 15px;
+}
+
+/* https://stackoverflow.com/questions/42183672/how-to-implement-a-navbar-dropdown-hover-in-bootstrap-v4/48224232#48224232 */
+.dropdown:hover > .dropdown-menu {
+  display: block;
+}
+.dropdown > .dropdown-toggle:active {
+  /*Without this, clicking will make it sticky*/
+  pointer-events: none;
+}
+
+.main-container {
+  max-width: 1400px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.navbar-default {
+  color: #11A7BB;
+  background-color: #11A7BB;
+}
+```
+
+
+```{r load_pkgs}
+{
+  library(dplyr, include.only = c("mutate", "filter", "select"))
+  library(tidyr, include.only = c("unnest"))
+  library(tibble, include.only = c("tibble"))
+  library(purrr, include.only = c("map"))
+  library(dracarys)
+  library(here, include.only = "here")
+  library(glue, include.only = "glue")
+  library(knitr, include.only = "kable")
+  library(DT, include.only = "datatable")
+}
+```
+
+```{r data_parse}
+token <- dracarys::ica_token_validate()
+# gds_outdir <- params$gds_outdir
+gds_outdir <- "gds://production/primary_data/230714_A01052_0158_AH7WGHDSX7/202307151453444c/230714_A01052_0158_AH7WGHDSX7_bclconvert_multiqc"
+
+j <- dracarys::gds_files_list_filter_relevant(gds_outdir, token = token, include = "PresignedUrl") |>
+  dplyr::pull(.data$presigned_url)
+stopifnot(length(j) == 1)
+d_plots <- dracarys::multiqc_parse_plots(j, plot_names = "everything")
+d_stats <- dracarys::MultiqcFile$new(j)$read()
+```
+
+## Sample Statistics
+
+```{r}
+x <- d_stats |>
+  dplyr::filter(multiqc_tool == "multiqc_bclconvert_bysample") |>
+  dplyr::select(-"multiqc_tool", "Sample Name" = "multiqc_sample") |>
+  tidyr::unnest("data")
+num_cols <- purrr::map_lgl(x, is.numeric)
+num_cols <- names(num_cols[num_cols])
+# round num cols
+x <- x |>
+  dplyr::mutate(dplyr::across(dplyr::all_of(num_cols), \(x) round(x, 1)))
+
+dt <- DT::datatable(
+  x,
+  extensions = c("Scroller", "Buttons", "KeyTable"),
+  options = list(
+    scroller = TRUE, scrollY = 600, scrollX = TRUE, autoWidth = FALSE, keys = TRUE,
+    buttons = c("csv", "excel"), dom = "Blfrtip"
+  )
+)
+for (col in num_cols) {
+  dt <- dt |>
+    DT::formatStyle(
+      col,
+      background = DT::styleColorBar(x[[col]], color = "lightgreen"),
+      backgroundSize = "90% 90%",
+      backgroundRepeat = "no-repeat",
+      backgroundPosition = "center"
+    )
+}
+dt |>
+  DT::formatCurrency(num_cols, currency = "", interval = 3, mark = ",", digits = 0)
+```
+
+## Lane Statistics
+
+```{r}
+x <- d_stats |>
+  dplyr::filter(multiqc_tool == "multiqc_bclconvert_bylane") |>
+  dplyr::select(-"multiqc_tool", "RunID - Lane" = "multiqc_sample") |>
+  tidyr::unnest("data")
+num_cols <- purrr::map_lgl(x, is.numeric)
+num_cols <- names(num_cols[num_cols])
+x <- x |>
+  dplyr::mutate(dplyr::across(dplyr::all_of(num_cols), \(x) round(x, 1)))
+
+dt <- DT::datatable(
+  x,
+  extensions = c("Scroller", "Buttons", "KeyTable"),
+  options = list(
+    scroller = TRUE, scrollY = 200, scrollX = TRUE, autoWidth = FALSE, keys = TRUE,
+    buttons = c("csv", "excel"), dom = "Blfrtip"
+  )
+)
+for (col in num_cols) {
+  dt <- dt |>
+    DT::formatStyle(
+      col,
+      background = DT::styleColorBar(x[[col]], color = "lightgreen"),
+      backgroundSize = "90% 90%",
+      backgroundRepeat = "no-repeat",
+      backgroundPosition = "center"
+    )
+}
+dt |>
+  DT::formatCurrency(num_cols, currency = "", interval = 3, mark = ",", digits = 0)
+```
