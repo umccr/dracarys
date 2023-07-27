@@ -4,13 +4,15 @@
 \alias{bcftools_parse_vcf_regions}
 \title{Parse VCF regions with bcftools}
 \usage{
-bcftools_parse_vcf_regions(vcf, r)
+bcftools_parse_vcf_regions(vcf, r, only_pass = TRUE)
 }
 \arguments{
 \item{vcf}{Path to VCF. Can be S3, http or local. If presigned URL, need to
 also concatenate the VCF index as in 'vcf_url##idx##vcfi_url'.}
 
 \item{r}{Character vector of regions to subset (e.g. c('chr1:123-456', 'chr2:789-1000'))}
+
+\item{only_pass}{Keep PASS variants only (TRUE by default)?}
 }
 \value{
 A tibble with all the main, FORMAT, and INFO fields detected in

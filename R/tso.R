@@ -23,7 +23,7 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
     #' @return tibble with variants.
     read = function() {
       x <- self$path
-      bcftools_parse_single_vcf(x)
+      bcftools_parse_vcf(x, only_pass = TRUE)
     },
     #' @description
     #' Writes a tidy version of the `MergedSmallVariants.vcf.gz` file output from TSO.

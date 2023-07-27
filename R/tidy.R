@@ -18,9 +18,14 @@
 #' @examples
 #' \dontrun{
 #' in_dir <- paste0(
-#'   "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/",
-#'   "20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+#'   "gds://production/analysis_data/SBJ01639/tso_ctdna_tumor_only/",
+#'   "202204045ad5743c/L2200214/Results/PRJ220425_L2200214/"
 #' )
+#' out_dir <- here::here("nogit/tso/2023-07-27")
+#' prefix <- "SBJ01639"
+#' dryrun <- T
+#' out_format <- "tsv"
+#'
 #' in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
 #' out_dir <- file.path(in_dir, "../out")
 #' gds_local_dir <- NULL
@@ -45,7 +50,7 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
       gdsdir = in_dir, outdir = gds_local_dir, token = token,
       pattern = pat, dryrun = dryrun
     )
-    # Use the downloaded results
+    # Now use the downloaded results
     in_dir <- gds_local_dir
   } else {
     # in_dir is not gds
@@ -71,7 +76,8 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
 
     if (nrow(d) == 0) {
       regex <- FILE_REGEX |>
-        dplyr::pull("regex")
+        dplyr::pull("regex") |>
+        sort()
       msg <- paste(
         "No UMCCR files for dracarys were found in {.file {in_dir}}.",
         "See current supported regexes: {regex}."
@@ -88,6 +94,7 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
   cli::cli_alert_info("{date_log()} {e('dragon')} {.emph {prefix}}: Start tidying UMCCR dir: {.file {in_dir}}")
   res <- d |>
     dplyr::select("type", "path", "bname") |>
+    dplyr::filter(!.data$type %in% FILES_DOWNLOAD_BUT_IGNORE) |>
     dplyr::rowwise() |>
     dplyr::mutate(
       env = list(dr_func_eval(.data$type)),

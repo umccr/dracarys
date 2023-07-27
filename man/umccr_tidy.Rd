@@ -44,9 +44,14 @@ tibbles to TSV and/or Parquet format.
 \examples{
 \dontrun{
 in_dir <- paste0(
-  "gds://production/analysis_data/SBJ02858/tso_ctdna_tumor_only/",
-  "20221104b7ad0b38/L2201560/Results/PRJ222206_L2201560/"
+  "gds://production/analysis_data/SBJ01639/tso_ctdna_tumor_only/",
+  "202204045ad5743c/L2200214/Results/PRJ220425_L2200214/"
 )
+out_dir <- here::here("nogit/tso/2023-07-27")
+prefix <- "SBJ01639"
+dryrun <- T
+out_format <- "tsv"
+
 in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
 out_dir <- file.path(in_dir, "../out")
 gds_local_dir <- NULL

@@ -65,6 +65,8 @@ FILE_REGEX <- tibble::tribble(
   "-qc_summary\\.tsv\\.gz$", "UmQcSumFile"
 )
 
+FILES_DOWNLOAD_BUT_IGNORE <- c("TsoMergedSmallVariantsVcfIndexFile")
+
 #' Evaluate dracarys Function
 #'
 #' This is somewhat a hack for getting a function to evaluate based on a lookup

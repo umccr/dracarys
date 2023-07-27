@@ -4,10 +4,12 @@
 \alias{bcftools_parse_vcf}
 \title{Parse VCF with bcftools}
 \usage{
-bcftools_parse_vcf(vcf)
+bcftools_parse_vcf(vcf, only_pass = TRUE)
 }
 \arguments{
 \item{vcf}{VCF with one or more samples.}
+
+\item{only_pass}{Keep PASS variants only (TRUE by default)?}
 }
 \value{
 A tibble with all the main, FORMAT, and INFO fields detected in
