@@ -9,9 +9,9 @@ output:
   rmdformats::material:
     highlight: kate
 params:
-  title: "UMCCR bcl_convert Report"
+  title: "UMCCR BCL Convert Report"
   gds_outdir: "X"
-description: "UMCCR bcl_convert Report"
+description: "UMCCR BCL Convert Report"
 title: "`r params$title`"
 ---
 
@@ -27,12 +27,10 @@ knitr::opts_chunk$set(
   padding: 5px 15px;
 }
 
-/* https://stackoverflow.com/questions/42183672/how-to-implement-a-navbar-dropdown-hover-in-bootstrap-v4/48224232#48224232 */
 .dropdown:hover > .dropdown-menu {
   display: block;
 }
 .dropdown > .dropdown-toggle:active {
-  /*Without this, clicking will make it sticky*/
   pointer-events: none;
 }
 
@@ -48,18 +46,20 @@ knitr::opts_chunk$set(
 }
 ```
 
-
 ```{r load_pkgs}
 {
-  library(dplyr, include.only = c("mutate", "filter", "select"))
-  library(tidyr, include.only = c("unnest"))
-  library(tibble, include.only = c("tibble"))
-  library(purrr, include.only = c("map"))
+  library(dplyr, include.only = c("mutate", "filter", "select", "count"))
   library(dracarys)
-  library(here, include.only = "here")
-  library(glue, include.only = "glue")
-  library(knitr, include.only = "kable")
   library(DT, include.only = "datatable")
+  library(ggplot2, include.only = c("ggplot", "aes"))
+  library(glue, include.only = "glue")
+  library(here, include.only = "here")
+  library(knitr, include.only = "kable")
+  library(plotly, include.only = "ggplotly")
+  library(purrr, include.only = "map")
+  library(scales, include.only = "pretty_breaks")
+  library(tidyr, include.only = "unnest")
+  library(tibble, include.only = "tibble")
 }
 ```
 
@@ -71,11 +71,13 @@ gds_outdir <- "gds://production/primary_data/230714_A01052_0158_AH7WGHDSX7/20230
 j <- dracarys::gds_files_list_filter_relevant(gds_outdir, token = token, include = "PresignedUrl") |>
   dplyr::pull(.data$presigned_url)
 stopifnot(length(j) == 1)
-d_plots <- dracarys::multiqc_parse_plots(j, plot_names = "everything")
 d_stats <- dracarys::MultiqcFile$new(j)$read()
+d_plots <- dracarys::multiqc_parse_plots(j, plot_names = "everything")
 ```
 
-## Sample Statistics
+## Statistics
+
+### Sample
 
 ```{r}
 x <- d_stats |>
@@ -110,7 +112,7 @@ dt |>
   DT::formatCurrency(num_cols, currency = "", interval = 3, mark = ",", digits = 0)
 ```
 
-## Lane Statistics
+### Lane
 
 ```{r}
 x <- d_stats |>
@@ -142,4 +144,98 @@ for (col in num_cols) {
 }
 dt |>
   DT::formatCurrency(num_cols, currency = "", interval = 3, mark = ",", digits = 0)
+```
+
+```{r rm_stuff}
+rm(dt, x, col, num_cols)
+```
+
+## Plots
+
+```{r data_prep_plot}
+fig_width <- 12
+cols_sel <- c("Undetermined", "Mismatched", "Perfect")
+d <- d_plots |>
+  tidyr::unnest("plot_res") |>
+  dplyr::select(-"label") |>
+  dplyr::rename(
+    Undetermined = "Undetermined Reads",
+    Mismatched = "Mismatched Index Reads",
+    Perfect = "Perfect Index Reads"
+  ) |>
+  tidyr::pivot_longer(cols = dplyr::all_of(cols_sel)) |>
+  dplyr::mutate(
+    sample = factor(sample),
+    name = factor(name, levels = cols_sel)
+  )
+```
+
+```{r plot_fun}
+plot1 <- function(d) {
+  plot2 <- function(d, bar_pos = "stack", ylab = "Counts") {
+    assertthat::assert_that(bar_pos %in% c("fill", "stack"))
+    lab_fun <- ifelse(
+      bar_pos == "stack",
+      scales::label_number(scale_cut = scales::cut_short_scale()),
+      scales::percent_format(accuracy = 1)
+    )
+    d |>
+      ggplot2::ggplot(ggplot2::aes(x = sample, y = value, fill = name)) +
+      ggplot2::geom_bar(position = bar_pos, stat = "identity") +
+      ggplot2::scale_fill_manual(
+        "",
+        values = c("Undetermined" = "#90ed7d", "Mismatched" = "#5c5c61", "Perfect" = "#7cb5ec")
+      ) +
+      ggplot2::coord_flip() +
+      ggplot2::theme_minimal() +
+      ggplot2::ylab(ylab) +
+      ggplot2::xlab("") +
+      ggplot2::scale_y_continuous(
+        breaks = scales::pretty_breaks(n = 10),
+        labels = lab_fun
+      )
+  }
+  p1 <- plot2(d, bar_pos = "stack", ylab = "Counts")
+  p2 <- plot2(d, bar_pos = "fill", ylab = "Percentages")
+  list(p1 = p1, p2 = p2)
+}
+
+lane_plots <- d |>
+  dplyr::filter(plot_nm == "bclconvert_lane_counts") |>
+  plot1()
+sample_plots <- d |>
+  dplyr::filter(plot_nm == "bclconvert_sample_counts") |>
+  plot1()
+```
+
+### Sample {.tabset .tabset-pills}
+
+#### Counts
+
+```{r fig.width=fig_width}
+sample_plots$p1 |>
+  plotly::ggplotly()
+```
+
+#### Percentages
+
+```{r fig.width=fig_width}
+sample_plots$p2 |>
+  plotly::ggplotly()
+```
+
+### Lane {.tabset .tabset-pills}
+
+#### Counts
+
+```{r fig.width=fig_width}
+lane_plots$p1 |>
+  plotly::ggplotly()
+```
+
+#### Percentages
+
+```{r fig.width=fig_width}
+lane_plots$p2 |>
+  plotly::ggplotly()
 ```
