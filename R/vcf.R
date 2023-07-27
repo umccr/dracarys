@@ -1,3 +1,7 @@
+bcftools_installed <- function() {
+  system("bcftools -v", ignore.stdout = TRUE) == 0
+}
+
 #' Parse VCF with bcftools
 #'
 #' Parse VCF with bcftools.
@@ -5,11 +9,14 @@
 #' then converts the parsed character vector to a tibble.
 #'
 #' @param vcf VCF with one or more samples.
+#' @param only_pass Keep PASS variants only (TRUE by default)?
 #'
 #' @return A tibble with all the main, FORMAT, and INFO fields detected in
 #' the VCF header as columns.
 #' @export
-bcftools_parse_vcf <- function(vcf) {
+bcftools_parse_vcf <- function(vcf, only_pass = TRUE) {
+  assertthat::assert_that(is.logical(only_pass), length(only_pass) == 1)
+  assertthat::assert_that(bcftools_installed(), msg = "bcftools needs to be on the PATH.")
   if (is_url(vcf)) {
     vcf <- glue("'{vcf}'")
   }
@@ -58,7 +65,11 @@ bcftools_parse_vcf <- function(vcf) {
   info_cols <- paste0("%INFO/", info, collapse = "\\t")
   fmt_cols <- paste0("[\\t", paste0(paste0("%", fmt), collapse = "\\t"), "]\\n")
   q <- paste0(main_cols, "\\t", info_cols, fmt_cols)
-  cmd_body <- glue("bcftools query -f \"{q}\" {vcf}")
+  include_pass <- ""
+  if (only_pass) {
+    include_pass <- "-i 'FILTER=\"PASS\" || FILTER=\".\"'"
+  }
+  cmd_body <- glue("bcftools query -f \"{q}\" {vcf} {include_pass}")
   b <- system(cmd_body, intern = TRUE)
   # create column names using the main columns, an INFO prefix for the INFO
   # columns, and a S1/2/.._X prefix for the sample columns.
@@ -85,9 +96,11 @@ bcftools_parse_vcf <- function(vcf) {
 #'
 #' Parses VCF regions with bcftools. The VCF subset is written to a temporary
 #' file in the local filesystem, then parsed into a tibble object.
+#'
 #' @param vcf Path to VCF. Can be S3, http or local. If presigned URL, need to
 #' also concatenate the VCF index as in 'vcf_url##idx##vcfi_url'.
 #' @param r Character vector of regions to subset (e.g. c('chr1:123-456', 'chr2:789-1000'))
+#' @param only_pass Keep PASS variants only (TRUE by default)?
 #'
 #' @return A tibble with all the main, FORMAT, and INFO fields detected in
 #' the VCF header as columns, for the regions specified in `r` (if any).
@@ -99,8 +112,9 @@ bcftools_parse_vcf <- function(vcf) {
 #' bcftools_parse_vcf_regions(vcf_local, r)
 #' }
 #' @export
-bcftools_parse_vcf_regions <- function(vcf, r) {
+bcftools_parse_vcf_regions <- function(vcf, r, only_pass = TRUE) {
   assertthat::assert_that(is.character(r))
+  assertthat::assert_that(bcftools_installed(), msg = "bcftools needs to be on the PATH.")
   if (is_url(vcf)) {
     vcf <- glue("'{vcf}'")
   }
@@ -109,5 +123,5 @@ bcftools_parse_vcf_regions <- function(vcf, r) {
   out <- tempfile(fileext = ".vcf")
   cmd <- glue("bcftools view {vcf} -r {r} > {out}")
   system(cmd, intern = TRUE)
-  bcftools_parse_vcf(out)
+  bcftools_parse_vcf(vcf = out, only_pass = only_pass)
 }
