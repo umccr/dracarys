@@ -48,7 +48,7 @@ session_info_tbls <- function(pkgs = NULL) {
 }
 
 output_format_valid <- function(x) {
-  format_choices <- c("tsv", "parquet", "both", "delta")
+  format_choices <- c("tsv", "parquet", "both", "delta", "rds")
   assertthat::assert_that(
     length(x) == 1,
     x %in% format_choices
