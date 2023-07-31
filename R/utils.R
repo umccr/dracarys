@@ -48,10 +48,9 @@ session_info_tbls <- function(pkgs = NULL) {
 }
 
 output_format_valid <- function(x) {
-  format_choices <- c("tsv", "parquet", "both", "delta", "rds")
+  format_choices <- c("tsv", "parquet", "delta", "rds")
   assertthat::assert_that(
-    length(x) == 1,
-    x %in% format_choices
+    all(x %in% format_choices)
   )
 }
 
@@ -86,19 +85,24 @@ rdf2tab <- function(rdf, outpath, drid = NULL, ...) {
 write_dracarys <- function(obj, prefix, out_format, drid = NULL) {
   prefix <- as.character(prefix) # glue is error prone in Spark
   output_format_valid(out_format)
-  if (out_format == "delta") {
+  if ("delta" %in% out_format) {
     rdf2tab(rdf = obj, outpath = prefix, drid = drid)
     return(invisible(obj))
   }
-  if (out_format %in% c("tsv", "both")) {
+  if ("tsv" %in% out_format) {
     fs::dir_create(dirname(prefix))
     tsv_out <- glue("{prefix}.tsv.gz")
     readr::write_tsv(obj, tsv_out)
   }
-  if (out_format %in% c("parquet", "both")) {
+  if ("parquet" %in% out_format) {
     fs::dir_create(dirname(prefix))
     parquet_out <- glue("{prefix}.parquet")
     arrow::write_parquet(obj, parquet_out)
+  }
+  if ("rds" %in% out_format) {
+    fs::dir_create(dirname(prefix))
+    rds_out <- glue("{prefix}.rds")
+    readr::write_rds(obj, rds_out)
   }
   return(invisible(obj))
 }

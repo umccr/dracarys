@@ -349,10 +349,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         dplyr::rowwise() |>
         dplyr::mutate(
           section = tolower(.data$section),
-          p = glue("{prefix}acfc_metrics_{.data$section}"),
+          p = glue("{prefix}_{.data$section}"),
           out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
         )
-      p <- glue("{prefix}acfc_metrics_umistatistics")
+      p <- glue("{prefix}_umistatistics")
       p_hist <- glue("{p}_hist")
       p_nonhist <- glue("{p}_nonhist")
       write_dracarys(obj = d_umi_hist, prefix = p_hist, out_format = out_format, drid = drid)

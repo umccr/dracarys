@@ -21,17 +21,17 @@
 #'   "gds://production/analysis_data/SBJ01639/tso_ctdna_tumor_only/",
 #'   "202204045ad5743c/L2200214/Results/PRJ220425_L2200214/"
 #' )
-#' out_dir <- here::here("nogit/tso/2023-07-27")
+#' out_dir <- here::here("nogit/tso/2023-07-27_3")
 #' prefix <- "SBJ01639"
-#' dryrun <- T
-#' out_format <- "tsv"
+#' out_format <- "rds"
+#' umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix, out_format = out_format, dryrun = F)
 #'
 #' in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
 #' out_dir <- file.path(in_dir, "../out")
 #' gds_local_dir <- NULL
 #' prefix <- "SBJ02858"
 #' dryrun <- F
-#' umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix)
+#' umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix, dryrun = F)
 #' }
 #' @export
 umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
@@ -101,7 +101,7 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
       obj = list(.data$env$new(.data$path)),
       has_plot = "plot" %in% names(.data$env[["public_methods"]]),
       obj_parsed = list(.data$obj$read()),
-      obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = prefix, out_format = out_format)),
+      obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = glue("{prefix}_{.data$type}"), out_format = out_format)),
       plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
     ) |>
     dplyr::select("type", "path", "obj", dat = "obj_parsed", "plot")
