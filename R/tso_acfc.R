@@ -10,7 +10,7 @@
 #' )
 #' m <- TsoAlignCollapseFusionCallerMetricsFile$new(x)
 #' d_parsed <- m$read() # or read(m)
-#' m$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' m$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = c("tsv", "rds"))
 #' @export
 TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
   "TsoAlignCollapseFusionCallerMetricsFile",
@@ -43,53 +43,29 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
       d <- j |>
         purrr::map(l2tib)
 
-      # pivot all metrics for easier ingestion
-      # and utilise the multiqc parser to rename dirty columns
-      if ("MappingAligningPerRg" %in% names(d)) {
-        d[["MappingAligningPerRg"]] <- d[["MappingAligningPerRg"]] |>
-          tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
-          dplyr::filter(!is.na(.data$value1)) |>
-          dplyr::mutate(
-            value = as.numeric(.data$value1),
-            name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
-          ) |>
-          dplyr::select("name", "value") |>
-          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
-          dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
-          multiqc_rename_cols() |>
-          dplyr::select(-"umccr_workflow")
-      }
-      if ("MappingAligningSummary" %in% names(d)) {
-        d[["MappingAligningSummary"]] <- d[["MappingAligningSummary"]] |>
-          tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
-          dplyr::filter(!is.na(.data$value1)) |>
-          dplyr::mutate(
-            value = as.numeric(.data$value1),
-            name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
-          ) |>
-          dplyr::select("name", "value") |>
-          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
-          dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
-          multiqc_rename_cols() |>
-          dplyr::select(-"umccr_workflow")
-      }
-      if ("TrimmerStatistics" %in% names(d)) {
-        d[["TrimmerStatistics"]] <- d[["TrimmerStatistics"]] |>
-          tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
-          dplyr::filter(!is.na(.data$value1)) |>
-          dplyr::mutate(
-            value = as.numeric(.data$value1),
-            name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
-          ) |>
-          dplyr::select("name", "value") |>
-          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
-          dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
-          multiqc_rename_cols() |>
-          dplyr::select(-"umccr_workflow")
+      # Pivot all metrics for easier ingestion,
+      # and utilise the multiqc parser to rename dirty columns.
+      # Keeping each list section separate for flexibility.
+      secs <- c("MappingAligningPerRg", "MappingAligningSummary", "TrimmerStatistics", "CoverageSummary")
+      for (sec in secs) {
+        if (sec %in% names(d)) {
+          d[[sec]] <- d[[sec]] |>
+            tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
+            dplyr::filter(!is.na(.data$value1)) |>
+            dplyr::mutate(
+              value = as.numeric(.data$value1),
+              name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
+            ) |>
+            dplyr::select("name", "value") |>
+            tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+            dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
+            multiqc_rename_cols() |>
+            dplyr::select(-"umccr_workflow")
+        }
       }
       if ("UmiStatistics" %in% names(d)) {
         # handle non-hist data
-        d[["UmiStatisticsNonHist"]] <- d[["UmiStatistics"]] |>
+        d[["UmiStatisticsMain"]] <- d[["UmiStatistics"]] |>
           dplyr::filter(!grepl("Hist", .data$name)) |>
           tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
           dplyr::filter(!is.na(.data$value1)) |>
@@ -117,20 +93,6 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         # now delete
         d[["UmiStatistics"]] <- NULL
       }
-      if ("CoverageSummary" %in% names(d)) {
-        d[["CoverageSummary"]] <- d[["CoverageSummary"]] |>
-          tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
-          dplyr::filter(!is.na(.data$value1)) |>
-          dplyr::mutate(
-            value = as.numeric(.data$value1),
-            name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
-          ) |>
-          dplyr::select("name", "value") |>
-          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
-          dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
-          multiqc_rename_cols() |>
-          dplyr::select(-"umccr_workflow")
-      }
       if ("SvSummary" %in% names(d)) {
         d[["SvSummary"]] <- d[["SvSummary"]] |>
           dplyr::mutate(
@@ -141,7 +103,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           tidyr::pivot_wider(names_from = "name", values_from = "value")
       }
       if ("RunTime" %in% names(d)) {
-        # for this just keep the 'percent' column (number of seconds)
+        # just keep the 'percent' column (number of seconds)
         d[["RunTime"]] <- d[["RunTime"]] |>
           dplyr::mutate(
             seconds = as.numeric(.data$percent),
@@ -173,10 +135,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      # first handle umi hist
+      # handle umi hist separately, also used for plotting
       d_umi_hist <- self$histoprep(d)
       d_main <- d |>
-        dplyr::filter(!grepl("UmiStatistics", .data$section))
+        dplyr::filter(.data$section != "UmiStatisticsHist")
       d_main_write <- d_main |>
         dplyr::rowwise() |>
         dplyr::mutate(
@@ -184,11 +146,8 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           p = glue("{prefix}_{.data$section}"),
           out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
         )
-      p <- glue("{prefix}_umistatistics")
-      p_hist <- glue("{p}_hist")
-      p_nonhist <- glue("{p}_nonhist")
+      p_hist <- glue("{prefix}_umistatisticsmainhist")
       write_dracarys(obj = d_umi_hist, prefix = p_hist, out_format = out_format, drid = drid)
-      write_dracarys(obj = d_umi_nonhist, prefix = p_nonhist, out_format = out_format, drid = drid)
     },
     #' @description
     #' Prepares the UmiStatistics histogram data from the
@@ -226,6 +185,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         ) |>
         ggplot2::ggplot(ggplot2::aes(x = num, y = value)) +
         ggplot2::geom_line() +
+        ggplot2::scale_y_continuous(
+          breaks = scales::pretty_breaks(n = 10),
+          labels = scales::label_number(scale_cut = scales::cut_short_scale())
+        ) +
         ggplot2::theme_bw() +
         ggplot2::labs(title = "Number of families with 0/1/2/3... raw reads.") +
         ggplot2::xlab("Families") +
@@ -237,6 +200,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         ) |>
         ggplot2::ggplot(ggplot2::aes(x = num, y = value)) +
         ggplot2::geom_line() +
+        ggplot2::scale_y_continuous(
+          breaks = scales::pretty_breaks(n = 10),
+          labels = scales::label_number(scale_cut = scales::cut_short_scale())
+        ) +
         ggplot2::theme_bw() +
         ggplot2::labs(title = "Number of positions with 0/1/2/3... UMI sequences.") +
         ggplot2::xlab("Positions") +
