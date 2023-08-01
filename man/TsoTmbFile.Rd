@@ -11,7 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705.tmb.json.gz", package = "dracarys")
 tmb <- TsoTmbFile$new(x)
 d_parsed <- tmb$read() # or read(tmb)
-tmb$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+tmb$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTmbFile}
@@ -75,8 +75,7 @@ Writes a tidy version of the \code{tmb.json.gz} file output from TSO.
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
-\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
-'parquet', 'both').}
+\item{\code{out_format}}{Format of output file(s).}
 
 \item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }

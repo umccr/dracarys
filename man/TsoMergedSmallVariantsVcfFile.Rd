@@ -12,7 +12,7 @@ Contains methods for reading and displaying contents of the
 x <- here::here("nogit/tso/2023-05-30/SBJ00595_L2100178/PTC_SrSqCMM1pc_L2100178_rerun_MergedSmallVariants.vcf.gz")
 d <- TsoMergedSmallVariantsVcfFile$new(x)
 d_parsed <- d$read() # or read(d)
-d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 d$write(d_parsed, prefix = "FOO", out_format = "delta", drid = "wfr.123")
 }
 }
@@ -74,8 +74,7 @@ Writes a tidy version of the \code{MergedSmallVariants.vcf.gz} file output from 
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
-\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
-'parquet', 'both').}
+\item{\code{out_format}}{Format of output file(s).}
 
 \item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }

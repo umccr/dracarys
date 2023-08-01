@@ -11,7 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
 d <- TsoTmbTraceTsvFile$new(x)
 d_parsed <- d$read() # or read(d)
-d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTmbTraceTsvFile}
@@ -71,8 +71,7 @@ Writes a tidy version of the \code{TMB_Trace.tsv} file output from TSO.
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
-\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
-'parquet', 'both').}
+\item{\code{out_format}}{Format of output file(s).}
 
 \item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }

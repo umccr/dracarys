@@ -12,7 +12,7 @@ x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package =
 fl <- TsoFragmentLengthHistFile$new(x)
 d_parsed <- fl$read() # or read(fl)
 fl$plot(d_parsed, 5)
-fl$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+fl$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoFragmentLengthHistFile}
@@ -78,8 +78,7 @@ from TSO.
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
-\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
-'parquet', 'both').}
+\item{\code{out_format}}{Format of output file(s).}
 
 \item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }

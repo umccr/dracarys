@@ -12,7 +12,7 @@ x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package =
 trc <- TsoTargetRegionCoverageFile$new(x)
 d_parsed <- trc$read() # or read(trc)
 trc$plot(d_parsed, 90) # or plot(trc, d_parsed, 90)
-trc$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+trc$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoTargetRegionCoverageFile}
@@ -79,8 +79,7 @@ from TSO.
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
-\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
-'parquet', 'both').}
+\item{\code{out_format}}{Format of output file(s).}
 
 \item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }

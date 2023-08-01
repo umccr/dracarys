@@ -11,7 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
 msi <- TsoMsiFile$new(x)
 d_parsed <- msi$read() # or read(msi)
-msi$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+msi$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoMsiFile}
@@ -68,8 +68,7 @@ Writes a tidy version of the \code{msi.json.gz} file output from TSO.
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
-\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
-'parquet', 'both').}
+\item{\code{out_format}}{Format of output file(s).}
 
 \item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }

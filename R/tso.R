@@ -9,7 +9,7 @@
 #' x <- here::here("nogit/tso/2023-05-30/SBJ00595_L2100178/PTC_SrSqCMM1pc_L2100178_rerun_MergedSmallVariants.vcf.gz")
 #' d <- TsoMergedSmallVariantsVcfFile$new(x)
 #' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' d$write(d_parsed, prefix = "FOO", out_format = "delta", drid = "wfr.123")
 #' }
 #' @export
@@ -31,8 +31,7 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
+    #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
       if (!is.null(out_dir)) {
@@ -54,7 +53,7 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
 #' x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
 #' d <- TsoTmbTraceTsvFile$new(x)
 #' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' @export
 TsoTmbTraceTsvFile <- R6::R6Class(
   "TsoTmbTraceTsvFile",
@@ -84,8 +83,7 @@ TsoTmbTraceTsvFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
+    #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
       if (!is.null(out_dir)) {
@@ -108,7 +106,7 @@ TsoTmbTraceTsvFile <- R6::R6Class(
 #' fl <- TsoFragmentLengthHistFile$new(x)
 #' d_parsed <- fl$read() # or read(fl)
 #' fl$plot(d_parsed, 5)
-#' fl$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' fl$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' @export
 TsoFragmentLengthHistFile <- R6::R6Class(
   "TsoFragmentLengthHistFile",
@@ -138,8 +136,7 @@ TsoFragmentLengthHistFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
+    #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
       if (!is.null(out_dir)) {
@@ -189,7 +186,7 @@ TsoFragmentLengthHistFile <- R6::R6Class(
 #' trc <- TsoTargetRegionCoverageFile$new(x)
 #' d_parsed <- trc$read() # or read(trc)
 #' trc$plot(d_parsed, 90) # or plot(trc, d_parsed, 90)
-#' trc$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' trc$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' @export
 TsoTargetRegionCoverageFile <- R6::R6Class(
   "TsoTargetRegionCoverageFile",
@@ -225,8 +222,7 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
+    #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
       if (!is.null(out_dir)) {
@@ -282,7 +278,7 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
 #' x <- system.file("extdata/tso/sample705.tmb.json.gz", package = "dracarys")
 #' tmb <- TsoTmbFile$new(x)
 #' d_parsed <- tmb$read() # or read(tmb)
-#' tmb$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' tmb$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' @export
 TsoTmbFile <- R6::R6Class(
   "TsoTmbFile",
@@ -302,7 +298,6 @@ TsoTmbFile <- R6::R6Class(
     #' * CodingRegionSizeMb
     read = function() {
       x <- self$path
-      # j <- jsonlite::read_json(x) # cannot handle NaN
       j <- read_jsongz_rjsonio(x) # turns NaN to NULL
       # not interested in Settings element
       j[["Settings"]] <- NULL
@@ -318,8 +313,7 @@ TsoTmbFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
+    #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
       if (!is.null(out_dir)) {
@@ -336,12 +330,27 @@ TsoTmbFile <- R6::R6Class(
 #' @description
 #' Contains methods for reading and displaying contents of the
 #' `Fusions.csv` file output from TSO.
+#' Returns a tibble where the columns are (based on the input file header metadata):
+#'
+#' - Sample: input sample ID.
+#' - Name: Fusion name as reported by manta.
+#' - Chr1/Chr2: The chromosome of the 1st/2nd breakend.
+#' - Pos1/Pos2: The position of the 1st/2nd breakend.
+#' - Direction: The direction of how the breakends are joined together.
+#' - Alt_Depth: The number of read-pairs supporting the fusion call.
+#' - BP1_Depth/BP2_Depth: Number of read-pairs aligned to the 1st/2nd breakend.
+#' - Total_Depth: Max number of read-pairs aligned to a fusion breakend.
+#' - VAF: Variant allele frequency.
+#' - Gene1/Gene2: Genes that overlap the 1st/2nd breakend.
+#' - Contig: The fusion contig.
+#' - Filter: Indicates whether the fusion has passed all of the fusion filters.
+#' - Is_Cosmic_GenePair: Indicates whether the gene pair has been reported by Cosmic(True/False).
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705_Fusions.csv", package = "dracarys")
 #' fus <- TsoFusionsCsvFile$new(x)
 #' d_parsed <- fus$read() # or read(fus)
-#' fus$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' fus$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' @export
 TsoFusionsCsvFile <- R6::R6Class(
   "TsoFusionsCsvFile",
@@ -368,8 +377,7 @@ TsoFusionsCsvFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
+    #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
       if (!is.null(out_dir)) {
@@ -391,7 +399,7 @@ TsoFusionsCsvFile <- R6::R6Class(
 #' x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
 #' msi <- TsoMsiFile$new(x)
 #' d_parsed <- msi$read() # or read(msi)
-#' msi$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' msi$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' @export
 TsoMsiFile <- R6::R6Class(
   "TsoMsiFile",
@@ -421,8 +429,7 @@ TsoMsiFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
+    #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
       if (!is.null(out_dir)) {
@@ -444,7 +451,7 @@ TsoMsiFile <- R6::R6Class(
 #' x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
 #' res <- TsoSampleAnalysisResultsFile$new(x)
 #' d_parsed <- res$read() # or read(res)
-#' res$write(d_parsed, tempfile(), "both")
+#' res$write(d_parsed, tempfile(), "tsv")
 #' @export
 TsoSampleAnalysisResultsFile <- R6::R6Class(
   "TsoSampleAnalysisResultsFile",
@@ -591,8 +598,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
+    #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
       if (!is.null(out_dir)) {

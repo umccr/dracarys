@@ -6,12 +6,28 @@
 \description{
 Contains methods for reading and displaying contents of the
 \code{Fusions.csv} file output from TSO.
+Returns a tibble where the columns are (based on the input file header metadata):
+\itemize{
+\item Sample: input sample ID.
+\item Name: Fusion name as reported by manta.
+\item Chr1/Chr2: The chromosome of the 1st/2nd breakend.
+\item Pos1/Pos2: The position of the 1st/2nd breakend.
+\item Direction: The direction of how the breakends are joined together.
+\item Alt_Depth: The number of read-pairs supporting the fusion call.
+\item BP1_Depth/BP2_Depth: Number of read-pairs aligned to the 1st/2nd breakend.
+\item Total_Depth: Max number of read-pairs aligned to a fusion breakend.
+\item VAF: Variant allele frequency.
+\item Gene1/Gene2: Genes that overlap the 1st/2nd breakend.
+\item Contig: The fusion contig.
+\item Filter: Indicates whether the fusion has passed all of the fusion filters.
+\item Is_Cosmic_GenePair: Indicates whether the gene pair has been reported by Cosmic(True/False).
+}
 }
 \examples{
 x <- system.file("extdata/tso/sample705_Fusions.csv", package = "dracarys")
 fus <- TsoFusionsCsvFile$new(x)
 d_parsed <- fus$read() # or read(fus)
-fus$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+fus$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoFusionsCsvFile}
@@ -71,8 +87,7 @@ Writes a tidy version of the \code{Fusions.csv} file output from TSO.
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
-\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
-'parquet', 'both').}
+\item{\code{out_format}}{Format of output file(s).}
 
 \item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }
