@@ -47,10 +47,14 @@ session_info_tbls <- function(pkgs = NULL) {
   )
 }
 
-output_format_valid <- function(x) {
+dr_output_format_valid <- function(x) {
   format_choices <- c("tsv", "parquet", "delta", "rds")
   assertthat::assert_that(
-    all(x %in% format_choices)
+    is.null(x) | all(x %in% format_choices),
+    msg = paste0(
+      "Output format should be one or more of ",
+      paste(format_choices, collapse = ", "), ", or _only_ NULL."
+    )
   )
 }
 
@@ -84,10 +88,10 @@ rdf2tab <- function(rdf, outpath, drid = NULL, ...) {
 
 write_dracarys <- function(obj, prefix, out_format, drid = NULL) {
   prefix <- as.character(prefix) # glue is error prone in Spark
-  output_format_valid(out_format)
+  dr_output_format_valid(out_format)
   if ("delta" %in% out_format) {
     rdf2tab(rdf = obj, outpath = prefix, drid = drid)
-    return(invisible(obj))
+    return(invisible(obj)) # skip other outputs
   }
   if ("tsv" %in% out_format) {
     fs::dir_create(dirname(prefix))
@@ -104,6 +108,7 @@ write_dracarys <- function(obj, prefix, out_format, drid = NULL) {
     rds_out <- glue("{prefix}.rds")
     readr::write_rds(obj, rds_out)
   }
+  # also gets returned in case of NULL out_format
   return(invisible(obj))
 }
 

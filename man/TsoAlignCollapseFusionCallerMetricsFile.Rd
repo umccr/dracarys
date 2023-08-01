@@ -23,7 +23,6 @@ m$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = c("tsv
 \itemize{
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-read}{\code{TsoAlignCollapseFusionCallerMetricsFile$read()}}
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-write}{\code{TsoAlignCollapseFusionCallerMetricsFile$write()}}
-\item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-histoprep}{\code{TsoAlignCollapseFusionCallerMetricsFile$histoprep()}}
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-plot}{\code{TsoAlignCollapseFusionCallerMetricsFile$plot()}}
 \item \href{#method-TsoAlignCollapseFusionCallerMetricsFile-clone}{\code{TsoAlignCollapseFusionCallerMetricsFile$clone()}}
 }
@@ -95,38 +94,16 @@ Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-TsoAlignCollapseFusionCallerMetricsFile-histoprep"></a>}}
-\if{latex}{\out{\hypertarget{method-TsoAlignCollapseFusionCallerMetricsFile-histoprep}{}}}
-\subsection{Method \code{histoprep()}}{
-Prepares the UmiStatistics histogram data from the
+\if{html}{\out{<a id="method-TsoAlignCollapseFusionCallerMetricsFile-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-TsoAlignCollapseFusionCallerMetricsFile-plot}{}}}
+\subsection{Method \code{plot()}}{
+Generates the UmiStatistics Histogram plots from the
 \code{AlignCollapseFusionCaller_metrics.json.gz} file output from TSO.
 \itemize{
 \item Histo is the majority from UmiStatistics section, deal with it separately.
 \item Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
 \item Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 }
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$histoprep(d)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{d}}{Parsed object from \code{self$read()}.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-TsoAlignCollapseFusionCallerMetricsFile-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-TsoAlignCollapseFusionCallerMetricsFile-plot}{}}}
-\subsection{Method \code{plot()}}{
-Generates the UmiStatistics Histogram plots from the
-\code{AlignCollapseFusionCaller_metrics.json.gz} file output from TSO.
-
-Histo is the majority from UmiStatistics section, deal with it separately.
-Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
-Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{TsoAlignCollapseFusionCallerMetricsFile$plot(d, max_num = 15)}\if{html}{\out{</div>}}
 }

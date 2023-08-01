@@ -112,8 +112,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           dplyr::select("name", "seconds") |>
           tidyr::pivot_wider(names_from = "name", values_from = "seconds")
       }
-      d <- d |>
-        tibble::enframe(name = "section")
+      # keep as list
       d
     },
 
@@ -135,48 +134,33 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      # handle umi hist separately, also used for plotting
-      d_umi_hist <- self$histoprep(d)
-      d_main <- d |>
-        dplyr::filter(.data$section != "UmiStatisticsHist")
-      d_main_write <- d_main |>
+      d_write <- d |>
+        tibble::enframe(name = "section") |>
         dplyr::rowwise() |>
         dplyr::mutate(
-          section = tolower(.data$section),
-          p = glue("{prefix}_{.data$section}"),
+          section_low = tolower(.data$section),
+          p = glue("{prefix}_{.data$section_low}"),
           out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
-        )
-      p_hist <- glue("{prefix}_umistatisticsmainhist")
-      write_dracarys(obj = d_umi_hist, prefix = p_hist, out_format = out_format, drid = drid)
-    },
-    #' @description
-    #' Prepares the UmiStatistics histogram data from the
-    #' `AlignCollapseFusionCaller_metrics.json.gz` file output from TSO.
-    #'
-    #' - Histo is the majority from UmiStatistics section, deal with it separately.
-    #' - Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
-    #' - Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    histoprep = function(d) {
-      assertthat::assert_that("UmiStatisticsHist" %in% d[["section"]])
-      dhist <- d |>
-        dplyr::filter(.data$section == "UmiStatisticsHist") |>
-        tidyr::unnest("value") |>
-        dplyr::select(c("name", "num", "value"))
+        ) |>
+        dplyr::ungroup() |>
+        dplyr::select("section", "value") |>
+        tibble::deframe()
+      # return list to bo consistent with the read function
+      # since we're writing multiple outputs, return all of them here
+      invisible(d_write)
     },
     #' @description
     #' Generates the UmiStatistics Histogram plots from the
     #' `AlignCollapseFusionCaller_metrics.json.gz` file output from TSO.
     #'
-    #' Histo is the majority from UmiStatistics section, deal with it separately.
-    #' Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
-    #' Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
+    #' - Histo is the majority from UmiStatistics section, deal with it separately.
+    #' - Histo of num supporting fragments: Num of families with 0/1/2/3... raw reads.
+    #' - Histo of unique UMIs per fragment pos: Num of pos with 0/1/2/3... UMI seqs.
     #' @param d Parsed object from `self$read()`.
     #' @param max_num Maximum number to display in both plots.
     #' @return Both histogram plot objects.
     plot = function(d, max_num = 15) {
-      h <- self$histoprep(d)
+      h <- d[["UmiStatisticsHist"]]
       # 15 seems like a good cutoff for both plots
       p1 <- h |>
         dplyr::filter(

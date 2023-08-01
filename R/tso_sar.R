@@ -140,11 +140,12 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
 
       res <- list(
         sample_info = sample_info,
-        software_config = sw,
-        biomarkers = biom_tbl,
         qc = qc,
-        snvs = snvs,
-        cnvs = cnvs
+        biomarkers = biom_tbl,
+        sw_conf_datasources = sw[["data_sources"]],
+        sw_conf_other = sw[["other"]],
+        snv = snvs,
+        cnv = cnvs
       )
       res
     },
@@ -176,25 +177,27 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
           pref = glue("{p}_biomarkers")
         ),
         sw_conf_datasources = list(
-          obj = d[["software_config"]][["data_sources"]],
+          obj = d[["sw_conf_datasources"]],
           pref = glue("{p}_sw_conf_datasources")
         ),
         sw_conf_other = list(
-          obj = d[["software_config"]][["other"]],
+          obj = d[["sw_conf_other"]],
           pref = glue("{p}_sw_conf_other")
         ),
         snv = list(
-          obj = d[["snvs"]],
+          obj = d[["snv"]],
           pref = glue("{p}_smallv")
         ),
         cnv = list(
-          obj = d[["cnvs"]],
+          obj = d[["cnv"]],
           pref = glue("{p}_cnv")
         )
       )
-      purrr::map(l, function(k) {
-        write_dracarys(obj = k[["obj"]], prefix = k[["pref"]], out_format = out_format, drid = drid)
-      })
+      d_write <- l |>
+        purrr::map(function(k) {
+          write_dracarys(obj = k[["obj"]], prefix = k[["pref"]], out_format = out_format, drid = drid)
+        })
+      invisible(d_write)
     }
   )
 )

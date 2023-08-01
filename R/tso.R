@@ -146,7 +146,6 @@ TsoFragmentLengthHistFile <- R6::R6Class(
       write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     },
 
-
     #' @description Plots the fragment length distributions as given in the
     #' `fragment_length_hist.json.gz` file.
     #'

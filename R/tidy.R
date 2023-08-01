@@ -21,10 +21,10 @@
 #'   "gds://production/analysis_data/SBJ01639/tso_ctdna_tumor_only/",
 #'   "202204045ad5743c/L2200214/Results/PRJ220425_L2200214/"
 #' )
-#' out_dir <- here::here("nogit/tso/2023-07-27_3")
+#' out_dir <- here::here("nogit/tso/2023-08-01")
 #' in_dir <- file.path(out_dir, "dracarys_gds_sync")
 #' prefix <- "SBJ01639"
-#' out_format <- "tsv"
+#' out_format <- "rds"
 #' umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix, out_format = out_format, dryrun = F)
 #'
 #' in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
@@ -40,7 +40,7 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
                        dryrun = FALSE, token = Sys.getenv("ICA_ACCESS_TOKEN"),
                        pattern = NULL) {
   assertthat::assert_that(!is.null(in_dir), !is.null(out_dir), !is.null(prefix))
-  output_format_valid(out_format)
+  dr_output_format_valid(out_format)
   e <- emojifont::emoji
 
   if (grepl("^gds://", in_dir)) {
