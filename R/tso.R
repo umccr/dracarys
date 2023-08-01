@@ -305,6 +305,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         fun1 <- function(l) {
           # handle silly NULLs..
           l[["value"]] <- l[["value"]] %||% NA
+          l[["value"]] <- ifelse(l[["value"]] == "NA", NA, l[["value"]])
           tibble::as_tibble(l) |>
             dplyr::mutate(dplyr::across(dplyr::everything(), ~ as.character(.)))
         }
@@ -313,9 +314,119 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           dplyr::bind_rows()
       }
       j <- read_jsongz_rjsonio(x, simplify = FALSE)
-      j |>
-        purrr::map(l2tib) |>
+      d <- j |>
+        purrr::map(l2tib)
+
+      # pivot all metrics for easier ingestion
+      # and utilise the multiqc parser to rename dirty columns
+      if ("MappingAligningPerRg" %in% names(d)) {
+        d[["MappingAligningPerRg"]] <- d[["MappingAligningPerRg"]] |>
+          tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
+          dplyr::filter(!is.na(.data$value1)) |>
+          dplyr::mutate(
+            value = as.numeric(.data$value1),
+            name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
+          ) |>
+          dplyr::select("name", "value") |>
+          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+          dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
+          multiqc_rename_cols() |>
+          dplyr::select(-"umccr_workflow")
+      }
+      if ("MappingAligningSummary" %in% names(d)) {
+        d[["MappingAligningSummary"]] <- d[["MappingAligningSummary"]] |>
+          tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
+          dplyr::filter(!is.na(.data$value1)) |>
+          dplyr::mutate(
+            value = as.numeric(.data$value1),
+            name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
+          ) |>
+          dplyr::select("name", "value") |>
+          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+          dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
+          multiqc_rename_cols() |>
+          dplyr::select(-"umccr_workflow")
+      }
+      if ("TrimmerStatistics" %in% names(d)) {
+        d[["TrimmerStatistics"]] <- d[["TrimmerStatistics"]] |>
+          tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
+          dplyr::filter(!is.na(.data$value1)) |>
+          dplyr::mutate(
+            value = as.numeric(.data$value1),
+            name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
+          ) |>
+          dplyr::select("name", "value") |>
+          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+          dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
+          multiqc_rename_cols() |>
+          dplyr::select(-"umccr_workflow")
+      }
+      if ("UmiStatistics" %in% names(d)) {
+        # handle non-hist data
+        d[["UmiStatisticsNonHist"]] <- d[["UmiStatistics"]] |>
+          dplyr::filter(!grepl("Hist", .data$name)) |>
+          tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
+          dplyr::filter(!is.na(.data$value1)) |>
+          dplyr::mutate(
+            value = as.numeric(.data$value1),
+            name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
+          ) |>
+          dplyr::select("name", "value") |>
+          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+          dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
+          multiqc_rename_cols() |>
+          dplyr::select(-"umccr_workflow")
+        # handle hist data
+        d[["UmiStatisticsHist"]] <- d[["UmiStatistics"]] |>
+          dplyr::filter(grepl("Hist", .data$name)) |>
+          dplyr::mutate(
+            name = sub("Histogram of ", "", .data$name),
+            name = gsub(" ", "_", .data$name),
+            value = as.numeric(.data$value)
+          ) |>
+          dplyr::group_by(name) |>
+          dplyr::mutate(num = dplyr::row_number()) |>
+          dplyr::ungroup() |>
+          dplyr::select(c("name", "num", "value"))
+        # now delete
+        d[["UmiStatistics"]] <- NULL
+      }
+      if ("CoverageSummary" %in% names(d)) {
+        d[["CoverageSummary"]] <- d[["CoverageSummary"]] |>
+          tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
+          dplyr::filter(!is.na(.data$value1)) |>
+          dplyr::mutate(
+            value = as.numeric(.data$value1),
+            name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
+          ) |>
+          dplyr::select("name", "value") |>
+          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+          dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
+          multiqc_rename_cols() |>
+          dplyr::select(-"umccr_workflow")
+      }
+      if ("SvSummary" %in% names(d)) {
+        d[["SvSummary"]] <- d[["SvSummary"]] |>
+          dplyr::mutate(
+            name = sub("Number of (.*) \\(PASS\\)", "\\1", .data$name),
+            name = sub("breakend pairs", "bnd_pairs", .data$name),
+            value = as.numeric(.data$value)
+          ) |>
+          tidyr::pivot_wider(names_from = "name", values_from = "value")
+      }
+      if ("RunTime" %in% names(d)) {
+        # for this just keep the 'percent' column (number of seconds)
+        d[["RunTime"]] <- d[["RunTime"]] |>
+          dplyr::mutate(
+            seconds = as.numeric(.data$percent),
+            name = tools::toTitleCase(sub("Time ", "", .data$name))
+          ) |>
+          dplyr::select("name", "seconds") |>
+          tidyr::pivot_wider(names_from = "name", values_from = "seconds")
+      }
+      d <- d |>
         tibble::enframe(name = "section")
+      d
     },
 
     #' @description
@@ -338,13 +449,8 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
       }
       # first handle umi hist
       d_umi_hist <- self$histoprep(d)
-      d_umi_nonhist <- d |>
-        dplyr::filter(.data$section == "UmiStatistics") |>
-        tidyr::unnest("value") |>
-        dplyr::filter(!grepl("Hist", .data$name)) |>
-        dplyr::select("name", "value", "percent")
       d_main <- d |>
-        dplyr::filter(.data$section != "UmiStatistics")
+        dplyr::filter(!grepl("UmiStatistics", .data$section))
       d_main_write <- d_main |>
         dplyr::rowwise() |>
         dplyr::mutate(
@@ -368,21 +474,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #'
     #' @param d Parsed object from `self$read()`.
     histoprep = function(d) {
-      assertthat::assert_that("UmiStatistics" %in% d[["section"]])
+      assertthat::assert_that("UmiStatisticsHist" %in% d[["section"]])
       dhist <- d |>
-        dplyr::filter(.data$section == "UmiStatistics") |>
+        dplyr::filter(.data$section == "UmiStatisticsHist") |>
         tidyr::unnest("value") |>
-        dplyr::filter(grepl("Hist", .data$name))
-      assertthat::assert_that(all(dhist[["percent"]] %in% NA))
-      dhist |>
-        dplyr::mutate(
-          name = sub("Histogram of ", "", .data$name),
-          name = gsub(" ", "_", .data$name),
-          value = as.numeric(.data$value)
-        ) |>
-        dplyr::group_by(name) |>
-        dplyr::mutate(num = dplyr::row_number()) |>
-        dplyr::ungroup() |>
         dplyr::select(c("name", "num", "value"))
     },
     #' @description

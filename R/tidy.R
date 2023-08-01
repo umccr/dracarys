@@ -22,8 +22,9 @@
 #'   "202204045ad5743c/L2200214/Results/PRJ220425_L2200214/"
 #' )
 #' out_dir <- here::here("nogit/tso/2023-07-27_3")
+#' in_dir <- file.path(out_dir, "dracarys_gds_sync")
 #' prefix <- "SBJ01639"
-#' out_format <- "rds"
+#' out_format <- "tsv"
 #' umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix, out_format = out_format, dryrun = F)
 #'
 #' in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))

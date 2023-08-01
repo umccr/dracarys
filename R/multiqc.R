@@ -90,10 +90,10 @@ multiqc_tidy_json <- function(j) {
     d <- d |>
       dplyr::filter(!.data$umccr_id %in% um_ref_samples)
   }
-  return(.multiqc_rename_cols(d))
+  return(multiqc_rename_cols(d))
 }
 
-.multiqc_rename_cols <- function(d) {
+multiqc_rename_cols <- function(d) {
   umccr_workflows <- c(
     "dragen_alignment", "dragen_somatic",
     "dragen_transcriptome", "dragen_umccrise",

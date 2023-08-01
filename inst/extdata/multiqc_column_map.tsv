@@ -928,6 +928,76 @@ dragen_ctdna	Soft-clipped bases R1	bases_softclip_r1_dragen
 dragen_ctdna	Soft-clipped bases R2	bases_softclip_r2_dragen
 dragen_ctdna	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
 dragen_ctdna	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_ctdna	Number of reads	reads_umi_dragen
+dragen_ctdna	Number of reads with valid or correctable UMIs	reads_validcorrectable_umi_dragen
+dragen_ctdna	Number of reads with valid or correctable UMIs pct	reads_validcorrectable_pct_umi_dragen
+dragen_ctdna	Number of reads in discarded families	reads_famdisc_umi_dragen
+dragen_ctdna	Number of reads in discarded families pct	reads_famdisc_pct_umi_dragen
+dragen_ctdna	Reads filtered out	reads_filtout_umi_dragen
+dragen_ctdna	Reads filtered out pct	rads_filtout_pct_umi_dragen
+dragen_ctdna	Reads with uncorrectable UMIs	reads_uncorrectable_umi_dragen
+dragen_ctdna	Reads with uncorrectable UMIs pct	reads_uncorrectable_pct_umi_dragen
+dragen_ctdna	Total number of families	fam_tot_umi_dragen
+dragen_ctdna	Families contextually corrected	fam_contextcorrect_umi_dragen
+dragen_ctdna	Families contextually corrected pct	fam_contextcorrect_pct_umi_dragen
+dragen_ctdna	Families shifted	fam_shift_umi_dragen
+dragen_ctdna	Families shifted pct	fam_shift_pct_umi_dragen
+dragen_ctdna	Families discarded	fam_disc_umi_dragen
+dragen_ctdna	Families discarded pct	fam_disc_pct_umi_dragen
+dragen_ctdna	Duplex families	fam_dupl_umi_dragen
+dragen_ctdna	Duplex families pct	fam_dupl_pct_umi_dragen
+dragen_ctdna	Consensus pairs emitted	pairs_consensus_emit_umi_dragen
+dragen_ctdna	Mean family depth	fam_depth_mean_umi_dragen
+dragen_ctdna	Number of collapsible regions	region_collapsible_tot_umi_dragen
+dragen_ctdna	Min collapsible region size (num reads)	region_collapsible_min_umi_dragen
+dragen_ctdna	Max collapsible region size (num reads)	region_collapsible_max_umi_dragen
+dragen_ctdna	Mean collapsible region size (num reads)	region_collapsible_mean_umi_dragen
+dragen_ctdna	Collapsible region size standard deviation	region_collapsible_stddev_umi_dragen
+dragen_ctdna	On target number of reads	reads_ontarget_umi_dragen
+dragen_ctdna	On target number of reads with valid or correctable UMIs	reads_validcorrectable_ontarget_umi_dragen
+dragen_ctdna	On target number of reads with valid or correctable UMIs pct	reads_validcorrectable_ontarget_pct_umi_dragen
+dragen_ctdna	On target duplex families	fam_dupl_ontarget_umi_dragen
+dragen_ctdna	On target duplex families pct	fam_dupl_ontarget_pct_umi_dragen
+dragen_ctdna	On target mean family depth	fam_ontarget_depth_mean_umi_dragen
+dragen_ctdna	Total input bases	bases_tot_dragen
+dragen_ctdna	Total input bases R1	bases_r1_dragen
+dragen_ctdna	Total input bases R2	bases_r2_dragen
+dragen_ctdna	Average input read length	read_len_avg_dragen
+dragen_ctdna	Total trimmed reads	reads_trimmed_tot_dragen
+dragen_ctdna	Total trimmed reads pct	reads_trimmed_tot_pct_dragen
+dragen_ctdna	Total trimmed bases	bases_trimmed_tot_dragen
+dragen_ctdna	Total trimmed bases pct	bases_trimmed_tot_pct_dragen
+dragen_ctdna	Average bases trimmed per read	bases_trimmed_avg_per_read_dragen
+dragen_ctdna	Average bases trimmed per trimmed read	bases_trimmed_avg_per_trimmedread_dragen
+dragen_ctdna	Remaining poly-G K-mers R1 3prime	polygkmers3r1_remaining_dragen
+dragen_ctdna	Remaining poly-G K-mers R1 3prime pct	polygkmers3r1_remaining_pct_dragen
+dragen_ctdna	Remaining poly-G K-mers R2 3prime	polygkmers3r2_remaining_dragen
+dragen_ctdna	Remaining poly-G K-mers R2 3prime pct	polygkmers3r2_remaining_pct_dragen
+dragen_ctdna	Poly-G soft trimmed reads unfiltered R1 3prime	polyg_soft_trimmed_reads_unfilt_3r1_dragen
+dragen_ctdna	Poly-G soft trimmed reads unfiltered R1 3prime pct	polyg_soft_trimmed_reads_unfilt_3r1_pct_dragen
+dragen_ctdna	Poly-G soft trimmed reads unfiltered R2 3prime	polyg_soft_trimmed_reads_unfilt_3r2_dragen
+dragen_ctdna	Poly-G soft trimmed reads unfiltered R2 3prime pct	polyg_soft_trimmed_reads_unfilt_3r2_pct_dragen
+dragen_ctdna	Poly-G soft trimmed reads filtered R1 3prime	polyg_soft_trimmed_reads_filt_3r1_dragen
+dragen_ctdna	Poly-G soft trimmed reads filtered R1 3prime pct	polyg_soft_trimmed_reads_filt_3r1_pct_dragen
+dragen_ctdna	Poly-G soft trimmed reads filtered R2 3prime	polyg_soft_trimmed_reads_filt_3r2_dragen
+dragen_ctdna	Poly-G soft trimmed reads filtered R2 3prime pct	polyg_soft_trimmed_reads_filt_3r2_pct_dragen
+dragen_ctdna	Poly-G soft trimmed bases unfiltered R1 3prime	polyg_soft_trimmed_bases_unfilt_3r1_dragen
+dragen_ctdna	Poly-G soft trimmed bases unfiltered R1 3prime pct	polyg_soft_trimmed_bases_unfilt_3r1_pct_dragen
+dragen_ctdna	Poly-G soft trimmed bases unfiltered R2 3prime	polyg_soft_trimmed_bases_unfilt_3r2_dragen
+dragen_ctdna	Poly-G soft trimmed bases unfiltered R2 3prime pct	polyg_soft_trimmed_bases_unfilt_3r2_pct_dragen
+dragen_ctdna	Poly-G soft trimmed bases filtered R1 3prime	polyg_soft_trimmed_bases_filt_3r1_dragen
+dragen_ctdna	Poly-G soft trimmed bases filtered R1 3prime pct	polyg_soft_trimmed_bases_filt_3r1_pct_dragen
+dragen_ctdna	Poly-G soft trimmed bases filtered R2 3prime	polyg_soft_trimmed_bases_filt_3r2_dragen
+dragen_ctdna	Poly-G soft trimmed bases filtered R2 3prime pct	polyg_soft_trimmed_bases_filt_3r2_pct_dragen
+dragen_ctdna	Total filtered reads	reads_tot_filt_dragen
+dragen_ctdna	Total filtered reads pct	reads_tot_filt_pct_dragen
+dragen_ctdna	Reads filtered for minimum read length R1	reads_filt_minreadlenr1_dragen
+dragen_ctdna	Reads filtered for minimum read length R1 pct	reads_filt_minreadlenr1_pct_dragen
+dragen_ctdna	Reads filtered for minimum read length R2	reads_filt_minreadlenr2_dragen
+dragen_ctdna	Reads filtered for minimum read length R2 pct	reads_filt_minreadlenr2_pct_dragen
+dragen_ctdna	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
+dragen_ctdna	Total reads in RG	reads_tot_rg_dragen
+dragen_ctdna	Total reads in RG pct	reads_tot_rg_pct_dragen
 bcbio_umccrise	umccr_id	umccr_id
 bcbio_umccrise	umccr_workflow	umccr_workflow
 bcbio_umccrise	config_creation_date	date_multiqc
