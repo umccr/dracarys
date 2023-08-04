@@ -4,7 +4,7 @@
 \alias{match_regex}
 \title{Match File to Regex}
 \usage{
-match_regex(x, regexes = FILE_REGEX)
+match_regex(x, regexes = DR_FILE_REGEX)
 }
 \arguments{
 \item{x}{File to match.}
@@ -12,11 +12,11 @@ match_regex(x, regexes = FILE_REGEX)
 \item{regexes}{Tibble with regex and function name.}
 }
 \value{
-The function corresponding to the matching regex from FILE_REGEX, or
+The function corresponding to the matching regex from \code{DR_FILE_REGEX}, or
 NA if there is no match made.
 }
 \description{
-Matches a given file with the regexes found in FILE_REGEX and if there is
+Matches a given file with the regexes found in \code{DR_FILE_REGEX} and if there is
 a match, it returns the 'name' of that match.
 }
 \examples{

@@ -4,7 +4,14 @@
 \alias{dr_gds_download}
 \title{dracarys GDS Download}
 \usage{
-dr_gds_download(gdsdir, outdir, token, pattern = NULL, dryrun = FALSE)
+dr_gds_download(
+  gdsdir,
+  outdir,
+  token,
+  pattern = NULL,
+  dryrun = FALSE,
+  regexes = DR_FILE_REGEX
+)
 }
 \arguments{
 \item{gdsdir}{Full path to GDS directory.}

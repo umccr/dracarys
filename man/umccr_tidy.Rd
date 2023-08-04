@@ -32,7 +32,7 @@ will be first downloaded to this directory.}
 \item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 
 \item{pattern}{Pattern to further filter the returned file type tibble (see
-\code{name} column in the \code{FILE_REGEX} tibble).}
+\code{name} column in the \code{DR_FILE_REGEX} tibble).}
 }
 \value{
 Tibble with path to input file and the resultant tidy object.

@@ -171,11 +171,11 @@ gds_volumes_list <- function(token, page_size = 10) {
 #' download them).
 #' @export
 dr_gds_download <- function(gdsdir, outdir, token,
-                            pattern = NULL, dryrun = FALSE) {
+                            pattern = NULL, dryrun = FALSE, regexes = DR_FILE_REGEX) {
   e <- emojifont::emoji
   fs::dir_create(outdir)
   d <- gds_files_list(gdsdir = gdsdir, token = token) |>
-    dplyr::mutate(type = purrr::map_chr(.data$bname, match_regex)) |>
+    dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
     dplyr::select("file_id", "dname", "type", "size", "path", "bname")
 
   # download recognisable dracarys files to outdir/{bname}

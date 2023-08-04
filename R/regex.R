@@ -1,12 +1,12 @@
 #' Match File to Regex
 #'
-#' Matches a given file with the regexes found in FILE_REGEX and if there is
+#' Matches a given file with the regexes found in `DR_FILE_REGEX` and if there is
 #' a match, it returns the 'name' of that match.
 #'
 #' @param x File to match.
 #' @param regexes Tibble with regex and function name.
 #'
-#' @return The function corresponding to the matching regex from FILE_REGEX, or
+#' @return The function corresponding to the matching regex from `DR_FILE_REGEX`, or
 #' NA if there is no match made.
 #'
 #' @examples
@@ -14,12 +14,12 @@
 #' match_regex("foo.fake.tsv")
 #'
 #' @export
-match_regex <- function(x, regexes = FILE_REGEX) {
+match_regex <- function(x, regexes = DR_FILE_REGEX) {
   assertthat::assert_that(
     inherits(regexes, "data.frame"),
     all(c("regex", "fun") %in% colnames(regexes))
   )
-  # d[grepl(FILE_REGEX[["regex"]][i], d[["path"]]), "type"] <- FILE_REGEX[["name"]][i]
+  # d[grepl(DR_FILE_REGEX[["regex"]][i], d[["path"]]), "type"] <- DR_FILE_REGEX[["name"]][i]
   for (i in seq_len(nrow(regexes))) {
     if (grepl(regexes[["regex"]][i], x)) {
       return(regexes[["fun"]][i])
@@ -28,7 +28,7 @@ match_regex <- function(x, regexes = FILE_REGEX) {
   return(NA_character_)
 }
 
-FILE_REGEX <- tibble::tribble(
+DR_FILE_REGEX <- tibble::tribble(
   ~regex, ~fun,
   "AlignCollapseFusionCaller_metrics\\.json\\.gz$", "TsoAlignCollapseFusionCallerMetricsFile",
   "TargetRegionCoverage\\.json\\.gz$", "TsoTargetRegionCoverageFile",
@@ -74,7 +74,7 @@ FILES_DOWNLOAD_BUT_IGNORE <- c("TsoMergedSmallVariantsVcfIndexFile")
 #'
 #' @param f Name of function to evaluate.
 #' @param v Character vector of strings evaluating to functions. By default,
-#' this points to the functions in the FILE_REGEX dracarys tibble.
+#' this points to the functions in the DR_FILE_REGEX dracarys tibble.
 #'
 #' @return Evaluated function.
 #' @examples
@@ -87,7 +87,7 @@ FILES_DOWNLOAD_BUT_IGNORE <- c("TsoMergedSmallVariantsVcfIndexFile")
 #' expect_null(dr_func_eval("foo"))
 #' @export
 dr_func_eval <- function(f, v = NULL) {
-  v <- v %||% FILE_REGEX[["fun"]]
+  v <- v %||% DR_FILE_REGEX[["fun"]]
   if (!f %in% v) {
     return(NULL)
   }
@@ -95,10 +95,10 @@ dr_func_eval <- function(f, v = NULL) {
   eval(parse(text = f))
 }
 
-#' Get dracarys `FILE_REGEX``
+#' Get dracarys `DR_FILE_REGEX``
 #'
-#' @return `FILE_REGEX` R tibble object.
+#' @return `DR_FILE_REGEX` R tibble object.
 #' @export
 file_regex_getter <- function() {
-  FILE_REGEX
+  DR_FILE_REGEX
 }

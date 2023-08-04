@@ -12,7 +12,7 @@
 #' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
 #' @param out_format Format of output (tsv, parquet, both) (def: tsv).
 #' @param pattern Pattern to further filter the returned file type tibble (see
-#' `name` column in the `FILE_REGEX` tibble).
+#' `name` column in the `DR_FILE_REGEX` tibble).
 #'
 #' @return Tibble with path to input file and the resultant tidy object.
 #' @examples
@@ -76,7 +76,7 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
       dplyr::filter(!is.na(.data$type))
 
     if (nrow(d) == 0) {
-      regex <- FILE_REGEX |>
+      regex <- DR_FILE_REGEX |>
         dplyr::pull("regex") |>
         sort()
       msg <- paste(

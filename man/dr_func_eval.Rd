@@ -10,7 +10,7 @@ dr_func_eval(f, v = NULL)
 \item{f}{Name of function to evaluate.}
 
 \item{v}{Character vector of strings evaluating to functions. By default,
-this points to the functions in the FILE_REGEX dracarys tibble.}
+this points to the functions in the DR_FILE_REGEX dracarys tibble.}
 }
 \value{
 Evaluated function.
