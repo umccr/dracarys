@@ -1,225 +1,234 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/404.html</loc>
+    <loc>https://umccr.github.io/dracarys/404.html</loc>
   </url>
   <url>
-    <loc>/CODE_OF_CONDUCT.html</loc>
+    <loc>https://umccr.github.io/dracarys/CODE_OF_CONDUCT.html</loc>
   </url>
   <url>
-    <loc>/LICENSE-text.html</loc>
+    <loc>https://umccr.github.io/dracarys/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>/articles/developers.html</loc>
+    <loc>https://umccr.github.io/dracarys/articles/developers.html</loc>
   </url>
   <url>
-    <loc>/articles/files.html</loc>
+    <loc>https://umccr.github.io/dracarys/articles/files.html</loc>
   </url>
   <url>
-    <loc>/articles/flames.html</loc>
+    <loc>https://umccr.github.io/dracarys/articles/flames.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
+    <loc>https://umccr.github.io/dracarys/articles/index.html</loc>
   </url>
   <url>
-    <loc>/authors.html</loc>
+    <loc>https://umccr.github.io/dracarys/authors.html</loc>
   </url>
   <url>
-    <loc>/index.html</loc>
+    <loc>https://umccr.github.io/dracarys/index.html</loc>
   </url>
   <url>
-    <loc>/news/index.html</loc>
+    <loc>https://umccr.github.io/dracarys/news/index.html</loc>
   </url>
   <url>
-    <loc>/reference/ContigMeanCovFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/ContigMeanCovFile.html</loc>
   </url>
   <url>
-    <loc>/reference/CoverageMetricsFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/CoverageMetricsFile.html</loc>
   </url>
   <url>
-    <loc>/reference/File.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/File.html</loc>
   </url>
   <url>
-    <loc>/reference/FineHistFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/FineHistFile.html</loc>
   </url>
   <url>
-    <loc>/reference/FragmentLengthHistFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/FragmentLengthHistFile.html</loc>
   </url>
   <url>
-    <loc>/reference/MappingMetricsFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/MappingMetricsFile.html</loc>
   </url>
   <url>
-    <loc>/reference/MultiqcFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/MultiqcFile.html</loc>
   </url>
   <url>
-    <loc>/reference/PcgrJsonFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/PcgrJsonFile.html</loc>
   </url>
   <url>
-    <loc>/reference/PcgrTiersFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/PcgrTiersFile.html</loc>
   </url>
   <url>
-    <loc>/reference/PloidyEstimationMetricsFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/PloidyEstimationMetricsFile.html</loc>
   </url>
   <url>
-    <loc>/reference/ReplayFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/ReplayFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TimeMetricsFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TimeMetricsFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TsoAlignCollapseFusionCallerMetricsFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TsoAlignCollapseFusionCallerMetricsFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TsoFragmentLengthHistFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TsoFragmentLengthHistFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TsoFusionsCsvFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TsoFusionsCsvFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TsoMergedSmallVariantsVcfFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TsoMergedSmallVariantsVcfFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TsoMsiFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TsoMsiFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TsoSampleAnalysisResultsFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TsoSampleAnalysisResultsFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TsoTargetRegionCoverageFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TsoTargetRegionCoverageFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TsoTmbFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TsoTmbFile.html</loc>
   </url>
   <url>
-    <loc>/reference/TsoTmbTraceTsvFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/TsoTmbTraceTsvFile.html</loc>
   </url>
   <url>
-    <loc>/reference/UmChordTsvFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/UmChordTsvFile.html</loc>
   </url>
   <url>
-    <loc>/reference/UmHrdetectTsvFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/UmHrdetectTsvFile.html</loc>
   </url>
   <url>
-    <loc>/reference/UmQcSumFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/UmQcSumFile.html</loc>
   </url>
   <url>
-    <loc>/reference/UmSigsSnvFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/UmSigsSnvFile.html</loc>
   </url>
   <url>
-    <loc>/reference/VCMetricsFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/VCMetricsFile.html</loc>
   </url>
   <url>
-    <loc>/reference/bcftools_parse_single_vcf.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/bcftools_parse_vcf.html</loc>
   </url>
   <url>
-    <loc>/reference/date_log.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/bcftools_parse_vcf_regions.html</loc>
   </url>
   <url>
-    <loc>/reference/dr_gds_download.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/date_log.html</loc>
   </url>
   <url>
-    <loc>/reference/dracarys-package.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/dr_func_eval.html</loc>
   </url>
   <url>
-    <loc>/reference/empty_tbl.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/dr_gds_download.html</loc>
   </url>
   <url>
-    <loc>/reference/file_regex_getter.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/dracarys-package.html</loc>
   </url>
   <url>
-    <loc>/reference/gds_file_download.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/empty_tbl.html</loc>
   </url>
   <url>
-    <loc>/reference/gds_file_download_api.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/file_regex_getter.html</loc>
   </url>
   <url>
-    <loc>/reference/gds_file_presignedurl.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/gds_file_download.html</loc>
   </url>
   <url>
-    <loc>/reference/gds_files_list.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/gds_file_download_api.html</loc>
   </url>
   <url>
-    <loc>/reference/gds_files_list_filter_relevant.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/gds_file_presignedurl.html</loc>
   </url>
   <url>
-    <loc>/reference/gds_volumes_list.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/gds_files_list.html</loc>
   </url>
   <url>
-    <loc>/reference/ica_token_validate.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/gds_files_list_filter_relevant.html</loc>
   </url>
   <url>
-    <loc>/reference/index.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/gds_volumes_list.html</loc>
   </url>
   <url>
-    <loc>/reference/match_regex.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/ica_token_validate.html</loc>
   </url>
   <url>
-    <loc>/reference/meta_bcl_convert.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/meta_rnasum.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/match_regex.html</loc>
   </url>
   <url>
-    <loc>/reference/meta_tso_ctdna_tumor_only.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/meta_bcl_convert.html</loc>
   </url>
   <url>
-    <loc>/reference/meta_umccrise.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/meta_rnasum.html</loc>
   </url>
   <url>
-    <loc>/reference/meta_wgs_alignment_qc.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/meta_tso_ctdna_tumor_only.html</loc>
   </url>
   <url>
-    <loc>/reference/meta_wgs_tumor_normal.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/meta_umccrise.html</loc>
   </url>
   <url>
-    <loc>/reference/meta_wts_tumor_only.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/meta_wgs_alignment_qc.html</loc>
   </url>
   <url>
-    <loc>/reference/multiqc_column_map_append.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/meta_wgs_tumor_normal.html</loc>
   </url>
   <url>
-    <loc>/reference/multiqc_date_fmt.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/meta_wts_tumor_only.html</loc>
   </url>
   <url>
-    <loc>/reference/multiqc_parse_bargraph_plot.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/multiqc_column_map_append.html</loc>
   </url>
   <url>
-    <loc>/reference/multiqc_parse_gen.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/multiqc_date_fmt.html</loc>
   </url>
   <url>
-    <loc>/reference/multiqc_parse_plots.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/multiqc_parse_bargraph_plot.html</loc>
   </url>
   <url>
-    <loc>/reference/multiqc_parse_raw.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/multiqc_parse_gen.html</loc>
   </url>
   <url>
-    <loc>/reference/multiqc_parse_xyline_plot.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/multiqc_parse_plots.html</loc>
   </url>
   <url>
-    <loc>/reference/multiqc_parse_xyline_plot_contig_cvg.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/multiqc_parse_raw.html</loc>
   </url>
   <url>
-    <loc>/reference/multiqc_tidy_json.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/multiqc_parse_xyline_plot.html</loc>
   </url>
   <url>
-    <loc>/reference/rdf2tab.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/multiqc_parse_xyline_plot_contig_cvg.html</loc>
   </url>
   <url>
-    <loc>/reference/read.File.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/multiqc_tidy_json.html</loc>
   </url>
   <url>
-    <loc>/reference/read.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/portal_meta_read.html</loc>
   </url>
   <url>
-    <loc>/reference/session_info_kable.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/rdf2tab.html</loc>
   </url>
   <url>
-    <loc>/reference/time_metrics_process.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/read.File.html</loc>
   </url>
   <url>
-    <loc>/reference/tso_rmd.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/read.html</loc>
   </url>
   <url>
-    <loc>/reference/umccr_tidy.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/session_info_kable.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/time_metrics_process.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/tso_rmd.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/umccr_tidy.html</loc>
   </url>
 </urlset>
