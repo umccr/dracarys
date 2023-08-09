@@ -455,15 +455,12 @@ meta_main_cols <- function() {
 
 #' Read ICA Workflows Metadata via Portal API
 #'
-#' Reads ICA Workflows Metadata via Portal API
+#' Reads ICA Workflows Metadata via Portal API using awscurl. See
+#' https://github.com/okigan/awscurl for required `AWS_` environment variables.
 #'
 #' @param rows Number of rows to return.
 #' @param params String containing additional params to pass to the `/workflows`
 #' endpoint, e.g. `'&type_name=bclconvert'`.
-#' @param AWS_REGION `AWS_REGION`, uses env var by default.
-#' @param AWS_ACCESS_KEY_ID `AWS_ACCESS_KEY_ID`, uses env var by default.
-#' @param AWS_SECRET_ACCESS_KEY `AWS_SECRET_ACCESS_KEY`, uses env var by default.
-#' @param AWS_SESSION_TOKEN `AWS_SESSION_TOKEN`, uses env var by default.
 #' @param pmeta Path to downloaded portal metadata file, or already parsed metadata tibble.
 #'
 #' @return A tibble of the results from the given query.
@@ -471,14 +468,9 @@ meta_main_cols <- function() {
 #'
 #' @examples
 #' \dontrun{
-#' portal_meta_read(params = "&type_name=bcl_convert", rows = 4)
+#' portal_meta_read(params = "&type_name=rnasum", rows = 4)
 #' }
-portal_meta_read <- function(pmeta = NULL, rows = 100,
-                             params = "",
-                             AWS_REGION = Sys.getenv("AWS_REGION"),
-                             AWS_ACCESS_KEY_ID = Sys.getenv("AWS_ACCESS_KEY_ID"),
-                             AWS_SECRET_ACCESS_KEY = Sys.getenv("AWS_SECRET_ACCESS_KEY"),
-                             AWS_SESSION_TOKEN = Sys.getenv("AWS_SESSION_TOKEN")) {
+portal_meta_read <- function(pmeta = NULL, rows = 100, params = "") {
   au_tz <- "Australia/Melbourne"
   utc_tz <- "UTC"
   if (!is.null(pmeta)) {
@@ -515,14 +507,12 @@ portal_meta_read <- function(pmeta = NULL, rows = 100,
 
   base_url <- "https://api.portal.prod.umccr.org/iam"
   url1 <- utils::URLencode(glue("{base_url}/workflows?rowsPerPage={rows}{params}"))
-  curl_cmd <- glue(
-    "curl '{url1}' ",
-    "--aws-sigv4 'aws:amz:{AWS_REGION}:execute-api' ",
-    "--user '{AWS_ACCESS_KEY_ID}:{AWS_SECRET_ACCESS_KEY}' ",
-    "--header 'x-amz-security-token: {AWS_SESSION_TOKEN}' ",
+  awscurl_cmd <- glue(
+    "awscurl '{url1}' ",
     "--header 'Accept: application/json'"
   )
-  j <- system(curl_cmd, intern = TRUE)
+  message(glue("Running {awscurl_cmd}"))
+  j <- system(awscurl_cmd, intern = TRUE)
   date_fmt <- "%Y-%m-%dT%H:%M:%S"
   d <- j |>
     jsonlite::fromJSON() |>

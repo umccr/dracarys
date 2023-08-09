@@ -4,15 +4,7 @@
 \alias{portal_meta_read}
 \title{Read ICA Workflows Metadata via Portal API}
 \usage{
-portal_meta_read(
-  pmeta = NULL,
-  rows = 100,
-  params = "",
-  AWS_REGION = Sys.getenv("AWS_REGION"),
-  AWS_ACCESS_KEY_ID = Sys.getenv("AWS_ACCESS_KEY_ID"),
-  AWS_SECRET_ACCESS_KEY = Sys.getenv("AWS_SECRET_ACCESS_KEY"),
-  AWS_SESSION_TOKEN = Sys.getenv("AWS_SESSION_TOKEN")
-)
+portal_meta_read(pmeta = NULL, rows = 100, params = "")
 }
 \arguments{
 \item{pmeta}{Path to downloaded portal metadata file, or already parsed metadata tibble.}
@@ -21,23 +13,16 @@ portal_meta_read(
 
 \item{params}{String containing additional params to pass to the \verb{/workflows}
 endpoint, e.g. \code{'&type_name=bclconvert'}.}
-
-\item{AWS_REGION}{\code{AWS_REGION}, uses env var by default.}
-
-\item{AWS_ACCESS_KEY_ID}{\code{AWS_ACCESS_KEY_ID}, uses env var by default.}
-
-\item{AWS_SECRET_ACCESS_KEY}{\code{AWS_SECRET_ACCESS_KEY}, uses env var by default.}
-
-\item{AWS_SESSION_TOKEN}{\code{AWS_SESSION_TOKEN}, uses env var by default.}
 }
 \value{
 A tibble of the results from the given query.
 }
 \description{
-Reads ICA Workflows Metadata via Portal API
+Reads ICA Workflows Metadata via Portal API using awscurl. See
+https://github.com/okigan/awscurl for required \code{AWS_} environment variables.
 }
 \examples{
 \dontrun{
-portal_meta_read(params = "&type_name=bcl_convert", rows = 4)
+portal_meta_read(params = "&type_name=rnasum", rows = 4)
 }
 }
