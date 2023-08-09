@@ -8,6 +8,7 @@ dr_gds_download(
   gdsdir,
   outdir,
   token,
+  page_size = 100,
   pattern = NULL,
   dryrun = FALSE,
   regexes = DR_FILE_REGEX
@@ -19,6 +20,8 @@ dr_gds_download(
 \item{outdir}{Path to output directory.}
 
 \item{token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{page_size}{Page size (def: 100).}
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 

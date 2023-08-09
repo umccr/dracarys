@@ -6,14 +6,15 @@
 #' @param token ICA access token.
 #' @param pattern Pattern to further filter the returned file type tibble.
 #' @param include Use PresignedUrl to include presigned URLs to all files within
+#' @param page_size Page size (def: 100).
 #' the GDS directory.
 #'
 #' @return A tibble with type, bname, size, file_id, path, and presigned URL.
 #' @export
-gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, include = NULL) {
+gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, include = NULL, page_size = 100) {
   pattern <- pattern %||% ".*" # keep all recognisable files by default
   cols_sel <- c("type", "bname", "size", "file_id", "path", "presigned_url")
-  d <- dracarys::gds_files_list(gdsdir, token, include = include) |>
+  d <- dracarys::gds_files_list(gdsdir, token, include = include, page_size = page_size) |>
     dplyr::rowwise() |>
     dplyr::mutate(type = purrr::map_chr(.data$bname, match_regex)) |>
     dplyr::ungroup() |>
@@ -166,15 +167,16 @@ gds_volumes_list <- function(token, page_size = 10) {
 #' @param gdsdir Full path to GDS directory.
 #' @param outdir Path to output directory.
 #' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+#' @param page_size Page size (def: 100).
 #' @param pattern Pattern to further filter the returned file type tibble.
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
 #' @export
-dr_gds_download <- function(gdsdir, outdir, token,
+dr_gds_download <- function(gdsdir, outdir, token, page_size = 100,
                             pattern = NULL, dryrun = FALSE, regexes = DR_FILE_REGEX) {
   e <- emojifont::emoji
   fs::dir_create(outdir)
-  d <- gds_files_list(gdsdir = gdsdir, token = token) |>
+  d <- gds_files_list(gdsdir = gdsdir, token = token, page_size = page_size) |>
     dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
     dplyr::select("file_id", "dname", "type", "size", "path", "bname")
 

@@ -4,7 +4,13 @@
 \alias{gds_files_list_filter_relevant}
 \title{List Relevant Files In GDS Directory}
 \usage{
-gds_files_list_filter_relevant(gdsdir, token, pattern = NULL, include = NULL)
+gds_files_list_filter_relevant(
+  gdsdir,
+  token,
+  pattern = NULL,
+  include = NULL,
+  page_size = 100
+)
 }
 \arguments{
 \item{gdsdir}{GDS directory.}
@@ -13,7 +19,9 @@ gds_files_list_filter_relevant(gdsdir, token, pattern = NULL, include = NULL)
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
-\item{include}{Use PresignedUrl to include presigned URLs to all files within
+\item{include}{Use PresignedUrl to include presigned URLs to all files within}
+
+\item{page_size}{Page size (def: 100).
 the GDS directory.}
 }
 \value{
