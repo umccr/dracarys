@@ -120,8 +120,8 @@ get_sbj_url <- function(x, colour = NULL) {
 ```{r vars}
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2023-08-05T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2023-08-07T23:59:59", format = fmt1)
+date_start <- as.POSIXct("2023-08-12T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2023-08-14T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -132,16 +132,16 @@ wf_order <- c(
   "rnasum"
 )
 
-lims_rds <- here::here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
+lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # lims_raw <- glims_read()
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
-pmeta_rds <- here::here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-# pmeta_raw <- dracarys::portal_meta_read(rows = 100)
+pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
+# pmeta_raw <- dracarys::portal_meta_read(rows = 60)
 # saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
 pmeta <- pmeta_raw |>
-  dplyr::filter(start >= date_start, end <= date_end) |>
+  dplyr::filter(start >= date_start, is.na(end) | end <= date_end) |>
   dplyr::mutate(type_name = factor(.data$type_name, levels = wf_order))
 lims <- lims_raw |>
   dplyr::select(
