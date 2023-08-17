@@ -145,7 +145,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         dplyr::ungroup() |>
         dplyr::select("section", "value") |>
         tibble::deframe()
-      # return list to bo consistent with the read function
+      # return list to be consistent with the read function
       # since we're writing multiple outputs, return all of them here
       invisible(d_write)
     },

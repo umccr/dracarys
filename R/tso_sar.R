@@ -23,7 +23,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
       j <- read_jsongz_jsonlite(x)
       dat <- j[["data"]]
       ## sampleInformation
-      sample_info <- dat[["sampleInformation"]] |>
+      sampleinfo <- dat[["sampleInformation"]] |>
         tibble::as_tibble_row()
       ## softwareConfiguration
       sw_conf <- dat[["softwareConfiguration"]]
@@ -139,11 +139,11 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
       }
 
       res <- list(
-        sample_info = sample_info,
+        sampleinfo = sampleinfo,
         qc = qc,
         biomarkers = biom_tbl,
-        sw_conf_datasources = sw[["data_sources"]],
-        sw_conf_other = sw[["other"]],
+        swconfds = sw[["data_sources"]],
+        swconfother = sw[["other"]],
         snv = snvs,
         cnv = cnvs
       )
@@ -162,41 +162,17 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      p <- prefix
-      l <- list(
-        sample_info = list(
-          obj = d[["sample_info"]],
-          pref = glue("{p}_sample_info")
-        ),
-        qc = list(
-          obj = d[["qc"]],
-          pref = glue("{p}_qc")
-        ),
-        biomarkers = list(
-          obj = d[["biomarkers"]],
-          pref = glue("{p}_biomarkers")
-        ),
-        sw_conf_datasources = list(
-          obj = d[["sw_conf_datasources"]],
-          pref = glue("{p}_sw_conf_datasources")
-        ),
-        sw_conf_other = list(
-          obj = d[["sw_conf_other"]],
-          pref = glue("{p}_sw_conf_other")
-        ),
-        snv = list(
-          obj = d[["snv"]],
-          pref = glue("{p}_smallv")
-        ),
-        cnv = list(
-          obj = d[["cnv"]],
-          pref = glue("{p}_cnv")
-        )
-      )
-      d_write <- l |>
-        purrr::map(function(k) {
-          write_dracarys(obj = k[["obj"]], prefix = k[["pref"]], out_format = out_format, drid = drid)
-        })
+      d_write <- d |>
+        tibble::enframe(name = "section") |>
+        dplyr::rowwise() |>
+        dplyr::mutate(
+          section_low = tolower(.data$section),
+          p = glue("{prefix}_{.data$section_low}"),
+          out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
+        ) |>
+        dplyr::ungroup() |>
+        dplyr::select("section", "value") |>
+        tibble::deframe()
       invisible(d_write)
     }
   )
