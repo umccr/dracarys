@@ -1,7 +1,7 @@
 #' Tidy UMCCR Results
 #'
 #' Tidies UMCCR workflow results into a list of tibbles and writes individual
-#' tibbles to TSV and/or Parquet format.
+#' tibbles to TSV, Parquet, SparkDF, or RDS format.
 #'
 #' @param in_dir Directory path to UMCCR workflow results (can be GDS or local).
 #' @param prefix Prefix of output file(s).

@@ -171,6 +171,7 @@ gds_volumes_list <- function(token, page_size = 10) {
 #' @param pattern Pattern to further filter the returned file type tibble.
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
+#' @param regexes Tibble with regex and function name.
 #' @export
 dr_gds_download <- function(gdsdir, outdir, token, page_size = 100,
                             pattern = NULL, dryrun = FALSE, regexes = DR_FILE_REGEX) {

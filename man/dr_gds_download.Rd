@@ -27,6 +27,8 @@ dr_gds_download(
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}
+
+\item{regexes}{Tibble with regex and function name.}
 }
 \description{
 Download only GDS files that can be processed by dracarys.
