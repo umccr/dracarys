@@ -26,8 +26,8 @@ Given a [ICA
 GDS](https://developer.illumina.com/illumina-connected-analytics) or
 local directory with results from a UMCCR workflow, {dracarys} will grab
 files of interest and transform them into ‘tidier’ structures for output
-into TSV/Parquet format for downstream ingestion into a database/data
-lake. See supported [workflows](#supported-workflows),
+into TSV/Parquet/RDS format for downstream ingestion into a
+database/data lake. See supported [workflows](#supported-workflows),
 [running](#running) examples, and [CLI](#cli) options in the sections
 below.
 
@@ -87,11 +87,18 @@ docker pull --platform linux/amd64 ghcr.io/umccr/dracarys:X.X.X
 
 ## ✨ Supported Workflows
 
-| Workflow   | Description                                                                                                                                          |
-|------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 🐉 DRAGEN  | UMCCR [DRAGEN DNA/RNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) workflows                           |
-| 🌶 cttso    | UMCCR [ctDNA TSO500](https://support-docs.illumina.com/SW/DRAGEN_TSO500_ctDNA_v2.1/Content/SW/TSO500/WorkflowDiagram_appT500ctDNAlocal.htm) workflow |
-| 🌈 MultiQC | [MultiQC](https://multiqc.info/) QC workflow summaries                                                                                               |
+{dracarys} supports most outputs from the following UMCCR workflows,
+including their [MultiQC](https://multiqc.info/) JSON output.
+
+| Workflow             | Description                                                                                                                                          |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
+| bcl_convert          | BCLConvert workflow (only MultiQC JSON)                                                                                                              |
+| tso_ctdna_tumor_only | UMCCR [ctDNA TSO500](https://support-docs.illumina.com/SW/DRAGEN_TSO500_ctDNA_v2.1/Content/SW/TSO500/WorkflowDiagram_appT500ctDNAlocal.htm) workflow |
+| wgs_alignment_qc     | UMCCR [DRAGEN DNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment)                             |
+| wts_tumor_only       |                                                                                                                                                      |
+| wgs_tumor_normal     | UMCCR Tumor/Normal DRAGEN workflow                                                                                                                   |
+| umccrise             | UMCCR [umccrise](https://github.com/umccr/umccrise) workflow                                                                                         |
+| rnasum               | UMCCR [RNAsum](rnasum-web) workflow                                                                                                                  |
 
 See which output files from these workflows are supported in [Supported
 Files](https://umccr.github.io/dracarys/articles/files.html).
@@ -114,7 +121,7 @@ export PATH="${dracarys_cli}:${PATH}"
 ```
 
     dracarys.R --version
-    dracarys.R 0.8.0
+    dracarys.R 0.10.0
 
     #-----------------------------------#
     dracarys.R --help
