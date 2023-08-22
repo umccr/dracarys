@@ -16,67 +16,66 @@ requirements:
   build:
     - git
   host:
-    # imports
     - r-base
+    - r-argparse
+    - r-arrow
     - r-assertthat
+    - r-cli
     - r-data.table
     - r-dplyr
+    - r-emojifont
+    - r-fs
     - r-ggplot2
     - r-ggrepel
     - r-glue
+    - r-here
+    - r-httr
     - r-jose
+    - r-jsonlite
+    - r-knitr
     - r-lubridate
     - r-purrr
     - r-r6
-    - r-rjsonio
     - r-readr
+    - r-rjsonio
     - r-rlang
-    - r-tibble
-    - r-tidyr
-    # suggests
-    - r-argparse
-    - r-arrow
-    - r-cli
-    - r-emojifont
-    - r-fs
-    - r-here
-    - r-httr
-    - r-jsonlite
-    - r-knitr
     - r-rmarkdown
     - r-scales
     - r-sessioninfo
+    - r-tibble
+    - r-tidyr
+    # suggests
     - r-testthat
   run:
-    # imports
     - r-base
+    - r-argparse
+    - r-arrow
     - r-assertthat
+    - r-cli
     - r-data.table
     - r-dplyr
+    - r-emojifont
+    - r-fs
     - r-ggplot2
     - r-ggrepel
     - r-glue
-    - r-jose
-    - r-purrr
-    - r-r6
-    - r-rjsonio
-    - r-readr
-    - r-rlang
-    - r-tibble
-    - r-tidyr
-    # suggests
-    - r-argparse
-    - r-arrow
-    - r-cli
-    - r-emojifont
-    - r-fs
     - r-here
     - r-httr
+    - r-jose
     - r-jsonlite
     - r-knitr
+    - r-lubridate
+    - r-purrr
+    - r-r6
+    - r-readr
+    - r-rjsonio
+    - r-rlang
     - r-rmarkdown
     - r-scales
     - r-sessioninfo
+    - r-tibble
+    - r-tidyr
+    # suggests
     - r-testthat
 
 test:

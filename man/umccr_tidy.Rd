@@ -39,7 +39,7 @@ Tibble with path to input file and the resultant tidy object.
 }
 \description{
 Tidies UMCCR workflow results into a list of tibbles and writes individual
-tibbles to TSV and/or Parquet format.
+tibbles to TSV, Parquet, SparkDF, or RDS format.
 }
 \examples{
 \dontrun{
