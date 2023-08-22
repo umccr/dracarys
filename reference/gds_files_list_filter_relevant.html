@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -58,7 +58,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gds_files_list_filter_relevant</span><span class="op">(</span><span class="va">gdsdir</span>, <span class="va">token</span>, pattern <span class="op">=</span> <span class="cn">NULL</span>, include <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">gds_files_list_filter_relevant</span><span class="op">(</span></span>
+<span>  <span class="va">gdsdir</span>,</span>
+<span>  <span class="va">token</span>,</span>
+<span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  include <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  page_size <span class="op">=</span> <span class="fl">100</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -76,7 +82,11 @@
 
 
 <dt>include</dt>
-<dd><p>Use PresignedUrl to include presigned URLs to all files within
+<dd><p>Use PresignedUrl to include presigned URLs to all files within</p></dd>
+
+
+<dt>page_size</dt>
+<dd><p>Page size (def: 100).
 the GDS directory.</p></dd>
 
 </dl></div>
