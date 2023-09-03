@@ -120,8 +120,8 @@ get_sbj_url <- function(x, colour = NULL) {
 ```{r vars}
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2023-08-19T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2023-08-21T23:59:59", format = fmt1)
+date_start <- as.POSIXct("2023-09-02T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2023-09-03T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -137,7 +137,7 @@ lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-# pmeta_raw <- dracarys::portal_meta_read(rows = 35)
+# pmeta_raw <- dracarys::portal_meta_read(rows = 65)
 # saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
 pmeta <- pmeta_raw |>
@@ -179,16 +179,30 @@ chunks1 <- as.list(pmeta_sumy_count > 0)
 pmeta_sumy_count |>
   tibble::enframe(name = "workflow", value = "count") |>
   kableExtra::kbl(caption = "Workflow Type Count", row.names = TRUE) |>
-  kableExtra::kable_minimal(full_width = FALSE, position = "float_left")
+  kableExtra::kable_classic(full_width = FALSE, position = "float_left")
 sbj_sumy <- pmeta_sumy |>
-  dplyr::count(sbjid) |>
+  dplyr::count(sbjid, name = "n_wf") |>
   dplyr::filter(grepl("SBJ", .data$sbjid)) |>
   dplyr::arrange(desc(sbjid)) |>
-  dplyr::left_join(clrs1, by = "sbjid")
-sbj_sumy |>
-  dplyr::select(sbj_url, n) |>
-  kableExtra::kbl(caption = "Subjects processed via one or more workflows", row.names = TRUE, escape = FALSE) |>
-  kableExtra::kable_minimal(full_width = FALSE, position = "left")
+  dplyr::left_join(clrs1, by = "sbjid") |>
+  dplyr::mutate(rn = dplyr::row_number())
+# split into multiple columns based on number of sbjs
+group_len <- 10
+sbj_sumy$column_group <- rep(
+  seq(1, 1 + nrow(sbj_sumy) %/% group_len),
+  each = group_len, length.out = nrow(sbj_sumy)
+)
+
+x <- sbj_sumy |>
+  dplyr::select("rn", "sbj_url", "n_wf", "column_group")
+split(x, x$column_group) |>
+  purrr::map(\(x) {
+    x <- x |> dplyr::select("rn", "sbj_url", "n_wf")
+    colnames(x)[1] <- ""
+    x
+  }) |>
+  kableExtra::kbl(caption = "Subjects processed via one or more workflows", row.names = FALSE, escape = FALSE) |>
+  kableExtra::kable_classic(full_width = FALSE, position = "left")
 ```
 
 ## RuntimeVis
