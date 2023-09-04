@@ -63,7 +63,7 @@ knitr::opts_chunk$set(
 ```{r data_setup, eval=FALSE}
 options(width = 150)
 token <- dracarys::ica_token_validate(Sys.getenv("ICA_ACCESS_TOKEN_PRO"))
-pmeta <- here::here("nogit/umccrise/rds/portal_meta/2023-09-04_pmeta_final.rds") |>
+pmeta <- here("nogit/umccrise/rds/portal_meta/2023-09-04_pmeta_final.rds") |>
   readr::read_rds()
 
 gds_map <- pmeta |>
@@ -81,31 +81,39 @@ gds_map <- pmeta |>
   ) |>
   filter(type != "MultiqcFile")
 
-saveRDS(gds_map, here::here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
+saveRDS(gds_map, here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
 
-parse_files <- function(gds_map, row_slice) {
+parse_files <- function(gds_map, row_slice, rds_out) {
   start_time <- Sys.time()
   dat1 <- gds_map |>
-    slice(row_slice) |>
-    rowwise() |>
-    mutate(
+    dplyr::slice(row_slice) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
       gen = list(dracarys::dr_func_eval(.data$type)),
       obj = list(.data$gen$new(.data$presigned_url)),
       objp = list(.data$obj$read())
     ) |>
-    ungroup()
+    dplyr::ungroup()
   end_time <- Sys.time()
   total_time <- end_time - start_time
   print(total_time)
-  dat1
+  readr::write_rds(x = dat1, file = rds_out)
 }
 
-gds_map <- readr::read_rds(here::here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
-x1 <- parse_files(gds_map, 1:500)
-x2 <- parse_files(gds_map, 501:1000)
-x3 <- parse_files(gds_map, 1001:1500)
-x4 <- parse_files(gds_map, 1501:2000)
-x5 <- parse_files(gds_map, 2001:2245)
+gds_map <- readr::read_rds(here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
+rds_path_out <- here("nogit/umccrise/rds/results")
+x0 <- parse_files(gds_map, 1:10, file.path(rds_path_out, "x0.rds"))
+x1 <- parse_files(gds_map, 1:500, file.path(rds_path_out, "x1.rds"))
+x2 <- parse_files(gds_map, 501:1000, file.path(rds_path_out, "x2.rds"))
+x3 <- parse_files(gds_map, 1001:1500, file.path(rds_path_out, "x3.rds"))
+x4 <- parse_files(gds_map, 1501:2000, file.path(rds_path_out, "x4.rds"))
+x5 <- parse_files(gds_map, 2001:2245, file.path(rds_path_out, "x5.rds"))
+```
+
+```{r data_load}
+dat1 <- fs::dir_ls(here("nogit/umccrise/rds/results")) |>
+  purrr::map(readr::read_rds) |>
+  dplyr::bind_rows()
 
 o <- dat1 |>
   mutate(
@@ -124,27 +132,56 @@ o <- dat1 |>
     objp
   )
 
-umqc <- o |>
+dt_view <- function(x, ...) {
+  x |>
+    dplyr::mutate(across(where(is.character), as.factor)) |>
+    DT::datatable(
+      filter = list(position = "top", clear = FALSE, plain = TRUE),
+      class = "cell-border display compact",
+      rownames = FALSE,
+      extensions = c("Scroller", "Buttons", "KeyTable"),
+      options = list(
+        scroller = TRUE, scrollY = 600, scrollX = TRUE,
+        autoWidth = FALSE, keys = TRUE,
+        buttons = c("csv", "excel"), dom = "Blfrtip"
+      ),
+      escape = FALSE,
+      ...
+    )
+}
+
+qcsum <- o |>
   filter(type == "UmQcSumFile") |>
-  tidyr::unnest_wider(objp) |>
+  unnest_wider(objp) |>
   select(-c(type))
 hrd_chord <- o |>
   filter(type == "UmChordTsvFile") |>
-  tidyr::unnest_wider(objp) |>
+  unnest_wider(objp) |>
   select(-c(type))
 hrd_hrdetect <- o |>
   filter(type == "UmHrdetectTsvFile") |>
-  tidyr::unnest_wider(objp) |>
+  unnest_wider(objp) |>
   select(-c(type))
 sigs_2015 <- o |>
   filter(type == "UmSigsSnvFile2015") |>
-  tidyr::unnest_wider(objp) |>
+  unnest_wider(objp) |>
   select(-c(type))
 sigs_2020 <- o |>
   filter(type == "UmSigsSnvFile2020") |>
-  tidyr::unnest_wider(objp) |>
+  unnest_wider(objp) |>
   select(-c(type))
 ```
+
+
+```{r}
+dt_view(qcsum, caption = "QC Summary")
+dt_view(hrd_chord, caption = "CHORD")
+dt_view(hrd_hrdetect, caption = "HRDetect")
+```
+
+## TODO
+
+- Add links to Portal per Subject
 
 ---
 
