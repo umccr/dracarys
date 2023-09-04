@@ -9,9 +9,9 @@ output:
   rmdformats::material:
     highlight: kate
 params:
-  title: "UMCCR BCL Convert Report"
+  title: "UMCCR bcl_convert Report"
   gds_outdir: "X"
-description: "UMCCR BCL Convert Report"
+description: "UMCCR bcl_convert Report"
 title: "`r params$title`"
 ---
 
