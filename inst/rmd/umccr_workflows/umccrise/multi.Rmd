@@ -5,7 +5,6 @@ output:
   html_document:
     toc: true
     theme: cosmo
-    css: style.css
     code_download: true
   rmdformats::material:
     highlight: kate
@@ -22,10 +21,37 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{css}
+.navbar-brand {
+  padding: 5px 15px;
+}
+
+.dropdown:hover > .dropdown-menu {
+  display: block;
+}
+.dropdown > .dropdown-toggle:active {
+  pointer-events: none;
+}
+
+.main-container {
+  max-width: 1400px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.navbar-default {
+  color: #750075;
+  background-color: #750075;
+}
+```
+
 ```{r load_pkgs}
 {
-  require(tidyverse)
-  # require(dracarys) # only needed for session info
+  require(dplyr)
+  require(readr, include.only = c("read_rds"))
+  require(purrr, include.only = c("map"))
+  require(tidyr, include.only = c("unnest", "unnest_wider"))
+  require(dracarys)
   require(glue, include.only = "glue")
   require(here, include.only = "here")
   require(knitr, include.only = "kable")
@@ -36,85 +62,88 @@ knitr::opts_chunk$set(
 
 ```{r data_setup, eval=FALSE}
 options(width = 150)
-res <- here("nogit/umccrise/2023-01-18") |>
-  dir_ls(recurse = TRUE, type = "file") |>
-  as_tibble_col(column_name = "path") |>
-  filter(!grepl("dracarys_gds_sync", path)) |> # get rid of synced data
+token <- dracarys::ica_token_validate(Sys.getenv("ICA_ACCESS_TOKEN_PRO"))
+pmeta <- here::here("nogit/umccrise/rds/portal_meta/2023-09-04_pmeta_final.rds") |>
+  readr::read_rds()
+
+gds_map <- pmeta |>
+  rowwise() |>
+  mutate(
+    gds_contents = list(dracarys::gds_files_list_filter_relevant(
+      gdsdir = .data$gds_outdir_umccrise, token = token, include = "PresignedUrl"
+    ))
+  ) |>
+  ungroup() |>
+  tidyr::unnest("gds_contents") |>
+  select(
+    "portal_run_id", "SubjectID", "LibraryID_tumor", "LibraryID_normal",
+    "start", "end", "type", "bname", "size", "file_id", "path", "presigned_url"
+  ) |>
+  filter(type != "MultiqcFile")
+
+saveRDS(gds_map, here::here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
+
+parse_files <- function(gds_map, row_slice) {
+  start_time <- Sys.time()
+  dat1 <- gds_map |>
+    slice(row_slice) |>
+    rowwise() |>
+    mutate(
+      gen = list(dracarys::dr_func_eval(.data$type)),
+      obj = list(.data$gen$new(.data$presigned_url)),
+      objp = list(.data$obj$read())
+    ) |>
+    ungroup()
+  end_time <- Sys.time()
+  total_time <- end_time - start_time
+  print(total_time)
+  dat1
+}
+
+gds_map <- readr::read_rds(here::here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
+x1 <- parse_files(gds_map, 1:500)
+x2 <- parse_files(gds_map, 501:1000)
+x3 <- parse_files(gds_map, 1001:1500)
+x4 <- parse_files(gds_map, 1501:2000)
+x5 <- parse_files(gds_map, 2001:2245)
+
+o <- dat1 |>
   mutate(
     type = case_when(
-      grepl("chord", path) ~ "chord",
-      grepl("hrdetect", path) ~ "hrdetect",
-      grepl("snv2015", path) ~ "sigs2015",
-      grepl("snv2020", path) ~ "sigs2020",
-      grepl("qc_summary", path) ~ "qcsum",
-      TRUE ~ "UNKNOWN"
-    ),
-    sbj2 = basename(dirname(path)),
-    sbj = sub("(.*)_.*", "\\1", sbj2)
+      grepl("snv_2015.tsv.gz", bname) ~ "UmSigsSnvFile2015",
+      grepl("snv_2020.tsv.gz", bname) ~ "UmSigsSnvFile2020",
+      .default = .data$type
+    )
   ) |>
-  # slice(1:10) |>
-  rowwise() |>
-  mutate(dat = list(read_tsv(path, show_col_types = FALSE))) |>
-  select(sbj, sbj2, type, dat) |>
-  pivot_wider(names_from = type, values_from = dat)
-qc <- res |>
-  select("sbj", "sbj2", "qcsum") |>
-  unnest_wider(qcsum)
-hrd <- res |>
-  hoist(chord, hrd_chord1 = "p_hrd") |>
-  hoist(hrdetect, hrd_hrdetect1 = "Probability") |>
-  select(sbj, sbj2, hrd_chord1, hrd_hrdetect1)
-sigs <- res |>
-  select(sbj, sbj2, sigs2015, sigs2020) |>
-  pivot_longer(c(sigs2015, sigs2020), names_to = "version", values_to = "dat") |>
-  unnest(dat)
-pcgr <- read_rds(here("nogit/pcgr/rds/res_2023-01-17.rds")) |>
-  rename(sbj2 = "sbj", tmb_pcgr = "tmb_estimate", tmb_n_pcgr = "n_tmb")
-all <- left_join(pcgr, hrd, by = "sbj2") |>
-  left_join(qc, by = c("sbj2", "sbj")) |>
-  select(-c("hrd_chord1", "hrd_hrdetect1")) |>
-  select(sbj, sbj2, everything())
-
-# ids <- read_csv(here("nogit/data_portal/labmetadata_2023-01-19.csv"), col_types = cols(.default = "c")) |>
-#   # select(subject_id, phenotype, assay,  library_id, sample_name, sample_id, external_sample_id, external_subject_id) |>
-#   filter(subject_id %in% all$sbj,
-#          type == "WGS")
-
-# add libids based on sbj2
-sbj2_to_libids <- read_rds(here("nogit/umccrise/rds/x_2023-01-20.rds")) |>
-  select(sbj2, libids, analysis_date = date, gds_indir)
-
-all <- all |>
-  left_join(sbj2_to_libids, by = "sbj2") |>
-  select(sbj, sbj2, libids, analysis_date, gds_indir,
-    qc_status_hmf,
-    sex_hmf,
-    purity_hmf,
-    ploidy_hmf,
-    msi_fracIndels_pcgr = fracIndels,
-    msi_predicted_class_pcgr = predicted_class,
-    msi_hmf,
-    msi_mb_hmf,
-    hrd_chord,
-    hrd_hrdetect,
-    tmb_pcgr,
-    tmb_n_pcgr,
-    tmb_hmf,
-    tml_hmf,
-    contamination_hmf,
-    deleted_genes_hmf,
-    wgd_hmf,
-    everything()
+  select(
+    portal_run_id,
+    SubjectID,
+    LibraryID_tumor,
+    LibraryID_normal,
+    type,
+    objp
   )
 
-sigs <- sigs |>
-  left_join(sbj2_to_libids, by = "sbj2") |>
-  select(sbj, sbj2, libids, analysis_date, gds_indir, everything())
-
-# limsrow <- read_csv(here("nogit/data_portal/limsrow_2023-01-19.csv"), col_types = cols(.default = "c"))
-
-readr::write_tsv(all, here("nogit/umccrise/res_2023-01-25.tsv.gz"))
-readr::write_tsv(sigs, here("nogit/umccrise/sigs_2023-01-20.tsv.gz"))
+umqc <- o |>
+  filter(type == "UmQcSumFile") |>
+  tidyr::unnest_wider(objp) |>
+  select(-c(type))
+hrd_chord <- o |>
+  filter(type == "UmChordTsvFile") |>
+  tidyr::unnest_wider(objp) |>
+  select(-c(type))
+hrd_hrdetect <- o |>
+  filter(type == "UmHrdetectTsvFile") |>
+  tidyr::unnest_wider(objp) |>
+  select(-c(type))
+sigs_2015 <- o |>
+  filter(type == "UmSigsSnvFile2015") |>
+  tidyr::unnest_wider(objp) |>
+  select(-c(type))
+sigs_2020 <- o |>
+  filter(type == "UmSigsSnvFile2020") |>
+  tidyr::unnest_wider(objp) |>
+  select(-c(type))
 ```
 
 ---
