@@ -9,7 +9,7 @@
 #' x <- "/path/to/chord.tsv.gz"
 #' d <- UmChordTsvFile$new(x)
 #' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' }
 #' @export
 UmChordTsvFile <- R6::R6Class(
@@ -29,7 +29,7 @@ UmChordTsvFile <- R6::R6Class(
         p_BRCA1 = "d",
         p_BRCA2 = "d"
       )
-      readr::read_tsv(x, col_types = ct)
+      read_tsvgz(x, col_types = ct)
     },
 
     #' @description
@@ -38,12 +38,14 @@ UmChordTsvFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_chord")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}_chord")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -59,7 +61,7 @@ UmChordTsvFile <- R6::R6Class(
 #' x <- "/path/to/hrdetect.tsv.gz"
 #' d <- UmHrdetectTsvFile$new(x)
 #' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' }
 #' @export
 UmHrdetectTsvFile <- R6::R6Class(
@@ -76,7 +78,7 @@ UmHrdetectTsvFile <- R6::R6Class(
         .default = "d",
         sample = "c"
       )
-      readr::read_tsv(x, col_types = ct) |>
+      read_tsvgz(x, col_types = ct) |>
         dplyr::select(-c("sample"))
     },
 
@@ -86,12 +88,14 @@ UmHrdetectTsvFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_hrdetect")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}_hrdetect")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -107,7 +111,7 @@ UmHrdetectTsvFile <- R6::R6Class(
 #' x <- "/path/to/snv_2015.tsv.gz"
 #' d <- UmSigsSnvFile$new(x)
 #' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' }
 #' @export
 UmSigsSnvFile <- R6::R6Class(
@@ -125,10 +129,7 @@ UmSigsSnvFile <- R6::R6Class(
         .default = "d",
         Signature = "c"
       )
-      list(
-        data = readr::read_tsv(x, col_types = ct),
-        version = version
-      )
+      read_tsvgz(x, col_types = ct)
     },
 
     #' @description
@@ -137,13 +138,14 @@ UmSigsSnvFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      version <- d[["version"]]
-      prefix2 <- glue("{prefix}_sigs_snv{version}")
-      write_dracarys(obj = d[["data"]], prefix = prefix2, out_format = out_format)
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}_sigs_snv")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
@@ -159,7 +161,7 @@ UmSigsSnvFile <- R6::R6Class(
 #' x <- "/path/to/snv_2015.tsv.gz"
 #' d <- UmQcSumFile$new(x)
 #' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' }
 #' @export
 UmQcSumFile <- R6::R6Class(
@@ -172,8 +174,8 @@ UmQcSumFile <- R6::R6Class(
     #' @return A tibble.
     read = function() {
       x <- self$path
-      d <- readr::read_tsv(x, col_types = readr::cols(.default = "c"))
-      d <- d |>
+      d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
+      d |>
         dplyr::select("variable", "value") |>
         tidyr::pivot_wider(names_from = "variable", values_from = "value") |>
         dplyr::rename(MSI_mb_tmp = "MSI (indels/Mb)") |>
@@ -189,7 +191,9 @@ UmQcSumFile <- R6::R6Class(
           deleted_genes_hmf = as.numeric(.data$DeletedGenes),
           msi_hmf = sub("(.*) \\(.*\\)", "\\1", .data$MSI_mb_tmp),
           tmb_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TMB) |> as.numeric(),
-          tml_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TML) |> as.numeric()
+          tml_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TML) |> as.numeric(),
+          hypermutated = ifelse("Hypermutated" %in% d$variable, .data[["Hypermutated"]], NA) |> as.character(),
+          bpi_enabled = ifelse("BPI Enabled" %in% d$variable, .data[["BPI Enabled"]], NA) |> as.character(),
         ) |>
         dplyr::select(
           qc_status_hmf = "QC_Status",
@@ -198,6 +202,7 @@ UmQcSumFile <- R6::R6Class(
           "hrd_chord", "hrd_hrdetect", "contamination_hmf",
           "deleted_genes_hmf", "tmb_hmf", "tml_hmf",
           wgd_hmf = "WGD",
+          hypermutated, bpi_enabled
         )
     },
 
@@ -208,12 +213,14 @@ UmQcSumFile <- R6::R6Class(
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
     #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s) (one of 'tsv' (def.),
-    #' 'parquet', 'both').
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      prefix <- file.path(out_dir, prefix)
-      prefix2 <- glue("{prefix}_qc_summary")
-      write_dracarys(obj = d, prefix = prefix2, out_format = out_format)
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}_qc_summary")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )

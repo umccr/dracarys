@@ -12,7 +12,7 @@ Contains methods for reading and displaying contents of the
 x <- "/path/to/snv_2015.tsv.gz"
 d <- UmSigsSnvFile$new(x)
 d_parsed <- d$read() # or read(d)
-d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 }
 }
 \section{Super class}{
@@ -67,8 +67,9 @@ Writes a tidy version of the \code{snv_20XX.tsv.gz} signature file output from u
 
 \item{\code{prefix}}{Prefix of output file(s).}
 
-\item{\code{out_format}}{Format of output file(s) (one of 'tsv' (def.),
-'parquet', 'both').}
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }
 \if{html}{\out{</div>}}
 }
