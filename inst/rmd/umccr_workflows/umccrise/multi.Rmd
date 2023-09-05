@@ -34,7 +34,7 @@ knitr::opts_chunk$set(
 }
 
 .main-container {
-  max-width: 1400px !important;
+  max-width: 1900px !important;
   margin-left: auto;
   margin-right: auto;
 }
@@ -57,6 +57,9 @@ knitr::opts_chunk$set(
   require(knitr, include.only = "kable")
   require(DT, include.only = "datatable")
   require(fs, include.only = c("dir_ls"))
+  require(ggplot2, include.only = c("ggplot", "aes"))
+  require(lubridate, include.only = c("as_datetime"))
+  require(plotly, include.only = c("ggplotly"))
 }
 ```
 
@@ -65,7 +68,6 @@ options(width = 150)
 token <- dracarys::ica_token_validate(Sys.getenv("ICA_ACCESS_TOKEN_PRO"))
 pmeta <- here("nogit/umccrise/rds/portal_meta/2023-09-04_pmeta_final.rds") |>
   readr::read_rds()
-
 gds_map <- pmeta |>
   rowwise() |>
   mutate(
@@ -111,6 +113,8 @@ x5 <- parse_files(gds_map, 2001:2245, file.path(rds_path_out, "x5.rds"))
 ```
 
 ```{r data_load}
+lims_raw <- here("nogit/umccrise/rds/lims/2023-09-04_lims_raw.rds") |>
+  readr::read_rds()
 dat1 <- fs::dir_ls(here("nogit/umccrise/rds/results")) |>
   purrr::map(readr::read_rds) |>
   dplyr::bind_rows()
@@ -121,76 +125,165 @@ o <- dat1 |>
       grepl("snv_2015.tsv.gz", bname) ~ "UmSigsSnvFile2015",
       grepl("snv_2020.tsv.gz", bname) ~ "UmSigsSnvFile2020",
       .default = .data$type
-    )
+    ),
+    date_analysed_aest = as.character(.data$end),
   ) |>
   select(
-    portal_run_id,
+    date_analysed_aest,
     SubjectID,
     LibraryID_tumor,
     LibraryID_normal,
     type,
-    objp
+    objp,
+    portal_run_id
   )
 
-dt_view <- function(x, ...) {
+lims <- lims_raw |>
+  dplyr::filter(LibraryID %in% c(o$LibraryID_tumor)) |>
+  dplyr::select(SubjectID, LibraryID, ExternalSubjectID, ProjectOwner, ProjectName, Type, Workflow) |>
+  dplyr::distinct()
+
+
+o2 <- o |>
+  dplyr::left_join(lims, by = c("SubjectID", "LibraryID_tumor" = "LibraryID")) |>
+  dplyr::mutate(
+    url = glue("https://portal.umccr.org/subjects/{.data$SubjectID}/overview"),
+    sbj_url = glue("<a href={url}>{.data$SubjectID}</a>"),
+    url = glue("<a href={url}>{.data$url}</a>"),
+    portal_run_id = glue("dr.{portal_run_id}")
+  ) |>
+  dplyr::rename(portal_url = url)
+
+dt_view <- function(x, scroll_y = 1000, ...) {
   x |>
     dplyr::mutate(across(where(is.character), as.factor)) |>
     DT::datatable(
       filter = list(position = "top", clear = FALSE, plain = TRUE),
       class = "cell-border display compact",
-      rownames = FALSE,
-      extensions = c("Scroller", "Buttons", "KeyTable"),
+      rownames = TRUE,
+      extensions = c("Scroller", "Buttons", "KeyTable", "FixedColumns"),
       options = list(
-        scroller = TRUE, scrollY = 600, scrollX = TRUE,
+        scroller = TRUE, scrollY = scroll_y, scrollX = TRUE,
         autoWidth = FALSE, keys = TRUE,
-        buttons = c("csv", "excel"), dom = "Blfrtip"
+        buttons = c("csv", "copy"), dom = "Blfrtip",
+        fixedColumns = TRUE
       ),
       escape = FALSE,
       ...
     )
 }
 
-qcsum <- o |>
+qcsum <- o2 |>
   filter(type == "UmQcSumFile") |>
-  unnest_wider(objp) |>
-  select(-c(type))
-hrd_chord <- o |>
+  unnest_wider(objp)
+hrd_chord <- o2 |>
   filter(type == "UmChordTsvFile") |>
   unnest_wider(objp) |>
-  select(-c(type))
-hrd_hrdetect <- o |>
-  filter(type == "UmHrdetectTsvFile") |>
-  unnest_wider(objp) |>
-  select(-c(type))
-sigs_2015 <- o |>
+  select(portal_run_id,
+    # chord_p_hrd = p_hrd,
+    chord_hr_status = hr_status,
+    chord_hrd_type = hrd_type,
+    chord_p_BRCA1 = p_BRCA1,
+    chord_p_BRCA2 = p_BRCA2
+  )
+# don't need hrdetect details
+# hrd_hrdetect <- o2 |>
+#   filter(type == "UmHrdetectTsvFile") |>
+#   unnest_wider(objp) |>
+#   select(portal_run_id, hrdetect_prob = Probability)
+sigs_2015 <- o2 |>
   filter(type == "UmSigsSnvFile2015") |>
   unnest_wider(objp) |>
   select(-c(type))
-sigs_2020 <- o |>
+sigs_2020 <- o2 |>
   filter(type == "UmSigsSnvFile2020") |>
   unnest_wider(objp) |>
   select(-c(type))
 ```
 
+## umccrise Results
 
-```{r}
-dt_view(qcsum, caption = "QC Summary")
-dt_view(hrd_chord, caption = "CHORD")
-dt_view(hrd_hrdetect, caption = "HRDetect")
+```{r final_tab}
+cols_select <- c(
+  "date_analysed_aest", "SubjectID", "sbj_url", "LibraryID_tumor", "ExternalSubjectID",
+  "ProjectOwner", "ProjectName", "Type", "Workflow", "LibraryID_normal",
+  "hrd_chord", "hrd_hrdetect",
+  "chord_hr_status", "chord_hrd_type", "chord_p_BRCA1", "chord_p_BRCA2",
+  "qc_status_hmf", "sex_hmf", "purity_hmf", "ploidy_hmf", "msi_hmf",
+  "msi_mb_hmf", "contamination_hmf",
+  "deleted_genes_hmf", "tmb_hmf", "tml_hmf", "wgd_hmf", "hypermutated",
+  "bpi_enabled", "portal_run_id", "portal_url"
+)
+d <- qcsum |>
+  dplyr::left_join(hrd_chord, by = "portal_run_id") |>
+  dplyr::select(dplyr::all_of(cols_select), dplyr::everything(), -c("type"))
+dt_view(d, caption = "umccrise Results Summary")
 ```
 
-## TODO
+### HRD Results
 
-- Add links to Portal per Subject
+```{r hrd_plot, fig.width=15, fig.height = 10}
+p <- d |>
+  dplyr::mutate(
+    sbj = glue("{SubjectID}_{LibraryID_tumor}"),
+    date = lubridate::as_datetime(date_analysed_aest, format = "%Y-%m-%d %H:%M:%S")
+  ) |>
+  dplyr::select(
+    date,
+    sbj,
+    chord = hrd_chord, hrdetect = hrd_hrdetect,
+  ) |>
+  tidyr::pivot_longer(chord:hrdetect, names_to = "method", values_to = "probability")
+p1 <- p |>
+  ggplot(aes(x = date, y = probability, label = sbj)) +
+  ggplot2::geom_point(aes(colour = method)) +
+  ggplot2::geom_line(aes(group = sbj), linewidth = 0.05) +
+  ggplot2::theme_bw() +
+  ggplot2::ggtitle("CHORD vs. HRDetect per SubjectID")
+
+plotly::ggplotly(p1)
+```
+
+
+## Metadata Summary {.tabset .tabset-pills}
+
+### ProjectOwner
+
+```{r ProjectOwner}
+count(d, ProjectOwner) |> dt_view(scroll_y = 400)
+```
+
+### ProjectName
+
+```{r ProjectName}
+count(d, ProjectName) |> dt_view(scroll_y = 400)
+```
+
+### Type
+
+```{r Type}
+count(d, Type) |> dt_view(scroll_y = 400)
+```
+
+### Workflow
+
+```{r Workflow}
+count(d, Workflow) |> dt_view(scroll_y = 400)
+```
+
+</div>
 
 ---
 
-## Session Info
+<details>
+<summary>Session Info</summary>
 
-```{r session_info, echo=FALSE, eval=FALSE}
+```{r session_info, echo=FALSE}
 pkgs_of_interest <- c("base", "dracarys", "tidyverse", "tidyselect", "ggplot2", "dplyr", "tidyr", "readr")
 # need dracarys for session info
 si <- dracarys::session_info_kable(pkgs_of_interest)
 si$si_pkg
 si$si_pl
 ```
+
+</details>
