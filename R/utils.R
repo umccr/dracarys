@@ -127,6 +127,16 @@ empty_tbl <- function(cnames, ctypes = readr::cols(.default = "c")) {
   readr::read_csv("\n", col_names = cnames, col_types = ctypes)
 }
 
+read_tsvgz <- function(x, ...) {
+  if (is_url(x)) {
+    res <- base::url(x) |>
+      base::gzcon() |>
+      readr::read_tsv(...)
+    return(res)
+  }
+  readr::read_tsv(x, ...)
+}
+
 read_jsongz_jsonlite <- function(x, ...) {
   if (is_url(x)) {
     # https://github.com/jeroen/jsonlite/issues/414
@@ -148,4 +158,26 @@ read_jsongz_rjsonio <- function(x, ...) {
     return(res)
   }
   RJSONIO::fromJSON(x, ...)
+}
+
+#' Read Google LIMS
+#'
+#' Reads UMCCR's Google LIMS spreadsheet.
+#'
+#' @return Tibble with all columns and rows from the Google LIMS spreadsheet.
+#' @export
+glims_read <- function() {
+  lims_key <- googledrive::drive_find("^Google LIMS$", shared_drive = "LIMS")$id
+  lims <- lims_key |>
+    googlesheets4::read_sheet("Sheet1", na = c(".", "", "-"), col_types = "c")
+  lims |> readr::type_convert(col_types = readr::cols(.default = "c", Timestamp = "T"))
+}
+
+
+#' @noRd
+dummy1 <- function() {
+  # Solves R CMD check: Namespaces in Imports field not imported from
+  scales::pretty_breaks
+  argparse::ArgumentParser
+  here::here
 }

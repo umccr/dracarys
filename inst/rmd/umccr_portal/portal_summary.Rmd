@@ -55,13 +55,6 @@ kable_empty_wf <- function(wf) {
     kableExtra::kable_minimal(full_width = TRUE, position = "left")
 }
 
-glims_read <- function() {
-  lims_key <- googledrive::drive_find("^Google LIMS$", shared_drive = "LIMS")$id
-  lims <- lims_key |>
-    googlesheets4::read_sheet("Sheet1", na = c(".", "", "-"), col_types = "c")
-  lims |> readr::type_convert(col_types = readr::cols(.default = "c", Timestamp = "T"))
-}
-
 dt_view <- function(x, ...) {
   x |>
     dplyr::mutate(across(where(is.character), as.factor)) |>
@@ -133,7 +126,7 @@ wf_order <- c(
 )
 
 lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
-# lims_raw <- glims_read()
+# lims_raw <- dracarys::glims_read()
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))

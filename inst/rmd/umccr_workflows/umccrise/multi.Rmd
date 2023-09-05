@@ -5,7 +5,6 @@ output:
   html_document:
     toc: true
     theme: cosmo
-    css: style.css
     code_download: true
   rmdformats::material:
     highlight: kate
@@ -22,109 +21,269 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{css}
+.navbar-brand {
+  padding: 5px 15px;
+}
+
+.dropdown:hover > .dropdown-menu {
+  display: block;
+}
+.dropdown > .dropdown-toggle:active {
+  pointer-events: none;
+}
+
+.main-container {
+  max-width: 1900px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.navbar-default {
+  color: #750075;
+  background-color: #750075;
+}
+```
+
 ```{r load_pkgs}
 {
-  require(tidyverse)
-  # require(dracarys) # only needed for session info
+  require(dplyr)
+  require(readr, include.only = c("read_rds"))
+  require(purrr, include.only = c("map"))
+  require(tidyr, include.only = c("unnest", "unnest_wider"))
+  require(dracarys)
   require(glue, include.only = "glue")
   require(here, include.only = "here")
   require(knitr, include.only = "kable")
   require(DT, include.only = "datatable")
   require(fs, include.only = c("dir_ls"))
+  require(ggplot2, include.only = c("ggplot", "aes"))
+  require(lubridate, include.only = c("as_datetime"))
+  require(plotly, include.only = c("ggplotly"))
 }
 ```
 
 ```{r data_setup, eval=FALSE}
 options(width = 150)
-res <- here("nogit/umccrise/2023-01-18") |>
-  dir_ls(recurse = TRUE, type = "file") |>
-  as_tibble_col(column_name = "path") |>
-  filter(!grepl("dracarys_gds_sync", path)) |> # get rid of synced data
+token <- dracarys::ica_token_validate(Sys.getenv("ICA_ACCESS_TOKEN_PRO"))
+pmeta <- here("nogit/umccrise/rds/portal_meta/2023-09-04_pmeta_final.rds") |>
+  readr::read_rds()
+gds_map <- pmeta |>
+  rowwise() |>
+  mutate(
+    gds_contents = list(dracarys::gds_files_list_filter_relevant(
+      gdsdir = .data$gds_outdir_umccrise, token = token, include = "PresignedUrl"
+    ))
+  ) |>
+  ungroup() |>
+  tidyr::unnest("gds_contents") |>
+  select(
+    "portal_run_id", "SubjectID", "LibraryID_tumor", "LibraryID_normal",
+    "start", "end", "type", "bname", "size", "file_id", "path", "presigned_url"
+  ) |>
+  filter(type != "MultiqcFile")
+
+saveRDS(gds_map, here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
+
+parse_files <- function(gds_map, row_slice, rds_out) {
+  start_time <- Sys.time()
+  dat1 <- gds_map |>
+    dplyr::slice(row_slice) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      gen = list(dracarys::dr_func_eval(.data$type)),
+      obj = list(.data$gen$new(.data$presigned_url)),
+      objp = list(.data$obj$read())
+    ) |>
+    dplyr::ungroup()
+  end_time <- Sys.time()
+  total_time <- end_time - start_time
+  print(total_time)
+  readr::write_rds(x = dat1, file = rds_out)
+}
+
+gds_map <- readr::read_rds(here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
+rds_path_out <- here("nogit/umccrise/rds/results")
+x0 <- parse_files(gds_map, 1:10, file.path(rds_path_out, "x0.rds"))
+x1 <- parse_files(gds_map, 1:500, file.path(rds_path_out, "x1.rds"))
+x2 <- parse_files(gds_map, 501:1000, file.path(rds_path_out, "x2.rds"))
+x3 <- parse_files(gds_map, 1001:1500, file.path(rds_path_out, "x3.rds"))
+x4 <- parse_files(gds_map, 1501:2000, file.path(rds_path_out, "x4.rds"))
+x5 <- parse_files(gds_map, 2001:2245, file.path(rds_path_out, "x5.rds"))
+```
+
+```{r data_load}
+lims_raw <- here("nogit/umccrise/rds/lims/2023-09-04_lims_raw.rds") |>
+  readr::read_rds()
+dat1 <- fs::dir_ls(here("nogit/umccrise/rds/results")) |>
+  purrr::map(readr::read_rds) |>
+  dplyr::bind_rows()
+
+o <- dat1 |>
   mutate(
     type = case_when(
-      grepl("chord", path) ~ "chord",
-      grepl("hrdetect", path) ~ "hrdetect",
-      grepl("snv2015", path) ~ "sigs2015",
-      grepl("snv2020", path) ~ "sigs2020",
-      grepl("qc_summary", path) ~ "qcsum",
-      TRUE ~ "UNKNOWN"
+      grepl("snv_2015.tsv.gz", bname) ~ "UmSigsSnvFile2015",
+      grepl("snv_2020.tsv.gz", bname) ~ "UmSigsSnvFile2020",
+      .default = .data$type
     ),
-    sbj2 = basename(dirname(path)),
-    sbj = sub("(.*)_.*", "\\1", sbj2)
+    date_analysed_aest = as.character(.data$end),
   ) |>
-  # slice(1:10) |>
-  rowwise() |>
-  mutate(dat = list(read_tsv(path, show_col_types = FALSE))) |>
-  select(sbj, sbj2, type, dat) |>
-  pivot_wider(names_from = type, values_from = dat)
-qc <- res |>
-  select("sbj", "sbj2", "qcsum") |>
-  unnest_wider(qcsum)
-hrd <- res |>
-  hoist(chord, hrd_chord1 = "p_hrd") |>
-  hoist(hrdetect, hrd_hrdetect1 = "Probability") |>
-  select(sbj, sbj2, hrd_chord1, hrd_hrdetect1)
-sigs <- res |>
-  select(sbj, sbj2, sigs2015, sigs2020) |>
-  pivot_longer(c(sigs2015, sigs2020), names_to = "version", values_to = "dat") |>
-  unnest(dat)
-pcgr <- read_rds(here("nogit/pcgr/rds/res_2023-01-17.rds")) |>
-  rename(sbj2 = "sbj", tmb_pcgr = "tmb_estimate", tmb_n_pcgr = "n_tmb")
-all <- left_join(pcgr, hrd, by = "sbj2") |>
-  left_join(qc, by = c("sbj2", "sbj")) |>
-  select(-c("hrd_chord1", "hrd_hrdetect1")) |>
-  select(sbj, sbj2, everything())
-
-# ids <- read_csv(here("nogit/data_portal/labmetadata_2023-01-19.csv"), col_types = cols(.default = "c")) |>
-#   # select(subject_id, phenotype, assay,  library_id, sample_name, sample_id, external_sample_id, external_subject_id) |>
-#   filter(subject_id %in% all$sbj,
-#          type == "WGS")
-
-# add libids based on sbj2
-sbj2_to_libids <- read_rds(here("nogit/umccrise/rds/x_2023-01-20.rds")) |>
-  select(sbj2, libids, analysis_date = date, gds_indir)
-
-all <- all |>
-  left_join(sbj2_to_libids, by = "sbj2") |>
-  select(sbj, sbj2, libids, analysis_date, gds_indir,
-    qc_status_hmf,
-    sex_hmf,
-    purity_hmf,
-    ploidy_hmf,
-    msi_fracIndels_pcgr = fracIndels,
-    msi_predicted_class_pcgr = predicted_class,
-    msi_hmf,
-    msi_mb_hmf,
-    hrd_chord,
-    hrd_hrdetect,
-    tmb_pcgr,
-    tmb_n_pcgr,
-    tmb_hmf,
-    tml_hmf,
-    contamination_hmf,
-    deleted_genes_hmf,
-    wgd_hmf,
-    everything()
+  select(
+    date_analysed_aest,
+    SubjectID,
+    LibraryID_tumor,
+    LibraryID_normal,
+    type,
+    objp,
+    portal_run_id
   )
 
-sigs <- sigs |>
-  left_join(sbj2_to_libids, by = "sbj2") |>
-  select(sbj, sbj2, libids, analysis_date, gds_indir, everything())
+lims <- lims_raw |>
+  dplyr::filter(LibraryID %in% c(o$LibraryID_tumor)) |>
+  dplyr::select(SubjectID, LibraryID, ExternalSubjectID, ProjectOwner, ProjectName, Type, Workflow) |>
+  dplyr::distinct()
 
-# limsrow <- read_csv(here("nogit/data_portal/limsrow_2023-01-19.csv"), col_types = cols(.default = "c"))
 
-readr::write_tsv(all, here("nogit/umccrise/res_2023-01-25.tsv.gz"))
-readr::write_tsv(sigs, here("nogit/umccrise/sigs_2023-01-20.tsv.gz"))
+o2 <- o |>
+  dplyr::left_join(lims, by = c("SubjectID", "LibraryID_tumor" = "LibraryID")) |>
+  dplyr::mutate(
+    url = glue("https://portal.umccr.org/subjects/{.data$SubjectID}/overview"),
+    sbj_url = glue("<a href={url}>{.data$SubjectID}</a>"),
+    url = glue("<a href={url}>{.data$url}</a>"),
+    portal_run_id = glue("dr.{portal_run_id}")
+  ) |>
+  dplyr::rename(portal_url = url)
+
+dt_view <- function(x, scroll_y = 1000, ...) {
+  x |>
+    dplyr::mutate(across(where(is.character), as.factor)) |>
+    DT::datatable(
+      filter = list(position = "top", clear = FALSE, plain = TRUE),
+      class = "cell-border display compact",
+      rownames = TRUE,
+      extensions = c("Scroller", "Buttons", "KeyTable", "FixedColumns"),
+      options = list(
+        scroller = TRUE, scrollY = scroll_y, scrollX = TRUE,
+        autoWidth = FALSE, keys = TRUE,
+        buttons = c("csv", "copy"), dom = "Blfrtip",
+        fixedColumns = TRUE
+      ),
+      escape = FALSE,
+      ...
+    )
+}
+
+qcsum <- o2 |>
+  filter(type == "UmQcSumFile") |>
+  unnest_wider(objp)
+hrd_chord <- o2 |>
+  filter(type == "UmChordTsvFile") |>
+  unnest_wider(objp) |>
+  select(portal_run_id,
+    # chord_p_hrd = p_hrd,
+    chord_hr_status = hr_status,
+    chord_hrd_type = hrd_type,
+    chord_p_BRCA1 = p_BRCA1,
+    chord_p_BRCA2 = p_BRCA2
+  )
+# don't need hrdetect details
+# hrd_hrdetect <- o2 |>
+#   filter(type == "UmHrdetectTsvFile") |>
+#   unnest_wider(objp) |>
+#   select(portal_run_id, hrdetect_prob = Probability)
+sigs_2015 <- o2 |>
+  filter(type == "UmSigsSnvFile2015") |>
+  unnest_wider(objp) |>
+  select(-c(type))
+sigs_2020 <- o2 |>
+  filter(type == "UmSigsSnvFile2020") |>
+  unnest_wider(objp) |>
+  select(-c(type))
 ```
+
+## umccrise Results
+
+```{r final_tab}
+cols_select <- c(
+  "date_analysed_aest", "SubjectID", "sbj_url", "LibraryID_tumor", "ExternalSubjectID",
+  "ProjectOwner", "ProjectName", "Type", "Workflow", "LibraryID_normal",
+  "hrd_chord", "hrd_hrdetect",
+  "chord_hr_status", "chord_hrd_type", "chord_p_BRCA1", "chord_p_BRCA2",
+  "qc_status_hmf", "sex_hmf", "purity_hmf", "ploidy_hmf", "msi_hmf",
+  "msi_mb_hmf", "contamination_hmf",
+  "deleted_genes_hmf", "tmb_hmf", "tml_hmf", "wgd_hmf", "hypermutated",
+  "bpi_enabled", "portal_run_id", "portal_url"
+)
+d <- qcsum |>
+  dplyr::left_join(hrd_chord, by = "portal_run_id") |>
+  dplyr::select(dplyr::all_of(cols_select), dplyr::everything(), -c("type"))
+dt_view(d, caption = "umccrise Results Summary")
+```
+
+### HRD Results
+
+```{r hrd_plot, fig.width=15, fig.height = 10}
+p <- d |>
+  dplyr::mutate(
+    sbj = glue("{SubjectID}_{LibraryID_tumor}"),
+    date = lubridate::as_datetime(date_analysed_aest, format = "%Y-%m-%d %H:%M:%S")
+  ) |>
+  dplyr::select(
+    date,
+    sbj,
+    chord = hrd_chord, hrdetect = hrd_hrdetect,
+  ) |>
+  tidyr::pivot_longer(chord:hrdetect, names_to = "method", values_to = "probability")
+p1 <- p |>
+  ggplot(aes(x = date, y = probability, label = sbj)) +
+  ggplot2::geom_point(aes(colour = method)) +
+  ggplot2::geom_line(aes(group = sbj), linewidth = 0.05) +
+  ggplot2::theme_bw() +
+  ggplot2::ggtitle("CHORD vs. HRDetect per SubjectID")
+
+plotly::ggplotly(p1)
+```
+
+
+## Metadata Summary {.tabset .tabset-pills}
+
+### ProjectOwner
+
+```{r ProjectOwner}
+count(d, ProjectOwner) |> dt_view(scroll_y = 400)
+```
+
+### ProjectName
+
+```{r ProjectName}
+count(d, ProjectName) |> dt_view(scroll_y = 400)
+```
+
+### Type
+
+```{r Type}
+count(d, Type) |> dt_view(scroll_y = 400)
+```
+
+### Workflow
+
+```{r Workflow}
+count(d, Workflow) |> dt_view(scroll_y = 400)
+```
+
+</div>
 
 ---
 
-## Session Info
+<details>
+<summary>Session Info</summary>
 
-```{r session_info, echo=FALSE, eval=FALSE}
+```{r session_info, echo=FALSE}
 pkgs_of_interest <- c("base", "dracarys", "tidyverse", "tidyselect", "ggplot2", "dplyr", "tidyr", "readr")
 # need dracarys for session info
 si <- dracarys::session_info_kable(pkgs_of_interest)
 si$si_pkg
 si$si_pl
 ```
+
+</details>

@@ -30,6 +30,8 @@ Imports:
     ggplot2,
     ggrepel,
     glue,
+    googledrive,
+    googlesheets4,
     here,
     httr,
     jose,
