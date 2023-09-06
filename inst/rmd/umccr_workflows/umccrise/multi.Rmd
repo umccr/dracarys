@@ -64,7 +64,7 @@ knitr::opts_chunk$set(
 ```
 
 ```{r data_setup, eval=FALSE}
-options(width = 150)
+# options(width = 150)
 token <- dracarys::ica_token_validate(Sys.getenv("ICA_ACCESS_TOKEN_PRO"))
 pmeta <- here("nogit/umccrise/rds/portal_meta/2023-09-04_pmeta_final.rds") |>
   readr::read_rds()
@@ -194,17 +194,19 @@ hrd_chord <- o2 |>
 sigs_2015 <- o2 |>
   filter(type == "UmSigsSnvFile2015") |>
   unnest_wider(objp) |>
-  select(-c(type))
+  select(-c(type)) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
 sigs_2020 <- o2 |>
   filter(type == "UmSigsSnvFile2020") |>
   unnest_wider(objp) |>
-  select(-c(type))
+  select(-c(type)) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
 ```
 
 ## umccrise Results
 
 ```{r final_tab}
-cols_select <- c(
+cols_select1 <- c(
   "date_analysed_aest", "SubjectID", "sbj_url", "LibraryID_tumor", "ExternalSubjectID",
   "ProjectOwner", "ProjectName", "Type", "Workflow", "LibraryID_normal",
   "hrd_chord", "hrd_hrdetect",
@@ -214,16 +216,36 @@ cols_select <- c(
   "deleted_genes_hmf", "tmb_hmf", "tml_hmf", "wgd_hmf", "hypermutated",
   "bpi_enabled", "portal_run_id", "portal_url"
 )
-d <- qcsum |>
+cols_select2 <- c(
+  "date_analysed_aest", "SubjectID", "sbj_url", "LibraryID_tumor", "ExternalSubjectID",
+  "ProjectOwner", "ProjectName", "Type", "Workflow", "LibraryID_normal",
+  "Sig_group", "Rank", "Signature", "Contribution", "RelFreq",
+  "portal_run_id", "portal_url"
+)
+d1 <- qcsum |>
   dplyr::left_join(hrd_chord, by = "portal_run_id") |>
-  dplyr::select(dplyr::all_of(cols_select), dplyr::everything(), -c("type"))
-dt_view(d, caption = "umccrise Results Summary")
+  dplyr::select(dplyr::all_of(cols_select1), dplyr::everything(), -c("type"))
+dt_view(d1, caption = "umccrise Results Summary")
+
+d2 <- dplyr::bind_rows(list(s2015 = sigs_2015, s2020 = sigs_2020), .id = "Sig_group") |>
+  dplyr::select(dplyr::all_of(cols_select2), dplyr::everything())
+dt_view(d2, caption = "Signature contributions (2015 and 2020)")
+
+d2 |>
+  group_by(date_analysed_aest, SubjectID, LibraryID_tumor, Sig_group) |>
+  mutate(
+    Signature_all = paste(glue("{Signature} ({RelFreq})"), collapse = ", ")
+  ) |>
+  ungroup() |>
+  select(date_analysed_aest:Sig_group, Signature_all) |>
+  distinct() |>
+  arrange(desc(date_analysed_aest), SubjectID)
 ```
 
 ### HRD Results
 
 ```{r hrd_plot, fig.width=15, fig.height = 10}
-p <- d |>
+d1p <- d1 |>
   dplyr::mutate(
     sbj = glue("{SubjectID}_{LibraryID_tumor}"),
     date = lubridate::as_datetime(date_analysed_aest, format = "%Y-%m-%d %H:%M:%S")
@@ -234,8 +256,8 @@ p <- d |>
     chord = hrd_chord, hrdetect = hrd_hrdetect,
   ) |>
   tidyr::pivot_longer(chord:hrdetect, names_to = "method", values_to = "probability")
-p1 <- p |>
-  ggplot(aes(x = date, y = probability, label = sbj)) +
+p1 <- d1p |>
+  ggplot2::ggplot(aes(x = date, y = probability, label = sbj)) +
   ggplot2::geom_point(aes(colour = method)) +
   ggplot2::geom_line(aes(group = sbj), linewidth = 0.05) +
   ggplot2::theme_bw() +
@@ -244,31 +266,70 @@ p1 <- p |>
 plotly::ggplotly(p1)
 ```
 
+### Signature Results
+
+**TODO**
+
+```{r fig.width = 15, fig.height=50, eval=FALSE}
+sig_order2015 <- paste0("Sig", 1:30)
+sig_order2020 <- paste0(
+  "SBS",
+  c(
+    1:6,
+    paste0(7, c("a", "b", "c", "d")),
+    8:9,
+    paste0(10, c("a", "b", "c", "d")),
+    11:16,
+    paste0(17, c("a", "b")),
+    18:60,
+    84:94
+  )
+)
+
+d2p <- d2 |>
+  # dplyr::filter(Rank %in% c(1:5)) |>
+  dplyr::mutate(
+    sbj = as.character(glue("{SubjectID}_{LibraryID_tumor}")),
+    date = lubridate::as_datetime(date_analysed_aest, format = "%Y-%m-%d %H:%M:%S")
+  ) |>
+  dplyr::select(
+    date, sbj, Sig_group, Rank, Signature, Contribution, RelFreq
+  ) |>
+  dplyr::mutate(Signature = factor(Signature, levels = c(sig_order2015, sig_order2020)))
+p2 <-
+  d2p |>
+  ggplot2::ggplot(aes(x = Contribution, y = sbj, fill = Signature, label = sbj)) +
+  ggplot2::geom_bar(position = "fill", stat = "identity") +
+  ggplot2::facet_wrap(~Sig_group, ncol = 1)
+
+plotly::ggplotly(p2)
+```
+
 
 ## Metadata Summary {.tabset .tabset-pills}
 
 ### ProjectOwner
 
 ```{r ProjectOwner}
-count(d, ProjectOwner) |> dt_view(scroll_y = 400)
+count(d1, ProjectOwner) |> dt_view(scroll_y = 400)
 ```
 
 ### ProjectName
 
 ```{r ProjectName}
-count(d, ProjectName) |> dt_view(scroll_y = 400)
+count(d1, ProjectName) |> dt_view(scroll_y = 400)
 ```
 
 ### Type
 
 ```{r Type}
-count(d, Type) |> dt_view(scroll_y = 400)
+count(d1, Type) |> dt_view(scroll_y = 400)
 ```
 
 ### Workflow
 
 ```{r Workflow}
-count(d, Workflow) |> dt_view(scroll_y = 400)
+count(d1, Workflow) |> dt_view(scroll_y = 400)
 ```
 
 </div>
