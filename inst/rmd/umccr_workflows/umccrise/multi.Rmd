@@ -47,10 +47,10 @@ knitr::opts_chunk$set(
 
 ```{r load_pkgs}
 {
-  require(dplyr)
+  require(dplyr) # import all dplyr funcs
   require(readr, include.only = c("read_rds"))
   require(purrr, include.only = c("map"))
-  require(tidyr, include.only = c("unnest", "unnest_wider"))
+  require(tidyr, include.only = c("unnest"))
   require(dracarys)
   require(glue, include.only = "glue")
   require(here, include.only = "here")
@@ -88,14 +88,14 @@ saveRDS(gds_map, here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
 parse_files <- function(gds_map, row_slice, rds_out) {
   start_time <- Sys.time()
   dat1 <- gds_map |>
-    dplyr::slice(row_slice) |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
+    slice(row_slice) |>
+    rowwise() |>
+    mutate(
       gen = list(dracarys::dr_func_eval(.data$type)),
       obj = list(.data$gen$new(.data$presigned_url)),
       objp = list(.data$obj$read())
     ) |>
-    dplyr::ungroup()
+    ungroup()
   end_time <- Sys.time()
   total_time <- end_time - start_time
   print(total_time)
@@ -117,7 +117,7 @@ lims_raw <- here("nogit/umccrise/rds/lims/2023-09-04_lims_raw.rds") |>
   readr::read_rds()
 dat1 <- fs::dir_ls(here("nogit/umccrise/rds/results")) |>
   purrr::map(readr::read_rds) |>
-  dplyr::bind_rows()
+  bind_rows()
 
 o <- dat1 |>
   mutate(
@@ -139,24 +139,24 @@ o <- dat1 |>
   )
 
 lims <- lims_raw |>
-  dplyr::filter(LibraryID %in% c(o$LibraryID_tumor)) |>
-  dplyr::select(SubjectID, LibraryID, ExternalSubjectID, ProjectOwner, ProjectName, Type, Workflow) |>
-  dplyr::distinct()
+  filter(LibraryID %in% c(o$LibraryID_tumor)) |>
+  select(SubjectID, LibraryID, ExternalSubjectID, ProjectOwner, ProjectName, Type, Workflow) |>
+  distinct()
 
 
 o2 <- o |>
-  dplyr::left_join(lims, by = c("SubjectID", "LibraryID_tumor" = "LibraryID")) |>
-  dplyr::mutate(
+  left_join(lims, by = c("SubjectID", "LibraryID_tumor" = "LibraryID")) |>
+  mutate(
     url = glue("https://portal.umccr.org/subjects/{.data$SubjectID}/overview"),
     sbj_url = glue("<a href={url}>{.data$SubjectID}</a>"),
     url = glue("<a href={url}>{.data$url}</a>"),
     portal_run_id = glue("dr.{portal_run_id}")
   ) |>
-  dplyr::rename(portal_url = url)
+  rename(portal_url = url)
 
 dt_view <- function(x, scroll_y = 1000, ...) {
   x |>
-    dplyr::mutate(across(where(is.character), as.factor)) |>
+    mutate(across(where(is.character), as.factor)) |>
     DT::datatable(
       filter = list(position = "top", clear = FALSE, plain = TRUE),
       class = "cell-border display compact",
@@ -223,12 +223,27 @@ cols_select2 <- c(
   "portal_run_id", "portal_url"
 )
 d1 <- qcsum |>
-  dplyr::left_join(hrd_chord, by = "portal_run_id") |>
-  dplyr::select(dplyr::all_of(cols_select1), dplyr::everything(), -c("type"))
+  left_join(hrd_chord, by = "portal_run_id") |>
+  select(all_of(cols_select1), everything(), -c("type"))
 dt_view(d1, caption = "umccrise Results Summary")
 
-d2 <- dplyr::bind_rows(list(s2015 = sigs_2015, s2020 = sigs_2020), .id = "Sig_group") |>
-  dplyr::select(dplyr::all_of(cols_select2), dplyr::everything())
+d2 <- bind_rows(list(s2015 = sigs_2015, s2020 = sigs_2020), .id = "Sig_group") |>
+  select(all_of(cols_select2), everything())
+
+d2_filt <- d2 |>
+  filter(
+    Sig_group == "s2015"
+  ) |>
+  group_by(portal_run_id) |>
+  mutate(tot_sig_vars = sum(Contribution)) |>
+  arrange(Rank) |>
+  slice_head(n = 2) |>
+  mutate(rn = row_number()) |>
+  ungroup() |>
+  mutate(
+    sig_summary = glue("{Signature} ({RelFreq} = {Contribution} / {tot_sig_vars})")
+  )
+
 dt_view(d2, caption = "Signature contributions (2015 and 2020)")
 
 d2 |>
@@ -246,11 +261,11 @@ d2 |>
 
 ```{r hrd_plot, fig.width=15, fig.height = 10}
 d1p <- d1 |>
-  dplyr::mutate(
+  mutate(
     sbj = glue("{SubjectID}_{LibraryID_tumor}"),
     date = lubridate::as_datetime(date_analysed_aest, format = "%Y-%m-%d %H:%M:%S")
   ) |>
-  dplyr::select(
+  select(
     date,
     sbj,
     chord = hrd_chord, hrdetect = hrd_hrdetect,
@@ -287,15 +302,15 @@ sig_order2020 <- paste0(
 )
 
 d2p <- d2 |>
-  # dplyr::filter(Rank %in% c(1:5)) |>
-  dplyr::mutate(
+  # filter(Rank %in% c(1:5)) |>
+  mutate(
     sbj = as.character(glue("{SubjectID}_{LibraryID_tumor}")),
     date = lubridate::as_datetime(date_analysed_aest, format = "%Y-%m-%d %H:%M:%S")
   ) |>
-  dplyr::select(
+  select(
     date, sbj, Sig_group, Rank, Signature, Contribution, RelFreq
   ) |>
-  dplyr::mutate(Signature = factor(Signature, levels = c(sig_order2015, sig_order2020)))
+  mutate(Signature = factor(Signature, levels = c(sig_order2015, sig_order2020)))
 p2 <-
   d2p |>
   ggplot2::ggplot(aes(x = Contribution, y = sbj, fill = Signature, label = sbj)) +
