@@ -246,6 +246,17 @@ dall <- qcsum |>
   left_join(dsig_filt, by = "portal_run_id")
 ```
 
+```{r join_excel_layla}
+excel_all <- here("nogit/umccrise/Combined analysis Jan22_Aug23.xlsx") |>
+  readxl::read_xlsx(sheet = "All")
+excel_all |>
+  select("...1", portal_run_id) |>
+  left_join(dall |> select(portal_run_id, sig_top2)) |>
+  rename(N = "...1") |>
+  readr::write_csv("sigs_top2_2023-09-08.csv")
+```
+
+
 ### HRD Results
 
 ```{r hrd_plot, fig.width=15, fig.height = 10}
