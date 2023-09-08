@@ -175,10 +175,10 @@ dt_view <- function(x, scroll_y = 1000, ...) {
 
 qcsum <- o2 |>
   filter(type == "UmQcSumFile") |>
-  unnest_wider(objp)
+  tidyr::unnest_wider(objp)
 hrd_chord <- o2 |>
   filter(type == "UmChordTsvFile") |>
-  unnest_wider(objp) |>
+  tidyr::unnest_wider(objp) |>
   select(portal_run_id,
     # chord_p_hrd = p_hrd,
     chord_hr_status = hr_status,
@@ -193,12 +193,12 @@ hrd_chord <- o2 |>
 #   select(portal_run_id, hrdetect_prob = Probability)
 sigs_2015 <- o2 |>
   filter(type == "UmSigsSnvFile2015") |>
-  unnest_wider(objp) |>
+  tidyr::unnest_wider(objp) |>
   select(-c(type)) |>
   tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
 sigs_2020 <- o2 |>
   filter(type == "UmSigsSnvFile2020") |>
-  unnest_wider(objp) |>
+  tidyr::unnest_wider(objp) |>
   select(-c(type)) |>
   tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
 ```
@@ -216,21 +216,12 @@ cols_select1 <- c(
   "deleted_genes_hmf", "tmb_hmf", "tml_hmf", "wgd_hmf", "hypermutated",
   "bpi_enabled", "portal_run_id", "portal_url"
 )
-cols_select2 <- c(
-  "date_analysed_aest", "SubjectID", "sbj_url", "LibraryID_tumor", "ExternalSubjectID",
-  "ProjectOwner", "ProjectName", "Type", "Workflow", "LibraryID_normal",
-  "Sig_group", "Rank", "Signature", "Contribution", "RelFreq",
-  "portal_run_id", "portal_url"
-)
-d1 <- qcsum |>
-  left_join(hrd_chord, by = "portal_run_id") |>
-  select(all_of(cols_select1), everything(), -c("type"))
-dt_view(d1, caption = "umccrise Results Summary")
+# signatures
+dsig <- bind_rows(list(s2015 = sigs_2015, s2020 = sigs_2020), .id = "Sig_group") |>
+  select(portal_run_id, Sig_group, Rank, Signature, Contribution, RelFreq)
 
-d2 <- bind_rows(list(s2015 = sigs_2015, s2020 = sigs_2020), .id = "Sig_group") |>
-  select(all_of(cols_select2), everything())
-
-d2_filt <- d2 |>
+# keep top two ranked sigs from 2015
+dsig_filt <- dsig |>
   filter(
     Sig_group == "s2015"
   ) |>
@@ -238,29 +229,27 @@ d2_filt <- d2 |>
   mutate(tot_sig_vars = sum(Contribution)) |>
   arrange(Rank) |>
   slice_head(n = 2) |>
-  mutate(rn = row_number()) |>
+  # some sigs have same Rank so use explicit sig_rank
+  mutate(sig_rank = row_number()) |>
   ungroup() |>
   mutate(
     sig_summary = glue("{Signature} ({RelFreq} = {Contribution} / {tot_sig_vars})")
-  )
-
-dt_view(d2, caption = "Signature contributions (2015 and 2020)")
-
-d2 |>
-  group_by(date_analysed_aest, SubjectID, LibraryID_tumor, Sig_group) |>
-  mutate(
-    Signature_all = paste(glue("{Signature} ({RelFreq})"), collapse = ", ")
   ) |>
-  ungroup() |>
-  select(date_analysed_aest:Sig_group, Signature_all) |>
-  distinct() |>
-  arrange(desc(date_analysed_aest), SubjectID)
+  select(portal_run_id, sig_rank, sig_summary) |>
+  tidyr::pivot_wider(names_from = sig_rank, values_from = sig_summary, names_prefix = "rank") |>
+  mutate(sig_top2 = paste(rank1, rank2, sep = ", ")) |>
+  select(portal_run_id, sig_top2)
+
+dall <- qcsum |>
+  left_join(hrd_chord, by = "portal_run_id") |>
+  select(all_of(cols_select1), everything(), -c("type")) |>
+  left_join(dsig_filt, by = "portal_run_id")
 ```
 
 ### HRD Results
 
 ```{r hrd_plot, fig.width=15, fig.height = 10}
-d1p <- d1 |>
+p1 <- dall |>
   mutate(
     sbj = glue("{SubjectID}_{LibraryID_tumor}"),
     date = lubridate::as_datetime(date_analysed_aest, format = "%Y-%m-%d %H:%M:%S")
@@ -270,8 +259,7 @@ d1p <- d1 |>
     sbj,
     chord = hrd_chord, hrdetect = hrd_hrdetect,
   ) |>
-  tidyr::pivot_longer(chord:hrdetect, names_to = "method", values_to = "probability")
-p1 <- d1p |>
+  tidyr::pivot_longer(chord:hrdetect, names_to = "method", values_to = "probability") |>
   ggplot2::ggplot(aes(x = date, y = probability, label = sbj)) +
   ggplot2::geom_point(aes(colour = method)) +
   ggplot2::geom_line(aes(group = sbj), linewidth = 0.05) +
