@@ -3,7 +3,9 @@ require(here)
 require(glue)
 require(dplyr)
 require(readr)
+require(paws)
 
+#---- GDS ----#
 # read last 1000 umccrise runs from portal
 # 475 from 2022-01-24 until 2023-09-03, of which 449 Succeeded
 date1 <- "2023-09-04"
@@ -44,3 +46,15 @@ d
 
 # final portal meta for umccrise runs
 saveRDS(d, file = here(glue("nogit/umccrise/rds/portal_meta/{date1}_pmeta_final.rds")))
+
+#---- S3 ----#
+pat <- "qc_summary.tsv.gz"
+rows <- 1000
+d <- s3_search(search = pat, rows = rows)
+
+d |>
+  mutate(
+    dir1 = dirname(path),
+    dir1 = dirname(dir1)
+  ) |>
+  select(dir1, path)
