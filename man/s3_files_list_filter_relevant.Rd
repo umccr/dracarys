@@ -2,7 +2,7 @@
 % Please edit documentation in R/s3.R
 \name{s3_files_list_filter_relevant}
 \alias{s3_files_list_filter_relevant}
-\title{List Relevant Files In S3 Directory}
+\title{List Relevant Files In AWS S3 Directory}
 \usage{
 s3_files_list_filter_relevant(
   s3dir,
@@ -27,7 +27,7 @@ s3_files_list_filter_relevant(
 A tibble with path, date, file size, file type, and presigned URL if requested.
 }
 \description{
-Lists relevant files in a S3 directory.
+Lists relevant files in an AWS S3 directory.
 }
 \examples{
 \dontrun{

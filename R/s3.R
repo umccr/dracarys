@@ -1,6 +1,6 @@
-#' List Relevant Files In S3 Directory
+#' List Relevant Files In AWS S3 Directory
 #'
-#' Lists relevant files in a S3 directory.
+#' Lists relevant files in an AWS S3 directory.
 #'
 #' @param s3dir GDS directory.
 #' @param pattern Pattern to further filter the returned file type tibble.
@@ -57,17 +57,32 @@ s3_file_presignedurl <- function(s3path, expiry_seconds = 3600) {
   p
 }
 
-# search for files on S3
-s3_search <- function(search, rows) {
+#' Search AWS S3 Objects
+#'
+#' Searches for the given pattern in the UMCCR `umccr-primary-data-prod` AWS S3
+#' bucket.
+#'
+#' @param pat Pattern to search for (e.g. 'multiqc_data.json').
+#' @param rows Max number of rows to return.
+#'
+#' @return Tibble with S3 path, object size, date modified, id, unique hash.
+#'
+#' @examples
+#' \dontrun{
+#' pat <- "qc_summary.tsv.gz"
+#' s3_search(pat, 10)
+#' }
+#' @export
+s3_search <- function(pat, rows) {
   au_tz <- "Australia/Melbourne"
   utc_tz <- "UTC"
   base_url <- "https://api.portal.prod.umccr.org/iam/s3"
-  url1 <- utils::URLencode(glue::glue("{base_url}?rowsPerPage={rows}&search={search}"))
-  awscurl_cmd <- glue::glue(
+  url1 <- utils::URLencode(glue("{base_url}?rowsPerPage={rows}&search={pat}"))
+  awscurl_cmd <- glue(
     "awscurl '{url1}' ",
     "--header 'Accept: application/json'"
   )
-  message(glue::glue("Running {awscurl_cmd}"))
+  message(glue("Running {awscurl_cmd}"))
   j <- system(awscurl_cmd, intern = TRUE)
   date_fmt <- "%Y-%m-%dT%H:%M:%S"
   d <- j |>
@@ -77,7 +92,9 @@ s3_search <- function(search, rows) {
   d |>
     dplyr::mutate(
       date1 = as.POSIXct(.data$last_modified_date, tz = utc_tz, format = date_fmt),
-      date_aest = lubridate::with_tz(.data$date1, tz = au_tz)
+      date_aest = lubridate::with_tz(.data$date1, tz = au_tz),
+      path = glue("s3://{bucket}/{key}"),
+      size = fs::as_fs_bytes(.data$size)
     ) |>
-    dplyr::select(path = "key", "bucket", "size", "date_aest", "id", "unique_hash")
+    dplyr::select("path", "size", "date_aest", "id", "unique_hash")
 }
