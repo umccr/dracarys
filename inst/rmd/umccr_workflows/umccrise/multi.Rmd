@@ -145,10 +145,18 @@ parse_files <- function(x, row_slice, rds_out) {
   readr::write_rds(x = dat1, file = rds_out)
 }
 
-rds_pa
+rds_path_out <- here::here("nogit/umccrise/rds/results")
+#---- S3 ----#
+s3_map <- readr::read_rds(here("nogit/umccrise/rds/s3_map_2023-09-12.rds"))
+s0 <- parse_files(s3_map, 1:10, file.path(rds_path_out, "s0.rds"))
+s1 <- parse_files(s3_map, 1:500, file.path(rds_path_out, "s1.rds"))
+s2 <- parse_files(s3_map, 501:1000, file.path(rds_path_out, "s2.rds"))
+s3 <- parse_files(s3_map, 1001:1500, file.path(rds_path_out, "s3.rds"))
+s4 <- parse_files(s3_map, 1501:2000, file.path(rds_path_out, "s4.rds"))
+s5 <- parse_files(s3_map, 2001:2245, file.path(rds_path_out, "s5.rds"))
 
+#---- GDS ----#
 gds_map <- readr::read_rds(here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
-rds_path_out <- here("nogit/umccrise/rds/results")
 x0 <- parse_files(gds_map, 1:10, file.path(rds_path_out, "x0.rds"))
 x1 <- parse_files(gds_map, 1:500, file.path(rds_path_out, "x1.rds"))
 x2 <- parse_files(gds_map, 501:1000, file.path(rds_path_out, "x2.rds"))
@@ -160,11 +168,25 @@ x5 <- parse_files(gds_map, 2001:2245, file.path(rds_path_out, "x5.rds"))
 ```{r data_load}
 lims_raw <- here("nogit/umccrise/rds/lims/2023-09-04_lims_raw.rds") |>
   readr::read_rds()
-dat1 <- fs::dir_ls(here("nogit/umccrise/rds/results")) |>
+dat_s3 <- fs::dir_ls(here("nogit/umccrise/rds/results"), regexp = "s[1-5]{1}.rds") |>
+  purrr::map(readr::read_rds) |>
+  bind_rows()
+dat_gds <- fs::dir_ls(here("nogit/umccrise/rds/results"), regexp = "x[1-5]{1}.rds") |>
   purrr::map(readr::read_rds) |>
   bind_rows()
 
-o <- dat1 |>
+dat_s3_res <- dat_s3 |>
+  mutate(
+    type = case_when(
+      grepl("snv_2015.tsv.gz", path) ~ "UmSigsSnvFile2015",
+      grepl("snv_2020.tsv.gz", path) ~ "UmSigsSnvFile2020",
+      .default = .data$type
+    ),
+    date_utc2 = lubridate::as_datetime(.data$date_utc, format = "%Y-%m-%dT%H:%M:%S+00:00"),
+    date_analysed_aest = lubridate::with_tz(.data$date_utc2, tz = "Australia/Melbourne")
+  ) |>
+  select(date_analysed_aest, SubjectID, LibraryID_tumor, SampleID_tumor, type, objp)
+dat_gds_res <- dat_gds |>
   mutate(
     type = case_when(
       grepl("snv_2015.tsv.gz", bname) ~ "UmSigsSnvFile2015",
@@ -173,24 +195,23 @@ o <- dat1 |>
     ),
     date_analysed_aest = as.character(.data$end),
   ) |>
-  select(
-    date_analysed_aest,
-    SubjectID,
-    LibraryID_tumor,
-    LibraryID_normal,
-    type,
-    objp,
-    portal_run_id
-  )
+  select(date_analysed_aest, SubjectID, LibraryID_tumor, LibraryID_normal, type, objp, portal_run_id)
 
-lims <- lims_raw |>
-  filter(LibraryID %in% c(o$LibraryID_tumor)) |>
+lims_s3 <- lims_raw |>
+  filter(LibraryID %in% dat_s3_res$LibraryID_tumor) |>
+  select(SubjectID, LibraryID, ExternalSubjectID, ProjectOwner, ProjectName, Type, Workflow) |>
+  distinct()
+lims_gds <- lims_raw |>
+  filter(LibraryID %in% c(dat_gds_res$LibraryID_tumor)) |>
   select(SubjectID, LibraryID, ExternalSubjectID, ProjectOwner, ProjectName, Type, Workflow) |>
   distinct()
 
+o1 <- dat_s3_res |>
+  left_join(lims_s3, by = c("SubjectID", "LibraryID_tumor" = "LibraryID"))
+#################### UP TO HERE^ ###########################################
 
-o2 <- o |>
-  left_join(lims, by = c("SubjectID", "LibraryID_tumor" = "LibraryID")) |>
+o2 <- dat_gds_res |>
+  left_join(lims_gds, by = c("SubjectID", "LibraryID_tumor" = "LibraryID")) |>
   mutate(
     url = glue("https://portal.umccr.org/subjects/{.data$SubjectID}/overview"),
     sbj_url = glue("<a href={url}>{.data$SubjectID}</a>"),
