@@ -9,7 +9,8 @@ s3_files_list_filter_relevant(
   pattern = NULL,
   page_size = 1000,
   max_items = 1000,
-  presign = FALSE
+  presign = FALSE,
+  expiry_sec = 43200
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ s3_files_list_filter_relevant(
 \item{max_items}{The total number of items to return in the command’s output (def: 1000).}
 
 \item{presign}{Include presigned URLs (def: FALSE).}
+
+\item{expiry_sec}{Number of seconds the presigned URL will be valid for (if generated) (def: 43200 (12hrs)).}
 }
 \value{
 A tibble with path, date, file size, file type, and presigned URL if requested.

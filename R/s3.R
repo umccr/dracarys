@@ -7,6 +7,7 @@
 #' @param page_size The size of each page to get in the AWS service call (def: 1000).
 #' @param max_items The total number of items to return in the command’s output (def: 1000).
 #' @param presign Include presigned URLs (def: FALSE).
+#' @param expiry_sec Number of seconds the presigned URL will be valid for (if generated) (def: 43200 (12hrs)).
 #'
 #' @return A tibble with path, date, file size, file type, and presigned URL if requested.
 #' @examples
@@ -15,7 +16,7 @@
 #' s3_files_list_filter_relevant(s3dir = s3dir, presign = TRUE)
 #' }
 #' @export
-s3_files_list_filter_relevant <- function(s3dir, pattern = NULL, page_size = 1000, max_items = 1000, presign = FALSE) {
+s3_files_list_filter_relevant <- function(s3dir, pattern = NULL, page_size = 1000, max_items = 1000, presign = FALSE, expiry_sec = 43200) {
   assertthat::assert_that(grepl("^s3://", s3dir), rlang::is_logical(presign))
   pattern <- pattern %||% ".*" # keep all recognisable files by default
   b <- sub("s3://(.*?)/.*", "\\1", s3dir)
@@ -31,7 +32,7 @@ s3_files_list_filter_relevant <- function(s3dir, pattern = NULL, page_size = 100
     tibble::as_tibble() |>
     dplyr::mutate(
       path = glue("s3://{b}/{.data$Key}"),
-      date1 = .data$LastModified,
+      date_utc = .data$LastModified,
       size = fs::as_fs_bytes(.data$Size)
     ) |>
     dplyr::rowwise() |>
@@ -41,12 +42,12 @@ s3_files_list_filter_relevant <- function(s3dir, pattern = NULL, page_size = 100
     ) |>
     dplyr::ungroup() |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
-    dplyr::select("path", "date1", "size", "type")
+    dplyr::select("path", "date_utc", "size", "type")
 
   if (presign) {
     d <- d |>
       dplyr::rowwise() |>
-      dplyr::mutate(presigned_url = s3_file_presignedurl(.data$path)) |>
+      dplyr::mutate(presigned_url = s3_file_presignedurl(.data$path, expiry_seconds = expiry_sec)) |>
       dplyr::ungroup()
   }
   d

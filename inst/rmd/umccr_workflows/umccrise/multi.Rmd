@@ -64,7 +64,48 @@ knitr::opts_chunk$set(
 ```
 
 ```{r data_setup, eval=FALSE}
-# options(width = 150)
+#---- S3 ----#
+s3 <- here::here(glue::glue("nogit/umccrise/rds/portal_meta/2023-09-12_pmeta_s3.rds")) |>
+  readr::read_rds()
+s3_get_presigned1 <- function(x, row_slice) {
+  start_time <- Sys.time()
+  s3_map <- x |>
+    slice(row_slice) |>
+    rowwise() |>
+    mutate(
+      s3_contents = list(s3_files_list_filter_relevant(
+        s3dir = .data$dir1, presign = TRUE
+      ))
+    ) |>
+    ungroup() |>
+    tidyr::unnest("s3_contents") |>
+    select(
+      "SubjectID", "LibraryID_tumor", "SampleID_tumor",
+      "date_utc", "type", "size", "path", "presigned_url"
+    )
+  end_time <- Sys.time()
+  total_time <- end_time - start_time
+  print(total_time)
+  s3_map
+}
+# 2 seconds per row
+s3_map1 <- s3_get_presigned1(s3, 1:100)
+s3_map2 <- s3_get_presigned1(s3, 101:200)
+s3_map3 <- s3_get_presigned1(s3, 201:300)
+s3_map4 <- s3_get_presigned1(s3, 301:400)
+s3_map5 <- s3_get_presigned1(s3, 401:449)
+
+saveRDS(s3_map1, here("nogit/umccrise/rds/s3/map1_2023-09-12.rds"))
+saveRDS(s3_map2, here("nogit/umccrise/rds/s3/map2_2023-09-12.rds"))
+saveRDS(s3_map3, here("nogit/umccrise/rds/s3/map3_2023-09-12.rds"))
+saveRDS(s3_map4, here("nogit/umccrise/rds/s3/map4_2023-09-12.rds"))
+saveRDS(s3_map5, here("nogit/umccrise/rds/s3/map5_2023-09-12.rds"))
+s3_map <- fs::dir_ls(here("nogit/umccrise/rds/s3"), regexp = "map.*rds") |>
+  purrr::map(readr::read_rds) |>
+  bind_rows()
+saveRDS(s3_map, here("nogit/umccrise/rds/s3_map_2023-09-12.rds"))
+
+#---- GDS ----#
 token <- dracarys::ica_token_validate(Sys.getenv("ICA_ACCESS_TOKEN_PRO"))
 pmeta <- here("nogit/umccrise/rds/portal_meta/2023-09-04_pmeta_final.rds") |>
   readr::read_rds()
@@ -84,10 +125,12 @@ gds_map <- pmeta |>
   filter(type != "MultiqcFile")
 
 saveRDS(gds_map, here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
+```
 
-parse_files <- function(gds_map, row_slice, rds_out) {
+```{r data_parse, eval=FALSE}
+parse_files <- function(x, row_slice, rds_out) {
   start_time <- Sys.time()
-  dat1 <- gds_map |>
+  dat1 <- x |>
     slice(row_slice) |>
     rowwise() |>
     mutate(
@@ -101,6 +144,8 @@ parse_files <- function(gds_map, row_slice, rds_out) {
   print(total_time)
   readr::write_rds(x = dat1, file = rds_out)
 }
+
+rds_pa
 
 gds_map <- readr::read_rds(here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
 rds_path_out <- here("nogit/umccrise/rds/results")
