@@ -1,4 +1,20 @@
-#' s3_files_list_filter_relevant("s3://umccr-primary-data-prod/Accreditation/ALLOCATE-134131/WGS/2021-07-26/umccrised/ALLOCATE-134131__ALLOCATE-134131_MDx150892_Missing/cancer_report_tables/", presign = TRUE)
+#' List Relevant Files In S3 Directory
+#'
+#' Lists relevant files in a S3 directory.
+#'
+#' @param s3dir GDS directory.
+#' @param pattern Pattern to further filter the returned file type tibble.
+#' @param page_size The size of each page to get in the AWS service call (def: 1000).
+#' @param max_items The total number of items to return in the command’s output (def: 1000).
+#' @param presign Include presigned URLs (def: FALSE).
+#'
+#' @return A tibble with path, date, file size, file type, and presigned URL if requested.
+#' @examples
+#' \dontrun{
+#' s3dir <- "s3://umccr-primary-data-prod/Accreditation/ALLOCATE-134131/WGS/2021-07-26/umccrised/ALLOCATE-134131__ALLOCATE-134131_MDx150892_Missing/cancer_report_tables"
+#' s3_files_list_filter_relevant(s3dir = s3dir, presign = TRUE)
+#' }
+#' @export
 s3_files_list_filter_relevant <- function(s3dir, pattern = NULL, page_size = 1000, max_items = 1000, presign = FALSE) {
   assertthat::assert_that(grepl("^s3://", s3dir), rlang::is_logical(presign))
   pattern <- pattern %||% ".*" # keep all recognisable files by default
@@ -25,7 +41,7 @@ s3_files_list_filter_relevant <- function(s3dir, pattern = NULL, page_size = 100
     ) |>
     dplyr::ungroup() |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
-    dplyr::select(path, date1, size, type)
+    dplyr::select("path", "date1", "size", "type")
 
   if (presign) {
     d <- d |>
@@ -63,5 +79,5 @@ s3_search <- function(search, rows) {
       date1 = as.POSIXct(.data$last_modified_date, tz = utc_tz, format = date_fmt),
       date_aest = lubridate::with_tz(.data$date1, tz = au_tz)
     ) |>
-    dplyr::select(path = key, bucket, size, date_aest, id, unique_hash)
+    dplyr::select(path = "key", "bucket", "size", "date_aest", "id", "unique_hash")
 }
