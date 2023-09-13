@@ -3,6 +3,7 @@
 __pycache__/
 *.py[cod]
 .Rproj.user
+.Rhistory
 
 /nogit
 /docs

@@ -47,10 +47,10 @@ knitr::opts_chunk$set(
 
 ```{r load_pkgs}
 {
-  require(dplyr)
+  require(dplyr) # import all dplyr funcs
   require(readr, include.only = c("read_rds"))
   require(purrr, include.only = c("map"))
-  require(tidyr, include.only = c("unnest", "unnest_wider"))
+  require(tidyr, include.only = c("unnest"))
   require(dracarys)
   require(glue, include.only = "glue")
   require(here, include.only = "here")
@@ -60,11 +60,53 @@ knitr::opts_chunk$set(
   require(ggplot2, include.only = c("ggplot", "aes"))
   require(lubridate, include.only = c("as_datetime"))
   require(plotly, include.only = c("ggplotly"))
+  require(openssl, include.only = c("sha256"))
 }
 ```
 
 ```{r data_setup, eval=FALSE}
-options(width = 150)
+#---- S3 ----#
+s3 <- here::here(glue::glue("nogit/umccrise/rds/portal_meta/2023-09-12_pmeta_s3.rds")) |>
+  readr::read_rds()
+s3_get_presigned1 <- function(x, row_slice) {
+  start_time <- Sys.time()
+  s3_map <- x |>
+    slice(row_slice) |>
+    rowwise() |>
+    mutate(
+      s3_contents = list(s3_files_list_filter_relevant(
+        s3dir = .data$dir1, presign = TRUE
+      ))
+    ) |>
+    ungroup() |>
+    tidyr::unnest("s3_contents") |>
+    select(
+      "SubjectID", "LibraryID_tumor", "SampleID_tumor",
+      "date_utc", "type", "size", "path", "presigned_url"
+    )
+  end_time <- Sys.time()
+  total_time <- end_time - start_time
+  print(total_time)
+  s3_map
+}
+# 2 seconds per row
+s3_map1 <- s3_get_presigned1(s3, 1:100)
+s3_map2 <- s3_get_presigned1(s3, 101:200)
+s3_map3 <- s3_get_presigned1(s3, 201:300)
+s3_map4 <- s3_get_presigned1(s3, 301:400)
+s3_map5 <- s3_get_presigned1(s3, 401:449)
+
+saveRDS(s3_map1, here("nogit/umccrise/rds/s3/map1_2023-09-12.rds"))
+saveRDS(s3_map2, here("nogit/umccrise/rds/s3/map2_2023-09-12.rds"))
+saveRDS(s3_map3, here("nogit/umccrise/rds/s3/map3_2023-09-12.rds"))
+saveRDS(s3_map4, here("nogit/umccrise/rds/s3/map4_2023-09-12.rds"))
+saveRDS(s3_map5, here("nogit/umccrise/rds/s3/map5_2023-09-12.rds"))
+s3_map <- fs::dir_ls(here("nogit/umccrise/rds/s3"), regexp = "map.*rds") |>
+  purrr::map(readr::read_rds) |>
+  bind_rows()
+saveRDS(s3_map, here("nogit/umccrise/rds/s3_map_2023-09-12.rds"))
+
+#---- GDS ----#
 token <- dracarys::ica_token_validate(Sys.getenv("ICA_ACCESS_TOKEN_PRO"))
 pmeta <- here("nogit/umccrise/rds/portal_meta/2023-09-04_pmeta_final.rds") |>
   readr::read_rds()
@@ -84,26 +126,38 @@ gds_map <- pmeta |>
   filter(type != "MultiqcFile")
 
 saveRDS(gds_map, here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
+```
 
-parse_files <- function(gds_map, row_slice, rds_out) {
+```{r data_parse, eval=FALSE}
+parse_files <- function(x, row_slice, rds_out) {
   start_time <- Sys.time()
-  dat1 <- gds_map |>
-    dplyr::slice(row_slice) |>
-    dplyr::rowwise() |>
-    dplyr::mutate(
+  dat1 <- x |>
+    slice(row_slice) |>
+    rowwise() |>
+    mutate(
       gen = list(dracarys::dr_func_eval(.data$type)),
       obj = list(.data$gen$new(.data$presigned_url)),
       objp = list(.data$obj$read())
     ) |>
-    dplyr::ungroup()
+    ungroup()
   end_time <- Sys.time()
   total_time <- end_time - start_time
   print(total_time)
   readr::write_rds(x = dat1, file = rds_out)
 }
 
+rds_path_out <- here::here("nogit/umccrise/rds/results")
+#---- S3 ----#
+s3_map <- readr::read_rds(here("nogit/umccrise/rds/s3_map_2023-09-12.rds"))
+s0 <- parse_files(s3_map, 1:10, file.path(rds_path_out, "s0.rds"))
+s1 <- parse_files(s3_map, 1:500, file.path(rds_path_out, "s1.rds"))
+s2 <- parse_files(s3_map, 501:1000, file.path(rds_path_out, "s2.rds"))
+s3 <- parse_files(s3_map, 1001:1500, file.path(rds_path_out, "s3.rds"))
+s4 <- parse_files(s3_map, 1501:2000, file.path(rds_path_out, "s4.rds"))
+s5 <- parse_files(s3_map, 2001:2245, file.path(rds_path_out, "s5.rds"))
+
+#---- GDS ----#
 gds_map <- readr::read_rds(here("nogit/umccrise/rds/gds_map_2023-09-05.rds"))
-rds_path_out <- here("nogit/umccrise/rds/results")
 x0 <- parse_files(gds_map, 1:10, file.path(rds_path_out, "x0.rds"))
 x1 <- parse_files(gds_map, 1:500, file.path(rds_path_out, "x1.rds"))
 x2 <- parse_files(gds_map, 501:1000, file.path(rds_path_out, "x2.rds"))
@@ -115,11 +169,38 @@ x5 <- parse_files(gds_map, 2001:2245, file.path(rds_path_out, "x5.rds"))
 ```{r data_load}
 lims_raw <- here("nogit/umccrise/rds/lims/2023-09-04_lims_raw.rds") |>
   readr::read_rds()
-dat1 <- fs::dir_ls(here("nogit/umccrise/rds/results")) |>
+dat_s3_raw <- fs::dir_ls(here("nogit/umccrise/rds/results"), regexp = "s[1-5]{1}.rds") |>
   purrr::map(readr::read_rds) |>
-  dplyr::bind_rows()
+  bind_rows()
+# create sha256 for umccrise directory to distinguish between runs
+# keep first 8 digits and append to umccrise date folder.
+dat_s3 <- dat_s3_raw |>
+  mutate(
+    um_dir = sub("s3://umccr-primary-data-prod/(.*)/cancer_report_tables/.*", "\\1", path),
+    date_dir = basename(dirname(dirname(um_dir))),
+    date_dir = gsub("-", "", date_dir),
+    hash256 = openssl::sha256(um_dir),
+    hash256 = substr(hash256, 1, 8),
+    portal_run_id = glue("fake.{date_dir}{hash256}")
+  ) |>
+  select(-c(um_dir, date_dir, hash256, SampleID_tumor))
+dat_gds <- fs::dir_ls(here("nogit/umccrise/rds/results"), regexp = "x[1-5]{1}.rds") |>
+  purrr::map(readr::read_rds) |>
+  bind_rows()
 
-o <- dat1 |>
+dat_s3_res <- dat_s3 |>
+  mutate(
+    type = case_when(
+      grepl("snv_2015.tsv.gz", path) ~ "UmSigsSnvFile2015",
+      grepl("snv_2020.tsv.gz", path) ~ "UmSigsSnvFile2020",
+      .default = .data$type
+    ),
+    date_utc2 = lubridate::as_datetime(.data$date_utc, format = "%Y-%m-%dT%H:%M:%S+00:00"),
+    date_analysed_aest = lubridate::with_tz(.data$date_utc2, tz = "Australia/Melbourne"),
+    date_analysed_aest = as.character(.data$date_analysed_aest)
+  ) |>
+  select(date_analysed_aest, SubjectID, LibraryID_tumor, type, objp, portal_run_id)
+dat_gds_res <- dat_gds |>
   mutate(
     type = case_when(
       grepl("snv_2015.tsv.gz", bname) ~ "UmSigsSnvFile2015",
@@ -128,35 +209,42 @@ o <- dat1 |>
     ),
     date_analysed_aest = as.character(.data$end),
   ) |>
-  select(
-    date_analysed_aest,
-    SubjectID,
-    LibraryID_tumor,
-    LibraryID_normal,
-    type,
-    objp,
-    portal_run_id
-  )
+  select(date_analysed_aest, SubjectID, LibraryID_tumor, type, objp, portal_run_id)
 
-lims <- lims_raw |>
-  dplyr::filter(LibraryID %in% c(o$LibraryID_tumor)) |>
-  dplyr::select(SubjectID, LibraryID, ExternalSubjectID, ProjectOwner, ProjectName, Type, Workflow) |>
-  dplyr::distinct()
+lims_s3 <- lims_raw |>
+  filter(LibraryID %in% dat_s3_res$LibraryID_tumor) |>
+  select(SubjectID, LibraryID, ExternalSubjectID, ProjectOwner, ProjectName, Type, Workflow) |>
+  distinct()
+lims_gds <- lims_raw |>
+  filter(LibraryID %in% c(dat_gds_res$LibraryID_tumor)) |>
+  select(SubjectID, LibraryID, ExternalSubjectID, ProjectOwner, ProjectName, Type, Workflow) |>
+  distinct()
 
-
-o2 <- o |>
-  dplyr::left_join(lims, by = c("SubjectID", "LibraryID_tumor" = "LibraryID")) |>
-  dplyr::mutate(
+o1 <- dat_s3_res |>
+  left_join(lims_s3, by = c("SubjectID", "LibraryID_tumor" = "LibraryID")) |>
+  mutate(
+    url = glue("https://portal.umccr.org/subjects/{.data$SubjectID}/overview"),
+    sbj_url = glue("<a href={url}>{.data$SubjectID}</a>"),
+    url = glue("<a href={url}>{.data$url}</a>")
+  ) |>
+  rename(portal_url = url)
+o2 <- dat_gds_res |>
+  left_join(lims_gds, by = c("SubjectID", "LibraryID_tumor" = "LibraryID")) |>
+  mutate(
     url = glue("https://portal.umccr.org/subjects/{.data$SubjectID}/overview"),
     sbj_url = glue("<a href={url}>{.data$SubjectID}</a>"),
     url = glue("<a href={url}>{.data$url}</a>"),
     portal_run_id = glue("dr.{portal_run_id}")
   ) |>
-  dplyr::rename(portal_url = url)
+  rename(portal_url = url)
+
+d <- list(s3 = o1, gds = o2) |>
+  bind_rows(.id = "s3_or_gds")
 
 dt_view <- function(x, scroll_y = 1000, ...) {
+  options(DT.TOJSON_ARGS = list(na = "string"))
   x |>
-    dplyr::mutate(across(where(is.character), as.factor)) |>
+    mutate(across(where(is.character), as.factor)) |>
     DT::datatable(
       filter = list(position = "top", clear = FALSE, plain = TRUE),
       class = "cell-border display compact",
@@ -173,12 +261,12 @@ dt_view <- function(x, scroll_y = 1000, ...) {
     )
 }
 
-qcsum <- o2 |>
+qcsum <- d |>
   filter(type == "UmQcSumFile") |>
-  unnest_wider(objp)
-hrd_chord <- o2 |>
+  tidyr::unnest_wider(objp)
+hrd_chord <- d |>
   filter(type == "UmChordTsvFile") |>
-  unnest_wider(objp) |>
+  tidyr::unnest_wider(objp) |>
   select(portal_run_id,
     # chord_p_hrd = p_hrd,
     chord_hr_status = hr_status,
@@ -191,22 +279,24 @@ hrd_chord <- o2 |>
 #   filter(type == "UmHrdetectTsvFile") |>
 #   unnest_wider(objp) |>
 #   select(portal_run_id, hrdetect_prob = Probability)
-sigs_2015 <- o2 |>
+sigs_2015 <- d |>
   filter(type == "UmSigsSnvFile2015") |>
-  unnest_wider(objp) |>
-  select(-c(type))
-sigs_2020 <- o2 |>
+  tidyr::unnest_wider(objp) |>
+  select(-c(type)) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
+sigs_2020 <- d |>
   filter(type == "UmSigsSnvFile2020") |>
-  unnest_wider(objp) |>
-  select(-c(type))
+  tidyr::unnest_wider(objp) |>
+  select(-c(type)) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
 ```
 
 ## umccrise Results
 
 ```{r final_tab}
-cols_select <- c(
+cols_select1 <- c(
   "date_analysed_aest", "SubjectID", "sbj_url", "LibraryID_tumor", "ExternalSubjectID",
-  "ProjectOwner", "ProjectName", "Type", "Workflow", "LibraryID_normal",
+  "ProjectOwner", "ProjectName", "Type", "Workflow",
   "hrd_chord", "hrd_hrdetect",
   "chord_hr_status", "chord_hrd_type", "chord_p_BRCA1", "chord_p_BRCA2",
   "qc_status_hmf", "sex_hmf", "purity_hmf", "ploidy_hmf", "msi_hmf",
@@ -214,28 +304,65 @@ cols_select <- c(
   "deleted_genes_hmf", "tmb_hmf", "tml_hmf", "wgd_hmf", "hypermutated",
   "bpi_enabled", "portal_run_id", "portal_url"
 )
-d <- qcsum |>
-  dplyr::left_join(hrd_chord, by = "portal_run_id") |>
-  dplyr::select(dplyr::all_of(cols_select), dplyr::everything(), -c("type"))
-dt_view(d, caption = "umccrise Results Summary")
+# signatures
+dsig <- bind_rows(list(s2015 = sigs_2015, s2020 = sigs_2020), .id = "Sig_group") |>
+  select(portal_run_id, Sig_group, Rank, Signature, Contribution, RelFreq)
+
+# keep top two ranked sigs from 2015
+dsig_filt <- dsig |>
+  filter(
+    Sig_group == "s2015"
+  ) |>
+  group_by(portal_run_id) |>
+  mutate(tot_sig_vars = sum(Contribution)) |>
+  arrange(Rank) |>
+  slice_head(n = 2) |>
+  # some sigs have same Rank so use explicit sig_rank
+  mutate(sig_rank = row_number()) |>
+  ungroup() |>
+  mutate(
+    sig_summary = glue("{Signature} ({RelFreq} = {Contribution} / {tot_sig_vars})")
+  ) |>
+  select(portal_run_id, sig_rank, sig_summary) |>
+  tidyr::pivot_wider(names_from = sig_rank, values_from = sig_summary, names_prefix = "rank") |>
+  mutate(sig_top2 = paste(rank1, rank2, sep = ", ")) |>
+  select(portal_run_id, sig_top2)
+
+dall <- qcsum |>
+  left_join(hrd_chord, by = "portal_run_id") |>
+  select(all_of(cols_select1), everything(), -c("type")) |>
+  left_join(dsig_filt, by = "portal_run_id") |>
+  relocate(sig_top2, .before = "hrd_chord") |>
+  relocate(s3_or_gds, .after = "SubjectID")
+dt_view(dall)
 ```
+
+```{r join_excel_layla, eval=FALSE}
+excel_all <- here("nogit/umccrise/Combined analysis Jan22_Aug23.xlsx") |>
+  readxl::read_xlsx(sheet = "All")
+excel_all |>
+  select("...1", portal_run_id) |>
+  left_join(dall |> select(portal_run_id, sig_top2)) |>
+  rename(N = "...1") |>
+  readr::write_csv("sigs_top2_2023-09-08.csv")
+```
+
 
 ### HRD Results
 
-```{r hrd_plot, fig.width=15, fig.height = 10}
-p <- d |>
-  dplyr::mutate(
+```{r hrd_plot, fig.width=15, fig.height = 15}
+p1 <- dall |>
+  mutate(
     sbj = glue("{SubjectID}_{LibraryID_tumor}"),
     date = lubridate::as_datetime(date_analysed_aest, format = "%Y-%m-%d %H:%M:%S")
   ) |>
-  dplyr::select(
+  select(
     date,
     sbj,
     chord = hrd_chord, hrdetect = hrd_hrdetect,
   ) |>
-  tidyr::pivot_longer(chord:hrdetect, names_to = "method", values_to = "probability")
-p1 <- p |>
-  ggplot(aes(x = date, y = probability, label = sbj)) +
+  tidyr::pivot_longer(chord:hrdetect, names_to = "method", values_to = "probability") |>
+  ggplot2::ggplot(aes(x = date, y = probability, label = sbj)) +
   ggplot2::geom_point(aes(colour = method)) +
   ggplot2::geom_line(aes(group = sbj), linewidth = 0.05) +
   ggplot2::theme_bw() +
@@ -244,31 +371,79 @@ p1 <- p |>
 plotly::ggplotly(p1)
 ```
 
+### Signature Results
+
+```{r fig.width = 15, fig.height=65, eval=TRUE}
+sig_order2015 <- paste0("Sig", 1:30)
+sig_order2020 <- paste0(
+  "SBS",
+  c(
+    1:6,
+    paste0(7, c("a", "b", "c", "d")),
+    8:9,
+    paste0(10, c("a", "b", "c", "d")),
+    11:16,
+    paste0(17, c("a", "b")),
+    18:60,
+    84:94
+  )
+)
+
+p2_prep <- dsig |>
+  filter(
+    Sig_group == "s2015",
+    Rank %in% c(1:3)
+  ) |>
+  left_join(dall |> select(portal_run_id, date_analysed_aest, SubjectID, LibraryID_tumor), by = "portal_run_id") |>
+  mutate(
+    sbj = as.character(glue("{SubjectID}_{LibraryID_tumor}")),
+    date = lubridate::as_datetime(date_analysed_aest, format = "%Y-%m-%d %H:%M:%S")
+  ) |>
+  select(
+    date, sbj, Sig_group, Rank, Signature, Contribution, RelFreq
+  ) |>
+  mutate(Signature = factor(Signature, levels = c(sig_order2015, sig_order2020)))
+p2 <- p2_prep |>
+  filter(!grepl("ALLOCATE", sbj)) |> # get rid of ALLOCATE subject
+  ggplot2::ggplot(aes(x = Contribution, y = sbj, fill = Signature, text = sbj)) +
+  ggplot2::geom_bar(position = "fill", stat = "identity") +
+  ggplot2::theme_bw(base_size = 7)
+# ggplot2::facet_wrap(~Sig_group, ncol = 1)
+
+plotly::ggplotly(p2, tooltip = c("x", "text", "fill"))
+```
+
 
 ## Metadata Summary {.tabset .tabset-pills}
 
 ### ProjectOwner
 
 ```{r ProjectOwner}
-count(d, ProjectOwner) |> dt_view(scroll_y = 400)
+count(dall, ProjectOwner) |> dt_view(scroll_y = 400)
 ```
 
 ### ProjectName
 
 ```{r ProjectName}
-count(d, ProjectName) |> dt_view(scroll_y = 400)
+count(dall, ProjectName) |> dt_view(scroll_y = 400)
 ```
 
 ### Type
 
 ```{r Type}
-count(d, Type) |> dt_view(scroll_y = 400)
+count(dall, Type) |> dt_view(scroll_y = 400)
 ```
 
 ### Workflow
 
 ```{r Workflow}
-count(d, Workflow) |> dt_view(scroll_y = 400)
+count(dall, Workflow) |> dt_view(scroll_y = 400)
+```
+
+### S3orGDS
+
+```{r s3orgds}
+count(dall, s3_or_gds) |> dt_view(scroll_y = 400)
 ```
 
 </div>

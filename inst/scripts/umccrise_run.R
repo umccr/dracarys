@@ -4,6 +4,7 @@ require(glue)
 require(dplyr)
 require(readr)
 
+#---- GDS ----#
 # read last 1000 umccrise runs from portal
 # 475 from 2022-01-24 until 2023-09-03, of which 449 Succeeded
 date1 <- "2023-09-04"
@@ -43,4 +44,31 @@ d <- pmeta |>
 d
 
 # final portal meta for umccrise runs
+# columns:
+# "id", "wfr_name", "wfr_id", "version", "end_status", "start", "end", "portal_run_id",
+# "SubjectID", "LibraryID_tumor", "LibraryID_normal", "SampleID_tumor", "SampleID_normal",
+# "gds_outdir_umccrise", "gds_indir_dragen_somatic", "gds_indir_dragen_germline", "gds_infile_genomes_tar"
 saveRDS(d, file = here(glue("nogit/umccrise/rds/portal_meta/{date1}_pmeta_final.rds")))
+
+#---- S3 ----#
+pat <- "qc_summary.tsv.gz"
+rows <- 1000
+d_s3_raw <- dracarys::s3_search(pat = pat, rows = rows)
+
+d_s3 <- d_s3_raw |>
+  arrange(desc(date_aest)) |>
+  mutate(
+    bname = basename(path),
+    dir1 = dirname(path), # path/to/dirA/cancer_report_tables
+    dir2 = basename(dirname(dir1)), # dirA
+    sbj_samp_lib = sub(".*__(.*)", "\\1", dir2),
+    SubjectID = sub("(SBJ[0-9]{5})_.*", "\\1", sbj_samp_lib),
+    SampleID_tumor = sub("SBJ.*?_(.*?)_.*", "\\1", sbj_samp_lib),
+    LibraryID_tumor = sub("SBJ.*?_.*?_(.*)", "\\1", sbj_samp_lib),
+    rerun = grepl("rerun", .data$LibraryID_tumor)
+  ) |>
+  select(dir1, SubjectID, LibraryID_tumor, SampleID_tumor, date = date_aest, rerun)
+
+date2 <- "2023-09-12"
+saveRDS(d_s3, file = here(glue("nogit/umccrise/rds/portal_meta/{date2}_pmeta_s3.rds")))
+# now we have S3 paths and metadata, so all we need is to generate presigned URLs and read the data
