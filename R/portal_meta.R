@@ -161,7 +161,7 @@ meta_rnasum <- function(pmeta, status = "Succeeded") {
   d |>
     dplyr::select(
       dplyr::all_of(meta_main_cols()),
-      -c("sequence_run", "batch_run"), # NA for rnasum
+      -dplyr::any_of(c("sequence_run", "batch_run")), # NA for rnasum
       SubjectID = "sbjid1",
       LibraryID = "libid1",
       SampleID = "rnasum_sample_name",
@@ -206,8 +206,8 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
       lane = purrr::map_int(.data$input, list("fastq_list_rows", "lane")),
       lane = as.character(.data$lane),
       # output
-      gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_alignment_output_directory", "location")),
-      gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location")),
+      gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_alignment_output_directory", "location"), .default = NA),
+      gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location"), .default = NA),
       SubjectID = sub("umccr__automated__wgs_alignment_qc__(SBJ.*)__L.*", "\\1", .data$wfr_name),
     )
   d |>
@@ -275,7 +275,7 @@ meta_wgs_tumor_normal <- function(pmeta, status = "Succeeded") {
   d |>
     dplyr::select(
       dplyr::all_of(meta_main_cols()),
-      -c("sequence_run", "batch_run"), # NA for wgs_tumor_normal
+      -dplyr::any_of(c("sequence_run", "batch_run")), # NA for wgs_tumor_normal
       "SubjectID",
       "LibraryID_tumor",
       "LibraryID_normal",
@@ -373,7 +373,7 @@ meta_umccrise <- function(pmeta, status = "Succeeded") {
   d |>
     dplyr::select(
       meta_main_cols(),
-      -c("sequence_run", "batch_run"), # NA for umccrise
+      -dplyr::any_of(c("sequence_run", "batch_run")), # NA for umccrise
       "SubjectID",
       "LibraryID_tumor",
       "LibraryID_normal",
@@ -448,7 +448,7 @@ meta_io_fromjson <- function(pmeta) {
 
 meta_main_cols <- function() {
   c(
-    "id", "wfr_name", "wfr_id", "version", "end_status", "sequence_run", "batch_run",
+    "id", "wfr_name", "wfr_id", "version", "end_status", # "sequence_run", "batch_run",
     "start", "end", "portal_run_id"
   )
 }
