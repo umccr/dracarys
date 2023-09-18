@@ -470,7 +470,7 @@ meta_main_cols <- function() {
 #' \dontrun{
 #' portal_meta_read(params = "&type_name=rnasum", rows = 4)
 #' }
-portal_meta_read <- function(pmeta = NULL, rows = 100, params = "") {
+portal_meta_read <- function(pmeta = NULL, rows = 100, params = "", account = "prod") {
   au_tz <- "Australia/Melbourne"
   utc_tz <- "UTC"
   if (!is.null(pmeta)) {
@@ -505,7 +505,7 @@ portal_meta_read <- function(pmeta = NULL, rows = 100, params = "") {
     }
   } # else pmeta is NULL, so read via portal API
 
-  base_url <- "https://api.portal.prod.umccr.org/iam"
+  base_url <- glue("https://api.portal.{account}.umccr.org/iam")
   url1 <- utils::URLencode(glue("{base_url}/workflows?rowsPerPage={rows}{params}"))
   awscurl_cmd <- glue(
     "awscurl '{url1}' ",
