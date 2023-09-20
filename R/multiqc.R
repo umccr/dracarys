@@ -71,6 +71,11 @@ multiqc_tidy_json <- function(j) {
     return(dracarys::multiqc_parse_raw(p))
   }
   d <- d |>
+    # get rid of duplicated elements - see umccr/dracarys#96
+    purrr::map(\(x) {
+      x[which(duplicated(names(x)))] <- NULL
+      x
+    }) |>
     dplyr::bind_rows(.id = "umccr_id") |>
     dplyr::mutate(
       config_creation_date = cdate,
