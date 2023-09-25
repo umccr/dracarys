@@ -9,7 +9,8 @@ gds_files_list_filter_relevant(
   token,
   pattern = NULL,
   include = NULL,
-  page_size = 100
+  page_size = 100,
+  regexes = DR_FILE_REGEX
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ gds_files_list_filter_relevant(
 
 \item{page_size}{Page size (def: 100).
 the GDS directory.}
+
+\item{regexes}{Tibble with regex and function name.}
 }
 \value{
 A tibble with type, bname, size, file_id, path, and presigned URL.

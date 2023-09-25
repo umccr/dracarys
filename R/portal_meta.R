@@ -462,6 +462,7 @@ meta_main_cols <- function() {
 #' @param params String containing additional params to pass to the `/workflows`
 #' endpoint, e.g. `'&type_name=bclconvert'`.
 #' @param pmeta Path to downloaded portal metadata file, or already parsed metadata tibble.
+#' @param account UMCCR portal account (one of "prod", "dev", "stg").
 #'
 #' @return A tibble of the results from the given query.
 #' @export
@@ -471,6 +472,7 @@ meta_main_cols <- function() {
 #' portal_meta_read(params = "&type_name=rnasum", rows = 4)
 #' }
 portal_meta_read <- function(pmeta = NULL, rows = 100, params = "", account = "prod") {
+  assertthat::assert_that(account %in% c("prod", "dev", "stg"))
   au_tz <- "Australia/Melbourne"
   utc_tz <- "UTC"
   if (!is.null(pmeta)) {

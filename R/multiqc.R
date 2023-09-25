@@ -128,7 +128,7 @@ multiqc_rename_cols <- function(d) {
     rename_vec <- purrr::set_names(m[["raw"]], m[["clean"]])
     d <- dplyr::rename(d, !!!rename_vec)
   }
-  return(d)
+  return(dplyr::distinct(d))
 }
 
 .multiqc_guess_workflow <- function(p) {

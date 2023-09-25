@@ -18,6 +18,10 @@ dragen_alignment	Mapped reads	reads_mapped_dragen
 dragen_alignment	Mapped reads pct	reads_mapped_pct_dragen
 dragen_alignment	Mapped reads adjusted for filtered mapping	reads_mapped_adjfilt_dragen
 dragen_alignment	Mapped reads adjusted for filtered mapping pct	reads_mapped_adjfilt_pct_dragen
+dragen_alignment	Mapped reads adjusted for excluded mapping	reads_mapped_adjexcl_dragen
+dragen_alignment	Mapped reads adjusted for excluded mapping pct	reads_mapped_adjexcl_pct_dragen
+dragen_alignment	Mapped reads adjusted for filtered and excluded mapping	reads_mapped_adjfiltexcl_dragen
+dragen_alignment	Mapped reads adjusted for filtered and excluded mapping pct	reads_mapped_adjfiltexcl_pct_dragen
 dragen_alignment	Mapped reads R1	reads_mapped_r1_dragen
 dragen_alignment	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
 dragen_alignment	Mapped reads R2	reads_mapped_r2_dragen
@@ -28,6 +32,12 @@ dragen_alignment	Unmapped reads	reads_unmapped_dragen
 dragen_alignment	Unmapped reads pct	reads_unmapped_pct_dragen
 dragen_alignment	Unmapped reads adjusted for filtered mapping	reads_unmapped_adjfilt_dragen
 dragen_alignment	Unmapped reads adjusted for filtered mapping pct	reads_unmapped_adjfilt_pct_dragen
+dragen_alignment	Unmapped reads adjusted for excluded mapping	reads_unmapped_adjexcl_dragen
+dragen_alignment	Unmapped reads adjusted for excluded mapping pct	reads_unmapped_adjexcl_pct_dragen
+dragen_alignment	Unmapped reads adjusted for filtered and excluded mapping	reads_unmapped_adjfiltexcl_dragen
+dragen_alignment	Unmapped reads adjusted for filtered and excluded mapping pct	reads_unmapped_adjfiltexcl_pct_dragen
+dragen_alignment	Reads mapping to multiple locations	reads_map_multiloc_dragen
+dragen_alignment	Reads mapping to multiple locations pct	reads_map_multiloc_pct_dragen
 dragen_alignment	Adjustment of reads matching non-reference decoys	reads_match_nonref_decoys_adj_dragen
 dragen_alignment	Adjustment of reads matching non-reference decoys pct	reads_match_nonref_decoys_adj_pct_dragen
 dragen_alignment	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
@@ -65,10 +75,19 @@ dragen_alignment	Mapped bases R1	bases_mapped_r1_dragen
 dragen_alignment	Mapped bases R1 pct	bases_mapped_r1_pct_dragen
 dragen_alignment	Mapped bases R2	bases_mapped_r2_dragen
 dragen_alignment	Mapped bases R2 pct	bases_mapped_r2_pct_dragen
+dragen_alignment	Mapped bases	bases_mapped_dragen
 dragen_alignment	Soft-clipped bases R1	bases_softclip_r1_dragen
 dragen_alignment	Soft-clipped bases R2	bases_softclip_r2_dragen
 dragen_alignment	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
 dragen_alignment	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_alignment	Hard-clipped bases R1	bases_hardclip_r1_dragen
+dragen_alignment	Hard-clipped bases R2	bases_hardclip_r2_dragen
+dragen_alignment	Hard-clipped bases R1 pct	bases_hardclip_r1_pct_dragen
+dragen_alignment	Hard-clipped bases R2 pct	bases_hardclip_r2_pct_dragen
+dragen_alignment	Soft-clipped bases	bases_softclip_dragen
+dragen_alignment	Soft-clipped bases pct	bases_softclip_pct_dragen
+dragen_alignment	Hard-clipped bases	bases_hardclip_dragen
+dragen_alignment	Hard-clipped bases pct	bases_hardclip_pct_dragen
 dragen_alignment	Mismatched bases R1	bases_mismatched_r1_dragen
 dragen_alignment	Mismatched bases R2	bases_mismatched_r2_dragen
 dragen_alignment	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
@@ -132,6 +151,7 @@ dragen_alignment	Aligned bases in genome	bases_aligned_in_genome_dragen
 dragen_alignment	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
 dragen_alignment	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
 dragen_alignment	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_alignment	Uniformity of coverage (PCT > 0.4*mean) over genome	cov_uniformity_over_genome_pct_gt04mean_dragen
 dragen_alignment	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
 dragen_alignment	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
 dragen_alignment	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
@@ -147,6 +167,27 @@ dragen_alignment	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_15x_
 dragen_alignment	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
 dragen_alignment	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
 dragen_alignment	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_alignment	PCT of genome with coverage [1500x: inf)	cov_genome_pct_1500x_inf_dragen
+dragen_alignment	PCT of genome with coverage [1000x: inf)	cov_genome_pct_1000x_inf_dragen
+dragen_alignment	PCT of genome with coverage [ 500x: inf)	cov_genome_pct_500x_inf_dragen
+dragen_alignment	PCT of genome with coverage [ 100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_alignment	PCT of genome with coverage [  50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_alignment	PCT of genome with coverage [  20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_alignment	PCT of genome with coverage [  15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_alignment	PCT of genome with coverage [  10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_alignment	PCT of genome with coverage [   3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_alignment	PCT of genome with coverage [   1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_alignment	PCT of genome with coverage [   0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_alignment	PCT of genome with coverage [1000x:1500x)	cov_genome_pct_1000x_1500x_dragen
+dragen_alignment	PCT of genome with coverage [ 500x:1000x)	cov_genome_pct_500x_1000x_dragen
+dragen_alignment	PCT of genome with coverage [ 100x: 500x)	cov_genome_pct_100x_500x_dragen
+dragen_alignment	PCT of genome with coverage [  50x: 100x)	cov_genome_pct_50x_100x_dragen
+dragen_alignment	PCT of genome with coverage [  20x:  50x)	cov_genome_pct_20x_50x_dragen
+dragen_alignment	PCT of genome with coverage [  15x:  20x)	cov_genome_pct_15x_20x_dragen
+dragen_alignment	PCT of genome with coverage [  10x:  15x)	cov_genome_pct_10x_15x_dragen
+dragen_alignment	PCT of genome with coverage [   3x:  10x)	cov_genome_pct_3x_10x_dragen
+dragen_alignment	PCT of genome with coverage [   1x:   3x)	cov_genome_pct_1x_3x_dragen
+dragen_alignment	PCT of genome with coverage [   0x:   1x)	cov_genome_pct_0x_1x_dragen
 dragen_alignment	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
 dragen_alignment	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
 dragen_alignment	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
@@ -176,6 +217,10 @@ dragen_somatic	Mapped reads	reads_mapped_dragen
 dragen_somatic	Mapped reads pct	reads_mapped_pct_dragen
 dragen_somatic	Mapped reads adjusted for filtered mapping	reads_mapped_adjfilt_dragen
 dragen_somatic	Mapped reads adjusted for filtered mapping pct	reads_mapped_adjfilt_pct_dragen
+dragen_somatic	Mapped reads adjusted for excluded mapping	reads_mapped_adjexcl_dragen
+dragen_somatic	Mapped reads adjusted for excluded mapping pct	reads_mapped_adjexcl_pct_dragen
+dragen_somatic	Mapped reads adjusted for filtered and excluded mapping	reads_mapped_adjfiltexcl_dragen
+dragen_somatic	Mapped reads adjusted for filtered and excluded mapping pct	reads_mapped_adjfiltexcl_pct_dragen
 dragen_somatic	Mapped reads R1	reads_mapped_r1_dragen
 dragen_somatic	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
 dragen_somatic	Mapped reads R2	reads_mapped_r2_dragen
@@ -186,6 +231,12 @@ dragen_somatic	Unmapped reads	reads_unmapped_dragen
 dragen_somatic	Unmapped reads pct	reads_unmapped_pct_dragen
 dragen_somatic	Unmapped reads adjusted for filtered mapping	reads_unmapped_adjfilt_dragen
 dragen_somatic	Unmapped reads adjusted for filtered mapping pct	reads_unmapped_adjfilt_pct_dragen
+dragen_somatic	Unmapped reads adjusted for excluded mapping	reads_unmapped_adjexcl_dragen
+dragen_somatic	Unmapped reads adjusted for excluded mapping pct	reads_unmapped_adjexcl_pct_dragen
+dragen_somatic	Unmapped reads adjusted for filtered and excluded mapping	reads_unmapped_adjfiltexcl_dragen
+dragen_somatic	Unmapped reads adjusted for filtered and excluded mapping pct	reads_unmapped_adjfiltexcl_pct_dragen
+dragen_somatic	Reads mapping to multiple locations	reads_map_multiloc_dragen
+dragen_somatic	Reads mapping to multiple locations pct	reads_map_multiloc_pct_dragen
 dragen_somatic	Adjustment of reads matching non-reference decoys	reads_match_nonref_decoys_adj_dragen
 dragen_somatic	Adjustment of reads matching non-reference decoys pct	reads_match_nonref_decoys_adj_pct_dragen
 dragen_somatic	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
@@ -227,6 +278,14 @@ dragen_somatic	Soft-clipped bases R1	bases_softclip_r1_dragen
 dragen_somatic	Soft-clipped bases R2	bases_softclip_r2_dragen
 dragen_somatic	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
 dragen_somatic	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_somatic	Hard-clipped bases R1	bases_hardclip_r1_dragen
+dragen_somatic	Hard-clipped bases R2	bases_hardclip_r2_dragen
+dragen_somatic	Hard-clipped bases R1 pct	bases_hardclip_r1_pct_dragen
+dragen_somatic	Hard-clipped bases R2 pct	bases_hardclip_r2_pct_dragen
+dragen_somatic	Soft-clipped bases	bases_softclip_dragen
+dragen_somatic	Soft-clipped bases pct	bases_softclip_pct_dragen
+dragen_somatic	Hard-clipped bases	bases_hardclip_dragen
+dragen_somatic	Hard-clipped bases pct	bases_hardclip_pct_dragen
 dragen_somatic	Mismatched bases R1	bases_mismatched_r1_dragen
 dragen_somatic	Mismatched bases R2	bases_mismatched_r2_dragen
 dragen_somatic	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
@@ -290,6 +349,7 @@ dragen_somatic	Aligned bases in genome	bases_aligned_in_genome_dragen
 dragen_somatic	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
 dragen_somatic	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
 dragen_somatic	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_somatic	Uniformity of coverage (PCT > 0.4*mean) over genome	cov_uniformity_over_genome_pct_gt04mean_dragen
 dragen_somatic	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
 dragen_somatic	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
 dragen_somatic	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
@@ -305,6 +365,27 @@ dragen_somatic	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_15x_dr
 dragen_somatic	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
 dragen_somatic	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
 dragen_somatic	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_somatic	PCT of genome with coverage [1500x: inf)	cov_genome_pct_1500x_inf_dragen
+dragen_somatic	PCT of genome with coverage [1000x: inf)	cov_genome_pct_1000x_inf_dragen
+dragen_somatic	PCT of genome with coverage [ 500x: inf)	cov_genome_pct_500x_inf_dragen
+dragen_somatic	PCT of genome with coverage [ 100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_somatic	PCT of genome with coverage [  50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_somatic	PCT of genome with coverage [  20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_somatic	PCT of genome with coverage [  15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_somatic	PCT of genome with coverage [  10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_somatic	PCT of genome with coverage [   3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_somatic	PCT of genome with coverage [   1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_somatic	PCT of genome with coverage [   0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_somatic	PCT of genome with coverage [1000x:1500x)	cov_genome_pct_1000x_1500x_dragen
+dragen_somatic	PCT of genome with coverage [ 500x:1000x)	cov_genome_pct_500x_1000x_dragen
+dragen_somatic	PCT of genome with coverage [ 100x: 500x)	cov_genome_pct_100x_500x_dragen
+dragen_somatic	PCT of genome with coverage [  50x: 100x)	cov_genome_pct_50x_100x_dragen
+dragen_somatic	PCT of genome with coverage [  20x:  50x)	cov_genome_pct_20x_50x_dragen
+dragen_somatic	PCT of genome with coverage [  15x:  20x)	cov_genome_pct_15x_20x_dragen
+dragen_somatic	PCT of genome with coverage [  10x:  15x)	cov_genome_pct_10x_15x_dragen
+dragen_somatic	PCT of genome with coverage [   3x:  10x)	cov_genome_pct_3x_10x_dragen
+dragen_somatic	PCT of genome with coverage [   1x:   3x)	cov_genome_pct_1x_3x_dragen
+dragen_somatic	PCT of genome with coverage [   0x:   1x)	cov_genome_pct_0x_1x_dragen
 dragen_somatic	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
 dragen_somatic	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
 dragen_somatic	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
@@ -383,6 +464,10 @@ dragen_transcriptome	Mapped reads	reads_mapped_dragen
 dragen_transcriptome	Mapped reads pct	reads_mapped_pct_dragen
 dragen_transcriptome	Mapped reads adjusted for filtered mapping	reads_mapped_adjfilt_dragen
 dragen_transcriptome	Mapped reads adjusted for filtered mapping pct	reads_mapped_adjfilt_pct_dragen
+dragen_transcriptome	Mapped reads adjusted for excluded mapping	reads_mapped_adjexcl_dragen
+dragen_transcriptome	Mapped reads adjusted for excluded mapping pct	reads_mapped_adjexcl_pct_dragen
+dragen_transcriptome	Mapped reads adjusted for filtered and excluded mapping	reads_mapped_adjfiltexcl_dragen
+dragen_transcriptome	Mapped reads adjusted for filtered and excluded mapping pct	reads_mapped_adjfiltexcl_pct_dragen
 dragen_transcriptome	Mapped reads R1	reads_mapped_r1_dragen
 dragen_transcriptome	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
 dragen_transcriptome	Mapped reads R2	reads_mapped_r2_dragen
@@ -393,6 +478,12 @@ dragen_transcriptome	Unmapped reads	reads_unmapped_dragen
 dragen_transcriptome	Unmapped reads pct	reads_unmapped_pct_dragen
 dragen_transcriptome	Unmapped reads adjusted for filtered mapping	reads_unmapped_adjfilt_dragen
 dragen_transcriptome	Unmapped reads adjusted for filtered mapping pct	reads_unmapped_adjfilt_pct_dragen
+dragen_transcriptome	Unmapped reads adjusted for excluded mapping	reads_unmapped_adjexcl_dragen
+dragen_transcriptome	Unmapped reads adjusted for excluded mapping pct	reads_unmapped_adjexcl_pct_dragen
+dragen_transcriptome	Unmapped reads adjusted for filtered and excluded mapping	reads_unmapped_adjfiltexcl_dragen
+dragen_transcriptome	Unmapped reads adjusted for filtered and excluded mapping pct	reads_unmapped_adjfiltexcl_pct_dragen
+dragen_transcriptome	Reads mapping to multiple locations	reads_map_multiloc_dragen
+dragen_transcriptome	Reads mapping to multiple locations pct	reads_map_multiloc_pct_dragen
 dragen_transcriptome	Adjustment of reads matching non-reference decoys	reads_match_nonref_decoys_adj_dragen
 dragen_transcriptome	Adjustment of reads matching non-reference decoys pct	reads_match_nonref_decoys_adj_pct_dragen
 dragen_transcriptome	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
@@ -434,6 +525,14 @@ dragen_transcriptome	Soft-clipped bases R1	bases_softclip_r1_dragen
 dragen_transcriptome	Soft-clipped bases R2	bases_softclip_r2_dragen
 dragen_transcriptome	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
 dragen_transcriptome	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_transcriptome	Hard-clipped bases R1	bases_hardclip_r1_dragen
+dragen_transcriptome	Hard-clipped bases R2	bases_hardclip_r2_dragen
+dragen_transcriptome	Hard-clipped bases R1 pct	bases_hardclip_r1_pct_dragen
+dragen_transcriptome	Hard-clipped bases R2 pct	bases_hardclip_r2_pct_dragen
+dragen_transcriptome	Soft-clipped bases	bases_softclip_dragen
+dragen_transcriptome	Soft-clipped bases pct	bases_softclip_pct_dragen
+dragen_transcriptome	Hard-clipped bases	bases_hardclip_dragen
+dragen_transcriptome	Hard-clipped bases pct	bases_hardclip_pct_dragen
 dragen_transcriptome	Mismatched bases R1	bases_mismatched_r1_dragen
 dragen_transcriptome	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
 dragen_transcriptome	Mismatched bases R2 pct	bases_mismatched_r2_pct_dragen
@@ -468,6 +567,7 @@ dragen_transcriptome	Aligned bases in genome	bases_aligned_in_genome_dragen
 dragen_transcriptome	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
 dragen_transcriptome	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
 dragen_transcriptome	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_transcriptome	Uniformity of coverage (PCT > 0.4*mean) over genome	cov_uniformity_over_genome_pct_gt04mean_dragen
 dragen_transcriptome	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
 dragen_transcriptome	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
 dragen_transcriptome	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
@@ -483,6 +583,27 @@ dragen_transcriptome	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_
 dragen_transcriptome	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
 dragen_transcriptome	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
 dragen_transcriptome	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_transcriptome	PCT of genome with coverage [1500x: inf)	cov_genome_pct_1500x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [1000x: inf)	cov_genome_pct_1000x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [ 500x: inf)	cov_genome_pct_500x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [ 100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [  50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [  20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [  15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [  10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [   3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [   1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [   0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_transcriptome	PCT of genome with coverage [1000x:1500x)	cov_genome_pct_1000x_1500x_dragen
+dragen_transcriptome	PCT of genome with coverage [ 500x:1000x)	cov_genome_pct_500x_1000x_dragen
+dragen_transcriptome	PCT of genome with coverage [ 100x: 500x)	cov_genome_pct_100x_500x_dragen
+dragen_transcriptome	PCT of genome with coverage [  50x: 100x)	cov_genome_pct_50x_100x_dragen
+dragen_transcriptome	PCT of genome with coverage [  20x:  50x)	cov_genome_pct_20x_50x_dragen
+dragen_transcriptome	PCT of genome with coverage [  15x:  20x)	cov_genome_pct_15x_20x_dragen
+dragen_transcriptome	PCT of genome with coverage [  10x:  15x)	cov_genome_pct_10x_15x_dragen
+dragen_transcriptome	PCT of genome with coverage [   3x:  10x)	cov_genome_pct_3x_10x_dragen
+dragen_transcriptome	PCT of genome with coverage [   1x:   3x)	cov_genome_pct_1x_3x_dragen
+dragen_transcriptome	PCT of genome with coverage [   0x:   1x)	cov_genome_pct_0x_1x_dragen
 dragen_transcriptome	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
 dragen_transcriptome	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
 dragen_transcriptome	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
@@ -518,6 +639,10 @@ dragen_umccrise	Mapped reads	reads_mapped_dragen
 dragen_umccrise	Mapped reads pct	reads_mapped_pct_dragen
 dragen_umccrise	Mapped reads adjusted for filtered mapping	reads_mapped_adjfilt_dragen
 dragen_umccrise	Mapped reads adjusted for filtered mapping pct	reads_mapped_adjfilt_pct_dragen
+dragen_umccrise	Mapped reads adjusted for excluded mapping	reads_mapped_adjexcl_dragen
+dragen_umccrise	Mapped reads adjusted for excluded mapping pct	reads_mapped_adjexcl_pct_dragen
+dragen_umccrise	Mapped reads adjusted for filtered and excluded mapping	reads_mapped_adjfiltexcl_dragen
+dragen_umccrise	Mapped reads adjusted for filtered and excluded mapping pct	reads_mapped_adjfiltexcl_pct_dragen
 dragen_umccrise	Mapped reads R1	reads_mapped_r1_dragen
 dragen_umccrise	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
 dragen_umccrise	Mapped reads R2	reads_mapped_r2_dragen
@@ -528,6 +653,12 @@ dragen_umccrise	Unmapped reads	reads_unmapped_dragen
 dragen_umccrise	Unmapped reads pct	reads_unmapped_pct_dragen
 dragen_umccrise	Unmapped reads adjusted for filtered mapping	reads_unmapped_adjfilt_dragen
 dragen_umccrise	Unmapped reads adjusted for filtered mapping pct	reads_unmapped_adjfilt_pct_dragen
+dragen_umccrise	Unmapped reads adjusted for excluded mapping	reads_unmapped_adjexcl_dragen
+dragen_umccrise	Unmapped reads adjusted for excluded mapping pct	reads_unmapped_adjexcl_pct_dragen
+dragen_umccrise	Unmapped reads adjusted for filtered and excluded mapping	reads_unmapped_adjfiltexcl_dragen
+dragen_umccrise	Unmapped reads adjusted for filtered and excluded mapping pct	reads_unmapped_adjfiltexcl_pct_dragen
+dragen_umccrise	Reads mapping to multiple locations	reads_map_multiloc_dragen
+dragen_umccrise	Reads mapping to multiple locations pct	reads_map_multiloc_pct_dragen
 dragen_umccrise	Adjustment of reads matching non-reference decoys	reads_match_nonref_decoys_adj_dragen
 dragen_umccrise	Adjustment of reads matching non-reference decoys pct	reads_match_nonref_decoys_adj_pct_dragen
 dragen_umccrise	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
@@ -565,10 +696,19 @@ dragen_umccrise	Mapped bases R1	bases_mapped_r1_dragen
 dragen_umccrise	Mapped bases R1 pct	bases_mapped_r1_pct_dragen
 dragen_umccrise	Mapped bases R2	bases_mapped_r2_dragen
 dragen_umccrise	Mapped bases R2 pct	bases_mapped_r2_pct_dragen
+dragen_umccrise	Mapped bases	bases_mapped_dragen
 dragen_umccrise	Soft-clipped bases R1	bases_softclip_r1_dragen
 dragen_umccrise	Soft-clipped bases R2	bases_softclip_r2_dragen
 dragen_umccrise	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
 dragen_umccrise	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_umccrise	Hard-clipped bases R1	bases_hardclip_r1_dragen
+dragen_umccrise	Hard-clipped bases R2	bases_hardclip_r2_dragen
+dragen_umccrise	Hard-clipped bases R1 pct	bases_hardclip_r1_pct_dragen
+dragen_umccrise	Hard-clipped bases R2 pct	bases_hardclip_r2_pct_dragen
+dragen_umccrise	Soft-clipped bases	bases_softclip_dragen
+dragen_umccrise	Soft-clipped bases pct	bases_softclip_pct_dragen
+dragen_umccrise	Hard-clipped bases	bases_hardclip_dragen
+dragen_umccrise	Hard-clipped bases pct	bases_hardclip_pct_dragen
 dragen_umccrise	Mismatched bases R1	bases_mismatched_r1_dragen
 dragen_umccrise	Mismatched bases R2	bases_mismatched_r2_dragen
 dragen_umccrise	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
@@ -632,6 +772,7 @@ dragen_umccrise	Aligned bases in genome	bases_aligned_in_genome_dragen
 dragen_umccrise	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
 dragen_umccrise	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
 dragen_umccrise	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_umccrise	Uniformity of coverage (PCT > 0.4*mean) over genome	cov_uniformity_over_genome_pct_gt04mean_dragen
 dragen_umccrise	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
 dragen_umccrise	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
 dragen_umccrise	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
@@ -647,6 +788,27 @@ dragen_umccrise	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_15x_d
 dragen_umccrise	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
 dragen_umccrise	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
 dragen_umccrise	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_umccrise	PCT of genome with coverage [1500x: inf)	cov_genome_pct_1500x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [1000x: inf)	cov_genome_pct_1000x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [ 500x: inf)	cov_genome_pct_500x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [ 100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [  50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [  20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [  15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [  10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [   3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [   1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [   0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_umccrise	PCT of genome with coverage [1000x:1500x)	cov_genome_pct_1000x_1500x_dragen
+dragen_umccrise	PCT of genome with coverage [ 500x:1000x)	cov_genome_pct_500x_1000x_dragen
+dragen_umccrise	PCT of genome with coverage [ 100x: 500x)	cov_genome_pct_100x_500x_dragen
+dragen_umccrise	PCT of genome with coverage [  50x: 100x)	cov_genome_pct_50x_100x_dragen
+dragen_umccrise	PCT of genome with coverage [  20x:  50x)	cov_genome_pct_20x_50x_dragen
+dragen_umccrise	PCT of genome with coverage [  15x:  20x)	cov_genome_pct_15x_20x_dragen
+dragen_umccrise	PCT of genome with coverage [  10x:  15x)	cov_genome_pct_10x_15x_dragen
+dragen_umccrise	PCT of genome with coverage [   3x:  10x)	cov_genome_pct_3x_10x_dragen
+dragen_umccrise	PCT of genome with coverage [   1x:   3x)	cov_genome_pct_1x_3x_dragen
+dragen_umccrise	PCT of genome with coverage [   0x:   1x)	cov_genome_pct_0x_1x_dragen
 dragen_umccrise	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
 dragen_umccrise	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
 dragen_umccrise	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
@@ -805,6 +967,7 @@ dragen_umccrise	viral_content	viral_content_umccrise
 dragen_umccrise	viral_integration_sites	viral_integration_sites_umccrise
 dragen_umccrise	germline	germline_umccrise
 dragen_umccrise	germline_predispose	germline_predispose_umccrise
+dragen_umccrise	avg_gc_content_percent	gc_pct_dragen
 dragen_ctdna	umccr_id	umccr_id
 dragen_ctdna	umccr_workflow	umccr_workflow
 dragen_ctdna	config_creation_date	date_multiqc
@@ -892,6 +1055,7 @@ dragen_ctdna	Aligned bases in genome	bases_aligned_in_genome_dragen
 dragen_ctdna	Aligned bases in genome pct	bases_aligned_in_genome_pct_dragen
 dragen_ctdna	Average alignment coverage over genome	cov_alignment_avg_over_genome_dragen
 dragen_ctdna	Uniformity of coverage (PCT > 0.2*mean) over genome	cov_uniformity_over_genome_pct_gt02mean_dragen
+dragen_ctdna	Uniformity of coverage (PCT > 0.4*mean) over genome	cov_uniformity_over_genome_pct_gt04mean_dragen
 dragen_ctdna	PCT of genome with coverage [100x: inf)	cov_genome_pct_100x_inf_dragen
 dragen_ctdna	PCT of genome with coverage [ 50x: inf)	cov_genome_pct_50x_inf_dragen
 dragen_ctdna	PCT of genome with coverage [ 20x: inf)	cov_genome_pct_20x_inf_dragen
@@ -907,6 +1071,27 @@ dragen_ctdna	PCT of genome with coverage [ 10x: 15x)	cov_genome_pct_10x_15x_drag
 dragen_ctdna	PCT of genome with coverage [  3x: 10x)	cov_genome_pct_3x_10x_dragen
 dragen_ctdna	PCT of genome with coverage [  1x:  3x)	cov_genome_pct_1x_3x_dragen
 dragen_ctdna	PCT of genome with coverage [  0x:  1x)	cov_genome_pct_0x_1x_dragen
+dragen_ctdna	PCT of genome with coverage [1500x: inf)	cov_genome_pct_1500x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [1000x: inf)	cov_genome_pct_1000x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [ 500x: inf)	cov_genome_pct_500x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [ 100x: inf)	cov_genome_pct_100x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [  50x: inf)	cov_genome_pct_50x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [  20x: inf)	cov_genome_pct_20x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [  15x: inf)	cov_genome_pct_15x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [  10x: inf)	cov_genome_pct_10x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [   3x: inf)	cov_genome_pct_3x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [   1x: inf)	cov_genome_pct_1x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [   0x: inf)	cov_genome_pct_0x_inf_dragen
+dragen_ctdna	PCT of genome with coverage [1000x:1500x)	cov_genome_pct_1000x_1500x_dragen
+dragen_ctdna	PCT of genome with coverage [ 500x:1000x)	cov_genome_pct_500x_1000x_dragen
+dragen_ctdna	PCT of genome with coverage [ 100x: 500x)	cov_genome_pct_100x_500x_dragen
+dragen_ctdna	PCT of genome with coverage [  50x: 100x)	cov_genome_pct_50x_100x_dragen
+dragen_ctdna	PCT of genome with coverage [  20x:  50x)	cov_genome_pct_20x_50x_dragen
+dragen_ctdna	PCT of genome with coverage [  15x:  20x)	cov_genome_pct_15x_20x_dragen
+dragen_ctdna	PCT of genome with coverage [  10x:  15x)	cov_genome_pct_10x_15x_dragen
+dragen_ctdna	PCT of genome with coverage [   3x:  10x)	cov_genome_pct_3x_10x_dragen
+dragen_ctdna	PCT of genome with coverage [   1x:   3x)	cov_genome_pct_1x_3x_dragen
+dragen_ctdna	PCT of genome with coverage [   0x:   1x)	cov_genome_pct_0x_1x_dragen
 dragen_ctdna	Average chr X coverage over genome	cov_avg_x_over_genome_dragen
 dragen_ctdna	Average chr Y coverage over genome	cov_avg_y_over_genome_dragen
 dragen_ctdna	Average mitochondrial coverage over genome	cov_avg_mt_over_genome_dragen
@@ -928,6 +1113,14 @@ dragen_ctdna	Soft-clipped bases R1	bases_softclip_r1_dragen
 dragen_ctdna	Soft-clipped bases R2	bases_softclip_r2_dragen
 dragen_ctdna	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
 dragen_ctdna	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_ctdna	Hard-clipped bases R1	bases_hardclip_r1_dragen
+dragen_ctdna	Hard-clipped bases R2	bases_hardclip_r2_dragen
+dragen_ctdna	Hard-clipped bases R1 pct	bases_hardclip_r1_pct_dragen
+dragen_ctdna	Hard-clipped bases R2 pct	bases_hardclip_r2_pct_dragen
+dragen_ctdna	Soft-clipped bases	bases_softclip_dragen
+dragen_ctdna	Soft-clipped bases pct	bases_softclip_pct_dragen
+dragen_ctdna	Hard-clipped bases	bases_hardclip_dragen
+dragen_ctdna	Hard-clipped bases pct	bases_hardclip_pct_dragen
 dragen_ctdna	Number of reads	reads_umi_dragen
 dragen_ctdna	Number of reads with valid or correctable UMIs	reads_validcorrectable_umi_dragen
 dragen_ctdna	Number of reads with valid or correctable UMIs pct	reads_validcorrectable_pct_umi_dragen
