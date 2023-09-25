@@ -8,15 +8,16 @@
 #' @param include Use PresignedUrl to include presigned URLs to all files within
 #' @param page_size Page size (def: 100).
 #' the GDS directory.
+#' @param regexes Tibble with regex and function name.
 #'
 #' @return A tibble with type, bname, size, file_id, path, and presigned URL.
 #' @export
-gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, include = NULL, page_size = 100) {
+gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, include = NULL, page_size = 100, regexes = DR_FILE_REGEX) {
   pattern <- pattern %||% ".*" # keep all recognisable files by default
   cols_sel <- c("type", "bname", "size", "file_id", "path", "presigned_url")
   d <- dracarys::gds_files_list(gdsdir, token, include = include, page_size = page_size) |>
     dplyr::rowwise() |>
-    dplyr::mutate(type = purrr::map_chr(.data$bname, match_regex)) |>
+    dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
     dplyr::ungroup() |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
     dplyr::select(dplyr::any_of(cols_sel))

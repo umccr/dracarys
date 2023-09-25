@@ -4,7 +4,7 @@
 \alias{portal_meta_read}
 \title{Read ICA Workflows Metadata via Portal API}
 \usage{
-portal_meta_read(pmeta = NULL, rows = 100, params = "")
+portal_meta_read(pmeta = NULL, rows = 100, params = "", account = "prod")
 }
 \arguments{
 \item{pmeta}{Path to downloaded portal metadata file, or already parsed metadata tibble.}
@@ -13,6 +13,8 @@ portal_meta_read(pmeta = NULL, rows = 100, params = "")
 
 \item{params}{String containing additional params to pass to the \verb{/workflows}
 endpoint, e.g. \code{'&type_name=bclconvert'}.}
+
+\item{account}{UMCCR portal account (one of "prod", "dev", "stg").}
 }
 \value{
 A tibble of the results from the given query.
