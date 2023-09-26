@@ -528,3 +528,33 @@ portal_meta_read <- function(pmeta = NULL, rows = 100, params = "", account = "p
       end = lubridate::with_tz(.data$end, tz = au_tz)
     )
 }
+
+#' Read ICA Workflows Metadata via Athena
+#'
+#' Reads the ICA Workflows Metadata for the given workflow run IDs.
+#'
+#' @param wfrids Character vector of wfr IDs to query.
+#'
+#' @return Tibble with a row per wfr ID.
+#'
+#' @examples
+#' \dontrun{
+#' wfrids <- c("wfr.1e764ca00e7a43a69e2424f250a34868")
+#' portal_meta_read_athena(wfrids)
+#' }
+#' @export
+portal_meta_read_athena <- function(wfrids = NULL) {
+  assertthat::assert_that(!is.null(wfrids), all(grepl("^wfr\\.", wfrids)))
+  RAthena::RAthena_options(clear_s3_resource = FALSE)
+  con <- DBI::dbConnect(
+    RAthena::athena(),
+    work_group = "data_portal",
+    rstudio_conn_tab = FALSE
+  )
+  wfrids_quote <- paste(shQuote(wfrids), collapse = ", ")
+  q1 <- glue(
+    'SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" where wfr_id in ({wfrids_quote});'
+  )
+  RAthena::dbGetQuery(con, q1) |>
+    tibble::as_tibble()
+}
