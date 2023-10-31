@@ -111,10 +111,11 @@ get_sbj_url <- function(x, colour = NULL, account = "") {
 ```
 
 ```{r vars}
+# Get metadata for workflows run within the date range
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2023-09-15T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2023-09-18T23:59:59", format = fmt1)
+date_start <- as.POSIXct("2023-10-28T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2023-10-29T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -130,7 +131,7 @@ lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-# pmeta_raw <- dracarys::portal_meta_read(rows = 80, account = "stg")
+# pmeta_raw <- dracarys::portal_meta_read(rows = 50, account = "prod")
 # saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
 pmeta <- pmeta_raw |>

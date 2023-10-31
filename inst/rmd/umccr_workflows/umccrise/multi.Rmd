@@ -183,7 +183,7 @@ dat_s3 <- dat_s3_raw |>
     hash256 = substr(hash256, 1, 8),
     portal_run_id = glue("fake.{date_dir}{hash256}")
   ) |>
-  select(-c(um_dir, date_dir, hash256, SampleID_tumor))
+  select(-c(date_dir, hash256, SampleID_tumor))
 dat_gds <- fs::dir_ls(here("nogit/umccrise/rds/results"), regexp = "x[1-5]{1}.rds") |>
   purrr::map(readr::read_rds) |>
   bind_rows()
@@ -302,7 +302,7 @@ cols_select1 <- c(
   "qc_status_hmf", "sex_hmf", "purity_hmf", "ploidy_hmf", "msi_hmf",
   "msi_mb_hmf", "contamination_hmf",
   "deleted_genes_hmf", "tmb_hmf", "tml_hmf", "wgd_hmf", "hypermutated",
-  "bpi_enabled", "portal_run_id", "portal_url"
+  "bpi_enabled", "portal_run_id", "portal_url", "um_dir"
 )
 # signatures
 dsig <- bind_rows(list(s2015 = sigs_2015, s2020 = sigs_2020), .id = "Sig_group") |>
