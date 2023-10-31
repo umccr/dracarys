@@ -8,7 +8,7 @@
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_bcl_convert(pmeta))
 #' @testexamples
-#' expect_equal(sum(!is.na(m$topup_or_rerun)), 22)
+#' expect_equal(sum(!is.na(m$topup_or_rerun)), 1)
 #' expect_equal(length(unique(m$portal_run_id)), 4)
 #' @export
 meta_bcl_convert <- function(pmeta, status = "Succeeded") {
@@ -128,8 +128,8 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_rnasum(pmeta))
 #' @testexamples
-#' expect_equal(m$rnasum_dataset[1], "LAML")
-#' expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230277.RNAseq_report.html")
+#' expect_equal(m$rnasum_dataset[1], "PANCAN")
+#' expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230467.RNAseq_report.html")
 #' @export
 meta_rnasum <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
@@ -397,7 +397,7 @@ meta_umccrise <- function(pmeta, status = "Succeeded") {
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_tso_ctdna_tumor_only(pmeta))
 #' @testexamples
-#' expect_equal(length(unique(m$portal_run_id)), 4)
+#' expect_equal(length(unique(m$portal_run_id)), 2)
 #' @export
 meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
   # retrieve workflow runs with the given type and status
@@ -435,6 +435,18 @@ meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
     )
 }
 
+#' Metadata for sash workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_sash(pmeta))
+#' @testexamples
+#' expect_equal(all(c("s3_indir_oncoanalyser", "LibraryID_tumor", "s3_outdir_sash") %in% colnames(m)), TRUE)
+#' @export
 meta_sash <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
   type <- "sash"
@@ -477,6 +489,18 @@ meta_sash <- function(pmeta, status = "Succeeded") {
     )
 }
 
+#' Metadata for oncoanalyser_wgs workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_oncoanalyser_wgs(pmeta))
+#' @testexamples
+#' expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor", "gds_bam_tumor") %in% colnames(m)), TRUE)
+#' @export
 meta_oncoanalyser_wgs <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
   type <- "oncoanalyser_wgs"
@@ -517,6 +541,18 @@ meta_oncoanalyser_wgs <- function(pmeta, status = "Succeeded") {
     )
 }
 
+#' Metadata for oncoanalyser_wgts_existing_both workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_oncoanalyser_wgts_existing_both(pmeta))
+#' @testexamples
+#' expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor_wts", "gds_bam_tumor_wgs") %in% colnames(m)), TRUE)
+#' @export
 meta_oncoanalyser_wgts_existing_both <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
   type <- "oncoanalyser_wgts_existing_both"
@@ -552,16 +588,33 @@ meta_oncoanalyser_wgts_existing_both <- function(pmeta, status = "Succeeded") {
     dplyr::select(
       meta_main_cols(),
       "SubjectID",
-      "LibraryID_tumor",
-      "LibraryID_normal",
-      "SampleID_tumor",
-      "SampleID_normal",
+      "LibraryID_tumor_wgs",
+      "LibraryID_normal_wgs",
+      "LibraryID_tumor_wts",
+      "SampleID_tumor_wgs",
+      "SampleID_normal_wgs",
+      "SampleID_tumor_wts",
       "s3_outdir_oncoanalyser",
-      "gds_bam_tumor",
-      "gds_bam_normal"
+      "s3_indir_oncoanalyser_wgs",
+      "s3_indir_oncoanalyser_wts",
+      "gds_bam_tumor_wgs",
+      "gds_bam_normal_wgs",
+      "s3_bam_tumor_wts"
     )
 }
 
+#' Metadata for oncoanalyser_wts workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_oncoanalyser_wts(pmeta))
+#' @testexamples
+#' expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor", "s3_bam_tumor") %in% colnames(m)), TRUE)
+#' @export
 meta_oncoanalyser_wts <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
   type <- "oncoanalyser_wts"
