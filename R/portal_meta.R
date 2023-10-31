@@ -435,6 +435,92 @@ meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
     )
 }
 
+meta_sash <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  type <- "sash"
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == type,
+      .data$end_status %in% status
+    )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
+  # grab libid/sampleid from the input meta, and outdir from the output meta
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      # input
+      SubjectID = purrr::map_chr(.data$input, "subject_id", .default = NA),
+      SampleID_tumor = purrr::map_chr(.data$input, "tumor_sample_id", .default = NA),
+      SampleID_normal = purrr::map_chr(.data$input, "normal_sample_id", .default = NA),
+      LibraryID_tumor = purrr::map_chr(.data$input, "tumor_library_id", .default = NA),
+      LibraryID_normal = purrr::map_chr(.data$input, "normal_library_id", .default = NA),
+      gds_indir_dragen_somatic = purrr::map_chr(.data$input, "dragen_somatic_dir", .default = NA),
+      gds_indir_dragen_germline = purrr::map_chr(.data$input, "dragen_germline_dir", .default = NA),
+      s3_indir_oncoanalyser = purrr::map_chr(.data$input, "oncoanalyser_dir", .default = NA),
+      # output
+      s3_outdir_sash = purrr::map_chr(.data$output, "output_directory", .default = NA)
+    )
+  d |>
+    dplyr::select(
+      meta_main_cols(),
+      -dplyr::any_of(c("sequence_run_id", "batch_run_id")), # NA for sash
+      "SubjectID",
+      "LibraryID_tumor",
+      "LibraryID_normal",
+      "SampleID_tumor",
+      "SampleID_normal",
+      "s3_outdir_sash",
+      "s3_indir_oncoanalyser",
+      "gds_indir_dragen_somatic",
+      "gds_indir_dragen_germline"
+    )
+}
+
+meta_oncoanalyser_wgs <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  type <- "oncoanalyser_wgs"
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == type,
+      .data$end_status %in% status
+    )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
+  # grab libid/sampleid from the input meta, and outdir from the output meta
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      # input
+      SubjectID = purrr::map_chr(.data$input, "subject_id", .default = NA),
+      SampleID_tumor = purrr::map_chr(.data$input, "tumor_wgs_sample_id", .default = NA),
+      SampleID_normal = purrr::map_chr(.data$input, "normal_wgs_sample_id", .default = NA),
+      LibraryID_tumor = purrr::map_chr(.data$input, "tumor_wgs_library_id", .default = NA),
+      LibraryID_normal = purrr::map_chr(.data$input, "normal_wgs_library_id", .default = NA),
+      gds_bam_tumor = purrr::map_chr(.data$input, "tumor_wgs_bam", .default = NA),
+      gds_bam_normal = purrr::map_chr(.data$input, "normal_wgs_bam", .default = NA),
+      mode = purrr::map_chr(.data$input, "mode", .default = NA),
+      # output
+      s3_outdir_oncoanalyser = purrr::map_chr(.data$output, "output_directory", .default = NA)
+    )
+  d |>
+    dplyr::select(
+      meta_main_cols(),
+      -dplyr::any_of(c("sequence_run_id", "batch_run_id")), # NA for sash
+      "SubjectID",
+      "LibraryID_tumor",
+      "LibraryID_normal",
+      "SampleID_tumor",
+      "SampleID_normal",
+      "s3_outdir_oncoanalyser",
+      "gds_bam_tumor",
+      "gds_bam_normal"
+    )
+}
+
+
 meta_io_fromjson <- function(pmeta) {
   pmeta <- portal_meta_read(pmeta)
   pmeta |>
@@ -554,6 +640,22 @@ portal_meta_read_athena <- function(wfrids = NULL) {
   wfrids_quote <- paste(shQuote(wfrids), collapse = ", ")
   q1 <- glue(
     'SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" where wfr_id in ({wfrids_quote});'
+  )
+  RAthena::dbGetQuery(con, q1) |>
+    tibble::as_tibble()
+}
+
+
+portal_meta_read_athena_tmp <- function(x = NULL) {
+  assertthat::assert_that(!is.null(x))
+  RAthena::RAthena_options(clear_s3_resource = FALSE)
+  con <- DBI::dbConnect(
+    RAthena::athena(),
+    work_group = "data_portal",
+    rstudio_conn_tab = FALSE
+  )
+  q1 <- glue(
+    'SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" {x}'
   )
   RAthena::dbGetQuery(con, q1) |>
     tibble::as_tibble()
