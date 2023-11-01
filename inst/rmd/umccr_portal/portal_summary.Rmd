@@ -115,7 +115,7 @@ get_sbj_url <- function(x, colour = NULL, account = "") {
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
 date_start <- as.POSIXct("2023-10-27T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2023-10-30T23:59:59", format = fmt1)
+date_end <- as.POSIXct("2023-10-31T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -278,9 +278,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, durationMin, runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, batch_name, Type, Assay, Source, Quality, Workflow,
-    durationMin, start, end
+    start, end
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -308,9 +308,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, gds_outdir
+    portal_run_id, wfr_id, start, end, gds_outdir
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -338,9 +338,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, Lane, ExternalSubjectID,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, Lane, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_dragen
+    portal_run_id, wfr_id, start, end, gds_outdir_dragen
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -368,9 +368,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, Lane, ExternalSubjectID,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, Lane, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_dragen
+    portal_run_id, wfr_id, start, end, gds_outdir_dragen
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -398,9 +398,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
     Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_dragen
+    portal_run_id, wfr_id, start, end, gds_outdir_dragen
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -433,9 +433,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
     Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_dragen_somatic, gds_outdir_dragen_germline
+    portal_run_id, wfr_id, start, end, gds_outdir_dragen_somatic, gds_outdir_dragen_germline
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -468,9 +468,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_umccrise
+    portal_run_id, wfr_id, start, end, gds_outdir_umccrise
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -498,9 +498,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, rnasum_dataset, ExternalSubjectID,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, rnasum_dataset, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_rnasum,
+    portal_run_id, wfr_id, start, end, gds_outdir_rnasum,
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -528,9 +528,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
     Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_star
+    portal_run_id, wfr_id, start, end, s3_outdir_star
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -558,9 +558,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
     Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_oncoanalyser
+    portal_run_id, wfr_id, start, end, s3_outdir_oncoanalyser
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -594,9 +594,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_oncoanalyser
+    portal_run_id, wfr_id, start, end, s3_outdir_oncoanalyser
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -630,9 +630,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, WGTS, ExternalSubjectID,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, WGTS, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_oncoanalyser
+    portal_run_id, wfr_id, start, end, s3_outdir_oncoanalyser
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -665,9 +665,9 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, durationMin, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_sash
+    portal_run_id, wfr_id, start, end, s3_outdir_sash
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
