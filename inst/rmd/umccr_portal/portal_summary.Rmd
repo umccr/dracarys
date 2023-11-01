@@ -114,16 +114,22 @@ get_sbj_url <- function(x, colour = NULL, account = "") {
 # Get metadata for workflows run within the date range
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2023-10-28T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2023-10-29T23:59:59", format = fmt1)
+date_start <- as.POSIXct("2023-10-27T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2023-10-30T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
   "wgs_alignment_qc",
+  "wts_alignment_qc",
   "wts_tumor_only",
   "wgs_tumor_normal",
   "umccrise",
-  "rnasum"
+  "rnasum",
+  "star_alignment",
+  "oncoanalyser_wts",
+  "oncoanalyser_wgs",
+  "oncoanalyser_wgts_existing_both",
+  "sash"
 )
 
 lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
@@ -131,7 +137,7 @@ lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-# pmeta_raw <- dracarys::portal_meta_read(rows = 50, account = "prod")
+# pmeta_raw <- dracarys::portal_meta_read(rows = 300, account = "stg")
 # saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
 pmeta <- pmeta_raw |>
@@ -153,9 +159,12 @@ pmeta_sumy <- pmeta |>
   ) |>
   dplyr::rowwise() |>
   dplyr::mutate(
-    sbj_lib = as.character(glue("umccr__automated__{.data$type_name}__")),
-    sbj_lib = sub(paste0(.data$sbj_lib, "(.*)__2023.*"), "\\1", .data$wfr_name),
-    sbjid = sub("(SBJ.*)__L.*", "\\1", .data$sbj_lib)
+    wfr_name = dplyr::if_else(grepl("umccr__automated", .data$wfr_name),
+      glue("{.data$wfr_name}"),
+      glue("umccr__automated__{.data$wfr_name}")
+    ),
+    sbj_lib = sub("umccr__automated__(.*?)__(SBJ.*__L.*)__202.*", "\\2", .data$wfr_name),
+    sbjid = sub("(SBJ.*?)__L.*", "\\1", .data$sbj_lib)
   ) |>
   dplyr::ungroup()
 unique_sbj <- sort(unique(pmeta_sumy$sbjid))
@@ -199,9 +208,13 @@ split(x, x$column_group) |>
   kableExtra::kable_classic(full_width = FALSE, position = "left")
 ```
 
+```{r, results='asis'}
+blank_lines()
+```
+
 ## RuntimeVis
 
-```{r vistime, fig.width=15, fig.height = 10}
+```{r vistime, fig.width=15, fig.height = 20}
 p1 <- pmeta_sumy |>
   dplyr::arrange(sbj_lib, type_name) |>
   dplyr::group_by(sbj_lib, type_name) |>
@@ -260,11 +273,14 @@ pmeta |>
   ) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
-  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
   dplyr::select(
     end_status, runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, batch_name, Type, Assay, Source, Quality, Workflow,
-    start, end
+    durationMin, start, end
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -287,11 +303,14 @@ pmeta |>
   dracarys::meta_tso_ctdna_tumor_only(status = c("Succeeded", "Failed")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
-  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
   dplyr::select(
     end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    wfr_id, start, end, gds_outdir
+    portal_run_id, wfr_id, durationMin, start, end, gds_outdir
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -314,18 +333,21 @@ pmeta |>
   dracarys::meta_wgs_alignment_qc(status = c("Succeeded", "Failed")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
-  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
   dplyr::select(
     end_status, SubjectID, LibraryID, SampleID, Phenotype, Lane, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    wfr_id, start, end, gds_outdir_dragen
+    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_dragen
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
 ```
 
 ```{r echo=FALSE}
-wf <- "wts_tumor_only"
+wf <- "wts_alignment_qc"
 ```
 
 ### 4. `r wf`
@@ -338,14 +360,47 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
+  dracarys::meta_wts_alignment_qc(status = c("Succeeded", "Failed")) |>
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
+  dplyr::select(
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, Lane, ExternalSubjectID,
+    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
+    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_dragen
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "wts_tumor_only"
+```
+
+### 5. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
   dracarys::meta_wts_tumor_only(status = c("Succeeded", "Failed")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
-  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
   dplyr::select(
     end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
     Type, Assay, Source, Quality, Workflow,
-    wfr_id, start, end, gds_outdir_dragen
+    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_dragen
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -355,7 +410,7 @@ pmeta |>
 wf <- "wgs_tumor_normal"
 ```
 
-### 5. `r wf`
+### 6. `r wf`
 
 ```{r}
 if (!chunks1[[wf]]) {
@@ -373,11 +428,14 @@ pmeta |>
   # include Phenotype to double-check join
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID", "Phenotype")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
-  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
   dplyr::select(
     end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
     Type, Assay, Source, Quality, Workflow,
-    wfr_id, start, end, gds_outdir_dragen_somatic, gds_outdir_dragen_germline
+    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_dragen_somatic, gds_outdir_dragen_germline
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()
@@ -385,38 +443,6 @@ pmeta |>
 
 ```{r echo=FALSE}
 wf <- "umccrise"
-```
-
-### 6. `r wf` {.active}
-
-```{r}
-if (!chunks1[[wf]]) {
-  kable_empty_wf(wf)
-}
-```
-
-```{r eval=chunks1[["umccrise"]]}
-pmeta |>
-  dracarys::meta_umccrise(status = c("Succeeded", "Failed")) |>
-  tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
-  tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
-  tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
-  tidyr::separate_wider_delim("SampleID__LibraryID", delim = "__", names = c("SampleID", "LibraryID")) |>
-  # include Phenotype to double-check join
-  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID", "Phenotype")) |>
-  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
-  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
-  dplyr::select(
-    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
-    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    wfr_id, start, end, gds_outdir_umccrise
-  ) |>
-  dplyr::arrange(desc(SubjectID), start) |>
-  dt_view()
-```
-
-```{r echo=FALSE}
-wf <- "rnasum"
 ```
 
 ### 7. `r wf`
@@ -427,16 +453,221 @@ if (!chunks1[[wf]]) {
 }
 ```
 
-```{r eval=chunks1[["rnasum"]]}
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_umccrise(status = c("Succeeded", "Failed")) |>
+  tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
+  tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
+  tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
+  tidyr::separate_wider_delim("SampleID__LibraryID", delim = "__", names = c("SampleID", "LibraryID")) |>
+  # include Phenotype to double-check join
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID", "Phenotype")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
+  dplyr::select(
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
+    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_umccrise
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "rnasum"
+```
+
+### 8. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
 pmeta |>
   dracarys::meta_rnasum(status = c("Succeeded", "Failed")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
-  dplyr::mutate(SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url)) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
   dplyr::select(
     end_status, SubjectID, LibraryID, SampleID, Phenotype, rnasum_dataset, ExternalSubjectID,
     ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
-    wfr_id, start, end, gds_outdir_rnasum,
+    portal_run_id, wfr_id, durationMin, start, end, gds_outdir_rnasum,
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "star_alignment"
+```
+
+### 9. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_star_alignment(status = c("Succeeded", "Failed")) |>
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
+  dplyr::select(
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    Type, Assay, Source, Quality, Workflow,
+    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_star
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "oncoanalyser_wts"
+```
+
+### 10. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_oncoanalyser_wts(status = c("Succeeded", "Failed")) |>
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
+  dplyr::select(
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID, ProjectOwner, ProjectName,
+    Type, Assay, Source, Quality, Workflow,
+    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_oncoanalyser
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+
+```{r echo=FALSE}
+wf <- "oncoanalyser_wgs"
+```
+
+### 11. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_oncoanalyser_wgs(status = c("Succeeded", "Failed")) |>
+  tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
+  tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
+  tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
+  tidyr::separate_wider_delim("SampleID__LibraryID", delim = "__", names = c("SampleID", "LibraryID")) |>
+  # include Phenotype to double-check join
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID", "Phenotype")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
+  dplyr::select(
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
+    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_oncoanalyser
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "oncoanalyser_wgts_existing_both"
+```
+
+### 12. `r wf`
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_oncoanalyser_wgts_existing_both(status = c("Succeeded", "Failed")) |>
+  tidyr::unite("SampleID__LibraryID___normal___wgs", SampleID_normal_wgs, LibraryID_normal_wgs, sep = "__") |>
+  tidyr::unite("SampleID__LibraryID___tumor___wgs", SampleID_tumor_wgs, LibraryID_tumor_wgs, sep = "__") |>
+  tidyr::unite("SampleID__LibraryID___tumor___wts", SampleID_tumor_wts, LibraryID_tumor_wts, sep = "__") |>
+  tidyr::pivot_longer(c("SampleID__LibraryID___normal___wgs", "SampleID__LibraryID___tumor___wgs", "SampleID__LibraryID___tumor___wts"), names_to = c(NA, "Phenotype", "WGTS"), names_sep = "___", values_to = "SampleID__LibraryID") |>
+  tidyr::separate_wider_delim("SampleID__LibraryID", delim = "__", names = c("SampleID", "LibraryID")) |>
+  # include Phenotype to double-check join
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID", "Phenotype")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
+  dplyr::select(
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, WGTS, ExternalSubjectID,
+    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
+    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_oncoanalyser
+  ) |>
+  dplyr::arrange(desc(SubjectID), start) |>
+  dt_view()
+```
+
+```{r echo=FALSE}
+wf <- "sash"
+```
+
+### 13. `r wf` {.active}
+
+```{r}
+if (!chunks1[[wf]]) {
+  kable_empty_wf(wf)
+}
+```
+
+```{r eval=chunks1[[wf]]}
+pmeta |>
+  dracarys::meta_sash(status = c("Succeeded", "Failed")) |>
+  tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
+  tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
+  tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
+  tidyr::separate_wider_delim("SampleID__LibraryID", delim = "__", names = c("SampleID", "LibraryID")) |>
+  # include Phenotype to double-check join
+  dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID", "Phenotype")) |>
+  dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
+  dplyr::mutate(
+    SubjectID = dplyr::if_else(is.na(.data$sbj_url), get_sbj_url(.data$SubjectID), .data$sbj_url),
+    durationMin = round(as.numeric(difftime(end, start, units = "mins")))
+  ) |>
+  dplyr::select(
+    end_status, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    ProjectOwner, ProjectName, Type, Assay, Source, Quality, Workflow,
+    portal_run_id, wfr_id, durationMin, start, end, s3_outdir_sash
   ) |>
   dplyr::arrange(desc(SubjectID), start) |>
   dt_view()

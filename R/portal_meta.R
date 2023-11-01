@@ -512,8 +512,8 @@ meta_star_alignment <- function(pmeta, status = "Succeeded") {
     dplyr::mutate(
       # input
       SubjectID = purrr::map_chr(.data$input, "subject_id", .default = NA),
-      SampleID_tumor = purrr::map_chr(.data$input, "sample_id", .default = NA),
-      LibraryID_tumor = purrr::map_chr(.data$input, "library_id", .default = NA),
+      SampleID = purrr::map_chr(.data$input, "sample_id", .default = NA),
+      LibraryID = purrr::map_chr(.data$input, "library_id", .default = NA),
       gds_fq_fwd = purrr::map_chr(.data$input, "fastq_fwd", .default = NA),
       gds_fq_rev = purrr::map_chr(.data$input, "fastq_rev", .default = NA),
       # output
@@ -523,8 +523,8 @@ meta_star_alignment <- function(pmeta, status = "Succeeded") {
     dplyr::select(
       meta_main_cols(),
       "SubjectID",
-      "LibraryID_tumor",
-      "SampleID_tumor",
+      "LibraryID",
+      "SampleID",
       "s3_outdir_star",
       "gds_fq_fwd",
       "gds_fq_rev"
@@ -730,9 +730,9 @@ meta_oncoanalyser_wts <- function(pmeta, status = "Succeeded") {
       # input
       mode = purrr::map_chr(.data$input, "mode", .default = NA),
       SubjectID = purrr::map_chr(.data$input, "subject_id", .default = NA),
-      SampleID_tumor = purrr::map_chr(.data$input, "tumor_wts_sample_id", .default = NA),
-      LibraryID_tumor = purrr::map_chr(.data$input, "tumor_wts_library_id", .default = NA),
-      s3_bam_tumor = purrr::map_chr(.data$input, "tumor_wts_bam", .default = NA),
+      SampleID = purrr::map_chr(.data$input, "tumor_wts_sample_id", .default = NA),
+      LibraryID = purrr::map_chr(.data$input, "tumor_wts_library_id", .default = NA),
+      s3_bam = purrr::map_chr(.data$input, "tumor_wts_bam", .default = NA),
       # output
       s3_outdir_oncoanalyser = purrr::map_chr(.data$output, "output_directory", .default = NA)
     )
@@ -740,9 +740,9 @@ meta_oncoanalyser_wts <- function(pmeta, status = "Succeeded") {
     dplyr::select(
       meta_main_cols(),
       "SubjectID",
-      "LibraryID_tumor",
-      "SampleID_tumor",
-      "s3_bam_tumor",
+      "LibraryID",
+      "SampleID",
+      "s3_bam",
       "s3_outdir_oncoanalyser",
     )
 }
