@@ -37,7 +37,15 @@ test_that("Function meta_wgs_alignment_qc() @ L189", {
 })
 
 
-test_that("Function meta_wgs_tumor_normal() @ L237", {
+test_that("Function meta_wts_alignment_qc() @ L237", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_wts_alignment_qc(pmeta))
+  expect_equal("Lane" %in% colnames(m), TRUE)
+})
+
+
+test_that("Function meta_wgs_tumor_normal() @ L285", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_wgs_tumor_normal(pmeta))
@@ -45,7 +53,7 @@ test_that("Function meta_wgs_tumor_normal() @ L237", {
 })
 
 
-test_that("Function meta_umccrise() @ L307", {
+test_that("Function meta_umccrise() @ L355", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_umccrise(pmeta))
@@ -53,7 +61,7 @@ test_that("Function meta_umccrise() @ L307", {
 })
 
 
-test_that("Function meta_tso_ctdna_tumor_only() @ L402", {
+test_that("Function meta_tso_ctdna_tumor_only() @ L450", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_tso_ctdna_tumor_only(pmeta))
@@ -61,7 +69,15 @@ test_that("Function meta_tso_ctdna_tumor_only() @ L402", {
 })
 
 
-test_that("Function meta_sash() @ L450", {
+test_that("Function meta_star_alignment() @ L498", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_star_alignment(pmeta))
+  expect_equal(all(c("s3_outdir_star", "LibraryID_tumor") %in% colnames(m)), TRUE)
+})
+
+
+test_that("Function meta_sash() @ L547", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_sash(pmeta))
@@ -69,7 +85,7 @@ test_that("Function meta_sash() @ L450", {
 })
 
 
-test_that("Function meta_oncoanalyser_wgs() @ L504", {
+test_that("Function meta_oncoanalyser_wgs() @ L601", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_oncoanalyser_wgs(pmeta))
@@ -77,7 +93,7 @@ test_that("Function meta_oncoanalyser_wgs() @ L504", {
 })
 
 
-test_that("Function meta_oncoanalyser_wgts_existing_both() @ L556", {
+test_that("Function meta_oncoanalyser_wgts_existing_both() @ L653", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_oncoanalyser_wgts_existing_both(pmeta))
@@ -85,7 +101,7 @@ test_that("Function meta_oncoanalyser_wgts_existing_both() @ L556", {
 })
 
 
-test_that("Function meta_oncoanalyser_wts() @ L618", {
+test_that("Function meta_oncoanalyser_wts() @ L715", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_oncoanalyser_wts(pmeta))
