@@ -6,7 +6,7 @@ test_that("Function meta_bcl_convert() @ L14", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_bcl_convert(pmeta))
-  expect_equal(sum(!is.na(m$topup_or_rerun)), 22)
+  expect_equal(sum(!is.na(m$topup_or_rerun)), 1)
   expect_equal(length(unique(m$portal_run_id)), 4)
 })
 
@@ -24,8 +24,8 @@ test_that("Function meta_rnasum() @ L134", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_rnasum(pmeta))
-  expect_equal(m$rnasum_dataset[1], "LAML")
-  expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230277.RNAseq_report.html")
+  expect_equal(m$rnasum_dataset[1], "PANCAN")
+  expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230467.RNAseq_report.html")
 })
 
 
@@ -37,7 +37,15 @@ test_that("Function meta_wgs_alignment_qc() @ L189", {
 })
 
 
-test_that("Function meta_wgs_tumor_normal() @ L237", {
+test_that("Function meta_wts_alignment_qc() @ L237", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_wts_alignment_qc(pmeta))
+  expect_equal("Lane" %in% colnames(m), TRUE)
+})
+
+
+test_that("Function meta_wgs_tumor_normal() @ L285", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_wgs_tumor_normal(pmeta))
@@ -45,7 +53,7 @@ test_that("Function meta_wgs_tumor_normal() @ L237", {
 })
 
 
-test_that("Function meta_umccrise() @ L307", {
+test_that("Function meta_umccrise() @ L355", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_umccrise(pmeta))
@@ -53,10 +61,50 @@ test_that("Function meta_umccrise() @ L307", {
 })
 
 
-test_that("Function meta_tso_ctdna_tumor_only() @ L402", {
+test_that("Function meta_tso_ctdna_tumor_only() @ L450", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_tso_ctdna_tumor_only(pmeta))
-  expect_equal(length(unique(m$portal_run_id)), 4)
+  expect_equal(length(unique(m$portal_run_id)), 2)
+})
+
+
+test_that("Function meta_star_alignment() @ L498", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_star_alignment(pmeta))
+  expect_equal(all(c("s3_outdir_star", "LibraryID_tumor") %in% colnames(m)), TRUE)
+})
+
+
+test_that("Function meta_sash() @ L547", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_sash(pmeta))
+  expect_equal(all(c("s3_indir_oncoanalyser", "LibraryID_tumor", "s3_outdir_sash") %in% colnames(m)), TRUE)
+})
+
+
+test_that("Function meta_oncoanalyser_wgs() @ L601", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_oncoanalyser_wgs(pmeta))
+  expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor", "gds_bam_tumor") %in% colnames(m)), TRUE)
+})
+
+
+test_that("Function meta_oncoanalyser_wgts_existing_both() @ L653", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_oncoanalyser_wgts_existing_both(pmeta))
+  expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor_wts", "gds_bam_tumor_wgs") %in% colnames(m)), TRUE)
+})
+
+
+test_that("Function meta_oncoanalyser_wts() @ L715", {
+  
+  pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+  (m <- meta_oncoanalyser_wts(pmeta))
+  expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor", "s3_bam_tumor") %in% colnames(m)), TRUE)
 })
 

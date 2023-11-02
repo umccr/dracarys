@@ -8,7 +8,7 @@
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_bcl_convert(pmeta))
 #' @testexamples
-#' expect_equal(sum(!is.na(m$topup_or_rerun)), 22)
+#' expect_equal(sum(!is.na(m$topup_or_rerun)), 1)
 #' expect_equal(length(unique(m$portal_run_id)), 4)
 #' @export
 meta_bcl_convert <- function(pmeta, status = "Succeeded") {
@@ -128,8 +128,8 @@ meta_wts_tumor_only <- function(pmeta, status = "Succeeded") {
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_rnasum(pmeta))
 #' @testexamples
-#' expect_equal(m$rnasum_dataset[1], "LAML")
-#' expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230277.RNAseq_report.html")
+#' expect_equal(m$rnasum_dataset[1], "PANCAN")
+#' expect_equal(basename(m$gds_outfile_rnasum_html[4]), "MDX230467.RNAseq_report.html")
 #' @export
 meta_rnasum <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
@@ -209,6 +209,54 @@ meta_wgs_alignment_qc <- function(pmeta, status = "Succeeded") {
       gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_alignment_output_directory", "location"), .default = NA),
       gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location"), .default = NA),
       SubjectID = sub("umccr__automated__wgs_alignment_qc__(SBJ.*)__L.*", "\\1", .data$wfr_name),
+    )
+  d |>
+    dplyr::select(
+      dplyr::all_of(meta_main_cols()),
+      "SubjectID",
+      LibraryID = "rglb",
+      SampleID = "rgsm",
+      Lane = "lane",
+      "gds_outdir_dragen",
+      "gds_outdir_multiqc",
+    )
+}
+
+#' Metadata for wts_alignment_qc workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_wts_alignment_qc(pmeta))
+#' @testexamples
+#' expect_equal("Lane" %in% colnames(m), TRUE)
+#' @export
+meta_wts_alignment_qc <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  type <- "wts_alignment_qc"
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == type,
+      .data$end_status %in% status
+    )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      # input
+      rglb = purrr::map_chr(.data$input, list("fastq_list_rows", "rglb")),
+      rgsm = purrr::map_chr(.data$input, list("fastq_list_rows", "rgsm")),
+      lane = purrr::map_int(.data$input, list("fastq_list_rows", "lane")),
+      lane = as.character(.data$lane),
+      # output
+      gds_outdir_dragen = purrr::map_chr(.data$output, list("dragen_alignment_output_directory", "location"), .default = NA),
+      gds_outdir_multiqc = purrr::map_chr(.data$output, list("multiqc_output_directory", "location"), .default = NA),
+      SubjectID = sub("umccr__automated__wts_alignment_qc__(SBJ.*)__L.*", "\\1", .data$wfr_name),
     )
   d |>
     dplyr::select(
@@ -397,7 +445,7 @@ meta_umccrise <- function(pmeta, status = "Succeeded") {
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_tso_ctdna_tumor_only(pmeta))
 #' @testexamples
-#' expect_equal(length(unique(m$portal_run_id)), 4)
+#' expect_equal(length(unique(m$portal_run_id)), 2)
 #' @export
 meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
   # retrieve workflow runs with the given type and status
@@ -432,6 +480,270 @@ meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
       SampleID = "sample_name2",
       "gds_outdir",
       cttso_rerun = "rerun"
+    )
+}
+
+#' Metadata for star_alignment workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_star_alignment(pmeta))
+#' @testexamples
+#' expect_equal(all(c("s3_outdir_star", "LibraryID_tumor") %in% colnames(m)), TRUE)
+#' @export
+meta_star_alignment <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  type <- "star_alignment"
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == type,
+      .data$end_status %in% status
+    )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
+  # grab libid/sampleid from the input meta, and outdir from the output meta
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      # input
+      SubjectID = purrr::map_chr(.data$input, "subject_id", .default = NA),
+      SampleID = purrr::map_chr(.data$input, "sample_id", .default = NA),
+      LibraryID = purrr::map_chr(.data$input, "library_id", .default = NA),
+      gds_fq_fwd = purrr::map_chr(.data$input, "fastq_fwd", .default = NA),
+      gds_fq_rev = purrr::map_chr(.data$input, "fastq_rev", .default = NA),
+      # output
+      s3_outdir_star = purrr::map_chr(.data$output, "output_directory", .default = NA)
+    )
+  d |>
+    dplyr::select(
+      meta_main_cols(),
+      "SubjectID",
+      "LibraryID",
+      "SampleID",
+      "s3_outdir_star",
+      "gds_fq_fwd",
+      "gds_fq_rev"
+    )
+}
+
+
+#' Metadata for sash workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_sash(pmeta))
+#' @testexamples
+#' expect_equal(all(c("s3_indir_oncoanalyser", "LibraryID_tumor", "s3_outdir_sash") %in% colnames(m)), TRUE)
+#' @export
+meta_sash <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  type <- "sash"
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == type,
+      .data$end_status %in% status
+    )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
+  # grab libid/sampleid from the input meta, and outdir from the output meta
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      # input
+      SubjectID = purrr::map_chr(.data$input, "subject_id", .default = NA),
+      SampleID_tumor = purrr::map_chr(.data$input, "tumor_sample_id", .default = NA),
+      SampleID_normal = purrr::map_chr(.data$input, "normal_sample_id", .default = NA),
+      LibraryID_tumor = purrr::map_chr(.data$input, "tumor_library_id", .default = NA),
+      LibraryID_normal = purrr::map_chr(.data$input, "normal_library_id", .default = NA),
+      gds_indir_dragen_somatic = purrr::map_chr(.data$input, "dragen_somatic_dir", .default = NA),
+      gds_indir_dragen_germline = purrr::map_chr(.data$input, "dragen_germline_dir", .default = NA),
+      s3_indir_oncoanalyser = purrr::map_chr(.data$input, "oncoanalyser_dir", .default = NA),
+      # output
+      s3_outdir_sash = purrr::map_chr(.data$output, "output_directory", .default = NA)
+    )
+  d |>
+    dplyr::select(
+      meta_main_cols(),
+      "SubjectID",
+      "LibraryID_tumor",
+      "LibraryID_normal",
+      "SampleID_tumor",
+      "SampleID_normal",
+      "s3_outdir_sash",
+      "s3_indir_oncoanalyser",
+      "gds_indir_dragen_somatic",
+      "gds_indir_dragen_germline"
+    )
+}
+
+#' Metadata for oncoanalyser_wgs workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_oncoanalyser_wgs(pmeta))
+#' @testexamples
+#' expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor", "gds_bam_tumor") %in% colnames(m)), TRUE)
+#' @export
+meta_oncoanalyser_wgs <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  type <- "oncoanalyser_wgs"
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == type,
+      .data$end_status %in% status
+    )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
+  # grab libid/sampleid from the input meta, and outdir from the output meta
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      # input
+      SubjectID = purrr::map_chr(.data$input, "subject_id", .default = NA),
+      SampleID_tumor = purrr::map_chr(.data$input, "tumor_wgs_sample_id", .default = NA),
+      SampleID_normal = purrr::map_chr(.data$input, "normal_wgs_sample_id", .default = NA),
+      LibraryID_tumor = purrr::map_chr(.data$input, "tumor_wgs_library_id", .default = NA),
+      LibraryID_normal = purrr::map_chr(.data$input, "normal_wgs_library_id", .default = NA),
+      gds_bam_tumor = purrr::map_chr(.data$input, "tumor_wgs_bam", .default = NA),
+      gds_bam_normal = purrr::map_chr(.data$input, "normal_wgs_bam", .default = NA),
+      # output
+      s3_outdir_oncoanalyser = purrr::map_chr(.data$output, "output_directory", .default = NA)
+    )
+  d |>
+    dplyr::select(
+      meta_main_cols(),
+      "SubjectID",
+      "LibraryID_tumor",
+      "LibraryID_normal",
+      "SampleID_tumor",
+      "SampleID_normal",
+      "s3_outdir_oncoanalyser",
+      "gds_bam_tumor",
+      "gds_bam_normal"
+    )
+}
+
+#' Metadata for oncoanalyser_wgts_existing_both workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_oncoanalyser_wgts_existing_both(pmeta))
+#' @testexamples
+#' expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor_wts", "gds_bam_tumor_wgs") %in% colnames(m)), TRUE)
+#' @export
+meta_oncoanalyser_wgts_existing_both <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  type <- "oncoanalyser_wgts_existing_both"
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == type,
+      .data$end_status %in% status
+    )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
+  # grab libid/sampleid from the input meta, and outdir from the output meta
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      # input
+      SubjectID = purrr::map_chr(.data$input, "subject_id", .default = NA),
+      SampleID_tumor_wgs = purrr::map_chr(.data$input, "tumor_wgs_sample_id", .default = NA),
+      SampleID_normal_wgs = purrr::map_chr(.data$input, "normal_wgs_sample_id", .default = NA),
+      SampleID_tumor_wts = purrr::map_chr(.data$input, "tumor_wts_sample_id", .default = NA),
+      LibraryID_tumor_wgs = purrr::map_chr(.data$input, "tumor_wgs_library_id", .default = NA),
+      LibraryID_normal_wgs = purrr::map_chr(.data$input, "normal_wgs_library_id", .default = NA),
+      LibraryID_tumor_wts = purrr::map_chr(.data$input, "tumor_wts_library_id", .default = NA),
+      gds_bam_tumor_wgs = purrr::map_chr(.data$input, "tumor_wgs_bam", .default = NA),
+      gds_bam_normal_wgs = purrr::map_chr(.data$input, "normal_wgs_bam", .default = NA),
+      s3_bam_tumor_wts = purrr::map_chr(.data$input, "tumor_wts_bam", .default = NA),
+      s3_indir_oncoanalyser_wgs = purrr::map_chr(.data$input, "existing_wgs_dir", .default = NA),
+      s3_indir_oncoanalyser_wts = purrr::map_chr(.data$input, "existing_wts_dir", .default = NA),
+      # output
+      s3_outdir_oncoanalyser = purrr::map_chr(.data$output, "output_directory", .default = NA)
+    )
+  d |>
+    dplyr::select(
+      meta_main_cols(),
+      "SubjectID",
+      "LibraryID_tumor_wgs",
+      "LibraryID_normal_wgs",
+      "LibraryID_tumor_wts",
+      "SampleID_tumor_wgs",
+      "SampleID_normal_wgs",
+      "SampleID_tumor_wts",
+      "s3_outdir_oncoanalyser",
+      "s3_indir_oncoanalyser_wgs",
+      "s3_indir_oncoanalyser_wts",
+      "gds_bam_tumor_wgs",
+      "gds_bam_normal_wgs",
+      "s3_bam_tumor_wts"
+    )
+}
+
+#' Metadata for oncoanalyser_wts workflow
+#'
+#' @param pmeta Path to portal workflows metadata table, or tibble with already parsed data.
+#' @param status Workflow status to keep (default: Succeeded).
+#'
+#' @return A tibble with metadata per workflow run.
+#' @examples
+#' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
+#' (m <- meta_oncoanalyser_wts(pmeta))
+#' @testexamples
+#' expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor", "s3_bam_tumor") %in% colnames(m)), TRUE)
+#' @export
+meta_oncoanalyser_wts <- function(pmeta, status = "Succeeded") {
+  # retrieve workflow runs with the given type and status
+  type <- "oncoanalyser_wts"
+  wf <- portal_meta_read(pmeta) |>
+    dplyr::filter(
+      .data$type_name == type,
+      .data$end_status %in% status
+    )
+  if (nrow(wf) == 0) {
+    return(wf)
+  }
+  # grab libid/sampleid from the input meta, and outdir from the output meta
+  d <- wf |>
+    meta_io_fromjson() |>
+    dplyr::mutate(
+      # input
+      mode = purrr::map_chr(.data$input, "mode", .default = NA),
+      SubjectID = purrr::map_chr(.data$input, "subject_id", .default = NA),
+      SampleID = purrr::map_chr(.data$input, "tumor_wts_sample_id", .default = NA),
+      LibraryID = purrr::map_chr(.data$input, "tumor_wts_library_id", .default = NA),
+      s3_bam = purrr::map_chr(.data$input, "tumor_wts_bam", .default = NA),
+      # output
+      s3_outdir_oncoanalyser = purrr::map_chr(.data$output, "output_directory", .default = NA)
+    )
+  d |>
+    dplyr::select(
+      meta_main_cols(),
+      "SubjectID",
+      "LibraryID",
+      "SampleID",
+      "s3_bam",
+      "s3_outdir_oncoanalyser",
     )
 }
 
@@ -554,6 +866,22 @@ portal_meta_read_athena <- function(wfrids = NULL) {
   wfrids_quote <- paste(shQuote(wfrids), collapse = ", ")
   q1 <- glue(
     'SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" where wfr_id in ({wfrids_quote});'
+  )
+  RAthena::dbGetQuery(con, q1) |>
+    tibble::as_tibble()
+}
+
+
+portal_meta_read_athena_tmp <- function(x = NULL) {
+  assertthat::assert_that(!is.null(x))
+  RAthena::RAthena_options(clear_s3_resource = FALSE)
+  con <- DBI::dbConnect(
+    RAthena::athena(),
+    work_group = "data_portal",
+    rstudio_conn_tab = FALSE
+  )
+  q1 <- glue(
+    'SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" {x}'
   )
   RAthena::dbGetQuery(con, q1) |>
     tibble::as_tibble()

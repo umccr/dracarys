@@ -17,7 +17,7 @@ Reads the ICA Workflows Metadata for the given workflow run IDs.
 }
 \examples{
 \dontrun{
-wfrids <- c('wfr.1e764ca00e7a43a69e2424f250a34868')
+wfrids <- c("wfr.1e764ca00e7a43a69e2424f250a34868")
 portal_meta_read_athena(wfrids)
 }
 }
