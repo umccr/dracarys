@@ -198,6 +198,7 @@ dragen_alignment	Aligned reads	reads_aligned_dragen
 dragen_alignment	Aligned reads in genome	reads_aligned_in_genome_dragen
 dragen_alignment	Aligned reads in genome pct	reads_aligned_in_genome_pct_dragen
 dragen_alignment	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
+dragen_alignment	Number of duplicate marked and mate reads removed pct	reads_num_dupmarked_mate_reads_removed_pct_dragen
 dragen_somatic	umccr_id	umccr_id
 dragen_somatic	umccr_workflow	umccr_workflow
 dragen_somatic	config_creation_date	date_multiqc
@@ -444,14 +445,19 @@ dragen_somatic	Filtered SNPs pct	vars_snp_filt_pct_dragen
 dragen_somatic	Filtered indels	vars_indel_filt_dragen
 dragen_somatic	Filtered indels pct	vars_indel_filt_pct_dragen
 dragen_somatic	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
+dragen_somatic	Number of duplicate marked and mate reads removed pct	reads_num_dupmarked_mate_reads_removed_pct_dragen
 dragen_somatic	avg_gc_content_percent	gc_pct_dragen
 dragen_transcriptome	umccr_id	umccr_id
 dragen_transcriptome	umccr_workflow	umccr_workflow
 dragen_transcriptome	config_creation_date	date_multiqc
 dragen_transcriptome	Total input reads	reads_tot_input_dragen
 dragen_transcriptome	Total input reads pct	reads_tot_input_pct_dragen
+dragen_transcriptome	Total reads in RG	reads_tot_rg_dragen
+dragen_transcriptome	Total reads in RG pct	reads_tot_rg_pct_dragen
 dragen_transcriptome	Number of duplicate marked reads	reads_num_dupmarked_dragen
 dragen_transcriptome	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
+dragen_transcriptome	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
+dragen_transcriptome	Number of duplicate marked and mate reads removed pct	reads_num_dupmarked_mate_reads_removed_pct_dragen
 dragen_transcriptome	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
 dragen_transcriptome	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
 dragen_transcriptome	Reads with mate sequenced	reads_w_mate_seq_dragen
@@ -534,6 +540,7 @@ dragen_transcriptome	Soft-clipped bases pct	bases_softclip_pct_dragen
 dragen_transcriptome	Hard-clipped bases	bases_hardclip_dragen
 dragen_transcriptome	Hard-clipped bases pct	bases_hardclip_pct_dragen
 dragen_transcriptome	Mismatched bases R1	bases_mismatched_r1_dragen
+dragen_transcriptome	Mismatched bases R2	bases_mismatched_r2_dragen
 dragen_transcriptome	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
 dragen_transcriptome	Mismatched bases R2 pct	bases_mismatched_r2_pct_dragen
 dragen_transcriptome	Mismatched bases R1 (excl. indels)	bases_mismatched_r1_noindels_dragen
@@ -975,6 +982,7 @@ dragen_ctdna	Total input reads	reads_tot_input_dragen
 dragen_ctdna	Total input reads pct	reads_tot_input_pct_dragen
 dragen_ctdna	Number of duplicate marked reads	reads_num_dupmarked_dragen
 dragen_ctdna	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
+dragen_ctdna	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
 dragen_ctdna	Number of duplicate marked and mate reads removed pct	reads_num_dupmarked_mate_reads_removed_pct_dragen
 dragen_ctdna	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
 dragen_ctdna	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
@@ -1188,7 +1196,6 @@ dragen_ctdna	Reads filtered for minimum read length R1	reads_filt_minreadlenr1_d
 dragen_ctdna	Reads filtered for minimum read length R1 pct	reads_filt_minreadlenr1_pct_dragen
 dragen_ctdna	Reads filtered for minimum read length R2	reads_filt_minreadlenr2_dragen
 dragen_ctdna	Reads filtered for minimum read length R2 pct	reads_filt_minreadlenr2_pct_dragen
-dragen_ctdna	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
 dragen_ctdna	Total reads in RG	reads_tot_rg_dragen
 dragen_ctdna	Total reads in RG pct	reads_tot_rg_pct_dragen
 bcbio_umccrise	umccr_id	umccr_id
