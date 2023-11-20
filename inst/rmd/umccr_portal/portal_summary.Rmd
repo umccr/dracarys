@@ -100,8 +100,10 @@ get_colours <- function(nc) {
   clrs[seq_len(nc)]
 }
 
-get_sbj_url <- function(x, colour = NULL, account = "") {
-  sbj_url <- glue("https://portal.{account}umccr.org/subjects/{x}/overview")
+get_sbj_url <- function(x, colour = NULL, account = "pro") {
+  assertthat::assert_that(account %in% c("pro", "stg", "dev"))
+  account <- ifelse(account == "pro", "", account)
+  sbj_url <- glue("https://portal{account}.umccr.org/subjects/{x}/overview")
   if (!is.null(colour)) {
     return(glue("<a href={sbj_url} style='background-color:{colour}'>{x}</a>"))
   }
@@ -114,8 +116,8 @@ get_sbj_url <- function(x, colour = NULL, account = "") {
 # Get metadata for workflows run within the date range
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2023-10-27T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2023-10-31T23:59:59", format = fmt1)
+date_start <- as.POSIXct("2023-11-02T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2023-11-04T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -137,7 +139,7 @@ lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-# pmeta_raw <- dracarys::portal_meta_read(rows = 300, account = "stg")
+# pmeta_raw <- dracarys::portal_meta_read(rows = 15, account = "prod")
 # saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
 pmeta <- pmeta_raw |>
@@ -171,7 +173,7 @@ unique_sbj <- sort(unique(pmeta_sumy$sbjid))
 clrs1 <- get_colours(length(unique_sbj)) |>
   purrr::set_names(unique_sbj) |>
   tibble::enframe(name = "sbjid", value = "color") |>
-  dplyr::mutate(sbj_url = get_sbj_url(.data$sbjid, colour = .data$color, account = "stg."))
+  dplyr::mutate(sbj_url = get_sbj_url(.data$sbjid, colour = .data$color, account = "pro"))
 pmeta_sumy_count <- pmeta_sumy |>
   dplyr::count(type_name, .drop = FALSE) |>
   tibble::deframe()
