@@ -47,6 +47,10 @@ session_info_tbls <- function(pkgs = NULL) {
   )
 }
 
+#' Output Format is Valid
+#'
+#' Checks that the specified output format is valid.
+#' @export
 dr_output_format_valid <- function(x) {
   format_choices <- c("tsv", "parquet", "delta", "rds")
   assertthat::assert_that(
