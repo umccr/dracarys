@@ -116,8 +116,8 @@ get_sbj_url <- function(x, colour = NULL, account = "pro") {
 # Get metadata for workflows run within the date range
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2023-11-02T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2023-11-04T23:59:59", format = fmt1)
+date_start <- as.POSIXct("2023-11-22T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2023-11-23T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -139,7 +139,7 @@ lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-# pmeta_raw <- dracarys::portal_meta_read(rows = 15, account = "prod")
+# pmeta_raw <- dracarys::portal_meta_read(rows = 200, account = "prod")
 # saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
 pmeta <- pmeta_raw |>
@@ -302,7 +302,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_tso_ctdna_tumor_only(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_tso_ctdna_tumor_only(status = c("Succeeded", "Failed", "Running")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(
@@ -332,7 +332,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_wgs_alignment_qc(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_wgs_alignment_qc(status = c("Succeeded", "Failed", "Running")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(
@@ -362,7 +362,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_wts_alignment_qc(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_wts_alignment_qc(status = c("Succeeded", "Failed", "Running")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(
@@ -392,7 +392,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_wts_tumor_only(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_wts_tumor_only(status = c("Succeeded", "Failed", "Running")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(
@@ -422,7 +422,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_wgs_tumor_normal(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_wgs_tumor_normal(status = c("Succeeded", "Failed", "Running")) |>
   tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
   tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
   tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
@@ -447,7 +447,7 @@ pmeta |>
 wf <- "umccrise"
 ```
 
-### 7. `r wf`
+### 7. `r wf` {.active}
 
 ```{r}
 if (!chunks1[[wf]]) {
@@ -457,7 +457,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_umccrise(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_umccrise(status = c("Succeeded", "Failed", "Running")) |>
   tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
   tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
   tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
@@ -492,7 +492,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_rnasum(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_rnasum(status = c("Succeeded", "Failed", "Running")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(
@@ -522,7 +522,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_star_alignment(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_star_alignment(status = c("Succeeded", "Failed", "Running")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(
@@ -552,7 +552,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_oncoanalyser_wts(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_oncoanalyser_wts(status = c("Succeeded", "Failed", "Running")) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID", "SubjectID")) |>
   dplyr::left_join(clrs1 |> dplyr::select(sbjid, sbj_url), by = c("SubjectID" = "sbjid")) |>
   dplyr::mutate(
@@ -583,7 +583,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_oncoanalyser_wgs(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_oncoanalyser_wgs(status = c("Succeeded", "Failed", "Running")) |>
   tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
   tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
   tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
@@ -618,7 +618,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_oncoanalyser_wgts_existing_both(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_oncoanalyser_wgts_existing_both(status = c("Succeeded", "Failed", "Running")) |>
   tidyr::unite("SampleID__LibraryID___normal___wgs", SampleID_normal_wgs, LibraryID_normal_wgs, sep = "__") |>
   tidyr::unite("SampleID__LibraryID___tumor___wgs", SampleID_tumor_wgs, LibraryID_tumor_wgs, sep = "__") |>
   tidyr::unite("SampleID__LibraryID___tumor___wts", SampleID_tumor_wts, LibraryID_tumor_wts, sep = "__") |>
@@ -644,7 +644,7 @@ pmeta |>
 wf <- "sash"
 ```
 
-### 13. `r wf` {.active}
+### 13. `r wf`
 
 ```{r}
 if (!chunks1[[wf]]) {
@@ -654,7 +654,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_sash(status = c("Succeeded", "Failed")) |>
+  dracarys::meta_sash(status = c("Succeeded", "Failed", "Running")) |>
   tidyr::unite("SampleID__LibraryID___normal", SampleID_normal, LibraryID_normal, sep = "__") |>
   tidyr::unite("SampleID__LibraryID___tumor", SampleID_tumor, LibraryID_tumor, sep = "__") |>
   tidyr::pivot_longer(c("SampleID__LibraryID___normal", "SampleID__LibraryID___tumor"), names_to = c(NA, "Phenotype"), names_sep = "___", values_to = "SampleID__LibraryID") |>
