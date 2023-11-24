@@ -85,6 +85,7 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE) {
   data.table::fread(
     cmd = cmd_body,
     header = FALSE,
+    sep = "\t",
     col.names = cnames,
     data.table = FALSE,
     na.strings = "."
