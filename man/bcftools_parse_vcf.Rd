@@ -20,3 +20,7 @@ Parse VCF with bcftools.
 Uses bcftools under the hood to do the heavy lifting with field splitting,
 then converts the parsed character vector to a tibble.
 }
+\details{
+For VCFs with 0 variants, returns a tibble with 0 rows and proper number of
+columns.
+}

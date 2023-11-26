@@ -8,6 +8,9 @@ bcftools_installed <- function() {
 #' Uses bcftools under the hood to do the heavy lifting with field splitting,
 #' then converts the parsed character vector to a tibble.
 #'
+#' For VCFs with 0 variants, returns a tibble with 0 rows and proper number of
+#' columns.
+#'
 #' @param vcf VCF with one or more samples.
 #' @param only_pass Keep PASS variants only (TRUE by default)?
 #'
@@ -70,7 +73,6 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE) {
     include_pass <- "-i 'FILTER=\"PASS\" || FILTER=\".\"'"
   }
   cmd_body <- glue("bcftools query -f \"{q}\" {vcf} {include_pass}")
-  b <- system(cmd_body, intern = TRUE)
   # create column names using the main columns, an INFO prefix for the INFO
   # columns, and a S1/2/.._X prefix for the sample columns.
   cnames <- c(
@@ -78,10 +80,13 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE) {
     paste0("INFO_", info),
     paste0(rep(samp$aliases, each = length(fmt)), "_", fmt)
   )
-  cclasses <- list(
-    POS = "character",
-    QUAL = "integer"
-  )
+  # handle empty VCF - fread warns about size 0
+  suppressWarnings({
+    first_row <- data.table::fread(cmd = cmd_body, sep = "\t", na.strings = ".", nrows = 1)
+  })
+  if (nrow(first_row) == 0) {
+    return(empty_tbl(cnames = cnames))
+  }
   data.table::fread(
     cmd = cmd_body,
     header = FALSE,
