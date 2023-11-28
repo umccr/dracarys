@@ -40,6 +40,8 @@ DR_FILE_REGEX <- tibble::tribble(
   "SampleAnalysisResults\\.json\\.gz$", "TsoSampleAnalysisResultsFile",
   "MergedSmallVariants\\.vcf\\.gz$", "TsoMergedSmallVariantsVcfFile",
   "MergedSmallVariants\\.vcf\\.gz\\.tbi$", "TsoMergedSmallVariantsVcfIndexFile",
+  "CopyNumberVariants\\.vcf\\.gz$", "TsoCopyNumberVariantsVcfFile",
+  "CopyNumberVariants\\.vcf\\.gz\\.tbi$", "TsoCopyNumberVariantsVcfIndexFile",
   "fastqc_metrics\\.csv$", "NULL",
   "insert-stats\\.tab$", "NULL",
   "sv_metrics\\.csv$", "NULL",
@@ -65,7 +67,7 @@ DR_FILE_REGEX <- tibble::tribble(
   "-qc_summary\\.tsv\\.gz$", "UmQcSumFile"
 )
 
-FILES_DOWNLOAD_BUT_IGNORE <- c("TsoMergedSmallVariantsVcfIndexFile")
+FILES_DOWNLOAD_BUT_IGNORE <- c("TsoMergedSmallVariantsVcfIndexFile", "TsoMergedSmallVariantsVcfIndexFile")
 
 #' Evaluate dracarys Function
 #'

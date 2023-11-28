@@ -1,3 +1,47 @@
+#' TsoCopyNumberVariantsVcfFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `CopyNumberVariants.vcf.gz` file output from TSO.
+#'
+#' @examples
+#' \dontrun{
+#' x <- normalizePath("~/icav1/g/production/analysis_data/SBJ00704/tso_ctdna_tumor_only/202311242b9666e0/L2301411/Results/PTC_ctTSO231120_L2301411/dracarys_gds_sync/PTC_ctTSO231120_L2301411_CopyNumberVariants.vcf.gz")
+#' d <- TsoCopyNumberVariantsVcfFile$new(x)
+#' d_parsed <- d$read() # or read(d)
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+#' d$write(d_parsed, prefix = "FOO", out_format = "delta", drid = "wfr.123")
+#' }
+#' @export
+TsoCopyNumberVariantsVcfFile <- R6::R6Class(
+  "TsoCopyNumberVariantsVcfFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `CopyNumberVariants.vcf.gz` file output from TSO.
+    #'
+    #' @return tibble with variants.
+    read = function() {
+      x <- self$path
+      bcftools_parse_vcf(x, only_pass = TRUE)
+    },
+    #' @description
+    #' Writes a tidy version of the `CopyNumberVariants.vcf.gz` file output from TSO.
+    #'
+    #' @param d Parsed object from `self$read()`.
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}copynumber_variants")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
+    }
+  )
+)
 #' TsoMergedSmallVariantsVcfFile R6 Class
 #'
 #' @description
@@ -367,7 +411,11 @@ TsoFusionsCsvFile <- R6::R6Class(
         BP2_Depth = "d", Total_Depth = "d", VAF = "d", Gene1 = "c", Gene2 = "c",
         Contig = "c", Filter = "c", Is_Cosmic_GenePair = "l"
       )
-      readr::read_csv(x, col_types = ct, comment = "#")
+      res <- readr::read_csv(x, col_types = ct, comment = "#")
+      if (nrow(res) == 0) {
+        return(empty_tbl(cnames = names(ct)))
+      }
+      return(res)
     },
 
     #' @description
