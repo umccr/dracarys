@@ -12,7 +12,9 @@ Contains methods for reading and displaying contents of the
 x <- "/path/to/multiqc_data.json"
 mqc <- MultiqcFile$new(x)
 mqc_parsed <- mqc$read() # or read(mqc)
-mqc$write(mqc_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+mqc$write(mqc_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+mqc_plots_parsed <- mqc$read(plot = TRUE, plot_names = "everything")
+mqc$write(mqc_plots_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "rds")
 }
 }
 \section{Super class}{
@@ -42,9 +44,19 @@ mqc$write(mqc_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "b
 \subsection{Method \code{read()}}{
 Reads the \code{multiqc_data.json} file output from MultiQC.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{MultiqcFile$read()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{MultiqcFile$read(plot = FALSE, plot_names = NULL)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{plot}}{Return tibble with data for plots (def: FALSE).}
+
+\item{\code{plot_names}}{Names of plots to parse. Use "everything" if you wantz all
+the plotz.}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 A tidy tibble.
 \itemize{

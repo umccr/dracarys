@@ -9,7 +9,9 @@
 #' x <- "/path/to/multiqc_data.json"
 #' mqc <- MultiqcFile$new(x)
 #' mqc_parsed <- mqc$read() # or read(mqc)
-#' mqc$write(mqc_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "both")
+#' mqc$write(mqc_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+#' mqc_plots_parsed <- mqc$read(plot = TRUE, plot_names = "everything")
+#' mqc$write(mqc_plots_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "rds")
 #' }
 #' @export
 MultiqcFile <- R6::R6Class(
@@ -19,11 +21,19 @@ MultiqcFile <- R6::R6Class(
     #' @description
     #' Reads the `multiqc_data.json` file output from MultiQC.
     #'
+    #' @param plot Return tibble with data for plots (def: FALSE).
+    #' @param plot_names Names of plots to parse. Use "everything" if you wantz all
+    #' the plotz.
     #' @return A tidy tibble.
     #'   - label:
-    read = function() {
+    read = function(plot = FALSE, plot_names = NULL) {
       x <- self$path
-      multiqc_tidy_json(x)
+      res <- multiqc_tidy_json(x)
+      if (plot) {
+        p <- multiqc_parse_plots(x, plot_names = plot_names)
+        res <- list(metrics = res, plots = p)
+      }
+      return(res)
     },
 
     #' @description
@@ -40,6 +50,9 @@ MultiqcFile <- R6::R6Class(
         prefix <- file.path(out_dir, prefix)
       }
       # prefix2 <- glue("{prefix}multiqc")
+      # only write plots if output format is rds, else need to destructure the whole thing...
+      has_plots_and_not_rds <- !inherits(d, "data.frame") && out_format != "rds"
+      assertthat::assert_that(!has_plots_and_not_rds)
       write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
