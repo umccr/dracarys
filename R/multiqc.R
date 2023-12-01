@@ -314,8 +314,9 @@ multiqc_date_fmt <- function(cdate) {
 #'
 #' @examples
 #' \dontrun{
-#' j <- here::here("nogit/warehouse/cttso/2023/05/wfr.ec3748db414f422381e419d367f73eec/dracarys_gds_sync/multiqc_data.json")
-#' multiqc_parse_plots(j, plot_names = c("fastqc_gc_content_mean_sequence_quality_plot", "dragen_coverage_per_contig"))
+#' j <- "dracarys_gds_sync/multiqc_data.json"
+#' multiqc_parse_plots(j, plot_names = c("dragen_coverage_per_contig"))
+#' multiqc_parse_plots(j, plot_names = "everything")
 #' multiqc_parse_plots(j, plot_names = NULL)
 #' }
 #' @export
@@ -428,7 +429,7 @@ multiqc_parse_xyline_plot_contig_cvg <- function(dat) {
 #' @examples
 #' \dontrun{
 #' j1 <- here::here("nogit/bcl_convert/multiqc_data.json")
-#' j2 <- here::here("nogit/warehouse/wgs_tumor_normal/SBJ03197/2023-04-30_0813ce/dracarys_gds_sync/multiqc_data.json")
+#' j2 <- here::here("nogit/dracarys_gds_sync/multiqc_data.json")
 #' j <- j1
 #' j <- j2
 #' multiqc_list_plots(j)

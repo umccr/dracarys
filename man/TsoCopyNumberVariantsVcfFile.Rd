@@ -9,7 +9,7 @@ Contains methods for reading and displaying contents of the
 }
 \examples{
 \dontrun{
-x <- normalizePath("~/icav1/g/production/analysis_data/SBJ00704/tso_ctdna_tumor_only/202311242b9666e0/L2301411/Results/PTC_ctTSO231120_L2301411/dracarys_gds_sync/PTC_ctTSO231120_L2301411_CopyNumberVariants.vcf.gz")
+x <- normalizePath("CopyNumberVariants.vcf.gz")
 d <- TsoCopyNumberVariantsVcfFile$new(x)
 d_parsed <- d$read() # or read(d)
 d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")

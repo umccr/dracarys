@@ -9,7 +9,7 @@ Contains methods for reading and displaying contents of the
 }
 \examples{
 \dontrun{
-x <- here::here("nogit/tso/2023-05-30/SBJ00595_L2100178/PTC_SrSqCMM1pc_L2100178_rerun_MergedSmallVariants.vcf.gz")
+x <- "MergedSmallVariants.vcf.gz"
 d <- TsoMergedSmallVariantsVcfFile$new(x)
 d_parsed <- d$read() # or read(d)
 d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")

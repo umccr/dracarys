@@ -113,7 +113,7 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE) {
 #'
 #' @examples
 #' \dontrun{
-#' vcf_local <- here::here("nogit/tso/2023-05-30/SBJ00595_L2100178/PTC_SrSqCMM1pc_L2100178_rerun_MergedSmallVariants.vcf.gz")
+#' vcf_local <- here::here("MergedSmallVariants.vcf.gz")
 #' r <- c("chr1:115256529-115256529", "chr2:29443613-29443613")
 #' bcftools_parse_vcf_regions(vcf_local, r)
 #' }

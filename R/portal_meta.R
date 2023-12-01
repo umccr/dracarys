@@ -493,7 +493,7 @@ meta_tso_ctdna_tumor_only <- function(pmeta, status = c("Succeeded")) {
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_star_alignment(pmeta))
 #' @testexamples
-#' expect_equal(all(c("s3_outdir_star", "LibraryID_tumor") %in% colnames(m)), TRUE)
+#' expect_equal(all(c("s3_outdir_star", "LibraryID") %in% colnames(m)), TRUE)
 #' @export
 meta_star_alignment <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status
@@ -710,7 +710,7 @@ meta_oncoanalyser_wgts_existing_both <- function(pmeta, status = "Succeeded") {
 #' pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
 #' (m <- meta_oncoanalyser_wts(pmeta))
 #' @testexamples
-#' expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor", "s3_bam_tumor") %in% colnames(m)), TRUE)
+#' expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID", "s3_bam") %in% colnames(m)), TRUE)
 #' @export
 meta_oncoanalyser_wts <- function(pmeta, status = "Succeeded") {
   # retrieve workflow runs with the given type and status

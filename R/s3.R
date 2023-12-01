@@ -12,7 +12,7 @@
 #' @return A tibble with path, date, file size, file type, and presigned URL if requested.
 #' @examples
 #' \dontrun{
-#' s3dir <- "s3://umccr-primary-data-prod/Accreditation/ALLOCATE-134131/WGS/2021-07-26/umccrised/ALLOCATE-134131__ALLOCATE-134131_MDx150892_Missing/cancer_report_tables"
+#' s3dir <- "s3://umccr-primary-data-prod/cancer_report_tables"
 #' s3_files_list_filter_relevant(s3dir = s3dir, presign = TRUE)
 #' }
 #' @export

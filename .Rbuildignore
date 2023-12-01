@@ -26,3 +26,8 @@
 ^\.dvcignore$
 ^\.dockerignore$
 CODE_OF_CONDUCT.md
+
+## inst html
+inst/rmd/umccr_portal/html
+inst/rmd/umccr_workflows/umccrise/html
+inst/rmd/umccr_workflows/bcl_convert/html

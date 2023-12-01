@@ -20,8 +20,9 @@ Parse Plot Data from MultiQC JSON
 }
 \examples{
 \dontrun{
-j <- here::here("nogit/warehouse/cttso/2023/05/wfr.ec3748db414f422381e419d367f73eec/dracarys_gds_sync/multiqc_data.json")
-multiqc_parse_plots(j, plot_names = c("fastqc_gc_content_mean_sequence_quality_plot", "dragen_coverage_per_contig"))
+j <- "dracarys_gds_sync/multiqc_data.json"
+multiqc_parse_plots(j, plot_names = c("dragen_coverage_per_contig"))
+multiqc_parse_plots(j, plot_names = "everything")
 multiqc_parse_plots(j, plot_names = NULL)
 }
 }

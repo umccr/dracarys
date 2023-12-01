@@ -6,6 +6,9 @@
 \usage{
 dr_output_format_valid(x)
 }
+\arguments{
+\item{x}{Output format.}
+}
 \description{
 Checks that the specified output format is valid.
 }

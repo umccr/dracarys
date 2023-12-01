@@ -73,7 +73,7 @@ test_that("Function meta_star_alignment() @ L498", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_star_alignment(pmeta))
-  expect_equal(all(c("s3_outdir_star", "LibraryID_tumor") %in% colnames(m)), TRUE)
+  expect_equal(all(c("s3_outdir_star", "LibraryID") %in% colnames(m)), TRUE)
 })
 
 
@@ -105,6 +105,6 @@ test_that("Function meta_oncoanalyser_wts() @ L715", {
   
   pmeta <- system.file("extdata/portal_meta_top4.csv", package = "dracarys")
   (m <- meta_oncoanalyser_wts(pmeta))
-  expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID_tumor", "s3_bam_tumor") %in% colnames(m)), TRUE)
+  expect_equal(all(c("s3_outdir_oncoanalyser", "LibraryID", "s3_bam") %in% colnames(m)), TRUE)
 })
 
