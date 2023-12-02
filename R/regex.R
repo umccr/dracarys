@@ -46,7 +46,7 @@ DR_FILE_REGEX <- tibble::tribble(
   "insert-stats\\.tab$", "NULL",
   "sv_metrics\\.csv$", "NULL",
   "trimmer_metrics\\.csv$", "NULL",
-  "wgs_contig_mean_cov(_tumor|_normal|)\\.csv$", "ContigMeanCovFile",
+  "wgs_contig_mean_cov(_tumor|_normal|)\\.csv*", "ContigMeanCovFile",
   "wgs_fine_hist(_tumor|_normal|)\\.csv$", "FineHistFile",
   "wgs_hist(_tumor|_normal|)\\.csv$", "NULL",
   "wgs_overall_mean_cov(_tumor|_normal|)\\.csv$", "NULL",

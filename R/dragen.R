@@ -11,9 +11,10 @@
 #' x2 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_tumor.csv.gz", package = "dracarys")
 #' cc1 <- ContigMeanCovFile$new(x1)
 #' cc2 <- ContigMeanCovFile$new(x2)
-#' read(cc1)
-#' read(cc2, keep_alt = TRUE)
-#' plot(cc1)
+#' d1 <- cc1$read()
+#' d2 <- cc2$read()
+#' cc1$plot(d1)
+#' cc2$plot(d2)
 #'
 #' @export
 ContigMeanCovFile <- R6::R6Class("ContigMeanCovFile", inherit = File, public = list(
@@ -27,34 +28,42 @@ ContigMeanCovFile <- R6::R6Class("ContigMeanCovFile", inherit = File, public = l
   #'   - n_bases: number of bases aligned to contig (excludes bases from
   #'   duplicate marked reads, reads with MAPQ=0, and clipped bases).
   #'   - coverage: col2 / contig length
-  read = function(keep_alt = FALSE) {
+  read = function(keep_alt = TRUE) {
     x <- self$path
     b <- self$bname()
-    suffix <- dplyr::if_else(
-      grepl("_normal\\.csv", b), "_N",
-      dplyr::if_else(grepl("_tumor\\.csv", b), "_T", "")
-    )
-    nm <- sub("(.*)\\.wgs_contig_mean_cov.*", "\\1", b)
-    label <- paste0(nm, suffix)
-
     readr::read_csv(x, col_names = c("chrom", "n_bases", "coverage"), col_types = "cdd") |>
       dplyr::filter(
         if (!keep_alt) {
-          !grepl("chrM|MT|_|Autosomal|HLA-", .data$chrom)
+          !grepl("chrM|MT|_|Autosomal|HLA-|EBV", .data$chrom)
         } else {
           TRUE
         }
-      ) |>
-      dplyr::mutate(label = tidyselect::all_of(label)) |>
-      dplyr::select("label", "chrom", "n_bases", "coverage")
+      )
   },
 
+  #' @description
+  #' Writes a tidy version of the `wgs_contig_mean_cov_<phenotype>.csv` file output
+  #' from DRAGEN.
+  #'
+  #' @param d Parsed object from `self$read()`.
+  #' @param prefix Prefix of output file(s).
+  #' @param out_dir Output directory.
+  #' @param out_format Format of output file(s).
+  #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+  write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+    if (!is.null(out_dir)) {
+      prefix <- file.path(out_dir, prefix)
+    }
+    write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
+  },
+
+
   #' @description Plots the `wgs_contig_mean_cov_<phenotype>.csv` files.
+  #' @param d Parsed object from `self$read()`.
   #' @param top_alt_n Number of top covered alt contigs to plot per phenotype.
   #' @return A ggplot2 object with chromosomes on X axis, and coverage on Y axis.
-  plot = function(top_alt_n = 15) {
-    assertthat::assert_that(length(top_alt_n) == 1, top_alt_n >= 0, is.numeric(top_alt_n))
-    cov_contig <- self$read(keep_alt = TRUE)
+  plot = function(d, top_alt_n = 15) {
+    assertthat::assert_that(top_alt_n >= 0)
 
     # Display chr1-22, X, Y at top (M goes to bottom).
     # Display top 20 of the rest, plus rest as 'other', at bottom
@@ -62,21 +71,16 @@ ContigMeanCovFile <- R6::R6Class("ContigMeanCovFile", inherit = File, public = l
     main_chrom2 <- c(paste0("chr", main_chrom1))
     main_chrom <- c(main_chrom1, main_chrom2, "Autosomal regions")
 
-    cov_contig <- cov_contig |>
+    d <- d |>
       dplyr::mutate(
         panel = dplyr::if_else(.data$chrom %in% main_chrom, "main", "alt"),
         panel = factor(.data$panel, levels = c("main", "alt"))
-      )
+      ) |>
+      dplyr::select("chrom", "coverage", "panel")
 
-    main_panel <- cov_contig |>
-      dplyr::filter(.data$panel == "main") |>
-      dplyr::select("label", "chrom", "coverage", "panel")
-    alt_panel <- cov_contig |>
-      dplyr::filter(.data$panel == "alt") |>
-      dplyr::select("label", "chrom", "coverage", "panel")
-
+    main_panel <- d |> dplyr::filter(.data$panel == "main")
+    alt_panel <- d |> dplyr::filter(.data$panel == "alt")
     top_alt <- alt_panel |>
-      dplyr::group_by(.data$label) |>
       dplyr::top_n(top_alt_n, wt = .data$coverage) |>
       dplyr::arrange(dplyr::desc(.data$coverage)) |>
       dplyr::pull(.data$chrom) |>
@@ -86,26 +90,26 @@ ContigMeanCovFile <- R6::R6Class("ContigMeanCovFile", inherit = File, public = l
       dplyr::mutate(alt_group = dplyr::if_else(.data$chrom %in% top_alt, "top", "bottom"))
 
     alt_panel_final <- alt_panel2 |>
-      dplyr::group_by(.data$alt_group, .data$label) |>
+      dplyr::group_by(.data$alt_group) |>
       dplyr::summarise(mean_cov = mean(.data$coverage)) |>
-      dplyr::inner_join(alt_panel2, by = c("alt_group", "label")) |>
+      dplyr::inner_join(alt_panel2, by = c("alt_group")) |>
       dplyr::mutate(
         chrom = dplyr::if_else(.data$alt_group == "bottom", "OTHER", .data$chrom),
         coverage = dplyr::if_else(.data$alt_group == "bottom", .data$mean_cov, .data$coverage)
       ) |>
       dplyr::distinct() |>
       dplyr::ungroup() |>
-      dplyr::select("label", "chrom", "coverage", "panel")
+      dplyr::select("chrom", "coverage", "panel")
 
     chrom_fac_levels <- c(main_chrom, "chrM", "MT", top_alt[!top_alt %in% c("chrM", "MT")], "OTHER")
     d <- dplyr::bind_rows(main_panel, alt_panel_final) |>
       dplyr::mutate(chrom = factor(.data$chrom, levels = chrom_fac_levels))
 
     d |>
+      dplyr::mutate(label = "sampleA") |>
       ggplot2::ggplot(
         ggplot2::aes(
-          x = .data$chrom, y = .data$coverage,
-          colour = .data$label, group = .data$label
+          x = .data$chrom, y = .data$coverage, group = .data$label,
         )
       ) +
       ggplot2::geom_point() +
