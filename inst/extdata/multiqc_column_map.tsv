@@ -6,8 +6,8 @@ dragen_alignment	Total input reads	reads_tot_input_dragen
 dragen_alignment	Total input reads pct	reads_tot_input_pct_dragen
 dragen_alignment	Number of duplicate marked reads	reads_num_dupmarked_dragen
 dragen_alignment	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
-dragen_alignment	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
-dragen_alignment	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_alignment	Number of unique reads (excl. duplicate marked reads)	reads_num_uniq_dragen
+dragen_alignment	Number of unique reads (excl. duplicate marked reads) pct	reads_num_uniq_pct_dragen
 dragen_alignment	Reads with mate sequenced	reads_w_mate_seq_dragen
 dragen_alignment	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
 dragen_alignment	Reads without mate sequenced	reads_wo_mate_seq_dragen
@@ -206,8 +206,8 @@ dragen_somatic	Total input reads	reads_tot_input_dragen
 dragen_somatic	Total input reads pct	reads_tot_input_pct_dragen
 dragen_somatic	Number of duplicate marked reads	reads_num_dupmarked_dragen
 dragen_somatic	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
-dragen_somatic	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
-dragen_somatic	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_somatic	Number of unique reads (excl. duplicate marked reads)	reads_num_uniq_dragen
+dragen_somatic	Number of unique reads (excl. duplicate marked reads) pct	reads_num_uniq_pct_dragen
 dragen_somatic	Reads with mate sequenced	reads_w_mate_seq_dragen
 dragen_somatic	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
 dragen_somatic	Reads without mate sequenced	reads_wo_mate_seq_dragen
@@ -458,8 +458,8 @@ dragen_transcriptome	Number of duplicate marked reads	reads_num_dupmarked_dragen
 dragen_transcriptome	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
 dragen_transcriptome	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
 dragen_transcriptome	Number of duplicate marked and mate reads removed pct	reads_num_dupmarked_mate_reads_removed_pct_dragen
-dragen_transcriptome	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
-dragen_transcriptome	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_transcriptome	Number of unique reads (excl. duplicate marked reads)	reads_num_uniq_dragen
+dragen_transcriptome	Number of unique reads (excl. duplicate marked reads) pct	reads_num_uniq_pct_dragen
 dragen_transcriptome	Reads with mate sequenced	reads_w_mate_seq_dragen
 dragen_transcriptome	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
 dragen_transcriptome	Reads without mate sequenced	reads_wo_mate_seq_dragen
@@ -634,8 +634,8 @@ dragen_umccrise	Total input reads	reads_tot_input_dragen
 dragen_umccrise	Total input reads pct	reads_tot_input_pct_dragen
 dragen_umccrise	Number of duplicate marked reads	reads_num_dupmarked_dragen
 dragen_umccrise	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
-dragen_umccrise	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
-dragen_umccrise	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_umccrise	Number of unique reads (excl. duplicate marked reads)	reads_num_uniq_dragen
+dragen_umccrise	Number of unique reads (excl. duplicate marked reads) pct	reads_num_uniq_pct_dragen
 dragen_umccrise	Reads with mate sequenced	reads_w_mate_seq_dragen
 dragen_umccrise	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
 dragen_umccrise	Reads without mate sequenced	reads_wo_mate_seq_dragen
@@ -984,8 +984,8 @@ dragen_ctdna	Number of duplicate marked reads	reads_num_dupmarked_dragen
 dragen_ctdna	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
 dragen_ctdna	Number of duplicate marked and mate reads removed	reads_num_dupmarked_mate_reads_removed_dragen
 dragen_ctdna	Number of duplicate marked and mate reads removed pct	reads_num_dupmarked_mate_reads_removed_pct_dragen
-dragen_ctdna	Number of unique reads (excl. duplicate marked reads)	reads_num_unique_dragen
-dragen_ctdna	Number of unique reads (excl. duplicate marked reads) pct	reads_num_unique_pct_dragen
+dragen_ctdna	Number of unique reads (excl. duplicate marked reads)	reads_num_uniq_dragen
+dragen_ctdna	Number of unique reads (excl. duplicate marked reads) pct	reads_num_uniq_pct_dragen
 dragen_ctdna	Reads with mate sequenced	reads_w_mate_seq_dragen
 dragen_ctdna	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
 dragen_ctdna	Reads without mate sequenced	reads_wo_mate_seq_dragen
@@ -1322,7 +1322,7 @@ bcbio_umccrise	Mapped_reads_pct	reads_mapped_pct_bcbio
 bcbio_umccrise	Mapped_unique_reads	reads_num_uniq_mapped_bcbio
 bcbio_umccrise	Offtarget_pct	reads_offtarget_pct_bcbio
 bcbio_umccrise	Ontarget_pct	reads_ontarget_pct_bcbio
-bcbio_umccrise	Ontarget_unique_reads	reads_ontarget_unique_bcbio
+bcbio_umccrise	Ontarget_unique_reads	reads_ontarget_uniq_bcbio
 bcbio_umccrise	Sequences_flagged_as_poor_quality	sequences_poor_quality_bcbio
 bcbio_umccrise	Total_reads	reads_tot_bcbio
 bcbio_umccrise	Usable_pct	reads_usable_pct_bcbio
@@ -1570,8 +1570,8 @@ bcbio_wts	Exonic_Rate	exonic_rate_qualimap
 bcbio_wts	Duplication_Rate_of_Mapped	mapped_dup_rate_qualimap
 bcbio_wts	total_reads	total_reads_star
 bcbio_wts	avg_input_read_length	avg_input_read_length_star
-bcbio_wts	uniquely_mapped	uniquely_mapped_star
-bcbio_wts	uniquely_mapped_percent	uniquely_mapped_percent_star
+bcbio_wts	uniquely_mapped	uniq_mapped_star
+bcbio_wts	uniquely_mapped_percent	uniq_mapped_percent_star
 bcbio_wts	avg_mapped_read_length	avg_mapped_read_length_star
 bcbio_wts	num_splices	num_splices_star
 bcbio_wts	num_annotated_splices	num_annotated_splices_star
@@ -1656,7 +1656,7 @@ bcbio_wgs	Mapped_reads_pct	reads_mapped_pct_bcbio
 bcbio_wgs	Mapped_unique_reads	reads_num_uniq_mapped_bcbio
 bcbio_wgs	Offtarget_pct	reads_offtarget_pct_bcbio
 bcbio_wgs	Ontarget_pct	reads_ontarget_pct_bcbio
-bcbio_wgs	Ontarget_unique_reads	reads_ontarget_unique_bcbio
+bcbio_wgs	Ontarget_unique_reads	reads_ontarget_uniq_bcbio
 bcbio_wgs	Sequences_flagged_as_poor_quality	sequences_poor_quality_bcbio
 bcbio_wgs	Total_reads	reads_tot_bcbio
 bcbio_wgs	Usable_pct	reads_usable_pct_bcbio
