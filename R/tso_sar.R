@@ -112,9 +112,8 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
           ),
           name = glue("{.data$metric}_{.data$name}")
         ) |>
-        dplyr::select("name", "value", "LSL", "USL") |>
-        tidyr::pivot_longer(c("value", "LSL", "USL"), names_to = "variable") |>
-        tidyr::pivot_wider(names_from = c("name", "variable"), values_from = "value")
+        dplyr::select("name", "value") |>
+        tidyr::pivot_wider(names_from = "name", values_from = "value")
 
       qc <- dplyr::bind_cols(smet_qc, smet_em)
       snvs <- tso_snv(dat[["variants"]][["smallVariants"]])
