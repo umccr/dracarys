@@ -3,6 +3,7 @@
 S3method(read,File)
 export(ContigMeanCovFile)
 export(CoverageMetricsFile)
+export(FastqcMetricsFile)
 export(File)
 export(FineHistFile)
 export(FragmentLengthHistFile)
