@@ -53,9 +53,8 @@ Reads the \code{mapping_metrics.csv} file output from DRAGEN.
 tibble with the following columns:
 - category: summary or read group
 - Phenotype: e.g. tumor, normal
-- RG: read group
+- RG: read group or TOTAL
 - var: metric variable
-- var_abbrev: metric variable abbreviation
 - count: count of reads
 - pct: percentage of reads
 }

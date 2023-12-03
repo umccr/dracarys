@@ -450,67 +450,72 @@ MappingMetricsFile <- R6::R6Class(
     #' @return tibble with the following columns:
     #'     - category: summary or read group
     #'     - Phenotype: e.g. tumor, normal
-    #'     - RG: read group
+    #'     - RG: read group or TOTAL
     #'     - var: metric variable
-    #'     - var_abbrev: metric variable abbreviation
     #'     - count: count of reads
     #'     - pct: percentage of reads
     read = function() {
       abbrev_nm <- c(
-        "Total Reads per RG" = "Tot",
-        "Number of duplicate marked reads" = "Dup",
-        "Number of duplicate marked and mate reads removed" = "Dup Rem",
-        "Number of unique reads (excl. duplicate marked reads)" = "Unique",
-        "Reads with mate sequenced" = "Mated",
-        "Reads without mate sequenced" = "noMated",
-        "QC-failed reads" = "Failed",
-        "Mapped reads" = "Mapped",
-        "Mapped reads R1" = "R1map",
-        "Mapped reads R2" = "R2map",
-        "Number of unique & mapped reads (excl. duplicate marked reads)" = "UniqueMap",
-        "Unmapped reads" = "Unmapped",
-        "Singleton reads (itself mapped; mate unmapped)" = "Singleton",
-        "Paired reads (itself & mate mapped)" = "PairedMap",
-        "Properly paired reads" = "PairedProper",
-        "Not properly paired reads (discordant)" = "PairedDisc",
-        "Paired reads mapped to different chromosomes" = "DiffChrom",
-        "Paired reads mapped to different chromosomes (MAPQ>=10)" = "DiffChrom MQ10",
-        "Reads with MAPQ [40:inf)" = "MQ 40+",
-        "Reads with MAPQ [30:40)" = "MQ 30-40",
-        "Reads with MAPQ [20:30)" = "MQ 20-30",
-        "Reads with MAPQ [10:20)" = "MQ 10-20",
-        "Reads with MAPQ [ 0:10)" = "MQ 0-10",
-        "Reads with MAPQ NA (Unmapped reads)" = "MQ NA",
-        "Reads with indel R1" = "R1 indel",
-        "Reads with indel R2" = "R2 indel",
-        "Total bases" = "TotalBases",
-        "Total bases R1" = "TotBasesR1",
-        "Total bases R2" = "TotBasesR2",
-        "Mapped bases R1" = "MappedBasesR1",
-        "Mapped bases R2" = "MappedBasesR2",
-        "Soft-clipped bases R1" = "SoftClipR1",
-        "Soft-clipped bases R2" = "SoftClipR2",
-        "Mismatched bases R1" = "MismatchR1",
-        "Mismatched bases R2" = "MismatchR2",
-        "Mismatched bases R1 (excl. indels)" = "MismatchR1 NI",
-        "Mismatched bases R2 (excl. indels)" = "MismatchR2 NI",
-        "Q30 bases" = "Q30",
-        "Q30 bases R1" = "R1Q30",
-        "Q30 bases R2" = "R2Q30",
-        "Q30 bases (excl. dups & clipped bases)" = "Q30 nondup",
-        "Total alignments" = "TotAlign",
-        "Secondary alignments" = "SecAlign",
-        "Supplementary (chimeric) alignments" = "ChimericAlign",
-        "Estimated read length" = "Read Length",
-        "Bases in reference genome" = "Genome Bases",
-        "Bases in target bed [% of genome]" = "BedBases %Genome",
-        "Average sequenced coverage over genome" = "Coverage Avg",
-        "Insert length: mean" = "InsertLength Mean",
-        "Insert length: median" = "InsertLength Median",
-        "Insert length: standard deviation" = "InsertLength StdDev",
-        "Provided sex chromosome ploidy" = "Ploidy SexChrom",
-        "DRAGEN mapping rate [mil. reads/second]" = "Map Rate"
+        "Total input reads" = "reads_tot_input_dragen",
+        "Number of duplicate marked reads" = "reads_num_dupmarked_dragen",
+        "Number of unique reads (excl. duplicate marked reads)" = "reads_num_uniq_dragen",
+        "Reads with mate sequenced" = "reads_w_mate_seq_dragen",
+        "Reads without mate sequenced" = "reads_wo_mate_seq_dragen",
+        "QC-failed reads" = "reads_qcfail_dragen",
+        "Mapped reads" = "reads_mapped_dragen",
+        "Mapped reads adjusted for filtered mapping" = "reads_mapped_adjfilt_dragen",
+        "Mapped reads R1" = "reads_mapped_r1_dragen",
+        "Mapped reads R2" = "reads_mapped_r2_dragen",
+        "Number of unique & mapped reads (excl. duplicate marked reads)" = "reads_num_uniq_mapped_dragen",
+        "Unmapped reads" = "reads_unmapped_dragen",
+        "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt_dragen",
+        "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj_dragen",
+        "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton_dragen",
+        "Paired reads (itself & mate mapped)" = "reads_paired_dragen",
+        "Properly paired reads" = "reads_paired_proper_dragen",
+        "Not properly paired reads (discordant)" = "reads_discordant_dragen",
+        "Paired reads mapped to different chromosomes" = "reads_paired_mapped_diff_chrom_dragen",
+        "Paired reads mapped to different chromosomes (MAPQ>=10)" = "reads_paired_mapped_diff_chrom_mapq10_dragen",
+        "Reads with MAPQ [40:inf)" = "reads_mapq_40_inf_dragen",
+        "Reads with MAPQ [30:40)" = "reads_mapq_30_40_dragen",
+        "Reads with MAPQ [20:30)" = "reads_mapq_20_30_dragen",
+        "Reads with MAPQ [10:20)" = "reads_mapq_10_20_dragen",
+        "Reads with MAPQ [ 0:10)" = "reads_mapq_0_10_dragen",
+        "Reads with MAPQ NA (Unmapped reads)" = "reads_mapq_na_unmapped_dragen",
+        "Reads with indel R1" = "reads_indel_r1_dragen",
+        "Reads with indel R2" = "reads_indel_r2_dragen",
+        "Total bases" = "bases_tot_dragen",
+        "Total bases R1" = "bases_tot_r1_dragen",
+        "Total bases R2" = "bases_tot_r2_dragen",
+        "Mapped bases R1" = "bases_mapped_r1_dragen",
+        "Mapped bases R2" = "bases_mapped_r2_dragen",
+        "Soft-clipped bases R1" = "bases_softclip_r1_dragen",
+        "Soft-clipped bases R2" = "bases_softclip_r2_dragen",
+        "Mismatched bases R1" = "bases_mismatched_r1_dragen",
+        "Mismatched bases R2" = "bases_mismatched_r2_dragen",
+        "Mismatched bases R1 (excl. indels)" = "bases_mismatched_r1_noindels_dragen",
+        "Mismatched bases R2 (excl. indels)" = "bases_mismatched_r2_noindels_dragen",
+        "Q30 bases" = "bases_q30_dragen",
+        "Q30 bases R1" = "bases_q30_r1_dragen",
+        "Q30 bases R2" = "bases_q30_r2_dragen",
+        "Q30 bases (excl. dups & clipped bases)" = "bases_q30_nodups_noclipped_dragen",
+        "Total alignments" = "alignments_tot_dragen",
+        "Secondary alignments" = "alignments_secondary_dragen",
+        "Supplementary (chimeric) alignments" = "alignments_chimeric_dragen",
+        "Estimated read length" = "read_len_dragen",
+        "Bases in reference genome" = "bases_in_ref_genome_dragen",
+        "Bases in target bed [% of genome]" = "bases_in_target_bed_genome_pct_dragen",
+        "Average sequenced coverage over genome" = "cov_avg_seq_over_genome_dragen",
+        "Insert length: mean" = "insert_len_mean_dragen",
+        "Insert length: median" = "insert_len_median_dragen",
+        "Insert length: standard deviation" = "insert_len_std_dev_dragen",
+        "Provided sex chromosome ploidy" = "ploidy_sex_chrom_provided_dragen",
+        "Estimated sample contamination" = "contamination_est_dragen",
+        "DRAGEN mapping rate [mil. reads/second]" = "mapping_rate_dragen_milreads_per_sec_dragen",
+        "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed_dragen",
+        "Total reads in RG" = "reads_tot_rg_dragen"
       )
+
 
       x <- self$path
       d <- readr::read_lines(x)
@@ -518,9 +523,7 @@ MappingMetricsFile <- R6::R6Class(
 
       d |>
         tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim("value", names = c("category", "RG", "extra"), delim = ",", too_many = "merge") |>
-        tidyr::separate_wider_delim("extra", names = c("var", "value"), delim = ",", too_many = "merge") |>
-        tidyr::separate_wider_delim("value", names = c("count", "pct"), delim = ",", too_few = "align_start") |>
+        tidyr::separate_wider_delim("value", names = c("category", "RG", "var", "count", "pct"), delim = ",", too_few = "align_start") |>
         dplyr::mutate(
           count = dplyr::na_if(.data$count, "NA"),
           count = as.numeric(.data$count),
@@ -536,12 +539,11 @@ MappingMetricsFile <- R6::R6Class(
             TRUE ~ "unknown"
           ),
           RG = ifelse(.data$RG == "", "TOTAL", .data$RG),
-          var = ifelse(grepl("Total.*reads", .data$var), "Total Reads per RG", .data$var),
-          var_abbrev = dplyr::recode(.data$var, !!!abbrev_nm)
+          var = dplyr::recode(.data$var, !!!abbrev_nm)
         ) |>
         dplyr::select(
           "category", "Phenotype", "RG",
-          "var", "var_abbrev", "count", "pct"
+          "var", "count", "pct"
         )
     },
     #' @description
