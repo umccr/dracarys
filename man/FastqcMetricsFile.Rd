@@ -12,7 +12,7 @@ x <- system.file("extdata/wgs/SEQC-II.fastqc_metrics.csv.gz", package = "dracary
 fq <- FastqcMetricsFile$new(x)
 d <- fq$read()
 fq$write(d, out_dir = tempdir(), prefix = "seqc_fq", out_format = "tsv")
-#fq$plot(d)
+# fq$plot(d)
 
 }
 \section{Super class}{

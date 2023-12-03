@@ -12,7 +12,7 @@ x <- system.file("extdata/wgs/SEQC-II.fragment_length_hist.csv.gz", package = "d
 fl <- FragmentLengthHistFile$new(x)
 d <- fl$read() # or read(fl)
 fl$plot(d) # or plot(fl)
-fl$write(d |> dplyr::filter(count > 10), out_dir = tempdir(), prefix = "seqc_fl", out_format = "tsv")
+fl$write(d |> dplyr::filter(count > 10), out_dir = tempdir(), prefix = "seqc_fl")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{FragmentLengthHistFile}

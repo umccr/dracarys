@@ -36,7 +36,6 @@ ContigMeanCovFile <- R6::R6Class(
     #'   - coverage: col2 / contig length
     read = function(keep_alt = TRUE) {
       x <- self$path
-      b <- self$bname()
       readr::read_csv(x, col_names = c("chrom", "n_bases", "coverage"), col_types = "cdd") |>
         dplyr::filter(
           if (!keep_alt) {
@@ -176,51 +175,53 @@ CoverageMetricsFile <- R6::R6Class(
     #'   - count: count value.
     read = function() {
       abbrev_nm <- c(
-        "Aligned bases" = "Aln bases",
-        "Aligned bases in genome" = "Aln Bases Genome",
-        "Average alignment coverage over genome" = "Avg Cov Genome",
-        "Average chr X coverage over genome" = "Avg Cov chrX",
-        "Average chr Y coverage over genome" = "Avg Cov chrY",
-        "Average mitochondrial coverage over genome" = "Avg Cov chrM",
-        "Average autosomal coverage over genome" = "Avg Cov Autos",
-        "Median autosomal coverage over genome" = "Med Cov Autos",
-        "Mean/Median autosomal coverage ratio over genome" = "Cov Ratio",
-        "Aligned reads" = "Aln Reads",
-        "Aligned reads in genome" = "Aln Reads Genome"
+        "Aligned bases"                                       = "bases_aligned_dragen",
+        "Aligned bases in genome"                             = "bases_aligned_in_genome_dragen",
+        "Average alignment coverage over genome"              = "cov_alignment_avg_over_genome_dragen",
+        "Uniformity of coverage (PCT > 0.2*mean) over genome" = "cov_uniformity_over_genome_pct_gt02mean_dragen",
+        "PCT of genome with coverage [100x: inf)"             = "cov_genome_pct_100x_inf_dragen",
+        "PCT of genome with coverage [ 50x: inf)"             = "cov_genome_pct_50x_inf_dragen",
+        "PCT of genome with coverage [ 20x: inf)"             = "cov_genome_pct_20x_inf_dragen",
+        "PCT of genome with coverage [ 15x: inf)"             = "cov_genome_pct_15x_inf_dragen",
+        "PCT of genome with coverage [ 10x: inf)"             = "cov_genome_pct_10x_inf_dragen",
+        "PCT of genome with coverage [  3x: inf)"             = "cov_genome_pct_3x_inf_dragen",
+        "PCT of genome with coverage [  1x: inf)"             = "cov_genome_pct_1x_inf_dragen",
+        "PCT of genome with coverage [  0x: inf)"             = "cov_genome_pct_0x_inf_dragen",
+        "PCT of genome with coverage [ 50x:100x)"             = "cov_genome_pct_50x_100x_dragen",
+        "PCT of genome with coverage [ 20x: 50x)"             = "cov_genome_pct_20x_50x_dragen",
+        "PCT of genome with coverage [ 15x: 20x)"             = "cov_genome_pct_15x_20x_dragen",
+        "PCT of genome with coverage [ 10x: 15x)"             = "cov_genome_pct_10x_15x_dragen",
+        "PCT of genome with coverage [  3x: 10x)"             = "cov_genome_pct_3x_10x_dragen",
+        "PCT of genome with coverage [  1x:  3x)"             = "cov_genome_pct_1x_3x_dragen",
+        "PCT of genome with coverage [  0x:  1x)"             = "cov_genome_pct_0x_1x_dragen",
+        "Average chr X coverage over genome"                  = "cov_avg_x_over_genome_dragen",
+        "Average chr Y coverage over genome"                  = "cov_avg_y_over_genome_dragen",
+        "Average mitochondrial coverage over genome"          = "cov_avg_mt_over_genome_dragen",
+        "Average autosomal coverage over genome"              = "cov_avg_auto_over_genome_dragen",
+        "Median autosomal coverage over genome"               = "cov_median_auto_over_genome_dragen",
+        "Mean/Median autosomal coverage ratio over genome"    = "cov_mean_median_auto_ratio_over_genome_dragen",
+        "Aligned reads"                                       = "reads_aligned_dragen",
+        "Aligned reads in genome"                             = "reads_aligned_in_genome_dragen"
       )
 
       x <- self$path
-      d <- readr::read_lines(x)
+      raw <- readr::read_lines(x)
       assertthat::assert_that(grepl("COVERAGE SUMMARY", d[1]))
 
-      d <- d |>
+      raw |>
         tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim("value", delim = ",", names = c("category", "dummy1", "extra"), too_many = "merge") |>
-        tidyr::separate_wider_delim("extra", delim = ",", names = c("var", "value"), too_many = "merge") |>
-        dplyr::select(-"dummy1")
-
-      pct <- d |>
-        dplyr::filter(grepl("PCT", .data$var)) |>
-        dplyr::mutate(
-          value = as.numeric(.data$value),
-          var_abbrev = dplyr::case_when(
-            grepl("PCT of genome", .data$var) ~ sub("PCT of genome with coverage", "%genome", var),
-            grepl("Uniformity", .data$var) ~ "uniformity (% > 0.2*mean)",
-            TRUE ~ "FOO"
-          )
+        tidyr::separate_wider_delim(
+          "value",
+          delim = ",", too_few = "align_start",
+          names = c("category", "dummy1", "var", "value", "pct")
         ) |>
-        dplyr::select("var", "var_abbrev", pct = "value")
-
-      cnt <- d |>
-        dplyr::filter(!grepl("PCT", .data$var)) |>
-        tidyr::separate_wider_delim("value", delim = ",", names = c("count", "pct"), too_few = "align_start") |>
         dplyr::mutate(
-          pct = as.numeric(.data$pct),
-          var_abbrev = dplyr::recode(.data$var, !!!abbrev_nm)
+          var = dplyr::recode(.data$var, !!!abbrev_nm),
+          value = as.numeric(.data$value)
         ) |>
-        dplyr::select("var", "var_abbrev", "count", "pct")
-
-      dplyr::bind_rows(pct, cnt)
+        # pct just shows 100% for a couple rows
+        dplyr::select("var", "value") |>
+        tidyr::pivot_wider(names_from = "var", values_from = "value")
     },
     #' @description
     #' Writes a tidy version of the `wgs_coverage_metrics_<phenotype>.csv` file output
@@ -339,7 +340,7 @@ FineHistFile <- R6::R6Class(
 #' fl <- FragmentLengthHistFile$new(x)
 #' d <- fl$read() # or read(fl)
 #' fl$plot(d) # or plot(fl)
-#' fl$write(d |> dplyr::filter(count > 10), out_dir = tempdir(), prefix = "seqc_fl", out_format = "tsv")
+#' fl$write(d |> dplyr::filter(count > 10), out_dir = tempdir(), prefix = "seqc_fl")
 #' @export
 FragmentLengthHistFile <- R6::R6Class(
   "FragmentLengthHistFile",
@@ -836,3 +837,98 @@ VCMetricsFile <- R6::R6Class(
     }
   )
 )
+
+#' TrimmerMetricsFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of
+#' the `trimmer_metrics.csv` file output from DRAGEN
+#'
+#' @examples
+#' x <- system.file("extdata/wgs/SEQC-II.trimmer_metrics.csv.gz", package = "dracarys")
+#' tm <- TrimmerMetricsFile$new(x)
+#' d <- tm$read()
+#' tm$write(d, out_dir = tempdir(), prefix = "seqc_tm", out_format = "tsv")
+#'
+#' @export
+TrimmerMetricsFile <- R6::R6Class(
+  "TrimmerMetricsFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `trimmer_metrics.csv` file output from DRAGEN.
+    #'
+    #' @return tibble (TODO)
+    read = function() {
+      x <- self$path
+      d <- readr::read_lines(x)
+      assertthat::assert_that(grepl("TRIMMER STATISTICS", d[1]))
+      trimmer_abbrev_nm <- c(
+        "Total input reads"                              = "reads_tot_input_dragen",
+        "Total input bases"                              = "bases_tot_dragen",
+        "Total input bases R1"                           = "bases_r1_dragen",
+        "Total input bases R2"                           = "bases_r2_dragen",
+        "Average input read length"                      = "read_len_avg_dragen",
+        "Total trimmed reads"                            = "reads_trimmed_tot_dragen",
+        "Total trimmed bases"                            = "bases_trimmed_tot_dragen",
+        "Average bases trimmed per read"                 = "bases_trimmed_avg_per_read_dragen",
+        "Average bases trimmed per trimmed read"         = "bases_trimmed_avg_per_trimmedread_dragen",
+        "Remaining poly-G K-mers R1 3prime"              = "polygkmers3r1_remaining_dragen",
+        "Remaining poly-G K-mers R2 3prime"              = "polygkmers3r2_remaining_dragen",
+        "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trimmed_reads_unfilt_3r1_dragen",
+        "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trimmed_reads_unfilt_3r2_dragen",
+        "Poly-G soft trimmed reads filtered R1 3prime"   = "polyg_soft_trimmed_reads_filt_3r1_dragen",
+        "Poly-G soft trimmed reads filtered R2 3prime"   = "polyg_soft_trimmed_reads_filt_3r2_dragen",
+        "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trimmed_bases_unfilt_3r1_dragen",
+        "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trimmed_bases_unfilt_3r2_dragen",
+        "Poly-G soft trimmed bases filtered R1 3prime"   = "polyg_soft_trimmed_bases_filt_3r1_dragen",
+        "Poly-G soft trimmed bases filtered R2 3prime"   = "polyg_soft_trimmed_bases_filt_3r2_dragen",
+        "Total filtered reads"                           = "reads_tot_filt_dragen",
+        "Reads filtered for minimum read length R1"      = "reads_filt_minreadlenr1_dragen",
+        "Reads filtered for minimum read length R2"      = "reads_filt_minreadlenr2_dragen"
+      )
+
+      d |>
+        tibble::as_tibble_col(column_name = "value") |>
+        tidyr::separate_wider_delim("value", names = c("category", "extra", "var", "count", "pct"), delim = ",", too_few = "align_start") |>
+        dplyr::mutate(
+          count = as.numeric(.data$count),
+          pct = round(as.numeric(.data$pct), 2),
+          var = dplyr::recode(.data$var, !!!trimmer_abbrev_nm)
+        ) |>
+        dplyr::select("var", "count", "pct") |>
+        tidyr::pivot_longer(c("count", "pct")) |>
+        dplyr::filter(!is.na(.data$value)) |>
+        dplyr::mutate(
+          name = dplyr::if_else(.data$name == "count", "", "_pct"),
+          var = glue("{.data$var}{.data$name}")
+        ) |>
+        dplyr::select("var", "value") |>
+        tidyr::pivot_wider(names_from = "var", values_from = "value")
+    },
+    #' @description
+    #' Writes a tidy version of the `trimmer_metrics.csv` file output
+    #' from DRAGEN.
+    #'
+    #' @param d Parsed object from `self$read()`.
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
+    }
+  )
+)
+
+# TODO:
+# - wgs_hist.csv
+#
+# wts
+# - quant_metrics.csv
+# - quant.transcript_fragment_lengths.txt
+# - quant.transcript_coverage.txt
+# - saturation.txt
