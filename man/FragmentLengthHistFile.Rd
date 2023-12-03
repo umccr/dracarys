@@ -10,8 +10,9 @@ the \code{fragment_length_hist.csv} file output from DRAGEN.
 \examples{
 x <- system.file("extdata/wgs/SEQC-II.fragment_length_hist.csv.gz", package = "dracarys")
 fl <- FragmentLengthHistFile$new(x)
-fl$read() # or read(fl)
-fl$plot() # or plot(fl)
+d <- fl$read() # or read(fl)
+fl$plot(d) # or plot(fl)
+fl$write(d |> dplyr::filter(count > 10), out_dir = tempdir(), prefix = "seqc_fl", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{FragmentLengthHistFile}
@@ -20,6 +21,7 @@ fl$plot() # or plot(fl)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-FragmentLengthHistFile-read}{\code{FragmentLengthHistFile$read()}}
+\item \href{#method-FragmentLengthHistFile-write}{\code{FragmentLengthHistFile$write()}}
 \item \href{#method-FragmentLengthHistFile-plot}{\code{FragmentLengthHistFile$plot()}}
 \item \href{#method-FragmentLengthHistFile-clone}{\code{FragmentLengthHistFile$clone()}}
 }
@@ -54,18 +56,52 @@ A tibble with the following columns:
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-FragmentLengthHistFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-FragmentLengthHistFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{fragment_length_hist.csv} file output
+from DRAGEN.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{FragmentLengthHistFile$write(
+  d,
+  out_dir = NULL,
+  prefix,
+  out_format = "tsv",
+  drid = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-FragmentLengthHistFile-plot"></a>}}
 \if{latex}{\out{\hypertarget{method-FragmentLengthHistFile-plot}{}}}
 \subsection{Method \code{plot()}}{
 Plots the fragment length distributions as given in the
 \code{fragment_length_hist.csv} file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{FragmentLengthHistFile$plot(min_count = 10)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{FragmentLengthHistFile$plot(d, min_count = 10)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{min_count}}{Minimum read count to be plotted (Default: 10).}
 }
 \if{html}{\out{</div>}}

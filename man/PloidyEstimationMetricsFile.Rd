@@ -10,7 +10,8 @@ the \code{ploidy_estimation_metrics.csv} file output from DRAGEN.
 \examples{
 x <- system.file("extdata/wgs/SEQC-II.ploidy_estimation_metrics.csv.gz", package = "dracarys")
 pem <- PloidyEstimationMetricsFile$new(x)
-pem$read() # or read(pem)
+d <- pem$read() # or read(pem)
+pem$write(d, out_dir = tempdir(), prefix = "seqc_ploidy", out_format = "tsv")
 
 }
 \section{Super class}{
@@ -20,6 +21,7 @@ pem$read() # or read(pem)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-PloidyEstimationMetricsFile-read}{\code{PloidyEstimationMetricsFile$read()}}
+\item \href{#method-PloidyEstimationMetricsFile-write}{\code{PloidyEstimationMetricsFile$write()}}
 \item \href{#method-PloidyEstimationMetricsFile-clone}{\code{PloidyEstimationMetricsFile$clone()}}
 }
 }
@@ -48,6 +50,38 @@ tibble with the following columns:
 - var: variable of interest (e.g. X median coverage)
 - value: value for specific variable (e.g. X median coverage
 variable with a value of  50)
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-PloidyEstimationMetricsFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-PloidyEstimationMetricsFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{ploidy_estimation_metrics.csv} file output
+from DRAGEN.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{PloidyEstimationMetricsFile$write(
+  d,
+  out_dir = NULL,
+  prefix,
+  out_format = "tsv",
+  drid = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

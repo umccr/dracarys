@@ -14,9 +14,13 @@ x1 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_normal.csv.gz", packa
 x2 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_tumor.csv.gz", package = "dracarys")
 cc1 <- ContigMeanCovFile$new(x1)
 cc2 <- ContigMeanCovFile$new(x2)
-read(cc1)
-read(cc2, keep_alt = TRUE)
-plot(cc1)
+d1 <- cc1$read()
+d2 <- cc2$read()
+cc1$write(d1, out_dir = tempdir(), prefix = "seqc_n", out_format = "tsv")
+cc2$write(d2, out_dir = tempdir(), prefix = "seqc_t", out_format = "tsv")
+
+cc1$plot(d1)
+cc2$plot(d2)
 
 }
 \section{Super class}{
@@ -26,6 +30,7 @@ plot(cc1)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ContigMeanCovFile-read}{\code{ContigMeanCovFile$read()}}
+\item \href{#method-ContigMeanCovFile-write}{\code{ContigMeanCovFile$write()}}
 \item \href{#method-ContigMeanCovFile-plot}{\code{ContigMeanCovFile$plot()}}
 \item \href{#method-ContigMeanCovFile-clone}{\code{ContigMeanCovFile$clone()}}
 }
@@ -46,7 +51,7 @@ plot(cc1)
 \subsection{Method \code{read()}}{
 Reads the \verb{wgs_contig_mean_cov_<phenotype>.csv} file output from DRAGEN.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ContigMeanCovFile$read(keep_alt = FALSE)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ContigMeanCovFile$read(keep_alt = TRUE)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -68,17 +73,51 @@ duplicate marked reads, reads with MAPQ=0, and clipped bases).
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-ContigMeanCovFile-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-ContigMeanCovFile-plot}{}}}
-\subsection{Method \code{plot()}}{
-Plots the \verb{wgs_contig_mean_cov_<phenotype>.csv} files.
+\if{html}{\out{<a id="method-ContigMeanCovFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-ContigMeanCovFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \verb{wgs_contig_mean_cov_<phenotype>.csv} file output
+from DRAGEN.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{ContigMeanCovFile$plot(top_alt_n = 15)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{ContigMeanCovFile$write(
+  d,
+  out_dir = NULL,
+  prefix,
+  out_format = "tsv",
+  drid = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ContigMeanCovFile-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-ContigMeanCovFile-plot}{}}}
+\subsection{Method \code{plot()}}{
+Plots the \verb{wgs_contig_mean_cov_<phenotype>.csv} files.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ContigMeanCovFile$plot(d, top_alt_n = 15)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{top_alt_n}}{Number of top covered alt contigs to plot per phenotype.}
 }
 \if{html}{\out{</div>}}

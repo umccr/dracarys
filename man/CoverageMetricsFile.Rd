@@ -13,8 +13,10 @@ x1 <- system.file("extdata/wgs/SEQC-II.wgs_coverage_metrics_normal.csv.gz", pack
 x2 <- system.file("extdata/wgs/SEQC-II.wgs_coverage_metrics_tumor.csv.gz", package = "dracarys")
 cm1 <- CoverageMetricsFile$new(x1)
 cm2 <- CoverageMetricsFile$new(x2)
-read(cm1)
-read(cm2)
+d1 <- read(cm1)
+d2 <- read(cm2)
+cm1$write(d1, out_dir = tempdir(), prefix = "seqc_n", out_format = "tsv")
+cm2$write(d2, out_dir = tempdir(), prefix = "seqc_t", out_format = "tsv")
 
 }
 \section{Super class}{
@@ -24,6 +26,7 @@ read(cm2)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-CoverageMetricsFile-read}{\code{CoverageMetricsFile$read()}}
+\item \href{#method-CoverageMetricsFile-write}{\code{CoverageMetricsFile$write()}}
 \item \href{#method-CoverageMetricsFile-clone}{\code{CoverageMetricsFile$clone()}}
 }
 }
@@ -55,6 +58,38 @@ tibble with the following columns:
 \item pct: percentage value.
 \item count: count value.
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-CoverageMetricsFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-CoverageMetricsFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \verb{wgs_coverage_metrics_<phenotype>.csv} file output
+from DRAGEN
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{CoverageMetricsFile$write(
+  d,
+  out_dir = NULL,
+  prefix,
+  out_format = "tsv",
+  drid = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

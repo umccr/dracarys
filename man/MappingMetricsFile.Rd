@@ -15,7 +15,8 @@ terms of pairs or alignments).
 \examples{
 x <- system.file("extdata/wgs/SEQC-II.mapping_metrics.csv.gz", package = "dracarys")
 mm <- MappingMetricsFile$new(x)
-mm$read() # or read(mm)
+d <- mm$read() # or read(mm)
+mm$write(d, out_dir = tempdir(), prefix = "seqc_mm", out_format = "tsv")
 
 }
 \section{Super class}{
@@ -25,6 +26,7 @@ mm$read() # or read(mm)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-MappingMetricsFile-read}{\code{MappingMetricsFile$read()}}
+\item \href{#method-MappingMetricsFile-write}{\code{MappingMetricsFile$write()}}
 \item \href{#method-MappingMetricsFile-clone}{\code{MappingMetricsFile$clone()}}
 }
 }
@@ -56,6 +58,38 @@ tibble with the following columns:
 - var_abbrev: metric variable abbreviation
 - count: count of reads
 - pct: percentage of reads
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-MappingMetricsFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-MappingMetricsFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{mapping_metrics.csv} file output
+from DRAGEN.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{MappingMetricsFile$write(
+  d,
+  out_dir = NULL,
+  prefix,
+  out_format = "tsv",
+  drid = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

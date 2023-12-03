@@ -15,11 +15,12 @@ x1 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_normal.csv.gz", package = "
 x2 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_tumor.csv.gz", package = "dracarys")
 ch1 <- FineHistFile$new(x1)
 ch2 <- FineHistFile$new(x2)
-read(ch1)
-read(ch2)
-plot(ch1)
-plot(ch2)
-
+d1 <- read(ch1)
+d2 <- read(ch2)
+ch1$plot(d1)
+ch2$plot(d2)
+ch1$write(d1, out_dir = tempdir(), prefix = "seqc_n", out_format = "tsv")
+ch2$write(d2, out_dir = tempdir(), prefix = "seqc_t", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{FineHistFile}
@@ -28,6 +29,7 @@ plot(ch2)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-FineHistFile-read}{\code{FineHistFile$read()}}
+\item \href{#method-FineHistFile-write}{\code{FineHistFile$write()}}
 \item \href{#method-FineHistFile-plot}{\code{FineHistFile$plot()}}
 \item \href{#method-FineHistFile-clone}{\code{FineHistFile$clone()}}
 }
@@ -61,17 +63,45 @@ tibble with three columns:
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-FineHistFile-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-FineHistFile-plot}{}}}
-\subsection{Method \code{plot()}}{
-Plots the \verb{wgs_fine_hist_<phenotype>.csv} files.
+\if{html}{\out{<a id="method-FineHistFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-FineHistFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \verb{wgs_fine_hist_<phenotype>.csv} file output
+from DRAGEN
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{FineHistFile$plot(x_lim = c(0, 300))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{FineHistFile$write(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-FineHistFile-plot"></a>}}
+\if{latex}{\out{\hypertarget{method-FineHistFile-plot}{}}}
+\subsection{Method \code{plot()}}{
+Plots the \verb{wgs_fine_hist_<phenotype>.csv} files.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{FineHistFile$plot(d, x_lim = c(0, 300))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
 \item{\code{x_lim}}{X axis range to plot.}
 }
 \if{html}{\out{</div>}}

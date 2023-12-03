@@ -23,8 +23,8 @@ tibble with the following columns:
 Processes multiple TimeMetricsFile objects.
 }
 \examples{
-x <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
-x <- TimeMetricsFile$new(x)
+p <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
+x <- TimeMetricsFile$new(p)
 (tm <- time_metrics_process(c(x, x), id = c("run1", "run2")))
 
 }

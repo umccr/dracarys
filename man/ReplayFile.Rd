@@ -11,7 +11,8 @@ line, parameters and version for the specific run.
 \examples{
 x <- system.file("extdata/wgs/SEQC-II-replay.json.gz", package = "dracarys")
 r <- ReplayFile$new(x)
-r$read() # or read(r)
+d <- r$read() # or read(r)
+r$write(d, out_dir = tempdir(), prefix = "seqc_replay", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{ReplayFile}
@@ -20,6 +21,7 @@ r$read() # or read(r)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-ReplayFile-read}{\code{ReplayFile$read()}}
+\item \href{#method-ReplayFile-write}{\code{ReplayFile$write()}}
 \item \href{#method-ReplayFile-clone}{\code{ReplayFile$clone()}}
 }
 }
@@ -51,6 +53,32 @@ A list with the following elements:
 \item \code{label}: character of sample label (inferred from file name)
 \item \code{hash_table_build}: tibble with details about the DRAGEN hash table build.
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-ReplayFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-ReplayFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{replay.json} file output
+from DRAGEN.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{ReplayFile$write(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

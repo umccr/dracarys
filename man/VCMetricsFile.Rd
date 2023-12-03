@@ -18,7 +18,8 @@ POSTFILTER VCF metrics.
 \examples{
 x <- system.file("extdata/wgs/SEQC-II.vc_metrics.csv.gz", package = "dracarys")
 vm <- VCMetricsFile$new(x)
-vm$read() # or read(vm)
+d <- vm$read() # or read(vm)
+vm$write(d, out_dir = tempdir(), prefix = "seqc_vc", out_format = "tsv")
 
 }
 \section{Super class}{
@@ -28,6 +29,7 @@ vm$read() # or read(vm)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-VCMetricsFile-read}{\code{VCMetricsFile$read()}}
+\item \href{#method-VCMetricsFile-write}{\code{VCMetricsFile$write()}}
 \item \href{#method-VCMetricsFile-clone}{\code{VCMetricsFile$clone()}}
 }
 }
@@ -59,6 +61,32 @@ tibble with the following columns:
 \item count: count value
 \item pct: percent value
 }
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-VCMetricsFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-VCMetricsFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{vc_metrics.csv} file output
+from DRAGEN.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{VCMetricsFile$write(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
