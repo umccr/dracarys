@@ -50,14 +50,7 @@ Reads the \verb{wgs_coverage_metrics_<phenotype>.csv} file output from DRAGEN.
 }
 
 \subsection{Returns}{
-tibble with the following columns:
-\itemize{
-\item label: file label.
-\item var: variable name.
-\item var_abbrev: variable abbreviation.
-\item pct: percentage value.
-\item count: count value.
-}
+tibble with one row and metrics spread across individual columns.
 }
 }
 \if{html}{\out{<hr>}}

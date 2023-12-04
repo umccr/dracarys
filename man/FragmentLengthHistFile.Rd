@@ -49,9 +49,9 @@ fragment length distribution for each sample.
 \subsection{Returns}{
 A tibble with the following columns:
 \itemize{
+\item sample: name of sample
 \item fragmentLength: estimated fragment length
 \item count: number of reads with estimated fragment length
-\item sample: name of sample
 }
 }
 }

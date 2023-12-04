@@ -6,14 +6,6 @@
 \description{
 Contains methods for reading and displaying contents of
 the \code{vc_metrics.csv} file output from DRAGEN, which contains variant calling metrics.
-reported for each sample in multi sample VCF and gVCF files.
-Based on the run case, metrics are reported either as standard VARIANT
-CALLER or JOINT CALLER. Metrics are reported both for the raw
-(PREFILTER) and hard filtered (POSTFILTER) VCFs.
-PON (Panel of Normals) and COSMIC filtered variants are counted as
-though they are PASS variants in the POSTFILTER VCFs metrics,
-which may result in higher than expected variant counts in the
-POSTFILTER VCF metrics.
 }
 \examples{
 x <- system.file("extdata/wgs/SEQC-II.vc_metrics.csv.gz", package = "dracarys")
@@ -53,14 +45,7 @@ Reads the \code{vc_metrics.csv} file output from DRAGEN.
 }
 
 \subsection{Returns}{
-tibble with the following columns:
-\itemize{
-\item category
-\item sample
-\item var: variable name
-\item count: count value
-\item pct: percent value
-}
+tibble with one row and metrics spread across individual columns.
 }
 }
 \if{html}{\out{<hr>}}

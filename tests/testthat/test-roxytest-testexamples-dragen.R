@@ -2,7 +2,7 @@
 
 # File R/dragen.R: @testexamples
 
-test_that("Function time_metrics_process() @ L760", {
+test_that("Function time_metrics_process() @ L770", {
   
   p <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
   x <- TimeMetricsFile$new(p)

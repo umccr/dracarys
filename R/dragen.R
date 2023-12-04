@@ -167,12 +167,7 @@ CoverageMetricsFile <- R6::R6Class(
     #' @description
     #' Reads the `wgs_coverage_metrics_<phenotype>.csv` file output from DRAGEN.
     #'
-    #' @return tibble with the following columns:
-    #'   - label: file label.
-    #'   - var: variable name.
-    #'   - var_abbrev: variable abbreviation.
-    #'   - pct: percentage value.
-    #'   - count: count value.
+    #' @return tibble with one row and metrics spread across individual columns.
     read = function() {
       abbrev_nm <- c(
         "Aligned bases"                                       = "bases_aligned_dragen",
@@ -206,7 +201,7 @@ CoverageMetricsFile <- R6::R6Class(
 
       x <- self$path
       raw <- readr::read_lines(x)
-      assertthat::assert_that(grepl("COVERAGE SUMMARY", d[1]))
+      assertthat::assert_that(grepl("COVERAGE SUMMARY", raw[1]))
 
       raw |>
         tibble::as_tibble_col(column_name = "value") |>
@@ -268,8 +263,7 @@ FineHistFile <- R6::R6Class(
   public = list(
     #' @description
     #' Reads the `wgs_fine_hist_<phenotype>.csv` file output from DRAGEN.
-    #' @return tibble with three columns:
-    #'   - label
+    #' @return tibble with following columns:
     #'   - depth
     #'   - number of loci with given depth
     read = function() {
@@ -349,9 +343,9 @@ FragmentLengthHistFile <- R6::R6Class(
     #' @description Reads the `fragment_length_hist.csv` file, which contains the
     #' fragment length distribution for each sample.
     #' @return A tibble with the following columns:
+    #' - sample: name of sample
     #' - fragmentLength: estimated fragment length
     #' - count: number of reads with estimated fragment length
-    #' - sample: name of sample
     read = function() {
       x <- self$path
       d <- readr::read_lines(x)
@@ -429,7 +423,8 @@ FragmentLengthHistFile <- R6::R6Class(
 #' the `mapping_metrics.csv` file output from DRAGEN.
 #' This file contains mapping and aligning metrics, like the metrics computed by
 #' the Samtools Flagstat command. These metrics are available on an aggregate
-#' level (over all input data), and on a per read group level.
+#' level (over all input data), and on a per read group level. NOTE: we are
+#' keeping only the read group level metrics (i.e. removing the aggregate data).
 #' Unless explicitly stated, the metrics units are in reads (i.e., not in
 #' terms of pairs or alignments).
 #'
@@ -447,13 +442,7 @@ MappingMetricsFile <- R6::R6Class(
     #' @description
     #' Reads the `mapping_metrics.csv` file output from DRAGEN.
     #'
-    #' @return tibble with the following columns:
-    #'     - category: summary or read group
-    #'     - Phenotype: e.g. tumor, normal
-    #'     - RG: read group or TOTAL
-    #'     - var: metric variable
-    #'     - count: count of reads
-    #'     - pct: percentage of reads
+    #' @return tibble with one row of X metrics per read group.
     read = function() {
       abbrev_nm <- c(
         "Total input reads" = "reads_tot_input_dragen",
@@ -515,36 +504,35 @@ MappingMetricsFile <- R6::R6Class(
         "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed_dragen",
         "Total reads in RG" = "reads_tot_rg_dragen"
       )
-
-
       x <- self$path
-      d <- readr::read_lines(x)
-      assertthat::assert_that(grepl("MAPPING/ALIGNING", d[1]))
-
-      d |>
+      raw <- readr::read_lines(x)
+      assertthat::assert_that(grepl("MAPPING/ALIGNING", raw[1]))
+      # tidy
+      d <- raw |>
         tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim("value", names = c("category", "RG", "var", "count", "pct"), delim = ",", too_few = "align_start") |>
+        tidyr::separate_wider_delim(
+          "value",
+          names = c("category", "RG", "var", "count", "pct"),
+          delim = ",", too_few = "align_start"
+        ) |>
+        dplyr::filter(.data$RG != "") |>
         dplyr::mutate(
           count = dplyr::na_if(.data$count, "NA"),
           count = as.numeric(.data$count),
           pct = as.numeric(.data$pct),
-          Phenotype = dplyr::case_when(
-            grepl("TUMOR", .data$category) ~ "tumor",
-            grepl("NORMAL", .data$category) ~ "normal",
-            TRUE ~ "unknown"
-          ),
-          category = dplyr::case_when(
-            grepl("ALIGNING SUMMARY", .data$category) ~ "summary",
-            grepl("ALIGNING PER RG", .data$category) ~ "readgroup",
-            TRUE ~ "unknown"
-          ),
-          RG = ifelse(.data$RG == "", "TOTAL", .data$RG),
           var = dplyr::recode(.data$var, !!!abbrev_nm)
         ) |>
-        dplyr::select(
-          "category", "Phenotype", "RG",
-          "var", "count", "pct"
-        )
+        dplyr::select("RG", "var", "count", "pct")
+      # pivot
+      d |>
+        tidyr::pivot_longer(c("count", "pct")) |>
+        dplyr::mutate(
+          name = dplyr::if_else(.data$name == "count", "", "_pct"),
+          var = glue("{.data$var}{.data$name}")
+        ) |>
+        dplyr::select("RG", "var", "value") |>
+        dplyr::filter(!is.na(.data$value)) |>
+        tidyr::pivot_wider(names_from = "var", values_from = "value")
     },
     #' @description
     #' Writes a tidy version of the `mapping_metrics.csv` file output
@@ -584,22 +572,52 @@ PloidyEstimationMetricsFile <- R6::R6Class(
     #' @description
     #' Reads the `ploidy_estimation_metrics.csv` file output from DRAGEN.
     #'
-    #' @return tibble with the following columns:
-    #'     - label: sample label (inferred from file name)
-    #'     - var: variable of interest (e.g. X median coverage)
-    #'     - value: value for specific variable (e.g. X median coverage
-    #'       variable with a value of  50)
+    #' @return tibble with one row and metrics spread across individual columns.
     read = function() {
       x <- self$path
-      d <- readr::read_lines(x)
-      assertthat::assert_that(grepl("PLOIDY ESTIMATION", d[1]))
-      d <- d |>
+      raw <- readr::read_lines(x)
+      assertthat::assert_that(grepl("PLOIDY ESTIMATION", raw[1]))
+      abbrev_nm <- c(
+        "Autosomal median coverage" = "cov_auto_median_dragen",
+        "X median coverage" = "cov_x_median_dragen",
+        "Y median coverage" = "cov_y_median_dragen",
+        "1 median / Autosomal median" = "cov_1_div_auto_medians_dragen",
+        "2 median / Autosomal median" = "cov_2_div_auto_medians_dragen",
+        "3 median / Autosomal median" = "cov_3_div_auto_medians_dragen",
+        "4 median / Autosomal median" = "cov_4_div_auto_medians_dragen",
+        "5 median / Autosomal median" = "cov_5_div_auto_medians_dragen",
+        "6 median / Autosomal median" = "cov_6_div_auto_medians_dragen",
+        "7 median / Autosomal median" = "cov_7_div_auto_medians_dragen",
+        "8 median / Autosomal median" = "cov_8_div_auto_medians_dragen",
+        "9 median / Autosomal median" = "cov_9_div_auto_medians_dragen",
+        "10 median / Autosomal median" = "cov_10_div_auto_median_dragen",
+        "11 median / Autosomal median" = "cov_11_div_auto_median_dragen",
+        "12 median / Autosomal median" = "cov_12_div_auto_median_dragen",
+        "13 median / Autosomal median" = "cov_13_div_auto_median_dragen",
+        "14 median / Autosomal median" = "cov_14_div_auto_median_dragen",
+        "15 median / Autosomal median" = "cov_15_div_auto_median_dragen",
+        "16 median / Autosomal median" = "cov_16_div_auto_median_dragen",
+        "17 median / Autosomal median" = "cov_17_div_auto_median_dragen",
+        "18 median / Autosomal median" = "cov_18_div_auto_median_dragen",
+        "19 median / Autosomal median" = "cov_19_div_auto_median_dragen",
+        "20 median / Autosomal median" = "cov_20_div_auto_median_dragen",
+        "21 median / Autosomal median" = "cov_21_div_auto_median_dragen",
+        "22 median / Autosomal median" = "cov_22_div_auto_median_dragen",
+        "X median / Autosomal median" = "cov_x_div_auto_median_dragen",
+        "Y median / Autosomal median" = "cov_y_div_auto_median_dragen",
+        "Ploidy estimation" = "ploidy_est_dragen"
+      )
+
+      d <- raw |>
         tibble::as_tibble_col(column_name = "value") |>
         tidyr::separate_wider_delim("value", names = c("dummy1", "dummy2", "var", "value"), delim = ",") |>
         dplyr::select("var", "value") |>
+        dplyr::mutate(
+          var = dplyr::recode(.data$var, !!!abbrev_nm)
+        ) |>
         tidyr::pivot_wider(names_from = "var", values_from = "value")
       # now convert all except 'Ploidy estimation' to numeric
-      cols1 <- colnames(d)[colnames(d) != "Ploidy estimation"]
+      cols1 <- colnames(d)[colnames(d) != "ploidy_est_dragen"]
       d |>
         dplyr::mutate(dplyr::across(dplyr::all_of(cols1), as.numeric))
     },
@@ -639,12 +657,7 @@ ReplayFile <- R6::R6Class(
   inherit = File,
   public = list(
     #' @description Reads the `replay.json` file.
-    #' @return A list with the following elements:
-    #'   - `command_line`: character of DRAGEN command line used.
-    #'   - `dragen_config`: tibble of parameters used for the DRAGEN run.
-    #'   - `system`: tibble with dragen_version, nodename, and kernel_release.
-    #'   - `label`: character of sample label (inferred from file name)
-    #'   - `hash_table_build`: tibble with details about the DRAGEN hash table build.
+    #' @return tibble with one row and metrics spread across individual columns.
     read = function() {
       x <- self$path
       res <- x |>
@@ -700,9 +713,7 @@ TimeMetricsFile <- R6::R6Class(
   inherit = File,
   public = list(
     #' @description Reads the `time_metrics.csv` file.
-    #' @return tibble with the following columns:
-    #'   - Step: DRAGEN step
-    #'   - Time: time in HH:MM
+    #' @return tibble with one row and metrics spread across individual columns.
     read = function() {
       x <- self$path
       cn <- c("dummy1", "dummy2", "Step", "time_hrs", "time_sec")
@@ -770,15 +781,6 @@ time_metrics_process <- function(x, id = seq_len(length(x))) {
 #' @description
 #' Contains methods for reading and displaying contents of
 #' the `vc_metrics.csv` file output from DRAGEN, which contains variant calling metrics.
-#' reported for each sample in multi sample VCF and gVCF files.
-#' Based on the run case, metrics are reported either as standard VARIANT
-#' CALLER or JOINT CALLER. Metrics are reported both for the raw
-#' (PREFILTER) and hard filtered (POSTFILTER) VCFs.
-#' PON (Panel of Normals) and COSMIC filtered variants are counted as
-#' though they are PASS variants in the POSTFILTER VCFs metrics,
-#' which may result in higher than expected variant counts in the
-#' POSTFILTER VCF metrics.
-#'
 #' @examples
 #' x <- system.file("extdata/wgs/SEQC-II.vc_metrics.csv.gz", package = "dracarys")
 #' vm <- VCMetricsFile$new(x)
@@ -793,26 +795,51 @@ VCMetricsFile <- R6::R6Class(
     #' @description
     #' Reads the `vc_metrics.csv` file output from DRAGEN.
     #'
-    #' @return tibble with the following columns:
-    #'   - category
-    #'   - sample
-    #'   - var: variable name
-    #'   - count: count value
-    #'   - pct: percent value
+    #' @return tibble with one row and metrics spread across individual columns.
     read = function() {
+      abbrev_nm <- c(
+        "Total" = "var_tot_dragen",
+        "Biallelic" = "var_biallelic_dragen",
+        "Multiallelic" = "var_multiallelic_dragen",
+        "SNPs" = "var_snp_dragen",
+        "Insertions (Hom)" = "var_ins_hom_dragen",
+        "Insertions (Het)" = "var_ins_het_dragen",
+        "Deletions (Hom)" = "var_del_hom_dragen",
+        "Deletions (Het)" = "var_del_het_dragen",
+        "Indels (Het)" = "var_indel_het_dragen",
+        "Chr X number of SNPs over genome" = "var_snp_x_over_genome_dragen",
+        "Chr Y number of SNPs over genome" = "var_snp_y_over_genome_dragen",
+        "(Chr X SNPs)/(chr Y SNPs) ratio over genome" = "var_x_over_y_snp_ratio_over_genome_dragen",
+        "SNP Transitions" = "var_snp_transitions_dragen",
+        "SNP Transversions" = "var_snp_transversions_dragen",
+        "Ti/Tv ratio" = "var_ti_tv_ratio_dragen",
+        "Heterozygous" = "var_heterozygous_dragen",
+        "Homozygous" = "var_homozygous_dragen",
+        "Het/Hom ratio" = "var_het_hom_ratio_dragen",
+        "In dbSNP" = "var_in_dbsnp_dragen",
+        "Not in dbSNP" = "var_nin_dbsnp_dragen",
+        "Percent Callability" = "callability_pct_dragen",
+        "Percent Autosome Callability" = "callability_auto_pct_dragen",
+        "Number of samples" = "sample_num_dragen",
+        "Reads Processed" = "reads_processed_dragen",
+        "Child Sample" = "sample_child_dragen"
+      )
       x <- self$path
-      d <- readr::read_lines(x)
-      assertthat::assert_that(grepl("VARIANT CALLER", d[1]))
-
-      d |>
+      raw <- readr::read_lines(x)
+      assertthat::assert_that(grepl("VARIANT CALLER", raw[1]))
+      # tidy
+      d <- raw |>
         tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim("value", names = c("category", "sample", "extra"), delim = ",", too_many = "merge") |>
-        tidyr::separate_wider_delim("extra", names = c("var", "value"), delim = ",", too_many = "merge") |>
-        tidyr::separate_wider_delim("value", names = c("count", "pct"), delim = ",", too_few = "align_start") |>
+        tidyr::separate_wider_delim(
+          "value",
+          names = c("category", "sample", "var", "count", "pct"),
+          delim = ",", too_few = "align_start"
+        ) |>
         dplyr::mutate(
+          var = dplyr::recode(.data$var, !!!abbrev_nm),
           count = dplyr::na_if(.data$count, "NA"),
           count = as.numeric(.data$count),
-          pct = as.numeric(.data$pct),
+          pct = round(as.numeric(.data$pct), 2),
           category = dplyr::case_when(
             grepl("SUMMARY", .data$category) ~ "summary",
             grepl("PREFILTER", .data$category) ~ "prefilter",
@@ -820,7 +847,18 @@ VCMetricsFile <- R6::R6Class(
             TRUE ~ "unknown"
           )
         ) |>
+        dplyr::filter(.data$category != "summary") |>
         dplyr::select("category", "sample", "var", "count", "pct")
+      # pivot
+      d |>
+        tidyr::pivot_longer(c("count", "pct")) |>
+        dplyr::mutate(
+          name = dplyr::if_else(.data$name == "count", "", "_pct"),
+          var = glue("{.data$var}{.data$name}")
+        ) |>
+        dplyr::select("category", "sample", "var", "value") |>
+        dplyr::filter(!is.na(.data$value)) |>
+        tidyr::pivot_wider(names_from = "var", values_from = "value")
     },
     #' @description
     #' Writes a tidy version of the `vc_metrics.csv` file output
@@ -860,7 +898,7 @@ TrimmerMetricsFile <- R6::R6Class(
     #' @description
     #' Reads the `trimmer_metrics.csv` file output from DRAGEN.
     #'
-    #' @return tibble (TODO)
+    #' @return tibble with one row and metrics spread across individual columns.
     read = function() {
       x <- self$path
       d <- readr::read_lines(x)

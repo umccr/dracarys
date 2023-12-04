@@ -45,11 +45,7 @@ Reads the \code{ploidy_estimation_metrics.csv} file output from DRAGEN.
 }
 
 \subsection{Returns}{
-tibble with the following columns:
-- label: sample label (inferred from file name)
-- var: variable of interest (e.g. X median coverage)
-- value: value for specific variable (e.g. X median coverage
-variable with a value of  50)
+tibble with one row and metrics spread across individual columns.
 }
 }
 \if{html}{\out{<hr>}}

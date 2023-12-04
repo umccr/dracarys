@@ -45,7 +45,7 @@ Reads the \code{trimmer_metrics.csv} file output from DRAGEN.
 }
 
 \subsection{Returns}{
-tibble (TODO)
+tibble with one row and metrics spread across individual columns.
 }
 }
 \if{html}{\out{<hr>}}

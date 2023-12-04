@@ -54,9 +54,8 @@ Reads the \verb{wgs_fine_hist_<phenotype>.csv} file output from DRAGEN.
 }
 
 \subsection{Returns}{
-tibble with three columns:
+tibble with following columns:
 \itemize{
-\item label
 \item depth
 \item number of loci with given depth
 }

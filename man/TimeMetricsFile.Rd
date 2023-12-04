@@ -45,11 +45,7 @@ Reads the \code{time_metrics.csv} file.
 }
 
 \subsection{Returns}{
-tibble with the following columns:
-\itemize{
-\item Step: DRAGEN step
-\item Time: time in HH:MM
-}
+tibble with one row and metrics spread across individual columns.
 }
 }
 \if{html}{\out{<hr>}}

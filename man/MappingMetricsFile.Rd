@@ -8,7 +8,8 @@ Contains methods for reading and displaying contents of
 the \code{mapping_metrics.csv} file output from DRAGEN.
 This file contains mapping and aligning metrics, like the metrics computed by
 the Samtools Flagstat command. These metrics are available on an aggregate
-level (over all input data), and on a per read group level.
+level (over all input data), and on a per read group level. NOTE: we are
+keeping only the read group level metrics (i.e. removing the aggregate data).
 Unless explicitly stated, the metrics units are in reads (i.e., not in
 terms of pairs or alignments).
 }
@@ -50,13 +51,7 @@ Reads the \code{mapping_metrics.csv} file output from DRAGEN.
 }
 
 \subsection{Returns}{
-tibble with the following columns:
-- category: summary or read group
-- Phenotype: e.g. tumor, normal
-- RG: read group or TOTAL
-- var: metric variable
-- count: count of reads
-- pct: percentage of reads
+tibble with one row of X metrics per read group.
 }
 }
 \if{html}{\out{<hr>}}

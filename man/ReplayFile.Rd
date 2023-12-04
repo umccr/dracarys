@@ -45,14 +45,7 @@ Reads the \code{replay.json} file.
 }
 
 \subsection{Returns}{
-A list with the following elements:
-\itemize{
-\item \code{command_line}: character of DRAGEN command line used.
-\item \code{dragen_config}: tibble of parameters used for the DRAGEN run.
-\item \code{system}: tibble with dragen_version, nodename, and kernel_release.
-\item \code{label}: character of sample label (inferred from file name)
-\item \code{hash_table_build}: tibble with details about the DRAGEN hash table build.
-}
+tibble with one row and metrics spread across individual columns.
 }
 }
 \if{html}{\out{<hr>}}

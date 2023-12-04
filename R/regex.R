@@ -44,7 +44,7 @@ DR_FILE_REGEX <- tibble::tribble(
   # "CopyNumberVariants\\.vcf\\.gz\\.tbi$", "TsoCopyNumberVariantsVcfIndexFile",
   "fastqc_metrics\\.csv$", "FastqcMetricsFile",
   "sv_metrics\\.csv$", "NULL",
-  "trimmer_metrics\\.csv$", "NULL",
+  "trimmer_metrics\\.csv$", "TrimmerMetricsFile",
   "wgs_contig_mean_cov(_tumor|_normal|)\\.csv$", "ContigMeanCovFile",
   "wgs_fine_hist(_tumor|_normal|)\\.csv$", "FineHistFile",
   "wgs_hist(_tumor|_normal|)\\.csv$", "NULL",
