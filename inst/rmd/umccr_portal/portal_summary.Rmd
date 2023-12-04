@@ -116,8 +116,8 @@ get_sbj_url <- function(x, colour = NULL, account = "pro") {
 # Get metadata for workflows run within the date range
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2023-11-27T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2023-11-28T23:59:59", format = fmt1)
+date_start <- as.POSIXct("2023-12-02T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2023-12-03T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -140,7 +140,7 @@ lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-# pmeta_raw <- dracarys::portal_meta_read(rows = 200, account = "prod")
+# pmeta_raw <- dracarys::portal_meta_read(rows = 150, account = "prod")
 # saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
 pmeta <- pmeta_raw |>
@@ -269,7 +269,7 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_bcl_convert() |>
+  dracarys::meta_bcl_convert(status = c("Succeeded", "Running")) |>
   dplyr::select(
     gds_outdir_multiqc, gds_outdir_multiqc_interop,
     end_status, runfolder_name, LibraryID, SampleID, batch_name, start, end
