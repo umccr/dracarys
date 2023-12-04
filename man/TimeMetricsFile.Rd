@@ -11,7 +11,8 @@ a breakdown of the run duration for each DRAGEN process.
 \examples{
 x <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
 tm <- TimeMetricsFile$new(x)
-tm$read() # or read(tm)
+d <- tm$read() # or read(tm)
+tm$write(d, out_dir = tempdir(), prefix = "seqc_time", out_format = "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TimeMetricsFile}
@@ -20,6 +21,7 @@ tm$read() # or read(tm)
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-TimeMetricsFile-read}{\code{TimeMetricsFile$read()}}
+\item \href{#method-TimeMetricsFile-write}{\code{TimeMetricsFile$write()}}
 \item \href{#method-TimeMetricsFile-clone}{\code{TimeMetricsFile$clone()}}
 }
 }
@@ -43,11 +45,39 @@ Reads the \code{time_metrics.csv} file.
 }
 
 \subsection{Returns}{
-tibble with the following columns:
-\itemize{
-\item Step: DRAGEN step
-\item Time: time in HH:MM
+tibble with one row and metrics spread across individual columns.
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-TimeMetricsFile-write"></a>}}
+\if{latex}{\out{\hypertarget{method-TimeMetricsFile-write}{}}}
+\subsection{Method \code{write()}}{
+Writes a tidy version of the \code{time_metrics.csv} file output
+from DRAGEN.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{TimeMetricsFile$write(
+  d,
+  out_dir = NULL,
+  prefix,
+  out_format = "tsv",
+  drid = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{d}}{Parsed object from \code{self$read()}.}
+
+\item{\code{out_dir}}{Output directory.}
+
+\item{\code{prefix}}{Prefix of output file(s).}
+
+\item{\code{out_format}}{Format of output file(s).}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

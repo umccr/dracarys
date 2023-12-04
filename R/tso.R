@@ -228,7 +228,7 @@ TsoFragmentLengthHistFile <- R6::R6Class(
 #' x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package = "dracarys")
 #' trc <- TsoTargetRegionCoverageFile$new(x)
 #' d_parsed <- trc$read() # or read(trc)
-#' trc$plot(d_parsed, 90) # or plot(trc, d_parsed, 90)
+#' trc$plot(d_parsed, 0) # or plot(trc, d_parsed, 90)
 #' trc$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
 #' @export
 TsoTargetRegionCoverageFile <- R6::R6Class(

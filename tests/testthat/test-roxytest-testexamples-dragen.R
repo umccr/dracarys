@@ -2,10 +2,10 @@
 
 # File R/dragen.R: @testexamples
 
-test_that("Function time_metrics_process() @ L619", {
+test_that("Function time_metrics_process() @ L771", {
   
-  x <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
-  x <- TimeMetricsFile$new(x)
+  p <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
+  x <- TimeMetricsFile$new(p)
   (tm <- time_metrics_process(c(x, x), id = c("run1", "run2")))
   
   expect_equal(nrow(tm), 2)

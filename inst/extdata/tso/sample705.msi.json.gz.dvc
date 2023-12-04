@@ -1,4 +1,5 @@
 outs:
-- md5: 0fa8625237fba976a072d6bf2f9df667
-  size: 542
+- md5: 4e657b82d0a1af72351970dcb30aad96
+  size: 581
+  hash: md5
   path: sample705.msi.json.gz

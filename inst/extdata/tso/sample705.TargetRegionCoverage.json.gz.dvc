@@ -1,4 +1,5 @@
 outs:
-- md5: da28ec32ef9b337a56350a48b9396538
-  size: 321
+- md5: 00a7667b4f32cbd352cec32c3f625ecb
+  size: 242
+  hash: md5
   path: sample705.TargetRegionCoverage.json.gz

@@ -1,0 +1,5 @@
+outs:
+- md5: 48ec9c0a040f7b4b21f7bf531b59d71b
+  size: 441141
+  hash: md5
+  path: sample705_MergedSmallVariants.vcf.gz

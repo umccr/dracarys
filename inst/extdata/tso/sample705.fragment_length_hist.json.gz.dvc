@@ -1,4 +1,5 @@
 outs:
-- md5: 6c4f578fecc0eb6c4e4f0aef3e3b986c
-  size: 88655
+- md5: 22abb8f6217b42fb45925c90a675894b
+  size: 15842
+  hash: md5
   path: sample705.fragment_length_hist.json.gz
