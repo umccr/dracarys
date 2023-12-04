@@ -1,0 +1,5 @@
+outs:
+- md5: 967b53760ee90be9568b99d7aa6c2867
+  size: 371
+  hash: md5
+  path: SEQC-II.trimmer_metrics.csv.gz

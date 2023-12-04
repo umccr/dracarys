@@ -10,3 +10,7 @@
 /SEQC-II.wgs_coverage_metrics_tumor.csv.gz
 /SEQC-II.wgs_fine_hist_normal.csv.gz
 /SEQC-II.wgs_fine_hist_tumor.csv.gz
+/SEQC-II.fastqc_metrics.csv.gz
+/SEQC-II.sv_metrics.csv.gz
+/SEQC-II.trimmer_metrics.csv.gz
+/SEQC-II.wgs_hist.csv.gz

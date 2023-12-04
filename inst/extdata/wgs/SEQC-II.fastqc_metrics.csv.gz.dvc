@@ -1,0 +1,5 @@
+outs:
+- md5: 6351a2100b1a576cc5bf8cab6d14f313
+  size: 38125
+  hash: md5
+  path: SEQC-II.fastqc_metrics.csv.gz
