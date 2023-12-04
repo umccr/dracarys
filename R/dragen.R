@@ -1,4 +1,4 @@
-#' ContigMeanCovFile R6 Class
+#' WgsContigMeanCovFile R6 Class
 #'
 #' @description
 #' Contains methods for reading and displaying contents of
@@ -9,8 +9,8 @@
 #' @examples
 #' x1 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_normal.csv.gz", package = "dracarys")
 #' x2 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_tumor.csv.gz", package = "dracarys")
-#' cc1 <- ContigMeanCovFile$new(x1)
-#' cc2 <- ContigMeanCovFile$new(x2)
+#' cc1 <- WgsContigMeanCovFile$new(x1)
+#' cc2 <- WgsContigMeanCovFile$new(x2)
 #' d1 <- cc1$read()
 #' d2 <- cc2$read()
 #' cc1$write(d1, out_dir = tempdir(), prefix = "seqc_n", out_format = "tsv")
@@ -20,8 +20,8 @@
 #' cc2$plot(d2)
 #'
 #' @export
-ContigMeanCovFile <- R6::R6Class(
-  "ContigMeanCovFile",
+WgsContigMeanCovFile <- R6::R6Class(
+  "WgsContigMeanCovFile",
   inherit = File,
   public = list(
     #' @description
@@ -142,7 +142,7 @@ ContigMeanCovFile <- R6::R6Class(
   )
 )
 
-#' CoverageMetricsFile R6 Class
+#' WgsCoverageMetricsFile R6 Class
 #'
 #' @description
 #' Contains methods for reading and displaying contents of
@@ -152,16 +152,16 @@ ContigMeanCovFile <- R6::R6Class(
 #' @examples
 #' x1 <- system.file("extdata/wgs/SEQC-II.wgs_coverage_metrics_normal.csv.gz", package = "dracarys")
 #' x2 <- system.file("extdata/wgs/SEQC-II.wgs_coverage_metrics_tumor.csv.gz", package = "dracarys")
-#' cm1 <- CoverageMetricsFile$new(x1)
-#' cm2 <- CoverageMetricsFile$new(x2)
+#' cm1 <- WgsCoverageMetricsFile$new(x1)
+#' cm2 <- WgsCoverageMetricsFile$new(x2)
 #' d1 <- read(cm1)
 #' d2 <- read(cm2)
 #' cm1$write(d1, out_dir = tempdir(), prefix = "seqc_n", out_format = "tsv")
 #' cm2$write(d2, out_dir = tempdir(), prefix = "seqc_t", out_format = "tsv")
 #'
 #' @export
-CoverageMetricsFile <- R6::R6Class(
-  "CoverageMetricsFile",
+WgsCoverageMetricsFile <- R6::R6Class(
+  "WgsCoverageMetricsFile",
   inherit = File,
   public = list(
     #' @description
@@ -236,7 +236,7 @@ CoverageMetricsFile <- R6::R6Class(
   )
 )
 
-#' FineHistFile R6 Class
+#' WgsFineHistFile R6 Class
 #'
 #' @description
 #' Contains methods for reading and displaying contents of
@@ -248,8 +248,8 @@ CoverageMetricsFile <- R6::R6Class(
 #' @examples
 #' x1 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_normal.csv.gz", package = "dracarys")
 #' x2 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_tumor.csv.gz", package = "dracarys")
-#' ch1 <- FineHistFile$new(x1)
-#' ch2 <- FineHistFile$new(x2)
+#' ch1 <- WgsFineHistFile$new(x1)
+#' ch2 <- WgsFineHistFile$new(x2)
 #' d1 <- read(ch1)
 #' d2 <- read(ch2)
 #' ch1$plot(d1)
@@ -257,8 +257,8 @@ CoverageMetricsFile <- R6::R6Class(
 #' ch1$write(d1, out_dir = tempdir(), prefix = "seqc_n", out_format = "tsv")
 #' ch2$write(d2, out_dir = tempdir(), prefix = "seqc_t", out_format = "tsv")
 #' @export
-FineHistFile <- R6::R6Class(
-  "FineHistFile",
+WgsFineHistFile <- R6::R6Class(
+  "WgsFineHistFile",
   inherit = File,
   public = list(
     #' @description
@@ -903,7 +903,7 @@ TrimmerMetricsFile <- R6::R6Class(
       x <- self$path
       d <- readr::read_lines(x)
       assertthat::assert_that(grepl("TRIMMER STATISTICS", d[1]))
-      trimmer_abbrev_nm <- c(
+      abbrev_nm <- c(
         "Total input reads"                              = "reads_tot_input_dragen",
         "Total input bases"                              = "bases_tot_dragen",
         "Total input bases R1"                           = "bases_r1_dragen",
@@ -934,7 +934,7 @@ TrimmerMetricsFile <- R6::R6Class(
         dplyr::mutate(
           count = as.numeric(.data$count),
           pct = round(as.numeric(.data$pct), 2),
-          var = dplyr::recode(.data$var, !!!trimmer_abbrev_nm)
+          var = dplyr::recode(.data$var, !!!abbrev_nm)
         ) |>
         dplyr::select("var", "count", "pct") |>
         tidyr::pivot_longer(c("count", "pct")) |>
@@ -964,9 +964,133 @@ TrimmerMetricsFile <- R6::R6Class(
   )
 )
 
-# TODO:
-# - wgs_hist.csv
-#
+#' SvMetricsFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of
+#' the `sv_metrics.csv` file output from DRAGEN
+#'
+#' @examples
+#' x <- system.file("extdata/wgs/SEQC-II.sv_metrics.csv.gz", package = "dracarys")
+#' sv <- SvMetricsFile$new(x)
+#' d <- sv$read()
+#' sv$write(d, out_dir = tempdir(), prefix = "seqc_sv", out_format = "tsv")
+#'
+#' @export
+SvMetricsFile <- R6::R6Class(
+  "SvMetricsFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `sv_metrics.csv` file output from DRAGEN.
+    #'
+    #' @return tibble with one row and metrics spread across individual columns.
+    read = function() {
+      x <- self$path
+      d <- readr::read_lines(x)
+      assertthat::assert_that(grepl("SV SUMMARY", d[1]))
+      abbrev_nm <- c(
+        "Number of deletions (PASS)" = "n_del",
+        "Number of insertions (PASS)" = "n_ins",
+        "Number of duplications (PASS)" = "n_dup",
+        "Number of breakend pairs (PASS)" = "n_bnd"
+      )
+      d |>
+        tibble::as_tibble_col(column_name = "value") |>
+        dplyr::filter(!grepl("Total number of structural variants", .data$value)) |>
+        tidyr::separate_wider_delim(
+          "value",
+          names = c("svsum", "sample", "var", "count", "pct"), delim = ","
+        ) |>
+        dplyr::mutate(
+          count = as.numeric(.data$count),
+          pct = round(as.numeric(.data$pct), 2),
+          var = dplyr::recode(.data$var, !!!abbrev_nm)
+        ) |>
+        dplyr::select("var", "count", "pct") |>
+        tidyr::pivot_longer(c("count", "pct")) |>
+        dplyr::mutate(
+          name = dplyr::if_else(.data$name == "count", "", "_pct"),
+          var = glue("{.data$var}{.data$name}")
+        ) |>
+        dplyr::arrange(.data$name, .data$var) |>
+        dplyr::select("var", "value") |>
+        tidyr::pivot_wider(names_from = "var", values_from = "value")
+    },
+    #' @description
+    #' Writes a tidy version of the `sv_metrics.csv` file output
+    #' from DRAGEN.
+    #'
+    #' @param d Parsed object from `self$read()`.
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
+    }
+  )
+)
+
+#' WgsHistFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of
+#' the `wgs_hist.csv` file output from DRAGEN
+#'
+#' @examples
+#' x <- system.file("extdata/wgs/SEQC-II.wgs_hist.csv.gz", package = "dracarys")
+#' h <- WgsHistFile$new(x)
+#' d <- h$read()
+#' h$write(d, out_dir = tempdir(), prefix = "seqc_sv", out_format = "tsv")
+#'
+#' @export
+WgsHistFile <- R6::R6Class(
+  "WgsHistFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `wgs_hist.csv` file output from DRAGEN.
+    #'
+    #' @return tibble with one row and metrics spread across individual columns.
+    read = function() {
+      x <- self$path
+      d <- readr::read_csv(x, col_names = c("var", "pct"), col_types = "cd")
+      d |>
+        dplyr::mutate(
+          var = sub("PCT of bases in wgs with coverage ", "", .data$var),
+          var = gsub("\\[|\\]|\\(|\\)", "", .data$var),
+          var = gsub("x", "", .data$var),
+          var = gsub("inf", "Inf", .data$var)
+        ) |>
+        tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
+        dplyr::mutate(
+          start = as.numeric(.data$start),
+          end = as.numeric(.data$end),
+          pct = round(.data$pct, 2)
+        )
+    },
+    #' @description
+    #' Writes a tidy version of the `wgs_hist.csv` file output
+    #' from DRAGEN.
+    #'
+    #' @param d Parsed object from `self$read()`.
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
+    }
+  )
+)
+
 # wts
 # - quant_metrics.csv
 # - quant.transcript_fragment_lengths.txt
