@@ -11,3 +11,6 @@
 /sample705_SampleAnalysisResults.json.gz
 /sample705_TMB_Trace.json.gz
 /sample705_TMB_Trace.tsv
+/sample705_MergedSmallVariants.vcf.gz
+/sample705_MergedSmallVariants.vcf.gz.tbi
+/multiqc_data.json

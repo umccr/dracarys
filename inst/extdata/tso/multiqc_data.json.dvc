@@ -1,0 +1,5 @@
+outs:
+- md5: ca33a6a30d936647e5a5dd7d24f2dcf5
+  size: 364884
+  hash: md5
+  path: multiqc_data.json

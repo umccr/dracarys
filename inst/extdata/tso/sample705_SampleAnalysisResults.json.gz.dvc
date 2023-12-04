@@ -1,4 +1,5 @@
 outs:
-- md5: cc4d0d65da5766daf0a6675aeb8e16f3
-  size: 167884
+- md5: a7a1214b3a886e2028a6e3c37c3e24c1
+  size: 115257
+  hash: md5
   path: sample705_SampleAnalysisResults.json.gz

@@ -1,0 +1,5 @@
+outs:
+- md5: e47edd3138a3bc29c96c4fd742d48440
+  size: 24715
+  hash: md5
+  path: sample705_MergedSmallVariants.vcf.gz.tbi

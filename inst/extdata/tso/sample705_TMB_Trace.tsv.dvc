@@ -1,4 +1,5 @@
 outs:
-- md5: 7e1968043c35f18bbd541cd8a5a2c453
-  size: 237841
+- md5: ccd776029107e41055becdaf271ad0c7
+  size: 178816
+  hash: md5
   path: sample705_TMB_Trace.tsv

@@ -1,4 +1,5 @@
 outs:
-- md5: 4f6bd85d75ce20f87fb50efc65f2908a
-  size: 479
+- md5: c39e93c4d34703419295bdc64313f4e1
+  size: 450
+  hash: md5
   path: sample705.tmb.json.gz
