@@ -1,0 +1,264 @@
+---
+author: "University of Melbourne Centre for Cancer Research"
+date: "`r Sys.time()`"
+output:
+  html_document:
+    toc: true
+    theme: cosmo
+  rmdformats::material:
+    highlight: kate
+params:
+  title: "UMCCR Alignment QC Summary Report"
+  indirs: !r c("/Users/pdiakumis/icav1/g/production/analysis_data/SBJ00006/wgs_alignment_qc/2023120207560682/L2301460__2_dragen/NTC_Tsqn231127_L2301460", 
+"/Users/pdiakumis/icav1/g/production/analysis_data/SBJ00006/wgs_alignment_qc/2023120233dd717e/L2301460__1_dragen/NTC_Tsqn231127_L2301460", 
+"/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04434/wgs_alignment_qc/202312021b071091/L2301458__2_dragen/PRJ231322_L2301458", 
+"/Users/pdiakumis/icav1/g/production/analysis_data/SBJ00020/wgs_alignment_qc/2023120232c970f3/L2301459__2_dragen/PTC_Tsqn231127_L2301459", 
+"/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04434/wgs_alignment_qc/20231202aade4cdd/L2301458__1_dragen/PRJ231322_L2301458", 
+"/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04434/wgs_alignment_qc/202312028ade3e75/L2301457__2_dragen/PRJ231321_L2301457", 
+"/Users/pdiakumis/icav1/g/production/analysis_data/SBJ00020/wgs_alignment_qc/20231202c7409dbb/L2301459__1_dragen/PTC_Tsqn231127_L2301459", 
+"/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04434/wgs_alignment_qc/2023120225ef70a8/L2301457__1_dragen/PRJ231321_L2301457", 
+"/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04411/wgs_alignment_qc/20231202c2a777eb/L2301454__3_dragen/PRJ231294_L2301454", 
+"/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04411/wgs_alignment_qc/202312022b845cd9/L2301453__4_dragen/PRJ231203_L2301453"
+)
+description: "UMCCR Alignment QC Summary Report"
+title: "`r params$title`"
+---
+
+```{r knitr_opts, include=F}
+knitr::opts_chunk$set(
+  collapse = TRUE, echo = FALSE,
+  warning = FALSE, message = FALSE
+)
+```
+
+```{css}
+.main-container {
+  max-width: 1400px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+```
+
+```{r load_pkgs}
+# source(here::here("inst/rmd/umccr_workflows/alignment_qc/params/pd.R")) # for use with 'Run All Chunks Above'
+{
+  require(dplyr)
+  require(tidyr)
+  require(purrr)
+  require(tibble)
+  require(readr)
+  require(dracarys) # only needed for session info
+  require(glue, include.only = "glue")
+  require(here, include.only = "here")
+  require(knitr, include.only = "kable")
+  require(DT)
+  require(fs)
+  require(ggplot2)
+}
+```
+
+```{r data_setup}
+stopifnot(all(dir.exists(params$indirs)))
+options(scipen = 999) # disable scientific notation
+options(width = 150)
+filepaths <- function(indir_tidy, suffix = "rds") {
+  prefix <- basename(indir_tidy) # sampleid_libid
+  tibble::tibble(
+    ftype = c(
+      paste0(
+        "FastqcMetricsFile_",
+        c(
+          "positional_base_content", "positional_base_mean_quality",
+          "positional_quality", "read_gc_content", "read_gc_content_quality",
+          "read_lengths", "read_mean_quality", "sequence_positions"
+        )
+      ),
+      "FragmentLengthHistFile",
+      "MappingMetricsFile",
+      "PloidyEstimationMetricsFile",
+      "ReplayFile",
+      "TimeMetricsFile",
+      "TrimmerMetricsFile",
+      "WgsContigMeanCovFile",
+      "WgsCoverageMetricsFile",
+      "WgsFineHistFile",
+      "WgsHistFile"
+    )
+  ) |>
+    dplyr::mutate(
+      bname = glue("{prefix}_{.data$ftype}.{suffix}"),
+      fpath = file.path(indir_tidy, .data$bname),
+      file_exists = file.exists(.data$fpath)
+    )
+}
+dat <- params$indirs |>
+  tibble::as_tibble_col(column_name = "indir") |>
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    fpaths = list(filepaths(indir_tidy = .data$indir))
+  ) |>
+  tidyr::unnest(fpaths) |>
+  # unnest ungroups implicitly
+  dplyr::rowwise() |>
+  dplyr::mutate(
+    dat = ifelse(.data$file_exists, list(readr::read_rds(.data$fpath), NULL))
+  ) |>
+  dplyr::ungroup()
+
+eval <- dat |>
+  dplyr::group_by(ftype) |>
+  dplyr::count(file_exists, name = "nf") |>
+  dplyr::mutate(eval = nf == length(params$indirs)) |>
+  dplyr::select("ftype", "eval") |>
+  tibble::deframe() |>
+  as.list()
+
+# filetype-specific access
+d <- dat |>
+  dplyr::select(indir, ftype, dat) |>
+  tidyr::nest(data = c(indir, dat))
+# sample-specific access
+d_samp <- dat |>
+  dplyr::mutate(sampleid_libid = basename(.data$indir)) |>
+  dplyr::select(sampleid_libid, ftype, dat) |>
+  tidyr::nest(data = c(ftype, dat)) |>
+  dplyr::arrange(sampleid_libid)
+```
+
+```{r data_setup2}
+options(scipen = 999) # disable scientific notation
+options(width = 150)
+dr_unnest <- function(x1) {
+  d |>
+    dplyr::filter(.data$ftype == x1) |>
+    tidyr::unnest(data) |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      nrows = nrow(dat),
+      sampleid_libid = basename(indir)
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::filter(nrows > 0) |>
+    tidyr::unnest(dat) |>
+    # remove indir for now
+    dplyr::select(sampleid_libid, dplyr::everything(), -c(ftype, nrows, indir)) |>
+    dplyr::mutate(sampleid_libid = as.factor(sampleid_libid))
+}
+```
+
+```{r funcs}
+# can use this to view smallish tables, just don't use it on big ones!
+dt_view <- function(x, caption = NULL, scroll_y = length(params$indirs) * 30) {
+  x |>
+    DT::datatable(
+      filter = list(position = "top", clear = FALSE, plain = TRUE),
+      class = "cell-border display compact",
+      rownames = FALSE,
+      extensions = c("Scroller", "Buttons", "KeyTable"),
+      options = list(
+        scroller = TRUE, scrollY = scroll_y, scrollX = TRUE,
+        autoWidth = FALSE, keys = TRUE,
+        buttons = c("csv", "excel"), dom = "Blfrtip"
+      ),
+      caption = caption
+    )
+}
+```
+
+## Mapping Metrics
+
+```{r mm, eval=eval$MappingMetricsFile}
+d1 <- dr_unnest("MappingMetricsFile") |>
+  dplyr::select(
+    sampleid_libid,
+    reads_tot_rg_dragen, reads_num_dupmarked_dragen, reads_num_dupmarked_dragen_pct,
+    reads_mapped_dragen_pct, reads_unmapped_dragen_pct, reads_num_uniq_dragen_pct,
+    reads_num_uniq_mapped_dragen_pct, reads_match_nonref_decoys_adj_dragen_pct,
+    reads_singleton_dragen_pct, reads_paired_dragen_pct,
+    reads_paired_proper_dragen_pct, reads_discordant_dragen_pct,
+    reads_mapq_0_10_dragen, read_len_dragen, insert_len_median_dragen,
+    insert_len_mean_dragen, dplyr::everything()
+  )
+num_cols <- names(d1)[sapply(d1, is.numeric)]
+d1 |>
+  dt_view() |>
+  DT::formatCurrency(columns = num_cols, currency = "")
+```
+
+## Fragment Length
+
+```{r fraglenhist_plot, eval=eval$FragmentLengthHistFile, fig.width=10, fig.height=10}
+fl1 <- dr_unnest("FragmentLengthHistFile")
+min_count <- 10
+fl1 |>
+  dplyr::mutate(sampleid_libid = as.factor(sampleid_libid)) |>
+  dplyr::filter(.data$count >= min_count) |>
+  ggplot2::ggplot(ggplot2::aes(x = .data$fragmentLength, y = .data$count)) +
+  ggplot2::geom_line(aes(colour = sampleid_libid)) +
+  ggplot2::labs(title = "Fragment Length Distribution") +
+  ggplot2::xlab("Fragment Length (bp)") +
+  ggplot2::ylab(glue("Read Count (min: {min_count})")) +
+  ggplot2::theme_minimal() +
+  ggplot2::theme(
+    legend.position = c(0.9, 0.9),
+    legend.justification = c(1, 1),
+    panel.grid.minor = ggplot2::element_blank(),
+    panel.grid.major = ggplot2::element_blank(),
+    plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
+  )
+```
+
+---
+
+## Addendum {.tabset .tabset-pills}
+
+<details>
+
+<summary>Details</summary>
+
+### Params
+
+```{r params_info}
+params |>
+  purrr::modify_if(is.null, \(x) "NULL", .else = as.character) |>
+  tibble::enframe(name = "Parameter", value = "Value") |>
+  tidyr::unnest("Value", keep_empty = TRUE) |>
+  knitr::kable()
+```
+
+### SessionInfo {.tabset .tabset-pills}
+
+```{r si_prep}
+si <- dracarys:::session_info_tbls()
+si_pkg <- si$si_pkg
+si_pl <- si$si_pl
+```
+
+#### Platform
+
+```{r si_pl}
+si_pl |>
+  knitr::kable()
+```
+
+#### Packages
+
+```{r si_pkg}
+si_pkg |>
+  knitr::kable()
+```
+
+#### SysInfo
+
+```{r reporter_details, comment = NA}
+tibble::tribble(
+  ~Info, ~Value,
+  "Node", Sys.info()["nodename"],
+  "OS", Sys.info()["sysname"],
+  "User", Sys.info()["user"],
+) |>
+  knitr::kable()
+```
+
+</details>
+
