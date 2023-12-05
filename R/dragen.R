@@ -174,21 +174,6 @@ WgsCoverageMetricsFile <- R6::R6Class(
         "Aligned bases in genome"                             = "bases_aligned_in_genome_dragen",
         "Average alignment coverage over genome"              = "cov_alignment_avg_over_genome_dragen",
         "Uniformity of coverage (PCT > 0.2*mean) over genome" = "cov_uniformity_over_genome_pct_gt02mean_dragen",
-        "PCT of genome with coverage [100x: inf)"             = "cov_genome_pct_100x_inf_dragen",
-        "PCT of genome with coverage [ 50x: inf)"             = "cov_genome_pct_50x_inf_dragen",
-        "PCT of genome with coverage [ 20x: inf)"             = "cov_genome_pct_20x_inf_dragen",
-        "PCT of genome with coverage [ 15x: inf)"             = "cov_genome_pct_15x_inf_dragen",
-        "PCT of genome with coverage [ 10x: inf)"             = "cov_genome_pct_10x_inf_dragen",
-        "PCT of genome with coverage [  3x: inf)"             = "cov_genome_pct_3x_inf_dragen",
-        "PCT of genome with coverage [  1x: inf)"             = "cov_genome_pct_1x_inf_dragen",
-        "PCT of genome with coverage [  0x: inf)"             = "cov_genome_pct_0x_inf_dragen",
-        "PCT of genome with coverage [ 50x:100x)"             = "cov_genome_pct_50x_100x_dragen",
-        "PCT of genome with coverage [ 20x: 50x)"             = "cov_genome_pct_20x_50x_dragen",
-        "PCT of genome with coverage [ 15x: 20x)"             = "cov_genome_pct_15x_20x_dragen",
-        "PCT of genome with coverage [ 10x: 15x)"             = "cov_genome_pct_10x_15x_dragen",
-        "PCT of genome with coverage [  3x: 10x)"             = "cov_genome_pct_3x_10x_dragen",
-        "PCT of genome with coverage [  1x:  3x)"             = "cov_genome_pct_1x_3x_dragen",
-        "PCT of genome with coverage [  0x:  1x)"             = "cov_genome_pct_0x_1x_dragen",
         "Average chr X coverage over genome"                  = "cov_avg_x_over_genome_dragen",
         "Average chr Y coverage over genome"                  = "cov_avg_y_over_genome_dragen",
         "Average mitochondrial coverage over genome"          = "cov_avg_mt_over_genome_dragen",
@@ -203,19 +188,36 @@ WgsCoverageMetricsFile <- R6::R6Class(
       raw <- readr::read_lines(x)
       assertthat::assert_that(grepl("COVERAGE SUMMARY", raw[1]))
 
-      raw |>
+      res <- raw |>
         tibble::as_tibble_col(column_name = "value") |>
         tidyr::separate_wider_delim(
           "value",
           delim = ",", too_few = "align_start",
           names = c("category", "dummy1", "var", "value", "pct")
-        ) |>
-        dplyr::mutate(
-          var = dplyr::recode(.data$var, !!!abbrev_nm),
-          value = as.numeric(.data$value)
-        ) |>
+        )
+      # split to rename the
+      # "PCT of genome with coverage [100x: inf)" values
+      res1 <- res |>
         # pct just shows 100% for a couple rows
-        dplyr::select("var", "value") |>
+        dplyr::filter(!grepl("PCT of genome with coverage", .data$var)) |>
+        dplyr::select("var", "value")
+      res2 <- res |>
+        dplyr::filter(grepl("PCT of genome with coverage", .data$var)) |>
+        dplyr::mutate(
+          var = sub("PCT of genome with coverage ", "", .data$var),
+          var = gsub("\\[|\\]|\\(|\\)| ", "", .data$var),
+          var = gsub("x", "", .data$var),
+          var = gsub("inf", "Inf", .data$var)
+        ) |>
+        tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
+        dplyr::mutate(var = as.character(glue("cov_genome_pct_{start}_{end}_dragen"))) |>
+        dplyr::select("var", "value")
+      res <- dplyr::bind_rows(res1, res2)
+      res |>
+        dplyr::mutate(
+          value = as.numeric(.data$value),
+          var = dplyr::recode(.data$var, !!!abbrev_nm)
+        ) |>
         tidyr::pivot_wider(names_from = "var", values_from = "value")
     },
     #' @description
