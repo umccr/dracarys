@@ -72,7 +72,10 @@ read_fastqc_metrics <- function(x) {
       delim = ",",
       names = c("section", "mate", "metric", "value"),
     ) |>
-    dplyr::mutate(value = as.numeric(.data$value))
+    dplyr::mutate(
+      value = dplyr::na_if(.data$value, "NA"),
+      value = as.numeric(.data$value)
+    )
 
   pos_base_cont <- d |>
     dplyr::filter(.data$section == "POSITIONAL BASE CONTENT") |>
