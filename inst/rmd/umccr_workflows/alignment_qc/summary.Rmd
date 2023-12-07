@@ -37,23 +37,23 @@ knitr::opts_chunk$set(
 ```{r load_pkgs}
 {
   require(dplyr)
-  require(tidyr)
-  require(purrr)
-  require(tibble)
-  require(readr)
-  require(dracarys) # only needed for session info
+  require(dracarys)
+  require(DT, include.only = "datatable")
   require(glue, include.only = "glue")
   require(here, include.only = "here")
+  require(purrr, include.only = "map")
+  require(readr, include.only = "read_rds")
+  require(tibble, include.only = "tibble")
   require(knitr, include.only = "kable")
-  require(DT)
-  require(fs)
   require(ggplot2)
+  require(tidyr, include.only = "unnest")
 }
-# source(here::here("inst/rmd/umccr_workflows/alignment_qc/params/pd.R")) # for use with 'Run All Chunks Above'
-ptbl <- tibble::as_tibble(params)
 ```
 
 ```{r data_setup}
+# source(here::here("inst/rmd/umccr_workflows/alignment_qc/params/pd.R")) # for use with 'Run All Chunks Above'
+ggplot2::theme_set(ggplot2::theme_bw())
+ptbl <- tibble::as_tibble(params)
 stopifnot(all(dir.exists(ptbl$indir)))
 options(scipen = 999) # disable scientific notation
 options(width = 150)
@@ -80,60 +80,60 @@ filepaths <- function(indir, sampleid, lane, suffix = "rds") {
       "WgsHistFile"
     )
   ) |>
-    dplyr::mutate(
+    mutate(
       fpath = file.path(indir, glue("{sampleid}_{.data$ftype}.{suffix}")),
       file_exists = file.exists(.data$fpath)
     )
 }
 
 dat <- ptbl |>
-  dplyr::rowwise() |>
-  dplyr::mutate(
+  rowwise() |>
+  mutate(
     fpaths = list(filepaths(indir = .data$indir, sampleid = .data$sampleid, lane = .data$lane)),
     umccrid = glue("{.data$subjectid}_{.data$libraryid}_LN{.data$lane}")
   ) |>
-  dplyr::select("umccrid", "fpaths") |>
+  select("umccrid", "fpaths") |>
   tidyr::unnest(fpaths) |>
-  dplyr::rowwise() |>
-  dplyr::mutate(
+  rowwise() |>
+  mutate(
     dat = ifelse(.data$file_exists, list(readr::read_rds(.data$fpath), NULL))
   ) |>
-  dplyr::ungroup()
+  ungroup()
 
 eval <- dat |>
-  dplyr::group_by(ftype) |>
-  dplyr::count(file_exists, name = "nf") |>
-  dplyr::mutate(eval = nf == nrow(ptbl)) |>
-  dplyr::select("ftype", "eval") |>
+  group_by(ftype) |>
+  count(file_exists, name = "nf") |>
+  mutate(eval = nf == nrow(ptbl)) |>
+  select("ftype", "eval") |>
   tibble::deframe() |>
   as.list()
 
 # filetype-specific access
 d <- dat |>
-  dplyr::select("umccrid", "ftype", "dat") |>
+  select("umccrid", "ftype", "dat") |>
   tidyr::nest(data = c("umccrid", "dat"))
 # sample-specific access
 d_samp <- dat |>
-  dplyr::select("umccrid", "ftype", "dat") |>
+  select("umccrid", "ftype", "dat") |>
   tidyr::nest(data = c("ftype", "dat")) |>
-  dplyr::arrange("umccrid")
+  arrange("umccrid")
 ```
 
 ```{r funcs}
 dr_unnest <- function(x1) {
   d |>
-    dplyr::filter(.data$ftype == x1) |>
+    filter(.data$ftype == x1) |>
     tidyr::unnest(data) |>
-    dplyr::rowwise() |>
-    dplyr::mutate(nrows = nrow(.data$dat)) |>
-    dplyr::ungroup() |>
-    dplyr::filter(nrows > 0) |>
+    rowwise() |>
+    mutate(nrows = nrow(.data$dat)) |>
+    ungroup() |>
+    filter(nrows > 0) |>
     tidyr::unnest(dat) |>
-    dplyr::select("umccrid", dplyr::everything(), -c("ftype", "nrows"))
+    select("umccrid", everything(), -c("ftype", "nrows"))
 }
 
-# can use this to view smallish tables, just don't use it on big ones!
 dt_view <- function(x, caption = NULL, scroll_y = nrow(ptbl) * 30) {
+  num_cols <- names(x)[sapply(x, is.numeric)]
   x |>
     DT::datatable(
       filter = list(position = "top", clear = FALSE, plain = TRUE),
@@ -146,7 +146,8 @@ dt_view <- function(x, caption = NULL, scroll_y = nrow(ptbl) * 30) {
         buttons = c("csv", "excel"), dom = "Blfrtip"
       ),
       caption = caption
-    )
+    ) |>
+    DT::formatCurrency(columns = num_cols, currency = "", digits = 1)
 }
 
 blank_lines <- function(n = 10) {
@@ -160,8 +161,8 @@ blank_lines <- function(n = 10) {
 
 ```{r mm, eval=eval$MappingMetricsFile}
 d1 <- dr_unnest("MappingMetricsFile") |>
-  dplyr::arrange(umccrid) |>
-  dplyr::select(
+  arrange(umccrid) |>
+  select(
     umccrid,
     reads_tot_rg_dragen, reads_num_dupmarked_dragen, reads_num_dupmarked_dragen_pct,
     reads_mapped_dragen_pct, reads_unmapped_dragen_pct, reads_num_uniq_dragen_pct,
@@ -169,12 +170,10 @@ d1 <- dr_unnest("MappingMetricsFile") |>
     reads_singleton_dragen_pct, reads_paired_dragen_pct,
     reads_paired_proper_dragen_pct, reads_discordant_dragen_pct,
     reads_mapq_0_10_dragen, read_len_dragen, insert_len_median_dragen,
-    insert_len_mean_dragen, dplyr::everything()
+    insert_len_mean_dragen, everything()
   )
-num_cols <- names(d1)[sapply(d1, is.numeric)]
 d1 |>
-  dt_view() |>
-  DT::formatCurrency(columns = num_cols, currency = "", digits = 1)
+  dt_view()
 ```
 
 ### Coverage
@@ -182,19 +181,17 @@ d1 |>
 ```{r covm, eval=eval$WgsCoverageMetricsFile}
 # TODO: plot cov_genome_pct_<X>_<Y>_dragen
 d1 <- dr_unnest("WgsCoverageMetricsFile") |>
-  dplyr::arrange(umccrid) |>
-  dplyr::select(
+  arrange(umccrid) |>
+  select(
     umccrid,
     cov_avg_auto_over_genome_dragen,
     cov_median_auto_over_genome_dragen,
     cov_avg_x_over_genome_dragen,
     cov_avg_y_over_genome_dragen,
-    dplyr::everything()
+    everything()
   )
-num_cols <- names(d1)[sapply(d1, is.numeric)]
 d1 |>
-  dt_view() |>
-  DT::formatCurrency(columns = num_cols, currency = "", digits = 1)
+  dt_view()
 ```
 
 ### Ploidy
@@ -202,33 +199,29 @@ d1 |>
 ```{r pe, eval=eval$PloidyEstimationMetricsFile}
 # TODO: plot cov_<X>_div_auto_medians_dragen
 d1 <- dr_unnest("PloidyEstimationMetricsFile") |>
-  dplyr::arrange(umccrid) |>
-  dplyr::select(
+  arrange(umccrid) |>
+  select(
     umccrid, ploidy_est_dragen, cov_auto_median_dragen,
-    cov_x_median_dragen, cov_y_median_dragen, dplyr::everything()
+    cov_x_median_dragen, cov_y_median_dragen, everything()
   )
-num_cols <- names(d1)[sapply(d1, is.numeric)]
 d1 |>
-  dt_view() |>
-  DT::formatCurrency(columns = num_cols, currency = "", digits = 1)
+  dt_view()
 ```
 
 ### Trimmer
 
 ```{r trim, eval=eval$TrimmerMetricsFile}
 d1 <- dr_unnest("TrimmerMetricsFile") |>
-  dplyr::arrange(umccrid) |>
-  dplyr::select(
+  arrange(umccrid) |>
+  select(
     umccrid, reads_tot_input_dragen, read_len_avg_dragen,
     reads_trimmed_tot_dragen, reads_trimmed_tot_dragen_pct,
     bases_trimmed_tot_dragen, bases_trimmed_tot_dragen_pct,
     reads_tot_filt_dragen, reads_tot_filt_dragen_pct,
-    dplyr::everything()
+    everything()
   )
-num_cols <- names(d1)[sapply(d1, is.numeric)]
 d1 |>
-  dt_view() |>
-  DT::formatCurrency(columns = num_cols, currency = "", digits = 1)
+  dt_view()
 ```
 
 ### FineHist
@@ -237,7 +230,7 @@ d1 |>
 d1 <- dr_unnest("WgsFineHistFile")
 d1 |>
   WgsFineHistFile$public_methods$plot(c(0, 150)) +
-  ggplot2::facet_wrap(~umccrid, scales = "free_y")
+  facet_wrap(~umccrid, scales = "free_y")
 ```
 
 ### Hist
@@ -245,14 +238,13 @@ d1 |>
 ```{r cvgm, eval=eval$WgsCoverageMetricsFile}
 d1 <- dr_unnest("WgsHistFile")
 d1 |>
-  ggplot2::ggplot(aes(x = start, y = pct, colour = umccrid)) +
-  ggplot2::geom_point() +
-  ggplot2::geom_line() +
-  ggplot2::facet_wrap(~umccrid, scales = "free_x") +
-  ggplot2::labs(x = "Coverage range", y = "PCT") +
-  ggplot2::ggtitle("PCT of bases with coverage in the given range.") +
-  ggplot2::theme_bw() +
-  ggplot2::theme(legend.position = "none")
+  ggplot(aes(x = start, y = pct, colour = umccrid)) +
+  geom_point() +
+  geom_linerange(aes(xmin = start, xmax = end)) +
+  facet_wrap(~umccrid) +
+  labs(x = "Coverage range", y = "PCT") +
+  ggtitle("PCT of bases with coverage in the given range.") +
+  theme(legend.position = "none")
 ```
 
 -----
@@ -263,18 +255,16 @@ d1 |>
 fl1 <- dr_unnest("FragmentLengthHistFile")
 min_count <- 10
 fl1 |>
-  dplyr::filter(.data$count >= min_count) |>
+  filter(.data$count >= min_count) |>
   ggplot2::ggplot(ggplot2::aes(x = .data$fragmentLength, y = .data$count)) +
   ggplot2::geom_line(aes(colour = umccrid)) +
   ggplot2::labs(title = "Fragment Length Distribution") +
   ggplot2::xlab("Fragment Length (bp)") +
   ggplot2::ylab(glue("Read Count (min: {min_count})")) +
-  ggplot2::theme_minimal() +
   ggplot2::theme(
     legend.position = c(0.9, 0.9),
     legend.justification = c(1, 1),
     panel.grid.minor = ggplot2::element_blank(),
-    panel.grid.major = ggplot2::element_blank(),
     plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
   )
 ```
@@ -283,10 +273,10 @@ fl1 |>
 
 ```{r contig_cvg, eval=eval$WgsContigMeanCovFile, results='asis'}
 d1 <- dr_unnest("WgsContigMeanCovFile") |>
-  dplyr::arrange("umccrid")
+  arrange("umccrid")
 for (s in sort(unique(d1$umccrid))) {
   p1 <- d1 |>
-    dplyr::filter(umccrid == s) |>
+    filter(umccrid == s) |>
     dracarys::WgsContigMeanCovFile$public_methods$plot() +
     ggplot2::labs(subtitle = s)
   cat(glue("\n### {s}"), "\n")
@@ -304,8 +294,8 @@ for (s in sort(unique(d1$umccrid))) {
 ```{r fqc_pbc}
 f1 <- dr_unnest("FastqcMetricsFile_positional_base_content")
 f1 |>
-  dplyr::filter(base != "N") |>
-  dplyr::mutate(prop = prop * 100) |>
+  filter(base != "N") |>
+  mutate(prop = prop * 100) |>
   ggplot(aes(x = pos, y = prop, colour = base, group = base)) +
   geom_line() +
   facet_grid(umccrid ~ mate) +
@@ -313,9 +303,11 @@ f1 |>
     x = "Position in Read (bp)",
     y = "Proportion of Bases",
     title = "Positional Base Content",
-    subtitle = glue("Proportion of bases of each specific nucleotide\nat given locations in the read.")
-  ) +
-  theme_bw()
+    subtitle = glue(
+      "Proportion of bases of each specific nucleotide",
+      "\nat given locations in the read."
+    )
+  )
 ```
 
 ### Positional Base Mean Quality ('Per-Position Mean Quality Scores')
@@ -341,87 +333,120 @@ ggplot() +
     x = "Position in Read (bp)",
     y = "Quality Score",
     title = "Positional Base Mean Quality",
-    subtitle = glue("Average Phred-scale quality value of bases with a specific\nnucleotide and at a given location in the read.")
+    subtitle = glue(
+      "Average Phred-scale quality value of bases with a specific",
+      "\nnucleotide and at a given location in the read."
+    )
   )
 ```
 
-### Positional Quality
+### Positional Quality ('Per-Position Quality Score Ranges')
 
-```{r fqc_pq}
-# TODO: ignore this for now, need to think how to plot
-ttl <- "Positional Quality"
-sttl <- glue("Phred-scale quality value for bases at a given location and a\ngiven quantile of the distribution")
+```{r fqc_pq, eval=F}
+# TODO: use boxplot instead of point
 f1 <- dr_unnest("FastqcMetricsFile_positional_quality")
+f1 |>
+  mutate(pos = as.integer(.data$pos)) |>
+  filter(pct %in% c(25, 50, 75)) |>
+  ggplot(aes(x = pos, y = value, colour = mate)) +
+  geom_point() +
+  facet_wrap(~umccrid) +
+  labs(
+    title = "Positional Quality",
+    subtitle = glue("Phred-scale quality value for bases at a given location and a\ngiven quantile of the distribution")
+  )
 ```
 
-### GC Content
+### GC Content ('Per-Sequence GC Content')
 
 ```{r read_gc}
 f1 <- dr_unnest("FastqcMetricsFile_read_gc_content")
 f1 |>
-  ggplot(aes(x = pct, y = value, colour = mate)) +
+  group_by(umccrid, mate) |>
+  mutate(
+    tot = sum(.data$value),
+    prop = round(.data$value / .data$tot, 3),
+    prop = 100 * prop
+  ) |>
+  ungroup() |>
+  ggplot(aes(x = pct, y = prop, colour = mate)) +
   geom_line(aes(linetype = mate), alpha = 0.4, linewidth = 1) +
-  scale_y_continuous(labels = scales::label_comma()) +
-  theme_bw() +
   facet_wrap(~umccrid) +
   labs(
     x = "GC content",
-    y = "Number of Reads",
+    y = "Percentage of Reads",
     title = "Read GC Content",
     subtitle = glue("Total number of reads with each GC content\npercentile between 0% and 100%")
   )
 ```
 
-### GC Content Quality
+### GC Content Quality ('GC Content Mean Quality Scores')
 
 ```{r read_gc_qual}
-f1 <- dr_unnest("FastqcMetricsFile_read_gc_content_quality")
-sttl <- glue("Average Phred-scale read mean quality for reads with\neach GC content percentile between 0% and 100%.")
-f1 |>
-  dplyr::filter(!is.na(.data$value)) |>
-  ggplot(aes(x = pct, y = value, colour = mate)) +
-  geom_line() +
-  theme_bw() +
+f1 <- dr_unnest("FastqcMetricsFile_read_gc_content_quality") |>
+  filter(!is.na(.data$value))
+ggplot() +
+  geom_rect(
+    data = fqc_colours,
+    mapping = aes(ymin = start, ymax = end, xmin = -Inf, xmax = Inf),
+    fill = rep(fqc_colours$col, length(unique(f1$umccrid))),
+    alpha = 0.4
+  ) +
+  geom_line(data = f1, aes(x = pct, y = value, colour = mate)) +
   facet_wrap(~umccrid) +
-  labs(title = "GC Content Quality", subtitle = sttl)
+  labs(
+    title = "GC Content Quality",
+    subtitle = glue("Average Phred-scale read mean quality for reads with\neach GC content percentile between 0% and 100%.")
+  )
 ```
 
-### Read Lengths
+### Read Lengths ('Sequence Length Distribution')
 
 ```{r read_len}
 f1 <- dr_unnest("FastqcMetricsFile_read_lengths")
-sttl <- glue("Total number of reads with each observed length.")
 f1 |>
   ggplot(aes(x = bp, y = value, colour = mate)) +
   geom_line(aes(linetype = mate), linewidth = 1) +
-  theme_bw() +
   theme(
     panel.grid.major = element_blank()
   ) +
   facet_wrap(~umccrid, scales = "free_y") +
-  labs(title = "Read Lengths", subtitle = sttl)
+  labs(
+    title = "Read Lengths",
+    subtitle = glue("Total number of reads with each observed length.")
+  )
 ```
 
-### Read Mean Quality
+### Read Mean Quality ('Per-Sequence Quality Scores')
 
 ```{r read_mean_qual}
 f1 <- dr_unnest("FastqcMetricsFile_read_mean_quality")
-sttl <- glue("Total number of reads. Each average Phred-scale\nquality value is rounded to the nearest integer.")
-f1 |>
-  ggplot(aes(x = q, y = value, colour = mate)) +
-  geom_line(aes(linetype = mate), linewidth = 1) +
-  theme_bw() +
+ggplot() +
+  geom_rect(
+    data = fqc_colours,
+    mapping = aes(xmin = start, xmax = end, ymin = -Inf, ymax = Inf),
+    fill = rep(fqc_colours$col, length(unique(f1$umccrid))),
+    alpha = 0.4
+  ) +
+  geom_line(data = f1, aes(x = q, y = value, colour = mate, linetype = mate), linewidth = 1) +
+  scale_y_continuous(labels = scales::label_comma()) +
   theme(
     panel.grid.major = element_blank()
   ) +
   facet_wrap(~umccrid, scales = "free_y") +
-  labs(title = "Read Mean Quality", subtitle = sttl)
+  labs(
+    title = "Read Mean Quality",
+    subtitle = glue("Number of reads with average quality scores. Shows if\na subset of reads has poor quality.
+
+")
+  )
 ```
 
 ### Sequence Positions
 
 ```{r seq_pos}
 f1 <- dr_unnest("FastqcMetricsFile_sequence_positions")
+"Number of times an adapter or other kmer sequence is found, starting at a given position in the input reads."
 ```
 
 ---
