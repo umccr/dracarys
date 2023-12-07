@@ -25,7 +25,7 @@ dp_workflow_read <- function() {
   # q_quote <- shQuote(paste(glue("umccr__automated__umccrise__{sbj}"), collapse = "|"))
   q1 <- glue(
     #' SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" where REGEXP_LIKE("wfr_name", {q_quote});'
-    'SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" WHERE "type_name" = \'wgs_alignment_qc\' ORDER BY start DESC LIMIT 10;'
+    'SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" WHERE "type_name" = \'wgs_alignment_qc\' ORDER BY "start" DESC LIMIT 10;'
   )
   d <- RAthena::dbGetQuery(con, q1) |>
     tibble::as_tibble()
@@ -43,9 +43,9 @@ res <- d |>
   dplyr::rowwise() |>
   dplyr::mutate(
     indir = gds_outdir_dragen,
-    outdir = file.path(sub("gds://", "", .data$indir), glue("{.data$SampleID}_{.data$LibraryID}")),
+    outdir = file.path(sub("gds://", "", .data$indir)),
     outdir = file.path(normalizePath("~/icav1/g"), .data$outdir),
     # indir = file.path(outdir, "dracarys_gds_sync"), # for when debugging locally
-    cmd = system(glue::glue("{tidy_script} tidy --in_dir {.data$indir} --out_dir {.data$outdir} --prefix {.data$SampleID}_{.data$LibraryID} --format rds"))
+    cmd = system(glue::glue("{tidy_script} tidy --in_dir {.data$indir} --out_dir {.data$outdir} --prefix {.data$SampleID} --format rds"))
   ) |>
   dplyr::ungroup()
