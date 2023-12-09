@@ -9,11 +9,7 @@ output:
     highlight: kate
 params:
   title: "UMCCR Alignment QC Summary Report"
-  indir: !r c("/Users/pdiakumis/icav1/g/production/analysis_data/SBJ00006/wgs_alignment_qc/2023120207560682/L2301460__2_dragen",  "/Users/pdiakumis/icav1/g/production/analysis_data/SBJ00006/wgs_alignment_qc/2023120233dd717e/L2301460__1_dragen",  "/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04434/wgs_alignment_qc/202312021b071091/L2301458__2_dragen",  "/Users/pdiakumis/icav1/g/production/analysis_data/SBJ00020/wgs_alignment_qc/2023120232c970f3/L2301459__2_dragen",  "/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04434/wgs_alignment_qc/20231202aade4cdd/L2301458__1_dragen",  "/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04434/wgs_alignment_qc/202312028ade3e75/L2301457__2_dragen",  "/Users/pdiakumis/icav1/g/production/analysis_data/SBJ00020/wgs_alignment_qc/20231202c7409dbb/L2301459__1_dragen",  "/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04434/wgs_alignment_qc/2023120225ef70a8/L2301457__1_dragen",  "/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04411/wgs_alignment_qc/20231202c2a777eb/L2301454__3_dragen",  "/Users/pdiakumis/icav1/g/production/analysis_data/SBJ04411/wgs_alignment_qc/202312022b845cd9/L2301453__4_dragen" )
-  subjectid: !r c("SBJ00006", "SBJ00006", "SBJ04434", "SBJ00020", "SBJ04434", "SBJ04434", "SBJ00020", "SBJ04434", "SBJ04411", "SBJ04411")
-  sampleid: !r c("NTC_Tsqn231127", "NTC_Tsqn231127", "PRJ231322", "PTC_Tsqn231127", "PRJ231322", "PRJ231321", "PTC_Tsqn231127", "PRJ231321", "PRJ231294", "PRJ231203")
-  libraryid: !r c("L2301460", "L2301460", "L2301458", "L2301459", "L2301458", "L2301457", "L2301459", "L2301457", "L2301454", "L2301453")
-  lane: !r c("2", "1", "2", "2", "1", "2", "1", "1", "3", "4")
+  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2023-12-09.rds")
 description: "UMCCR Alignment QC Summary Report"
 title: "`r params$title`"
 ---
@@ -52,9 +48,10 @@ knitr::opts_chunk$set(
 
 ```{r data_setup}
 # source(here::here("inst/rmd/umccr_workflows/alignment_qc/params/pd.R")) # for use with 'Run All Chunks Above'
+
 ggplot2::theme_set(ggplot2::theme_bw())
-ptbl <- tibble::as_tibble(params)
-stopifnot(all(dir.exists(ptbl$indir)))
+meta <- params[["meta"]] |> readr::read_rds()
+stopifnot(all(dir.exists(meta$indir)))
 options(scipen = 999) # disable scientific notation
 options(width = 150)
 filepaths <- function(indir, sampleid, lane, suffix = "rds") {
@@ -86,13 +83,13 @@ filepaths <- function(indir, sampleid, lane, suffix = "rds") {
     )
 }
 
-dat <- ptbl |>
+dat <- meta |>
   rowwise() |>
   mutate(
-    fpaths = list(filepaths(indir = .data$indir, sampleid = .data$sampleid, lane = .data$lane)),
-    umccrid = glue("{.data$subjectid}_{.data$libraryid}_LN{.data$lane}")
+    fpaths = list(filepaths(indir = .data$outdir, sampleid = .data$SampleID, lane = .data$Lane)),
+    umccrid = glue("{.data$SubjectID}_{.data$LibraryID}_LN{.data$Lane}")
   ) |>
-  select("umccrid", "fpaths") |>
+  select("umccrid", "phenotype", "fpaths") |>
   tidyr::unnest(fpaths) |>
   rowwise() |>
   mutate(
@@ -103,19 +100,19 @@ dat <- ptbl |>
 eval <- dat |>
   group_by(ftype) |>
   count(file_exists, name = "nf") |>
-  mutate(eval = nf == nrow(ptbl)) |>
+  mutate(eval = nf == nrow(meta)) |>
   select("ftype", "eval") |>
   tibble::deframe() |>
   as.list()
 
 # filetype-specific access
 d <- dat |>
-  select("umccrid", "ftype", "dat") |>
-  tidyr::nest(data = c("umccrid", "dat"))
+  select("umccrid", "phenotype", "ftype", "dat") |>
+  tidyr::nest(data = c("umccrid", "phenotype", "dat"))
 # sample-specific access
 d_samp <- dat |>
-  select("umccrid", "ftype", "dat") |>
-  tidyr::nest(data = c("ftype", "dat")) |>
+  select("umccrid", "phenotype", "ftype", "dat") |>
+  tidyr::nest(data = c("phenotype", "ftype", "dat")) |>
   arrange("umccrid")
 ```
 
@@ -129,11 +126,10 @@ dr_unnest <- function(x1) {
     ungroup() |>
     filter(nrows > 0) |>
     tidyr::unnest(dat) |>
-    select("umccrid", everything(), -c("ftype", "nrows"))
+    select("umccrid", "phenotype", everything(), -c("ftype", "nrows"))
 }
 
-dt_view <- function(x, caption = NULL, scroll_y = nrow(ptbl) * 30) {
-  num_cols <- names(x)[sapply(x, is.numeric)]
+dt_view <- function(x, caption = NULL, scroll_y = 10 + min(nrow(x) * 35, 570)) {
   x |>
     DT::datatable(
       filter = list(position = "top", clear = FALSE, plain = TRUE),
@@ -143,11 +139,9 @@ dt_view <- function(x, caption = NULL, scroll_y = nrow(ptbl) * 30) {
       options = list(
         scroller = TRUE, scrollY = scroll_y, scrollX = TRUE,
         autoWidth = FALSE, keys = TRUE,
-        buttons = c("csv", "excel"), dom = "Blfrtip"
-      ),
-      caption = caption
-    ) |>
-    DT::formatCurrency(columns = num_cols, currency = "", digits = 1)
+        buttons = c("csv"), dom = "Blfrtip"
+      )
+    )
 }
 
 blank_lines <- function(n = 10) {
@@ -155,7 +149,7 @@ blank_lines <- function(n = 10) {
 }
 ```
 
-## QC Metrics {.tabset .tabset-pills}
+## QC Metrics
 
 ### Mapping
 
@@ -163,49 +157,116 @@ blank_lines <- function(n = 10) {
 d1 <- dr_unnest("MappingMetricsFile") |>
   arrange(umccrid) |>
   select(
-    umccrid,
-    reads_tot_rg_dragen, reads_num_dupmarked_dragen, reads_num_dupmarked_dragen_pct,
-    reads_mapped_dragen_pct, reads_unmapped_dragen_pct, reads_num_uniq_dragen_pct,
-    reads_num_uniq_mapped_dragen_pct, reads_match_nonref_decoys_adj_dragen_pct,
-    reads_singleton_dragen_pct, reads_paired_dragen_pct,
-    reads_paired_proper_dragen_pct, reads_discordant_dragen_pct,
-    reads_mapq_0_10_dragen, read_len_dragen, insert_len_median_dragen,
-    insert_len_mean_dragen, everything()
+    umccrid, phenotype,
+    tot = reads_tot_rg_dragen,
+    dup = reads_num_dupmarked_dragen,
+    `dup%` = reads_num_dupmarked_dragen_pct,
+    `map%` = reads_mapped_dragen_pct,
+    `unmap%` = reads_unmapped_dragen_pct,
+    `uniq%` = reads_num_uniq_dragen_pct,
+    `uniq_map%` = reads_num_uniq_mapped_dragen_pct,
+    `paired%` = reads_paired_dragen_pct,
+    `paired_proper%` = reads_paired_proper_dragen_pct,
+    `singleton%` = reads_singleton_dragen_pct,
+    `discordant%` = reads_discordant_dragen_pct,
+    `mapq_0-10%` = reads_mapq_0_10_dragen_pct,
+    `mapq_10-20%` = reads_mapq_10_20_dragen_pct,
+    `mapq_20-30%` = reads_mapq_20_30_dragen_pct,
+    `mapq_30-40%` = reads_mapq_30_40_dragen_pct,
+    `mapq_40-Inf%` = reads_mapq_40_inf_dragen_pct,
+    read_len = read_len_dragen,
+    insert_len_med = insert_len_median_dragen,
+    insert_len_mean = insert_len_mean_dragen, everything()
   )
+num_cols <- purrr::map_lgl(d1, is.numeric)
+num_pct_cols <- grepl("%", names(d1)) & num_cols
+no_numpct_cols <- !grepl("%", names(d1)) & num_cols
+conf <- list(
+  bg_size = "95% 90%",
+  bg_repeat = "no-repeat",
+  bg_pos = "center",
+  green_range = c(80, 100),
+  pink_range = c(8, 20)
+)
 d1 |>
-  dt_view()
+  dt_view() |>
+  DT::formatCurrency(columns = names(d1)[num_pct_cols], currency = "", digits = 1) |>
+  DT::formatCurrency(columns = names(d1)[no_numpct_cols], currency = "", digits = 0) |>
+  DT::formatStyle(
+    columns = c("map%", "uniq%", "uniq_map%", "paired%", "paired_proper%"),
+    background = DT::styleColorBar(conf$green_range, color = "lightgreen"),
+    backgroundSize = conf$bg_size,
+    backgroundRepeat = conf$bg_repeat,
+    backgroundPosition = conf$bg_pos
+  ) |>
+  DT::formatStyle(
+    columns = c("dup%", "unmap%", "singleton%", "discordant%"),
+    background = DT::styleColorBar(conf$pink_range, color = "pink"),
+    backgroundSize = conf$bg_size,
+    backgroundRepeat = conf$bg_repeat,
+    backgroundPosition = conf$bg_pos
+  )
 ```
 
 ### Coverage
 
 ```{r covm, eval=eval$WgsCoverageMetricsFile}
-# TODO: plot cov_genome_pct_<X>_<Y>_dragen
+# cov_genome_pct_* metrics are in the Hist data, so filter out here
 d1 <- dr_unnest("WgsCoverageMetricsFile") |>
   arrange(umccrid) |>
   select(
-    umccrid,
-    cov_avg_auto_over_genome_dragen,
-    cov_median_auto_over_genome_dragen,
-    cov_avg_x_over_genome_dragen,
-    cov_avg_y_over_genome_dragen,
-    everything()
+    umccrid, phenotype,
+    cvg_auto_avg = cov_avg_auto_over_genome_dragen,
+    cvg_auto_med = cov_median_auto_over_genome_dragen,
+    cvg_x_avg = cov_avg_x_over_genome_dragen,
+    cvg_y_avg = cov_avg_y_over_genome_dragen,
+    cvg_uniq = cov_alignment_avg_over_genome_dragen,
+    cvg_mito_avg = cov_avg_mt_over_genome_dragen,
+    reads_aligned_dragen,
+    bases_aligned_dragen,
+    cvg_gt02 = cov_uniformity_over_genome_pct_gt02mean_dragen,
+    cvg_gt04 = cov_uniformity_over_genome_pct_gt04mean_dragen,
+    everything(),
+    -contains("cov_genome_pct_")
   )
+num_cols <- names(d1)[purrr::map_lgl(d1, is.numeric)]
 d1 |>
-  dt_view()
+  dt_view() |>
+  DT::formatCurrency(columns = num_cols, currency = "", digits = 1)
 ```
 
 ### Ploidy
 
-```{r pe, eval=eval$PloidyEstimationMetricsFile}
-# TODO: plot cov_<X>_div_auto_medians_dragen
+```{r pe, eval=eval$PloidyEstimationMetricsFile, fig.height=5}
 d1 <- dr_unnest("PloidyEstimationMetricsFile") |>
-  arrange(umccrid) |>
+  arrange(umccrid)
+d1_metrics <- d1 |>
   select(
-    umccrid, ploidy_est_dragen, cov_auto_median_dragen,
-    cov_x_median_dragen, cov_y_median_dragen, everything()
+    umccrid, phenotype,
+    ploidy = ploidy_est_dragen,
+    cvg_auto_med = cov_auto_median_dragen,
+    cvg_x_med = cov_x_median_dragen,
+    cov_y_med = cov_y_median_dragen
   )
-d1 |>
+d1_metrics |>
   dt_view()
+chrom_levels <- c(1:22, "x", "y")
+d1_plot <- d1 |>
+  select(
+    umccrid, phenotype,
+    contains("div_auto_median")
+  ) |>
+  tidyr::pivot_longer(-c("umccrid", "phenotype")) |>
+  tidyr::separate_wider_delim("name", delim = "_", names = c("cov", "chrom", "rest"), too_many = "merge") |>
+  mutate(chrom = factor(chrom, levels = chrom_levels)) |>
+  select(umccrid, phenotype, chrom, value)
+
+d1_plot |>
+  ggplot(aes(x = chrom, y = value, colour = umccrid, group = umccrid)) +
+  geom_line(na.rm = TRUE) +
+  geom_point(na.rm = TRUE) +
+  # facet_wrap(~umccrid) +
+  labs(title = "Chromosome Median / Autosomal Median")
 ```
 
 ### Trimmer
@@ -214,10 +275,30 @@ d1 |>
 d1 <- dr_unnest("TrimmerMetricsFile") |>
   arrange(umccrid) |>
   select(
-    umccrid, reads_tot_input_dragen, read_len_avg_dragen,
-    reads_trimmed_tot_dragen, reads_trimmed_tot_dragen_pct,
-    bases_trimmed_tot_dragen, bases_trimmed_tot_dragen_pct,
-    reads_tot_filt_dragen, reads_tot_filt_dragen_pct,
+    umccrid, phenotype,
+    reads_tot = reads_tot_input_dragen,
+    read_len_avg = read_len_avg_dragen,
+    `polygkmers3r1_remain%` = polygkmers3r1_remaining_dragen_pct,
+    `polygkmers3r2_remain%` = polygkmers3r2_remaining_dragen_pct,
+    `polyg_soft_trimmed_reads_unfilt_3r1%` = polyg_soft_trimmed_reads_unfilt_3r1_dragen_pct,
+    `polyg_soft_trimmed_reads_unfilt_3r2%` = polyg_soft_trimmed_reads_unfilt_3r2_dragen_pct,
+    `polyg_soft_trimmed_bases_unfilt_3r1%` = polyg_soft_trimmed_bases_unfilt_3r1_dragen_pct,
+    `polyg_soft_trimmed_bases_unfilt_3r2%` = polyg_soft_trimmed_bases_unfilt_3r2_dragen_pct,
+    polygkmers3r1_remaining = polygkmers3r1_remaining_dragen,
+    polygkmers3r2_remaining = polygkmers3r2_remaining_dragen,
+    polyg_soft_trimmed_reads_unfilt_3r1 = polyg_soft_trimmed_reads_unfilt_3r1_dragen,
+    polyg_soft_trimmed_reads_unfilt_3r2 = polyg_soft_trimmed_reads_unfilt_3r2_dragen,
+    polyg_soft_trimmed_bases_unfilt_3r1 = polyg_soft_trimmed_bases_unfilt_3r1_dragen,
+    polyg_soft_trimmed_bases_unfilt_3r2 = polyg_soft_trimmed_bases_unfilt_3r2_dragen,
+    bases_tot = bases_tot_dragen,
+    bases_r1 = bases_r1_dragen,
+    bases_r2 = bases_r2_dragen,
+    reads_trimmed_tot = reads_trimmed_tot_dragen,
+    `reads_trimmed_tot%` = reads_trimmed_tot_dragen_pct,
+    bases_trimmed_tot = bases_trimmed_tot_dragen,
+    `bases_trimmed_tot%` = bases_trimmed_tot_dragen_pct,
+    reads_tot_filt = reads_tot_filt_dragen,
+    `reads_tot_filt%` = reads_tot_filt_dragen_pct,
     everything()
   )
 d1 |>
@@ -502,4 +583,3 @@ tibble::tribble(
 ```
 
 </details>
-
