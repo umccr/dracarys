@@ -594,15 +594,15 @@ PloidyEstimationMetricsFile <- R6::R6Class(
         "Autosomal median coverage" = "cov_auto_median_dragen",
         "X median coverage" = "cov_x_median_dragen",
         "Y median coverage" = "cov_y_median_dragen",
-        "1 median / Autosomal median" = "cov_1_div_auto_medians_dragen",
-        "2 median / Autosomal median" = "cov_2_div_auto_medians_dragen",
-        "3 median / Autosomal median" = "cov_3_div_auto_medians_dragen",
-        "4 median / Autosomal median" = "cov_4_div_auto_medians_dragen",
-        "5 median / Autosomal median" = "cov_5_div_auto_medians_dragen",
-        "6 median / Autosomal median" = "cov_6_div_auto_medians_dragen",
-        "7 median / Autosomal median" = "cov_7_div_auto_medians_dragen",
-        "8 median / Autosomal median" = "cov_8_div_auto_medians_dragen",
-        "9 median / Autosomal median" = "cov_9_div_auto_medians_dragen",
+        "1 median / Autosomal median" = "cov_1_div_auto_median_dragen",
+        "2 median / Autosomal median" = "cov_2_div_auto_median_dragen",
+        "3 median / Autosomal median" = "cov_3_div_auto_median_dragen",
+        "4 median / Autosomal median" = "cov_4_div_auto_median_dragen",
+        "5 median / Autosomal median" = "cov_5_div_auto_median_dragen",
+        "6 median / Autosomal median" = "cov_6_div_auto_median_dragen",
+        "7 median / Autosomal median" = "cov_7_div_auto_median_dragen",
+        "8 median / Autosomal median" = "cov_8_div_auto_median_dragen",
+        "9 median / Autosomal median" = "cov_9_div_auto_median_dragen",
         "10 median / Autosomal median" = "cov_10_div_auto_median_dragen",
         "11 median / Autosomal median" = "cov_11_div_auto_median_dragen",
         "12 median / Autosomal median" = "cov_12_div_auto_median_dragen",
@@ -1083,7 +1083,8 @@ WgsHistFile <- R6::R6Class(
         dplyr::mutate(
           start = as.numeric(.data$start),
           end = as.numeric(.data$end),
-          pct = round(.data$pct, 2)
+          pct = round(.data$pct, 2),
+          cumsum = cumsum(.data$pct)
         )
     },
     #' @description

@@ -37,6 +37,7 @@ knitr::opts_chunk$set(
   require(DT, include.only = "datatable")
   require(glue, include.only = "glue")
   require(here, include.only = "here")
+  require(plotly, include.only = "ggplotly")
   require(purrr, include.only = "map")
   require(readr, include.only = "read_rds")
   require(tibble, include.only = "tibble")
@@ -154,7 +155,7 @@ blank_lines <- function(n = 10) {
 ### Mapping
 
 ```{r mm, eval=eval$MappingMetricsFile}
-d1 <- dr_unnest("MappingMetricsFile") |>
+d_map <- dr_unnest("MappingMetricsFile") |>
   arrange(umccrid) |>
   select(
     umccrid, phenotype,
@@ -176,11 +177,12 @@ d1 <- dr_unnest("MappingMetricsFile") |>
     `mapq_40-Inf%` = reads_mapq_40_inf_dragen_pct,
     read_len = read_len_dragen,
     insert_len_med = insert_len_median_dragen,
-    insert_len_mean = insert_len_mean_dragen, everything()
+    insert_len_mean = insert_len_mean_dragen,
+    everything()
   )
-num_cols <- purrr::map_lgl(d1, is.numeric)
-num_pct_cols <- grepl("%", names(d1)) & num_cols
-no_numpct_cols <- !grepl("%", names(d1)) & num_cols
+num_cols <- purrr::map_lgl(d_map, is.numeric)
+num_pct_cols <- grepl("%", names(d_map)) & num_cols
+no_numpct_cols <- !grepl("%", names(d_map)) & num_cols
 conf <- list(
   bg_size = "95% 90%",
   bg_repeat = "no-repeat",
@@ -188,10 +190,10 @@ conf <- list(
   green_range = c(80, 100),
   pink_range = c(8, 20)
 )
-d1 |>
+d_map |>
   dt_view() |>
-  DT::formatCurrency(columns = names(d1)[num_pct_cols], currency = "", digits = 1) |>
-  DT::formatCurrency(columns = names(d1)[no_numpct_cols], currency = "", digits = 0) |>
+  DT::formatCurrency(columns = names(d_map)[num_pct_cols], currency = "", digits = 1) |>
+  DT::formatCurrency(columns = names(d_map)[no_numpct_cols], currency = "", digits = 0) |>
   DT::formatStyle(
     columns = c("map%", "uniq%", "uniq_map%", "paired%", "paired_proper%"),
     background = DT::styleColorBar(conf$green_range, color = "lightgreen"),
@@ -208,20 +210,35 @@ d1 |>
   )
 ```
 
-### Coverage
+### Coverage + Ploidy
 
 ```{r covm, eval=eval$WgsCoverageMetricsFile}
-# cov_genome_pct_* metrics are in the Hist data, so filter out here
-d1 <- dr_unnest("WgsCoverageMetricsFile") |>
-  arrange(umccrid) |>
+d_pl <- dr_unnest("PloidyEstimationMetricsFile") |>
+  arrange(umccrid)
+d_pl_metrics <- d_pl |>
   select(
     umccrid, phenotype,
+    ploidy = ploidy_est_dragen,
+    cvg_auto_med_ploidy = cov_auto_median_dragen,
+    cvg_x_med_ploidy = cov_x_median_dragen,
+    cvg_y_med_ploidy = cov_y_median_dragen
+  )
+# cov_genome_pct_* metrics are in the Hist data, so filter out here
+d_cvg <- dr_unnest("WgsCoverageMetricsFile") |>
+  arrange(umccrid) |>
+  left_join(d_pl_metrics, by = c("umccrid", "phenotype")) |>
+  select(
+    umccrid, phenotype,
+    ploidy,
     cvg_auto_avg = cov_avg_auto_over_genome_dragen,
     cvg_auto_med = cov_median_auto_over_genome_dragen,
     cvg_x_avg = cov_avg_x_over_genome_dragen,
     cvg_y_avg = cov_avg_y_over_genome_dragen,
     cvg_uniq = cov_alignment_avg_over_genome_dragen,
     cvg_mito_avg = cov_avg_mt_over_genome_dragen,
+    cvg_auto_med_ploidy,
+    cvg_x_med_ploidy,
+    cvg_y_med_ploidy,
     reads_aligned_dragen,
     bases_aligned_dragen,
     cvg_gt02 = cov_uniformity_over_genome_pct_gt02mean_dragen,
@@ -229,50 +246,22 @@ d1 <- dr_unnest("WgsCoverageMetricsFile") |>
     everything(),
     -contains("cov_genome_pct_")
   )
-num_cols <- names(d1)[purrr::map_lgl(d1, is.numeric)]
-d1 |>
+num_cols <- names(d_cvg)[purrr::map_lgl(d_cvg, is.numeric)]
+d_cvg |>
   dt_view() |>
-  DT::formatCurrency(columns = num_cols, currency = "", digits = 1)
-```
-
-### Ploidy
-
-```{r pe, eval=eval$PloidyEstimationMetricsFile, fig.height=5}
-d1 <- dr_unnest("PloidyEstimationMetricsFile") |>
-  arrange(umccrid)
-d1_metrics <- d1 |>
-  select(
-    umccrid, phenotype,
-    ploidy = ploidy_est_dragen,
-    cvg_auto_med = cov_auto_median_dragen,
-    cvg_x_med = cov_x_median_dragen,
-    cov_y_med = cov_y_median_dragen
+  DT::formatCurrency(columns = num_cols, currency = "", digits = 1) |>
+  DT::formatStyle(
+    "ploidy",
+    backgroundColor = DT::styleEqual(
+      c("XY", "XX"), c("lightblue", "lightpink")
+    )
   )
-d1_metrics |>
-  dt_view()
-chrom_levels <- c(1:22, "x", "y")
-d1_plot <- d1 |>
-  select(
-    umccrid, phenotype,
-    contains("div_auto_median")
-  ) |>
-  tidyr::pivot_longer(-c("umccrid", "phenotype")) |>
-  tidyr::separate_wider_delim("name", delim = "_", names = c("cov", "chrom", "rest"), too_many = "merge") |>
-  mutate(chrom = factor(chrom, levels = chrom_levels)) |>
-  select(umccrid, phenotype, chrom, value)
-
-d1_plot |>
-  ggplot(aes(x = chrom, y = value, colour = umccrid, group = umccrid)) +
-  geom_line(na.rm = TRUE) +
-  geom_point(na.rm = TRUE) +
-  # facet_wrap(~umccrid) +
-  labs(title = "Chromosome Median / Autosomal Median")
 ```
 
 ### Trimmer
 
 ```{r trim, eval=eval$TrimmerMetricsFile}
-d1 <- dr_unnest("TrimmerMetricsFile") |>
+d_tr <- dr_unnest("TrimmerMetricsFile") |>
   arrange(umccrid) |>
   select(
     umccrid, phenotype,
@@ -301,53 +290,68 @@ d1 <- dr_unnest("TrimmerMetricsFile") |>
     `reads_tot_filt%` = reads_tot_filt_dragen_pct,
     everything()
   )
-d1 |>
+d_tr |>
   dt_view()
 ```
 
 ### FineHist
 
-```{r finehist, eval=eval$WgsFineHistFile}
-d1 <- dr_unnest("WgsFineHistFile")
-d1 |>
+```{r finehist, eval=eval$WgsFineHistFile, fig.height=10, fig.width=12}
+d_fhist <- dr_unnest("WgsFineHistFile")
+d_fhist |>
   WgsFineHistFile$public_methods$plot(c(0, 150)) +
   facet_wrap(~umccrid, scales = "free_y")
 ```
 
 ### Hist
 
-```{r cvgm, eval=eval$WgsCoverageMetricsFile}
-d1 <- dr_unnest("WgsHistFile")
-d1 |>
+```{r cvgm, eval=eval$WgsCoverageMetricsFile, fig.height=8, fig.width=12}
+d_hist <- dr_unnest("WgsHistFile")
+d_hist1 <- d_hist |>
   ggplot(aes(x = start, y = pct, colour = umccrid)) +
   geom_point() +
   geom_linerange(aes(xmin = start, xmax = end)) +
-  facet_wrap(~umccrid) +
-  labs(x = "Coverage range", y = "PCT") +
-  ggtitle("PCT of bases with coverage in the given range.") +
-  theme(legend.position = "none")
+  scale_y_continuous(n.breaks = 10) +
+  scale_x_continuous(n.breaks = 10) +
+  # facet_wrap(~umccrid) +
+  labs(
+    x = "Coverage range", y = "PCT",
+    title = "PCT of bases with coverage in the given range",
+    subtitle = "e.g. X PCT of bases have coverage between 100 and 500."
+  )
+d_hist2 <- d_hist |>
+  ggplot(aes(x = start, y = cumsum, colour = umccrid)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(n.breaks = 10) +
+  labs(
+    x = "Coverage", y = "PCT Cumsum",
+    title = "Percentage of sites in genome with given coverage"
+  )
+plotly::subplot(d_hist1, d_hist2, shareY = TRUE, titleY = TRUE, titleX = TRUE, nrows = 1)
 ```
 
 -----
 
 ## Fragment Length
 
-```{r fraglenhist_plot, eval=eval$FragmentLengthHistFile}
+```{r fraglenhist_plot, eval=eval$FragmentLengthHistFile, fig.height = 8}
 fl1 <- dr_unnest("FragmentLengthHistFile")
 min_count <- 10
-fl1 |>
+flp <- fl1 |>
   filter(.data$count >= min_count) |>
-  ggplot2::ggplot(ggplot2::aes(x = .data$fragmentLength, y = .data$count)) +
-  ggplot2::geom_line(aes(colour = umccrid)) +
-  ggplot2::labs(title = "Fragment Length Distribution") +
-  ggplot2::xlab("Fragment Length (bp)") +
-  ggplot2::ylab(glue("Read Count (min: {min_count})")) +
-  ggplot2::theme(
+  ggplot(aes(x = .data$fragmentLength, y = .data$count)) +
+  geom_line(aes(colour = umccrid)) +
+  labs(title = "Fragment Length Distribution") +
+  xlab("Fragment Length (bp)") +
+  ylab(glue("Read Count (min: {min_count})")) +
+  theme(
     legend.position = c(0.9, 0.9),
     legend.justification = c(1, 1),
     panel.grid.minor = ggplot2::element_blank(),
     plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
   )
+plotly::ggplotly(flp)
 ```
 
 ## Coverage {.tabset .tabset-pills}
@@ -366,6 +370,29 @@ for (s in sort(unique(d1$umccrid))) {
   blank_lines(2)
   cat("\n\n\n")
 }
+```
+
+## Ploidy
+
+```{r pe, eval=eval$PloidyEstimationMetricsFile, fig.height=5}
+chrom_levels <- c(1:22, "x", "y")
+d_pl_plot_data <- d_pl |>
+  select(
+    umccrid, phenotype,
+    contains("div_auto_median")
+  ) |>
+  tidyr::pivot_longer(-c("umccrid", "phenotype")) |>
+  tidyr::separate_wider_delim("name", delim = "_", names = c("cov", "chrom", "rest"), too_many = "merge") |>
+  mutate(chrom = factor(chrom, levels = chrom_levels)) |>
+  select(umccrid, phenotype, chrom, value)
+
+d_pl_plot <- d_pl_plot_data |>
+  ggplot(aes(x = chrom, y = value)) +
+  geom_line(aes(colour = umccrid, group = umccrid), na.rm = TRUE) +
+  geom_point(aes(colour = umccrid), na.rm = TRUE) +
+  # facet_wrap(~umccrid) +
+  labs(title = "Chromosome Median / Autosomal Median")
+plotly::ggplotly(d_pl_plot)
 ```
 
 ## FastQC {.tabset .tabset-pills}
