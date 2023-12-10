@@ -23,8 +23,8 @@ dp_workflow_read <- function() {
   )
   q1 <- glue(
     'SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" ',
-    'WHERE "start" < date(\'2023-12-06\') AND "type_name" = \'wgs_alignment_qc\' ',
-    'ORDER BY "start" DESC LIMIT 10;'
+    'WHERE "start" > date(\'2023-12-08\') AND REGEXP_LIKE("type_name", \'alignment_qc\') ',
+    'ORDER BY "start" DESC;'
   )
   d <- RAthena::dbGetQuery(con, q1) |>
     tibble::as_tibble()
@@ -52,8 +52,15 @@ dp_lims_read <- function(libids) {
 }
 
 # first read in the workflows table, extract metadata, then join with lims
-p <- dp_workflow_read() |>
+p <- dp_workflow_read()
+
+wgs <- p |>
+  filter(type_name == "wgs_alignment_qc") |>
   dracarys::meta_wgs_alignment_qc(status = "Succeeded")
+wts <- p |>
+  filter(type_name == "wts_alignment_qc") |>
+  dracarys::meta_wts_alignment_qc(status = "Succeeded")
+p <- dplyr::bind_rows(wgs, wts)
 lims <- dp_lims_read(p$LibraryID)
 
 d <- p |>
@@ -77,4 +84,5 @@ meta <- d |>
   dplyr::ungroup()
 
 meta |>
-  saveRDS(here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2023-12-09.rds"))
+  saveRDS(here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2023-12-10_wgts.rds"))
+# saveRDS(here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2023-12-10.rds"))
