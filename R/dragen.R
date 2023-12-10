@@ -75,6 +75,7 @@ WgsContigMeanCovFile <- R6::R6Class(
       main_chrom1 <- c(1:22, "X", "Y")
       main_chrom2 <- c(paste0("chr", main_chrom1))
       main_chrom <- c(main_chrom1, main_chrom2, "Autosomal regions")
+      min_cvg <- 0.000001
 
       d <- d |>
         dplyr::mutate(
@@ -103,6 +104,7 @@ WgsContigMeanCovFile <- R6::R6Class(
           coverage = dplyr::if_else(.data$alt_group == "bottom", .data$mean_cov, .data$coverage)
         ) |>
         dplyr::distinct() |>
+        dplyr::filter(coverage > min_cvg) |>
         dplyr::ungroup() |>
         dplyr::select("chrom", "coverage", "panel")
 
@@ -471,6 +473,7 @@ MappingMetricsFile <- R6::R6Class(
         "Unmapped reads" = "reads_unmapped_dragen",
         "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt_dragen",
         "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj_dragen",
+        "Adjustment of reads matching filter contigs" = "reads_match_filt_contig_adj_dragen",
         "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton_dragen",
         "Paired reads (itself & mate mapped)" = "reads_paired_dragen",
         "Properly paired reads" = "reads_paired_proper_dragen",
@@ -485,6 +488,7 @@ MappingMetricsFile <- R6::R6Class(
         "Reads with MAPQ NA (Unmapped reads)" = "reads_mapq_na_unmapped_dragen",
         "Reads with indel R1" = "reads_indel_r1_dragen",
         "Reads with indel R2" = "reads_indel_r2_dragen",
+        "Reads with splice junction" = "reads_splicejunc_dragen",
         "Total bases" = "bases_tot_dragen",
         "Total bases R1" = "bases_tot_r1_dragen",
         "Total bases R2" = "bases_tot_r2_dragen",
@@ -515,7 +519,8 @@ MappingMetricsFile <- R6::R6Class(
         "Estimated sample contamination" = "contamination_est_dragen",
         "DRAGEN mapping rate [mil. reads/second]" = "mapping_rate_dragen_milreads_per_sec_dragen",
         "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed_dragen",
-        "Total reads in RG" = "reads_tot_rg_dragen"
+        "Total reads in RG" = "reads_tot_rg_dragen",
+        "Filtered rRNA reads" = "reads_rrna_filtered_dragen"
       )
       x <- self$path
       raw <- readr::read_lines(x)
