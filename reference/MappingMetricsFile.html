@@ -3,13 +3,15 @@
 the mapping_metrics.csv file output from DRAGEN.
 This file contains mapping and aligning metrics, like the metrics computed by
 the Samtools Flagstat command. These metrics are available on an aggregate
-level (over all input data), and on a per read group level.
+level (over all input data), and on a per read group level. NOTE: we are
+keeping only the read group level metrics (i.e. removing the aggregate data).
 Unless explicitly stated, the metrics units are in reads (i.e., not in
-terms of pairs or alignments)."><title>MappingMetricsFile R6 Class — MappingMetricsFile • dracarys</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="MappingMetricsFile R6 Class — MappingMetricsFile"><meta property="og:description" content="Contains methods for reading and displaying contents of
+terms of pairs or alignments)."><title>MappingMetricsFile R6 Class — MappingMetricsFile • dracarys</title><script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no"><link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet"><script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous"><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous"><!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="MappingMetricsFile R6 Class — MappingMetricsFile"><meta property="og:description" content="Contains methods for reading and displaying contents of
 the mapping_metrics.csv file output from DRAGEN.
 This file contains mapping and aligning metrics, like the metrics computed by
 the Samtools Flagstat command. These metrics are available on an aggregate
-level (over all input data), and on a per read group level.
+level (over all input data), and on a per read group level. NOTE: we are
+keeping only the read group level metrics (i.e. removing the aggregate data).
 Unless explicitly stated, the metrics units are in reads (i.e., not in
 terms of pairs or alignments)."><!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -22,7 +24,7 @@ terms of pairs or alignments)."><!-- mathjax --><script src="https://cdnjs.cloud
     
     <a class="navbar-brand me-2" href="../index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.11.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.12.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,7 +71,8 @@ terms of pairs or alignments)."><!-- mathjax --><script src="https://cdnjs.cloud
 the <code>mapping_metrics.csv</code> file output from DRAGEN.
 This file contains mapping and aligning metrics, like the metrics computed by
 the Samtools Flagstat command. These metrics are available on an aggregate
-level (over all input data), and on a per read group level.
+level (over all input data), and on a per read group level. NOTE: we are
+keeping only the read group level metrics (i.e. removing the aggregate data).
 Unless explicitly stated, the metrics units are in reads (i.e., not in
 terms of pairs or alignments).</p>
     </div>
@@ -86,6 +89,7 @@ terms of pairs or alignments).</p>
 <h3 id="public-methods">Public methods<a class="anchor" aria-label="anchor" href="#public-methods"></a></h3>
 
 <ul><li><p><a href="#method-MappingMetricsFile-read"><code>MappingMetricsFile$read()</code></a></p></li>
+<li><p><a href="#method-MappingMetricsFile-write"><code>MappingMetricsFile$write()</code></a></p></li>
 <li><p><a href="#method-MappingMetricsFile-clone"><code>MappingMetricsFile$clone()</code></a></p></li>
 </ul></div><p><details open><summary>Inherited methods</summary><ul><li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="bname"><a href="File.html#method-bname"><code>dracarys::File$bname()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="File" data-id="initialize"><a href="File.html#method-initialize"><code>dracarys::File$initialize()</code></a></span></li>
@@ -100,25 +104,57 @@ terms of pairs or alignments).</p>
 
 <div class="section">
 <h4 id="returns">Returns<a class="anchor" aria-label="anchor" href="#returns"></a></h4>
-<p>tibble with the following columns:
-- category: summary or read group
-- Phenotype: e.g. tumor, normal
-- RG: read group
-- var: metric variable
-- var_abbrev: metric variable abbreviation
-- count: count of reads
-- pct: percentage of reads</p>
+<p>tibble with one row of X metrics per read group.</p>
+</div>
+
+</div><p></p><hr><a id="method-MappingMetricsFile-write"></a><div class="section">
+<h3 id="method-write-">Method <code><a href="https://rdrr.io/r/base/write.html" class="external-link">write()</a></code><a class="anchor" aria-label="anchor" href="#method-write-"></a></h3>
+<p>Writes a tidy version of the <code>mapping_metrics.csv</code> file output
+from DRAGEN.</p><div class="section">
+<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MappingMetricsFile</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span></span>
+<span>  <span class="va">d</span>,</span>
+<span>  out_dir <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  <span class="va">prefix</span>,</span>
+<span>  out_format <span class="op">=</span> <span class="st">"tsv"</span>,</span>
+<span>  drid <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span></code></pre></div><p></p></div>
+</div>
+
+<div class="section">
+<h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
+<p></p><div class="arguments"><dl><dt><code>d</code></dt>
+<dd><p>Parsed object from <code>self$read()</code>.</p></dd>
+
+
+<dt><code>out_dir</code></dt>
+<dd><p>Output directory.</p></dd>
+
+
+<dt><code>prefix</code></dt>
+<dd><p>Prefix of output file(s).</p></dd>
+
+
+<dt><code>out_format</code></dt>
+<dd><p>Format of output file(s).</p></dd>
+
+
+<dt><code>drid</code></dt>
+<dd><p>dracarys ID to use for the dataset (e.g. <code>wfrid.123</code>, <code>prid.456</code>).</p></dd>
+
+
+</dl><p></p></div>
 </div>
 
 </div><p></p><hr><a id="method-MappingMetricsFile-clone"></a><div class="section">
 <h3 id="method-clone-">Method <code>clone()</code><a class="anchor" aria-label="anchor" href="#method-clone-"></a></h3>
 <p>The objects of this class are cloneable with this method.</p><div class="section">
-<h4 id="usage-1">Usage<a class="anchor" aria-label="anchor" href="#usage-1"></a></h4>
+<h4 id="usage-2">Usage<a class="anchor" aria-label="anchor" href="#usage-2"></a></h4>
 <p></p><div class="r"><div class="sourceCode"><pre><code><span><span class="va">MappingMetricsFile</span><span class="op">$</span><span class="fu">clone</span><span class="op">(</span>deep <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div><p></p></div>
 </div>
 
 <div class="section">
-<h4 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h4>
+<h4 id="arguments-1">Arguments<a class="anchor" aria-label="anchor" href="#arguments-1"></a></h4>
 <p></p><div class="arguments"><dl><dt><code>deep</code></dt>
 <dd><p>Whether to make a deep clone.</p></dd>
 
@@ -134,21 +170,8 @@ terms of pairs or alignments).</p>
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/wgs/SEQC-II.mapping_metrics.csv.gz"</span>, package <span class="op">=</span> <span class="st">"dracarys"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mm</span> <span class="op">&lt;-</span> <span class="va">MappingMetricsFile</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">mm</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span> <span class="co"># or read(mm)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 218 × 7</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    category Phenotype RG    var                         var_abbrev   count   pct</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 1</span> summary  tumor     TOTAL Total Reads per RG          Tot         2.20<span style="color: #949494;">e</span>9 100  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 2</span> summary  tumor     TOTAL Number of duplicate marked… Dup         4.43<span style="color: #949494;">e</span>8  20.2</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 3</span> summary  tumor     TOTAL Number of duplicate marked… Dup Rem    <span style="color: #BB0000;">NA</span>   <span style="color: #949494;"> </span>   <span style="color: #BB0000;">NA</span>  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 4</span> summary  tumor     TOTAL Number of unique reads (ex… Unique      1.76<span style="color: #949494;">e</span>9  79.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 5</span> summary  tumor     TOTAL Reads with mate sequenced   Mated       2.20<span style="color: #949494;">e</span>9 100  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 6</span> summary  tumor     TOTAL Reads without mate sequenc… noMated     0   <span style="color: #949494;"> </span>    0  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 7</span> summary  tumor     TOTAL QC-failed reads             Failed      0   <span style="color: #949494;"> </span>    0  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 8</span> summary  tumor     TOTAL Mapped reads                Mapped      2.20<span style="color: #949494;">e</span>9  99.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;"> 9</span> summary  tumor     TOTAL Mapped reads adjusted for … Mapped re…  2.20<span style="color: #949494;">e</span>9  99.8</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">10</span> summary  tumor     TOTAL Mapped reads R1             R1map       1.10<span style="color: #949494;">e</span>9 100. </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># ℹ 208 more rows</span></span>
+<span class="r-in"><span><span class="va">d</span> <span class="op">&lt;-</span> <span class="va">mm</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span> <span class="co"># or read(mm)</span></span></span>
+<span class="r-in"><span><span class="va">mm</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">d</span>, out_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, prefix <span class="op">=</span> <span class="st">"seqc_mm"</span>, out_format <span class="op">=</span> <span class="st">"tsv"</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
 </code></pre></div>
     </div>

@@ -31,16 +31,10 @@
     <loc>https://umccr.github.io/dracarys/news/index.html</loc>
   </url>
   <url>
-    <loc>https://umccr.github.io/dracarys/reference/ContigMeanCovFile.html</loc>
-  </url>
-  <url>
-    <loc>https://umccr.github.io/dracarys/reference/CoverageMetricsFile.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/FastqcMetricsFile.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/File.html</loc>
-  </url>
-  <url>
-    <loc>https://umccr.github.io/dracarys/reference/FineHistFile.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/FragmentLengthHistFile.html</loc>
@@ -64,10 +58,19 @@
     <loc>https://umccr.github.io/dracarys/reference/ReplayFile.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/SvMetricsFile.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/TimeMetricsFile.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/TrimmerMetricsFile.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/TsoAlignCollapseFusionCallerMetricsFile.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/TsoCopyNumberVariantsVcfFile.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/TsoFragmentLengthHistFile.html</loc>
@@ -109,6 +112,18 @@
     <loc>https://umccr.github.io/dracarys/reference/VCMetricsFile.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/WgsContigMeanCovFile.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/WgsCoverageMetricsFile.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/WgsFineHistFile.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/WgsHistFile.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/bcftools_parse_vcf.html</loc>
   </url>
   <url>
@@ -122,6 +137,9 @@
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/dr_gds_download.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/dr_output_format_valid.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/dracarys-package.html</loc>
@@ -151,6 +169,9 @@
     <loc>https://umccr.github.io/dracarys/reference/gds_volumes_list.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/glims_read.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/ica_token_validate.html</loc>
   </url>
   <url>
@@ -163,7 +184,22 @@
     <loc>https://umccr.github.io/dracarys/reference/meta_bcl_convert.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/meta_oncoanalyser_wgs.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/meta_oncoanalyser_wgts_existing_both.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/meta_oncoanalyser_wts.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/meta_rnasum.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/meta_sash.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/meta_star_alignment.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/meta_tso_ctdna_tumor_only.html</loc>
@@ -176,6 +212,9 @@
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/meta_wgs_tumor_normal.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/meta_wts_alignment_qc.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/meta_wts_tumor_only.html</loc>
@@ -211,6 +250,9 @@
     <loc>https://umccr.github.io/dracarys/reference/portal_meta_read.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/portal_meta_read_athena.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/rdf2tab.html</loc>
   </url>
   <url>
@@ -220,13 +262,16 @@
     <loc>https://umccr.github.io/dracarys/reference/read.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/s3_files_list_filter_relevant.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/s3_search.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/session_info_kable.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/time_metrics_process.html</loc>
-  </url>
-  <url>
-    <loc>https://umccr.github.io/dracarys/reference/tso_rmd.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/umccr_tidy.html</loc>
