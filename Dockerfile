@@ -14,7 +14,7 @@ RUN mamba config \
 ARG DRACARYS_LOCK="dracarys-linux-64.lock"
 ARG ENV_NAME="dracarys_env"
 COPY ./conda/env/lock/${DRACARYS_LOCK} .
-RUN conda-lock install --name ${ENV_NAME} --file ${DRACARYS_LOCK} && \
+RUN conda-lock install --name ${ENV_NAME} ${DRACARYS_LOCK} && \
     mamba clean --all --force-pkgs-dirs
 
 ARG MAMBA_PREFIX="/opt/conda"
