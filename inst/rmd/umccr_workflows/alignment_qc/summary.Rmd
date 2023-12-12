@@ -56,7 +56,7 @@ meta <- params[["meta"]] |> readr::read_rds()
 stopifnot(all(dir.exists(meta$outdir)))
 options(scipen = 999) # disable scientific notation
 options(width = 150)
-filepaths <- function(indir, sampleid, lane, suffix = "rds") {
+filepaths <- function(indir, sampleid, suffix = "rds") {
   tibble::tibble(
     ftype = c(
       paste0(
@@ -88,7 +88,7 @@ filepaths <- function(indir, sampleid, lane, suffix = "rds") {
 dat <- meta |>
   rowwise() |>
   mutate(
-    fpaths = list(filepaths(indir = .data$outdir, sampleid = .data$SampleID, lane = .data$Lane)),
+    fpaths = list(filepaths(indir = .data$outdir, sampleid = .data$SampleID)),
     umccrid = glue("{.data$SubjectID}_{.data$LibraryID}_LN{.data$Lane}")
   ) |>
   select("umccrid", "phenotype", "type", "fpaths") |>
