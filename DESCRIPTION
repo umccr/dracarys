@@ -24,7 +24,6 @@ Imports:
     assertthat,
     cli,
     data.table,
-    DBI,
     dplyr,
     emojifont,
     fs,
@@ -42,7 +41,6 @@ Imports:
     purrr,
     R6,
     readr,
-    RAthena,
     RJSONIO,
     rlang,
     rmarkdown,
@@ -52,6 +50,8 @@ Imports:
     tidyr
 Suggests:
     SparkR,
+    DBI,
+    RAthena,
     testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE,
               roclets = c("namespace", "rd", "roxytest::testthat_roclet"))
