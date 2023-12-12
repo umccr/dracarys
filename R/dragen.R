@@ -75,6 +75,7 @@ WgsContigMeanCovFile <- R6::R6Class(
       main_chrom1 <- c(1:22, "X", "Y")
       main_chrom2 <- c(paste0("chr", main_chrom1))
       main_chrom <- c(main_chrom1, main_chrom2, "Autosomal regions")
+      min_cvg <- 0.000001
 
       d <- d |>
         dplyr::mutate(
@@ -103,6 +104,7 @@ WgsContigMeanCovFile <- R6::R6Class(
           coverage = dplyr::if_else(.data$alt_group == "bottom", .data$mean_cov, .data$coverage)
         ) |>
         dplyr::distinct() |>
+        dplyr::filter(coverage > min_cvg) |>
         dplyr::ungroup() |>
         dplyr::select("chrom", "coverage", "panel")
 
@@ -174,21 +176,7 @@ WgsCoverageMetricsFile <- R6::R6Class(
         "Aligned bases in genome"                             = "bases_aligned_in_genome_dragen",
         "Average alignment coverage over genome"              = "cov_alignment_avg_over_genome_dragen",
         "Uniformity of coverage (PCT > 0.2*mean) over genome" = "cov_uniformity_over_genome_pct_gt02mean_dragen",
-        "PCT of genome with coverage [100x: inf)"             = "cov_genome_pct_100x_inf_dragen",
-        "PCT of genome with coverage [ 50x: inf)"             = "cov_genome_pct_50x_inf_dragen",
-        "PCT of genome with coverage [ 20x: inf)"             = "cov_genome_pct_20x_inf_dragen",
-        "PCT of genome with coverage [ 15x: inf)"             = "cov_genome_pct_15x_inf_dragen",
-        "PCT of genome with coverage [ 10x: inf)"             = "cov_genome_pct_10x_inf_dragen",
-        "PCT of genome with coverage [  3x: inf)"             = "cov_genome_pct_3x_inf_dragen",
-        "PCT of genome with coverage [  1x: inf)"             = "cov_genome_pct_1x_inf_dragen",
-        "PCT of genome with coverage [  0x: inf)"             = "cov_genome_pct_0x_inf_dragen",
-        "PCT of genome with coverage [ 50x:100x)"             = "cov_genome_pct_50x_100x_dragen",
-        "PCT of genome with coverage [ 20x: 50x)"             = "cov_genome_pct_20x_50x_dragen",
-        "PCT of genome with coverage [ 15x: 20x)"             = "cov_genome_pct_15x_20x_dragen",
-        "PCT of genome with coverage [ 10x: 15x)"             = "cov_genome_pct_10x_15x_dragen",
-        "PCT of genome with coverage [  3x: 10x)"             = "cov_genome_pct_3x_10x_dragen",
-        "PCT of genome with coverage [  1x:  3x)"             = "cov_genome_pct_1x_3x_dragen",
-        "PCT of genome with coverage [  0x:  1x)"             = "cov_genome_pct_0x_1x_dragen",
+        "Uniformity of coverage (PCT > 0.4*mean) over genome" = "cov_uniformity_over_genome_pct_gt04mean_dragen",
         "Average chr X coverage over genome"                  = "cov_avg_x_over_genome_dragen",
         "Average chr Y coverage over genome"                  = "cov_avg_y_over_genome_dragen",
         "Average mitochondrial coverage over genome"          = "cov_avg_mt_over_genome_dragen",
@@ -203,19 +191,36 @@ WgsCoverageMetricsFile <- R6::R6Class(
       raw <- readr::read_lines(x)
       assertthat::assert_that(grepl("COVERAGE SUMMARY", raw[1]))
 
-      raw |>
+      res <- raw |>
         tibble::as_tibble_col(column_name = "value") |>
         tidyr::separate_wider_delim(
           "value",
           delim = ",", too_few = "align_start",
           names = c("category", "dummy1", "var", "value", "pct")
-        ) |>
-        dplyr::mutate(
-          var = dplyr::recode(.data$var, !!!abbrev_nm),
-          value = as.numeric(.data$value)
-        ) |>
+        )
+      # split to rename the
+      # "PCT of genome with coverage [100x: inf)" values
+      res1 <- res |>
         # pct just shows 100% for a couple rows
-        dplyr::select("var", "value") |>
+        dplyr::filter(!grepl("PCT of genome with coverage", .data$var)) |>
+        dplyr::select("var", "value")
+      res2 <- res |>
+        dplyr::filter(grepl("PCT of genome with coverage", .data$var)) |>
+        dplyr::mutate(
+          var = sub("PCT of genome with coverage ", "", .data$var),
+          var = gsub("\\[|\\]|\\(|\\)| ", "", .data$var),
+          var = gsub("x", "", .data$var),
+          var = gsub("inf", "Inf", .data$var)
+        ) |>
+        tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
+        dplyr::mutate(var = as.character(glue("cov_genome_pct_{start}_{end}_dragen"))) |>
+        dplyr::select("var", "value")
+      res <- dplyr::bind_rows(res1, res2)
+      res |>
+        dplyr::mutate(
+          value = as.numeric(.data$value),
+          var = dplyr::recode(.data$var, !!!abbrev_nm)
+        ) |>
         tidyr::pivot_wider(names_from = "var", values_from = "value")
     },
     #' @description
@@ -451,6 +456,15 @@ MappingMetricsFile <- R6::R6Class(
         "Reads with mate sequenced" = "reads_w_mate_seq_dragen",
         "Reads without mate sequenced" = "reads_wo_mate_seq_dragen",
         "QC-failed reads" = "reads_qcfail_dragen",
+        "Mapped reads adjusted for excluded mapping" = "reads_mapped_adjexcl_dragen",
+        "Mapped reads adjusted for filtered and excluded mapping" = "reads_mapped_adjfiltexcl_dragen",
+        "Unmapped reads adjusted for excluded mapping" = "reads_unmapped_adjexcl_dragen",
+        "Unmapped reads adjusted for filtered and excluded mapping" = "reads_unmapped_adjfiltexcl_dragen",
+        "Reads mapping to multiple locations" = "reads_map_multiloc_dragen",
+        "Hard-clipped bases R1" = "bases_hardclip_r1_dragen",
+        "Hard-clipped bases R2" = "bases_hardclip_r2_dragen",
+        "Soft-clipped bases" = "bases_softclip_dragen",
+        "Hard-clipped bases" = "bases_hardclip_dragen",
         "Mapped reads" = "reads_mapped_dragen",
         "Mapped reads adjusted for filtered mapping" = "reads_mapped_adjfilt_dragen",
         "Mapped reads R1" = "reads_mapped_r1_dragen",
@@ -459,6 +473,7 @@ MappingMetricsFile <- R6::R6Class(
         "Unmapped reads" = "reads_unmapped_dragen",
         "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt_dragen",
         "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj_dragen",
+        "Adjustment of reads matching filter contigs" = "reads_match_filt_contig_adj_dragen",
         "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton_dragen",
         "Paired reads (itself & mate mapped)" = "reads_paired_dragen",
         "Properly paired reads" = "reads_paired_proper_dragen",
@@ -473,9 +488,11 @@ MappingMetricsFile <- R6::R6Class(
         "Reads with MAPQ NA (Unmapped reads)" = "reads_mapq_na_unmapped_dragen",
         "Reads with indel R1" = "reads_indel_r1_dragen",
         "Reads with indel R2" = "reads_indel_r2_dragen",
+        "Reads with splice junction" = "reads_splicejunc_dragen",
         "Total bases" = "bases_tot_dragen",
         "Total bases R1" = "bases_tot_r1_dragen",
         "Total bases R2" = "bases_tot_r2_dragen",
+        "Mapped bases" = "bases_mapped_dragen",
         "Mapped bases R1" = "bases_mapped_r1_dragen",
         "Mapped bases R2" = "bases_mapped_r2_dragen",
         "Soft-clipped bases R1" = "bases_softclip_r1_dragen",
@@ -502,7 +519,8 @@ MappingMetricsFile <- R6::R6Class(
         "Estimated sample contamination" = "contamination_est_dragen",
         "DRAGEN mapping rate [mil. reads/second]" = "mapping_rate_dragen_milreads_per_sec_dragen",
         "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed_dragen",
-        "Total reads in RG" = "reads_tot_rg_dragen"
+        "Total reads in RG" = "reads_tot_rg_dragen",
+        "Filtered rRNA reads" = "reads_rrna_filtered_dragen"
       )
       x <- self$path
       raw <- readr::read_lines(x)
@@ -581,15 +599,15 @@ PloidyEstimationMetricsFile <- R6::R6Class(
         "Autosomal median coverage" = "cov_auto_median_dragen",
         "X median coverage" = "cov_x_median_dragen",
         "Y median coverage" = "cov_y_median_dragen",
-        "1 median / Autosomal median" = "cov_1_div_auto_medians_dragen",
-        "2 median / Autosomal median" = "cov_2_div_auto_medians_dragen",
-        "3 median / Autosomal median" = "cov_3_div_auto_medians_dragen",
-        "4 median / Autosomal median" = "cov_4_div_auto_medians_dragen",
-        "5 median / Autosomal median" = "cov_5_div_auto_medians_dragen",
-        "6 median / Autosomal median" = "cov_6_div_auto_medians_dragen",
-        "7 median / Autosomal median" = "cov_7_div_auto_medians_dragen",
-        "8 median / Autosomal median" = "cov_8_div_auto_medians_dragen",
-        "9 median / Autosomal median" = "cov_9_div_auto_medians_dragen",
+        "1 median / Autosomal median" = "cov_1_div_auto_median_dragen",
+        "2 median / Autosomal median" = "cov_2_div_auto_median_dragen",
+        "3 median / Autosomal median" = "cov_3_div_auto_median_dragen",
+        "4 median / Autosomal median" = "cov_4_div_auto_median_dragen",
+        "5 median / Autosomal median" = "cov_5_div_auto_median_dragen",
+        "6 median / Autosomal median" = "cov_6_div_auto_median_dragen",
+        "7 median / Autosomal median" = "cov_7_div_auto_median_dragen",
+        "8 median / Autosomal median" = "cov_8_div_auto_median_dragen",
+        "9 median / Autosomal median" = "cov_9_div_auto_median_dragen",
         "10 median / Autosomal median" = "cov_10_div_auto_median_dragen",
         "11 median / Autosomal median" = "cov_11_div_auto_median_dragen",
         "12 median / Autosomal median" = "cov_12_div_auto_median_dragen",
@@ -1070,7 +1088,8 @@ WgsHistFile <- R6::R6Class(
         dplyr::mutate(
           start = as.numeric(.data$start),
           end = as.numeric(.data$end),
-          pct = round(.data$pct, 2)
+          pct = round(.data$pct, 2),
+          cumsum = cumsum(.data$pct)
         )
     },
     #' @description
