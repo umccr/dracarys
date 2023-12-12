@@ -373,6 +373,10 @@ multiqc_parse_xyline_plot <- function(dat) {
   if (dat[["config"]][["id"]] %in% c("dragen_coverage_per_contig", "dragen_coverage_per_non_main_contig")) {
     return(multiqc_parse_xyline_plot_contig_cvg(dat))
   }
+  # some empty fastqc_adapter_content_plot - see https://github.com/umccr/dracarys/issues/104
+  if (length(dat[["datasets"]][[1]]) == 0) {
+    return(NULL)
+  }
   dat[["datasets"]][[1]] |>
     purrr::map(
       function(nm_data) {
