@@ -8,14 +8,14 @@ RUN mamba config \
     mamba install \
       -c conda-forge \
       -c nodefaults \
-      conda-lock==1.3.0 && \
+      conda-lock && \
     mamba clean --all --force-pkgs-dirs
 
+ARG DRACARYS_LOCK="dracarys-linux-64.lock"
 ARG ENV_NAME="dracarys_env"
-COPY ./conda/env/lock/conda-lock.yml .
-RUN conda-lock install --name ${ENV_NAME} conda-lock.yml && \
-    mamba clean --all --force-pkgs-dirs && \
-    rm conda-lock.yml
+COPY ./conda/env/lock/${DRACARYS_LOCK} .
+RUN conda-lock install --name ${ENV_NAME} --file ${DRACARYS_LOCK} && \
+    mamba clean --all --force-pkgs-dirs
 
 ARG MAMBA_PREFIX="/opt/conda"
 ENV PATH="${MAMBA_PREFIX}/envs/${ENV_NAME}/bin:${PATH}"
