@@ -65,7 +65,7 @@ DR_FILE_REGEX <- tibble::tribble(
   "-qc_summary\\.tsv\\.gz$", "UmQcSumFile"
 )
 
-FILES_DOWNLOAD_BUT_IGNORE <- c("TsoMergedSmallVariantsVcfIndexFile", "TsoMergedSmallVariantsVcfIndexFile")
+FILES_DOWNLOAD_BUT_IGNORE <- c("TsoMergedSmallVariantsVcfIndexFile", "TsoCopyNumberVariantsVcfIndexFile")
 
 #' Evaluate dracarys Function
 #'
@@ -95,7 +95,7 @@ dr_func_eval <- function(f, v = NULL) {
   eval(parse(text = f))
 }
 
-#' Get dracarys `DR_FILE_REGEX``
+#' Get dracarys `DR_FILE_REGEX`
 #'
 #' @return `DR_FILE_REGEX` R tibble object.
 #' @export

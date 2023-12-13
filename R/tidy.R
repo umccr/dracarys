@@ -102,7 +102,15 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
       env = list(dr_func_eval(.data$type)),
       obj = list(.data$env$new(.data$path)),
       has_plot = "plot" %in% names(.data$env[["public_methods"]]),
-      obj_parsed = ifelse(.data$type != "MultiqcFile", list(.data$obj$read()), list(.data$obj$read(plot = TRUE, plot_names = "everything"))),
+      obj_parsed = ifelse(
+        .data$type == "MultiqcFile",
+        list(.data$obj$read(plot = TRUE, plot_names = "everything")),
+        ifelse(
+          .data$type == "TsoMergedSmallVariantsVcfFile",
+          list(.data$obj$read(only_pass = FALSE)),
+          list(.data$obj$read())
+        )
+      ),
       obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = glue("{prefix}_{.data$type}"), out_format = out_format)),
       plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
     ) |>
