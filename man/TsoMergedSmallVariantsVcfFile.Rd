@@ -43,9 +43,16 @@ d$write(d_parsed, prefix = "FOO", out_format = "delta", drid = "wfr.123")
 \subsection{Method \code{read()}}{
 Reads the \code{MergedSmallVariants.vcf.gz} file output from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoMergedSmallVariantsVcfFile$read()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoMergedSmallVariantsVcfFile$read(only_pass = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{only_pass}}{Only include PASS variants (def: TRUE).}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 tibble with variants.
 }

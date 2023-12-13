@@ -63,11 +63,12 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
   public = list(
     #' @description
     #' Reads the `MergedSmallVariants.vcf.gz` file output from TSO.
+    #' @param only_pass Only include PASS variants (def: TRUE).
     #'
     #' @return tibble with variants.
-    read = function() {
+    read = function(only_pass = TRUE) {
       x <- self$path
-      bcftools_parse_vcf(x, only_pass = TRUE)
+      bcftools_parse_vcf(x, only_pass = only_pass)
     },
     #' @description
     #' Writes a tidy version of the `MergedSmallVariants.vcf.gz` file output from TSO.
