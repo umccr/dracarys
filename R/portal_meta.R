@@ -54,7 +54,7 @@ meta_bcl_convert <- function(pmeta, status = "Succeeded") {
     tidyr::separate_wider_regex("libid1", c(libid2 = ".*", "_", topup_or_rerun = ".*"), cols_remove = FALSE, too_few = "align_start") |>
     dplyr::select(
       dplyr::all_of(meta_main_cols()),
-      -c("batch_run"), # NA for bcl_convert
+      -dplyr::any_of(c("batch_run")), # NA for bcl_convert
       SampleID = "sampleid",
       LibraryID = "libid2",
       "topup_or_rerun",
