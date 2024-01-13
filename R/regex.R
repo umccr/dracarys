@@ -40,8 +40,10 @@ DR_FILE_REGEX <- tibble::tribble(
   "SampleAnalysisResults\\.json\\.gz$", "TsoSampleAnalysisResultsFile",
   "MergedSmallVariants\\.vcf\\.gz$", "TsoMergedSmallVariantsVcfFile",
   "MergedSmallVariants\\.vcf\\.gz\\.tbi$", "TsoMergedSmallVariantsVcfIndexFile",
-  # "CopyNumberVariants\\.vcf\\.gz$", "TsoCopyNumberVariantsVcfFile",
-  # "CopyNumberVariants\\.vcf\\.gz\\.tbi$", "TsoCopyNumberVariantsVcfIndexFile",
+  "MergedSmallVariants\\.genome\\.vcf\\.gz$", "TsoMergedSmallVariantsGenomeVcfFile",
+  "MergedSmallVariants\\.genome\\.vcf\\.gz\\.tbi$", "TsoMergedSmallVariantsGenomeVcfIndexFile",
+  "CopyNumberVariants\\.vcf\\.gz$", "TsoCopyNumberVariantsVcfFile",
+  "CopyNumberVariants\\.vcf\\.gz\\.tbi$", "TsoCopyNumberVariantsVcfIndexFile",
   "fastqc_metrics\\.csv$", "FastqcMetricsFile",
   "sv_metrics\\.csv$", "SvMetricsFile",
   "trimmer_metrics\\.csv$", "TrimmerMetricsFile",
@@ -65,7 +67,11 @@ DR_FILE_REGEX <- tibble::tribble(
   "-qc_summary\\.tsv\\.gz$", "UmQcSumFile"
 )
 
-FILES_DOWNLOAD_BUT_IGNORE <- c("TsoMergedSmallVariantsVcfIndexFile", "TsoCopyNumberVariantsVcfIndexFile")
+FILES_DOWNLOAD_BUT_IGNORE <- c(
+  "TsoMergedSmallVariantsVcfIndexFile",
+  "TsoCopyNumberVariantsVcfIndexFile",
+  "TsoMergedSmallVariantsGenomeVcfIndexFile"
+)
 
 #' Evaluate dracarys Function
 #'

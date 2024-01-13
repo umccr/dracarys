@@ -19,11 +19,13 @@ TsoCopyNumberVariantsVcfFile <- R6::R6Class(
   public = list(
     #' @description
     #' Reads the `CopyNumberVariants.vcf.gz` file output from TSO.
+    #' @param only_pass Only include PASS variants (def: TRUE).
+    #' @param alias Substitute sample names with S1/S2/... alias (def: TRUE).
     #'
     #' @return tibble with variants.
-    read = function() {
+    read = function(only_pass = TRUE, alias = TRUE) {
       x <- self$path
-      bcftools_parse_vcf(x, only_pass = TRUE)
+      bcftools_parse_vcf(x, only_pass = only_pass, alias = alias)
     },
     #' @description
     #' Writes a tidy version of the `CopyNumberVariants.vcf.gz` file output from TSO.
@@ -42,6 +44,7 @@ TsoCopyNumberVariantsVcfFile <- R6::R6Class(
     }
   )
 )
+
 #' TsoMergedSmallVariantsVcfFile R6 Class
 #'
 #' @description
@@ -64,14 +67,61 @@ TsoMergedSmallVariantsVcfFile <- R6::R6Class(
     #' @description
     #' Reads the `MergedSmallVariants.vcf.gz` file output from TSO.
     #' @param only_pass Only include PASS variants (def: TRUE).
+    #' @param alias Substitute sample names with S1/S2/... alias (def: TRUE).
     #'
     #' @return tibble with variants.
-    read = function(only_pass = TRUE) {
+    read = function(only_pass = TRUE, alias = TRUE) {
       x <- self$path
-      bcftools_parse_vcf(x, only_pass = only_pass)
+      bcftools_parse_vcf(x, only_pass = only_pass, alias = alias)
     },
     #' @description
     #' Writes a tidy version of the `MergedSmallVariants.vcf.gz` file output from TSO.
+    #'
+    #' @param d Parsed object from `self$read()`.
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      # prefix2 <- glue("{prefix}merged_small_variants")
+      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
+    }
+  )
+)
+
+#' TsoMergedSmallVariantsGenomeVcfFile R6 Class
+#'
+#' @description
+#' Contains methods for reading and displaying contents of the
+#' `MergedSmallVariants.genome.vcf.gz` file output from TSO.
+#'
+#' @examples
+#' \dontrun{
+#' x <- "MergedSmallVariants.genome.vcf.gz"
+#' d <- TsoMergedSmallVariantsGenomeVcfFile$new(x)
+#' d_parsed <- d$read() # or read(d)
+#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+#' }
+#' @export
+TsoMergedSmallVariantsGenomeVcfFile <- R6::R6Class(
+  "TsoMergedSmallVariantsGenomeVcfFile",
+  inherit = File,
+  public = list(
+    #' @description
+    #' Reads the `MergedSmallVariants.genome.vcf.gz` file output from TSO.
+    #' @param only_pass Only include PASS variants (def: TRUE).
+    #' @param alias Substitute sample names with S1/S2/... alias (def: TRUE).
+    #'
+    #' @return tibble with variants.
+    read = function(only_pass = TRUE, alias = TRUE) {
+      x <- self$path
+      bcftools_parse_vcf(x, only_pass = only_pass, alias = alias)
+    },
+    #' @description
+    #' Writes a tidy version of the `MergedSmallVariants.genome.vcf.gz` file output from TSO.
     #'
     #' @param d Parsed object from `self$read()`.
     #' @param prefix Prefix of output file(s).
@@ -195,7 +245,7 @@ TsoFragmentLengthHistFile <- R6::R6Class(
     #' `fragment_length_hist.json.gz` file.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param min_count Minimum read count to be plotted (Default: 10).
+    #' @param min_count Minimum read count to be plotted (def: 10).
     #' @return A ggplot2 plot containing fragment lengths on X axis and read counts
     #'   on Y axis for each sample.
     plot = function(d, min_count = 10) {
@@ -279,7 +329,7 @@ TsoTargetRegionCoverageFile <- R6::R6Class(
     #' @description Plots the `TargetRegionCoverage.json.gz` file.
     #'
     #' @param d Parsed object from `self$read()`.
-    #' @param min_pct Minimum percentage to be plotted (Default: 2).
+    #' @param min_pct Minimum percentage to be plotted (def: 2).
     #' @importFrom ggplot2 ggplot
     #' @importFrom ggrepel geom_text_repel
     #' @return A ggplot2 plot containing read depth on X axis and percentage

@@ -4,12 +4,14 @@
 \alias{bcftools_parse_vcf}
 \title{Parse VCF with bcftools}
 \usage{
-bcftools_parse_vcf(vcf, only_pass = TRUE)
+bcftools_parse_vcf(vcf, only_pass = TRUE, alias = TRUE)
 }
 \arguments{
 \item{vcf}{VCF with one or more samples.}
 
-\item{only_pass}{Keep PASS variants only (TRUE by default)?}
+\item{only_pass}{Keep PASS variants only (def: TRUE).}
+
+\item{alias}{Substitute sample names with S1/S2/... alias (def: TRUE).}
 }
 \value{
 A tibble with all the main, FORMAT, and INFO fields detected in

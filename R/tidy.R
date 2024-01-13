@@ -106,7 +106,11 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
         .data$type == "MultiqcFile",
         list(.data$obj$read(plot = TRUE, plot_names = "everything")),
         ifelse(
-          .data$type == "TsoMergedSmallVariantsVcfFile",
+          .data$type %in% c(
+            "TsoMergedSmallVariantsVcfFile",
+            "TsoMergedSmallVariantsGenomeVcfFile",
+            "TsoCopyNumberVariantsVcfFile"
+          ),
           list(.data$obj$read(only_pass = FALSE)),
           list(.data$obj$read())
         )
