@@ -84,7 +84,7 @@ read_fastqc_metrics <- function(x) {
     dplyr::mutate(
       pos = as.integer(.data$pos),
       tot = sum(.data$value),
-      prop = round(.data$value / .data$tot, 3)
+      prop = ifelse(.data$tot == 0, 0, round(.data$value / .data$tot, 3))
     ) |>
     dplyr::ungroup() |>
     dplyr::select("mate", "pos", "base", "prop")
