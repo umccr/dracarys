@@ -44,6 +44,7 @@ DR_FILE_REGEX <- tibble::tribble(
   "MergedSmallVariants\\.genome\\.vcf\\.gz\\.tbi$", "TsoMergedSmallVariantsGenomeVcfIndexFile",
   "CopyNumberVariants\\.vcf\\.gz$", "TsoCopyNumberVariantsVcfFile",
   "CopyNumberVariants\\.vcf\\.gz\\.tbi$", "TsoCopyNumberVariantsVcfIndexFile",
+  "CombinedVariantOutput\\.tsv$", "TsoCombinedVariantOutputFile",
   "fastqc_metrics\\.csv$", "FastqcMetricsFile",
   "sv_metrics\\.csv$", "SvMetricsFile",
   "trimmer_metrics\\.csv$", "TrimmerMetricsFile",
