@@ -40,14 +40,21 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           dplyr::bind_rows()
       }
       j <- read_jsongz_rjsonio(x, simplify = FALSE)
+      secs <- list(
+        s1 = c("MappingAligningPerRg", "MappingAligningSummary", "TrimmerStatistics", "CoverageSummary"),
+        s2 = c("UmiStatistics", "SvSummary", "RunTime")
+      )
+      secs2 <- unlist(secs, use.names = FALSE)
+      secs_in_list <- secs2[secs2 %in% names(j)]
+      # just extract the following elements if they exist
+      j <- j[secs_in_list]
       d <- j |>
         purrr::map(l2tib)
 
       # Pivot all metrics for easier ingestion,
       # and utilise the multiqc parser to rename dirty columns.
       # Keeping each list section separate for flexibility.
-      secs <- c("MappingAligningPerRg", "MappingAligningSummary", "TrimmerStatistics", "CoverageSummary")
-      for (sec in secs) {
+      for (sec in secs$s1) {
         if (sec %in% names(d)) {
           d[[sec]] <- d[[sec]] |>
             tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
