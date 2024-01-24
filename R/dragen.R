@@ -1018,7 +1018,8 @@ SvMetricsFile <- R6::R6Class(
         dplyr::filter(!grepl("Total number of structural variants", .data$value)) |>
         tidyr::separate_wider_delim(
           "value",
-          names = c("svsum", "sample", "var", "count", "pct"), delim = ","
+          names = c("svsum", "sample", "var", "count", "pct"), delim = ",",
+          too_few = "align_start"
         ) |>
         dplyr::mutate(
           count = as.numeric(.data$count),
