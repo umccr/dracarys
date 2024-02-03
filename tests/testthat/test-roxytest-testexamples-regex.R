@@ -2,7 +2,7 @@
 
 # File R/regex.R: @testexamples
 
-test_that("Function dr_func_eval() @ L95", {
+test_that("Function dr_func_eval() @ L97", {
   
   mean_1_to_10 <- dr_func_eval("mean", v = c("mean", "sd"))(1:10)
   x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
