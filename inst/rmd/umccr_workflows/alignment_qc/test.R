@@ -14,7 +14,7 @@
 # log into aws umccr prod account
 dracarys:::awsvault_profile("upro")
 
-dp_workflow_read <- function() {
+dp_workflow_read <- function(start_date) {
   RAthena::RAthena_options(clear_s3_resource = FALSE)
   con <- DBI::dbConnect(
     RAthena::athena(),
@@ -23,7 +23,7 @@ dp_workflow_read <- function() {
   )
   q1 <- glue(
     'SELECT * FROM "data_portal"."data_portal"."data_portal_workflow" ',
-    'WHERE "start" > date(\'2023-12-08\') AND REGEXP_LIKE("type_name", \'alignment_qc\') ',
+    'WHERE "start" > date(\'{start_date}\') AND REGEXP_LIKE("type_name", \'alignment_qc\') ',
     'ORDER BY "start" DESC;'
   )
   d <- RAthena::dbGetQuery(con, q1) |>
@@ -52,12 +52,13 @@ dp_lims_read <- function(libids) {
 }
 
 # first read in the workflows table, extract metadata, then join with lims
-p <- dp_workflow_read()
+start_date <- "2024-01-13"
+p_raw <- dp_workflow_read(start_date)
 
-wgs <- p |>
+wgs <- p_raw |>
   filter(type_name == "wgs_alignment_qc") |>
   dracarys::meta_wgs_alignment_qc(status = "Succeeded")
-wts <- p |>
+wts <- p_raw |>
   filter(type_name == "wts_alignment_qc") |>
   dracarys::meta_wts_alignment_qc(status = "Succeeded")
 p <- dplyr::bind_rows(wgs, wts)
@@ -78,11 +79,10 @@ meta <- d |>
     indir = gds_outdir_dragen,
     outdir = file.path(sub("gds://", "", .data$indir)),
     outdir = file.path(normalizePath("~/icav1/g"), .data$outdir),
-    indir = file.path(outdir, "dracarys_gds_sync"), # for when debugging locally
+    # indir = file.path(outdir, "dracarys_gds_sync"), # for when debugging locally
     cmd = system(glue::glue("{tidy_script} tidy --in_dir {.data$indir} --out_dir {.data$outdir} --prefix {.data$SampleID} --format rds"))
   ) |>
   dplyr::ungroup()
 
 meta |>
-  saveRDS(here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2023-12-10_wgts.rds"))
-# saveRDS(here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2023-12-10.rds"))
+  saveRDS(here::here(glue::glue("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/{start_date}_wgts.rds")))
