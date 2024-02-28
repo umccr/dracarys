@@ -167,6 +167,14 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #' @param max_num Maximum number to display in both plots.
     #' @return Both histogram plot objects.
     plot = function(d, max_num = 15) {
+      if (is.null(d[["UmiStatisticsHist"]])) {
+        return(
+          list(
+            p_num_supporting_fragments = NULL,
+            p_unique_umis_per_frag_pos = NULL
+          )
+        )
+      }
       h <- d[["UmiStatisticsHist"]]
       # 15 seems like a good cutoff for both plots
       p1 <- h |>
