@@ -284,8 +284,13 @@ TsoFragmentLengthHistFile <- R6::R6Class(
     read = function() {
       x <- self$path
       j <- read_jsongz_jsonlite(x)
+      cnames <- c("FragmentLength", "Count")
+      # handle SBJ00006...
+      if (length(j) == 0) {
+        return(empty_tbl(cnames = cnames))
+      }
       assertthat::assert_that(
-        all(names(j[[1]] %in% c("FragmentLength", "Count")))
+        all(names(j[[1]] %in% cnames))
       )
       j |>
         purrr::map(tibble::as_tibble) |>
