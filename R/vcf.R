@@ -12,12 +12,13 @@ bcftools_installed <- function() {
 #' columns.
 #'
 #' @param vcf VCF with one or more samples.
-#' @param only_pass Keep PASS variants only (TRUE by default)?
+#' @param only_pass Keep PASS variants only (def: TRUE).
+#' @param alias Substitute sample names with S1/S2/... alias (def: TRUE).
 #'
 #' @return A tibble with all the main, FORMAT, and INFO fields detected in
 #' the VCF header as columns.
 #' @export
-bcftools_parse_vcf <- function(vcf, only_pass = TRUE) {
+bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
   assertthat::assert_that(is.logical(only_pass), length(only_pass) == 1)
   assertthat::assert_that(bcftools_installed(), msg = "bcftools needs to be on the PATH.")
   if (is_url(vcf)) {
@@ -40,6 +41,10 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE) {
     samples <- x[-(1:main_len)]
     nsamples <- length(samples)
     aliases <- paste0("S", seq_len(nsamples))
+    # in case you want the full sample name instead
+    if (!alias) {
+      aliases <- samples
+    }
     list(
       samples = samples,
       n = nsamples,
@@ -106,7 +111,7 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE) {
 #' @param vcf Path to VCF. Can be S3, http or local. If presigned URL, need to
 #' also concatenate the VCF index as in 'vcf_url##idx##vcfi_url'.
 #' @param r Character vector of regions to subset (e.g. c('chr1:123-456', 'chr2:789-1000'))
-#' @param only_pass Keep PASS variants only (TRUE by default)?
+#' @param only_pass Keep PASS variants only (def: TRUE).
 #'
 #' @return A tibble with all the main, FORMAT, and INFO fields detected in
 #' the VCF header as columns, for the regions specified in `r` (if any).

@@ -25,10 +25,12 @@
 ^\.dvc$
 ^\.dvcignore$
 ^\.dockerignore$
-CODE_OF_CONDUCT.md
+^CODE_OF_CONDUCT\.md$
+^\.DS_Store$
 
 ## inst html
 inst/rmd/umccr_portal/html
 inst/rmd/umccr_workflows/umccrise/html
 inst/rmd/umccr_workflows/bcl_convert/html
 inst/rmd/umccr_workflows/alignment_qc/html
+inst/sandbox

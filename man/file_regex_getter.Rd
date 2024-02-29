@@ -2,7 +2,7 @@
 % Please edit documentation in R/regex.R
 \name{file_regex_getter}
 \alias{file_regex_getter}
-\title{Get dracarys `DR_FILE_REGEX``}
+\title{Get dracarys \code{DR_FILE_REGEX}}
 \usage{
 file_regex_getter()
 }
@@ -10,5 +10,5 @@ file_regex_getter()
 \code{DR_FILE_REGEX} R tibble object.
 }
 \description{
-Get dracarys `DR_FILE_REGEX``
+Get dracarys \code{DR_FILE_REGEX}
 }

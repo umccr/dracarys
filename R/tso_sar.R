@@ -33,9 +33,9 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
       # get rid of it to grab the remaining elements
       sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] <- NULL
       sw_nl_rest <- sw_conf[["nirvanaVersionList"]][[1]] |>
-        tibble::as_tibble()
+        tibble::as_tibble_row()
       sw_conf[["nirvanaVersionList"]] <- NULL
-      sw_rest <- tibble::as_tibble(sw_conf)
+      sw_rest <- tibble::as_tibble_row(sw_conf)
       sw_all <- dplyr::bind_cols(sw_rest, sw_nl_rest)
       sw <- list(
         data_sources = sw_nl_data_sources,
@@ -53,7 +53,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
           msi[["additionalMetrics"]][[1]][["name"]] == "SumJsd"
         )
         biom_list[["msi_pct_unstable_sites"]] <- msi[["msiPercentUnstableSites"]]
-        biom_list[["msi_SumJsd"]] <- msi[["additionalMetrics"]][[1]][["value"]]
+        biom_list[["msi_sum_jsd"]] <- msi[["additionalMetrics"]][[1]][["value"]]
       }
       if ("tumorMutationalBurden" %in% names(biom)) {
         tmb <- biom[["tumorMutationalBurden"]]
@@ -71,18 +71,10 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
         biom_list[["tmb_somatic_coding_variants_count"]] <- amet[["SomaticCodingVariantsCount"]]
       }
       biom_tbl <- tibble::as_tibble_row(biom_list)
-      empty_tbl <- function(cnames) {
+      empty_tbl2 <- function(cnames) {
         cnames |>
           purrr::map_dfc(setNames, object = list(logical()))
       }
-      if (length(biom_list) == 0) {
-        biom_tbl <- c(
-          "msi_pct_unstable_sites", "msi_SumJsd", "tmb_per_mb",
-          "tmb_coding_region_sizemb", "tmb_somatic_coding_variants_count"
-        ) |>
-          empty_tbl()
-      }
-
       ## sampleMetrics
       qc2tib <- function(el) {
         el[["metrics"]] |>
@@ -93,29 +85,23 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
       smet_em <- smet[["expandedMetrics"]][[1]][["metrics"]] |>
         purrr::map(tibble::as_tibble_row) |>
         dplyr::bind_rows() |>
-        dplyr::select("name", "value") |>
-        tidyr::pivot_wider(names_from = "name", values_from = "value")
+        dplyr::mutate(name = tolower(.data$name)) |>
+        dplyr::select("name", "value")
       smet_qc <- smet[["qualityControlMetrics"]]
       smet_nms <- purrr::map_chr(smet_qc, "name")
       smet_qc <- smet_qc |>
         purrr::map(qc2tib) |>
-        purrr::set_names(smet_nms) |>
-        dplyr::bind_rows(.id = "metric") |>
-        # try to tidy up a bit
-        dplyr::mutate(
-          metric = dplyr::case_when(
-            .data$metric == "DNA Library QC Metrics" ~ "dna_qc",
-            .data$metric == "DNA Library QC Metrics for Small Variant Calling and TMB" ~ "dna_qc_smallv_tmb",
-            .data$metric == "DNA Library QC Metrics for Copy Number Variant Calling" ~ "dna_qc_cnv",
-            .data$metric == "DNA Library QC Metrics for MSI and Fusions" ~ "dna_qc_msi_fus",
-            TRUE ~ .data$metric
-          ),
-          name = glue("{.data$metric}_{.data$name}")
-        ) |>
-        dplyr::select("name", "value") |>
+        dplyr::bind_rows() |>
+        dplyr::distinct() |>
+        dplyr::mutate(name = tolower(.data$name)) |>
+        dplyr::select("name", "value")
+      qc <- dplyr::bind_rows(smet_qc, smet_em) |>
         tidyr::pivot_wider(names_from = "name", values_from = "value")
+      # also bind qc with biom_tbl if non-empty
+      if (length(biom_list) != 0) {
+        qc <- dplyr::bind_cols(qc, biom_tbl)
+      }
 
-      qc <- dplyr::bind_cols(smet_qc, smet_em)
       snvs <- tso_snv(dat[["variants"]][["smallVariants"]])
       if (nrow(snvs) == 0) {
         snvs <- c(
@@ -125,7 +111,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
           "polyPhenScore", "polyPhenPrediction", "proteinId", "proteinPos",
           "siftScore", "siftPrediction", "consequence", "introns"
         ) |>
-          empty_tbl()
+          empty_tbl2()
       }
 
       cnvs <- tso_cnv(dat[["variants"]][["copyNumberVariants"]])
@@ -134,13 +120,12 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
           "foldChange", "qual", "copyNumberType", "gene", "chromosome",
           "startPosition", "endPosition"
         ) |>
-          empty_tbl()
+          empty_tbl2()
       }
 
       res <- list(
         sampleinfo = sampleinfo,
         qc = qc,
-        biomarkers = biom_tbl,
         swconfds = sw[["data_sources"]],
         swconfother = sw[["other"]],
         snv = snvs,
@@ -176,3 +161,42 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
     }
   )
 )
+
+tso_snv <- function(snvs) {
+  # snvs is an array of snv elements
+  snv_info <- function(snv) {
+    main <- tibble::tibble(
+      chrom = snv[["vcfChromosome"]],
+      pos = snv[["vcfPosition"]],
+      ref = snv[["vcfRefAllele"]],
+      alt = snv[["vcfAltAllele"]],
+      af = snv[["vcfVariantFrequency"]],
+      qual = snv[["quality"]],
+      dp_tot = snv[["totalDepth"]],
+      dp_alt = snv[["altAlleleDepth"]]
+    )
+    # each snv has a single-element array nirvana
+    nirv <- snv[["nirvana"]][[1]]
+    # nirvana has a transcript array
+    txs <- nirv[["transcripts"]]
+    get_tx_info <- function(tx) {
+      cons <- unlist(tx$consequence) |> paste(collapse = ",")
+      tx$consequence <- NULL
+      tibble::as_tibble_row(tx) |>
+        dplyr::mutate(consequence = cons)
+    }
+    if (length(txs) > 0) {
+      tx_info <- txs |>
+        purrr::map_dfr(get_tx_info) |>
+        dplyr::bind_rows()
+    } else {
+      tx_info <- NULL
+    }
+    dplyr::bind_cols(main, tx_info)
+  }
+  purrr::map_dfr(snvs, snv_info)
+}
+
+tso_cnv <- function(cnvs) {
+  purrr::map_dfr(cnvs, tibble::as_tibble)
+}

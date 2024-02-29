@@ -100,7 +100,7 @@ Plots the \code{TargetRegionCoverage.json.gz} file.
 \describe{
 \item{\code{d}}{Parsed object from \code{self$read()}.}
 
-\item{\code{min_pct}}{Minimum percentage to be plotted (Default: 2).}
+\item{\code{min_pct}}{Minimum percentage to be plotted (def: 2).}
 }
 \if{html}{\out{</div>}}
 }

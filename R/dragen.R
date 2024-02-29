@@ -215,9 +215,9 @@ WgsCoverageMetricsFile <- R6::R6Class(
         tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
         dplyr::mutate(var = as.character(glue("cov_genome_pct_{start}_{end}_dragen"))) |>
         dplyr::select("var", "value")
-      res <- dplyr::bind_rows(res1, res2)
-      res |>
+      res <- dplyr::bind_rows(res1, res2) |>
         dplyr::mutate(
+          value = dplyr::na_if(.data$value, "NA"),
           value = as.numeric(.data$value),
           var = dplyr::recode(.data$var, !!!abbrev_nm)
         ) |>
@@ -1018,7 +1018,8 @@ SvMetricsFile <- R6::R6Class(
         dplyr::filter(!grepl("Total number of structural variants", .data$value)) |>
         tidyr::separate_wider_delim(
           "value",
-          names = c("svsum", "sample", "var", "count", "pct"), delim = ","
+          names = c("svsum", "sample", "var", "count", "pct"), delim = ",",
+          too_few = "align_start"
         ) |>
         dplyr::mutate(
           count = as.numeric(.data$count),

@@ -374,7 +374,8 @@ multiqc_parse_xyline_plot <- function(dat) {
     return(multiqc_parse_xyline_plot_contig_cvg(dat))
   }
   # some empty fastqc_adapter_content_plot - see https://github.com/umccr/dracarys/issues/104
-  if (length(dat[["datasets"]][[1]]) == 0) {
+  # also empty fastqc_per_base_sequence_quality_plot
+  if (length(dat[["datasets"]][[1]]) == 0 || length(dat$datasets[[1]][["data"]]) == 0) {
     return(NULL)
   }
   dat[["datasets"]][[1]] |>

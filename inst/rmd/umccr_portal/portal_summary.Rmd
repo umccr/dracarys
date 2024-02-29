@@ -21,7 +21,7 @@ title: "`r params$title`"
 ```{r knitr_opts, include=F}
 knitr::opts_chunk$set(
   collapse = TRUE, echo = FALSE,
-  warning = FALSE, message = FALSE
+  warning = TRUE, message = FALSE
 )
 ```
 
@@ -126,8 +126,8 @@ add_totals <- function(x) {
 # Get metadata for workflows run within the date range
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2023-12-08T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2023-12-10T23:59:59", format = fmt1)
+date_start <- as.POSIXct("2024-02-21T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2024-02-23T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -150,7 +150,9 @@ lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-# pmeta_raw <- dracarys::portal_meta_read(rows = 200, account = "prod")
+wf_query <- 'WHERE "start" >= date(\'2024-02-21\') AND "start" <= date(\'2024-02-24\') ORDER BY "start" DESC;'
+
+# pmeta_raw <- dracarys:::portal_meta_read_athena_tmp(wf_query)
 # saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
 pmeta <- pmeta_raw |>
@@ -202,8 +204,10 @@ pmeta_status_count |>
   kableExtra::column_spec(
     3,
     color = ifelse(
-      pmeta_status_count$end_status == "Succeeded", "green",
-      ifelse(pmeta_status_count$end_status == "Failed", "red", "black")
+      is.na(pmeta_status_count$end_status), "orange", ifelse(
+        pmeta_status_count$end_status == "Succeeded", "green",
+        ifelse(pmeta_status_count$end_status == "Failed", "red", "black")
+      )
     )
   )
 sbj_sumy <- pmeta_sumy |>
@@ -237,7 +241,7 @@ blank_lines()
 
 ## RuntimeVis
 
-```{r vistime, fig.width=15, fig.height = 30}
+```{r vistime, fig.width=20, fig.height = 13}
 p1 <- pmeta_sumy |>
   dplyr::arrange(sbj_lib, type_name) |>
   dplyr::group_by(sbj_lib, type_name) |>
@@ -289,9 +293,9 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_bcl_convert(status = c("Succeeded", "Running")) |>
+  dracarys::meta_bcl_convert(status = c("Succeeded", "Running", "Failed")) |>
   dplyr::select(
-    gds_outdir_multiqc, gds_outdir_multiqc_interop,
+    portal_run_id, gds_outdir_multiqc, gds_outdir_multiqc_interop,
     end_status, runfolder_name, LibraryID, SampleID, batch_name, start, end
   ) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID")) |>
@@ -301,11 +305,11 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, durationMin, runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, portal_run_id, durationMin, runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, batch_name, Type, Assay, Source, Quality, Workflow,
     start, end
   ) |>
-  dplyr::arrange(desc(SubjectID), start) |>
+  dplyr::arrange(desc(portal_run_id), desc(SubjectID), start) |>
   dt_view()
 ```
 

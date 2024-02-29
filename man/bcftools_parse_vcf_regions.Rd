@@ -12,7 +12,7 @@ also concatenate the VCF index as in 'vcf_url##idx##vcfi_url'.}
 
 \item{r}{Character vector of regions to subset (e.g. c('chr1:123-456', 'chr2:789-1000'))}
 
-\item{only_pass}{Keep PASS variants only (TRUE by default)?}
+\item{only_pass}{Keep PASS variants only (def: TRUE).}
 }
 \value{
 A tibble with all the main, FORMAT, and INFO fields detected in

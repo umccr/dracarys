@@ -100,7 +100,7 @@ Plots the fragment length distributions as given in the
 \describe{
 \item{\code{d}}{Parsed object from \code{self$read()}.}
 
-\item{\code{min_count}}{Minimum read count to be plotted (Default: 10).}
+\item{\code{min_count}}{Minimum read count to be plotted (def: 10).}
 }
 \if{html}{\out{</div>}}
 }

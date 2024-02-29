@@ -43,9 +43,18 @@ d$write(d_parsed, prefix = "FOO", out_format = "delta", drid = "wfr.123")
 \subsection{Method \code{read()}}{
 Reads the \code{CopyNumberVariants.vcf.gz} file output from TSO.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{TsoCopyNumberVariantsVcfFile$read()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{TsoCopyNumberVariantsVcfFile$read(only_pass = TRUE, alias = TRUE)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{only_pass}}{Only include PASS variants (def: TRUE).}
+
+\item{\code{alias}}{Substitute sample names with S1/S2/... alias (def: TRUE).}
+}
+\if{html}{\out{</div>}}
+}
 \subsection{Returns}{
 tibble with variants.
 }

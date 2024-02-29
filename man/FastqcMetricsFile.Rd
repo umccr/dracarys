@@ -23,7 +23,6 @@ fq$write(d, out_dir = tempdir(), prefix = "seqc_fq", out_format = "tsv")
 \itemize{
 \item \href{#method-FastqcMetricsFile-read}{\code{FastqcMetricsFile$read()}}
 \item \href{#method-FastqcMetricsFile-write}{\code{FastqcMetricsFile$write()}}
-\item \href{#method-FastqcMetricsFile-plot}{\code{FastqcMetricsFile$plot()}}
 \item \href{#method-FastqcMetricsFile-clone}{\code{FastqcMetricsFile$clone()}}
 }
 }
@@ -80,26 +79,6 @@ from DRAGEN.
 \item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }
 \if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-FastqcMetricsFile-plot"></a>}}
-\if{latex}{\out{\hypertarget{method-FastqcMetricsFile-plot}{}}}
-\subsection{Method \code{plot()}}{
-Plots the \code{fastqc_metrics.csv} files.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{FastqcMetricsFile$plot(d)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{d}}{Parsed object from \code{self$read()}.}
-}
-\if{html}{\out{</div>}}
-}
-\subsection{Returns}{
-A ggplot2 object with chromosomes on X axis, and coverage on Y axis.
 }
 }
 \if{html}{\out{<hr>}}

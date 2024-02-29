@@ -40,8 +40,11 @@ DR_FILE_REGEX <- tibble::tribble(
   "SampleAnalysisResults\\.json\\.gz$", "TsoSampleAnalysisResultsFile",
   "MergedSmallVariants\\.vcf\\.gz$", "TsoMergedSmallVariantsVcfFile",
   "MergedSmallVariants\\.vcf\\.gz\\.tbi$", "TsoMergedSmallVariantsVcfIndexFile",
-  # "CopyNumberVariants\\.vcf\\.gz$", "TsoCopyNumberVariantsVcfFile",
-  # "CopyNumberVariants\\.vcf\\.gz\\.tbi$", "TsoCopyNumberVariantsVcfIndexFile",
+  # "MergedSmallVariants\\.genome\\.vcf\\.gz$", "TsoMergedSmallVariantsGenomeVcfFile",
+  # "MergedSmallVariants\\.genome\\.vcf\\.gz\\.tbi$", "TsoMergedSmallVariantsGenomeVcfIndexFile",
+  "CopyNumberVariants\\.vcf\\.gz$", "TsoCopyNumberVariantsVcfFile",
+  "CopyNumberVariants\\.vcf\\.gz\\.tbi$", "TsoCopyNumberVariantsVcfIndexFile",
+  "CombinedVariantOutput\\.tsv$", "TsoCombinedVariantOutputFile",
   "fastqc_metrics\\.csv$", "FastqcMetricsFile",
   "sv_metrics\\.csv$", "SvMetricsFile",
   "trimmer_metrics\\.csv$", "TrimmerMetricsFile",
@@ -62,10 +65,15 @@ DR_FILE_REGEX <- tibble::tribble(
   "hrdetect\\.tsv\\.gz$", "UmHrdetectTsvFile",
   "snv_2015\\.tsv\\.gz$", "UmSigsSnvFile",
   "snv_2020\\.tsv\\.gz$", "UmSigsSnvFile",
-  "-qc_summary\\.tsv\\.gz$", "UmQcSumFile"
+  "-qc_summary\\.tsv\\.gz$", "UmQcSumFile",
+  "bcftools_stats\\.txt$", "BcftoolsStatsFile"
 )
 
-FILES_DOWNLOAD_BUT_IGNORE <- c("TsoMergedSmallVariantsVcfIndexFile", "TsoMergedSmallVariantsVcfIndexFile")
+FILES_DOWNLOAD_BUT_IGNORE <- c(
+  "TsoMergedSmallVariantsVcfIndexFile",
+  "TsoCopyNumberVariantsVcfIndexFile",
+  "TsoMergedSmallVariantsGenomeVcfIndexFile"
+)
 
 #' Evaluate dracarys Function
 #'
@@ -95,7 +103,7 @@ dr_func_eval <- function(f, v = NULL) {
   eval(parse(text = f))
 }
 
-#' Get dracarys `DR_FILE_REGEX``
+#' Get dracarys `DR_FILE_REGEX`
 #'
 #' @return `DR_FILE_REGEX` R tibble object.
 #' @export
