@@ -126,8 +126,8 @@ add_totals <- function(x) {
 # Get metadata for workflows run within the date range
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2024-01-14T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2024-01-15T23:59:59", format = fmt1)
+date_start <- as.POSIXct("2024-02-21T00:00:01", format = fmt1)
+date_end <- as.POSIXct("2024-02-23T23:59:59", format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -150,7 +150,7 @@ lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-wf_query <- 'WHERE "start" >= date(\'2024-01-13\') AND "start" <= date(\'2024-01-16\') ORDER BY "start" DESC;'
+wf_query <- 'WHERE "start" >= date(\'2024-02-21\') AND "start" <= date(\'2024-02-24\') ORDER BY "start" DESC;'
 
 # pmeta_raw <- dracarys:::portal_meta_read_athena_tmp(wf_query)
 # saveRDS(pmeta_raw, file = pmeta_rds)
@@ -293,9 +293,9 @@ if (!chunks1[[wf]]) {
 
 ```{r eval=chunks1[[wf]]}
 pmeta |>
-  dracarys::meta_bcl_convert(status = c("Succeeded", "Running")) |>
+  dracarys::meta_bcl_convert(status = c("Succeeded", "Running", "Failed")) |>
   dplyr::select(
-    gds_outdir_multiqc, gds_outdir_multiqc_interop,
+    portal_run_id, gds_outdir_multiqc, gds_outdir_multiqc_interop,
     end_status, runfolder_name, LibraryID, SampleID, batch_name, start, end
   ) |>
   dplyr::left_join(lims, by = c("LibraryID", "SampleID")) |>
@@ -305,11 +305,11 @@ pmeta |>
     durationMin = round(as.numeric(difftime(end, start, units = "mins")))
   ) |>
   dplyr::select(
-    end_status, durationMin, runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
+    end_status, portal_run_id, durationMin, runfolder_name, SubjectID, LibraryID, SampleID, Phenotype, ExternalSubjectID,
     ProjectOwner, ProjectName, batch_name, Type, Assay, Source, Quality, Workflow,
     start, end
   ) |>
-  dplyr::arrange(desc(SubjectID), start) |>
+  dplyr::arrange(desc(portal_run_id), desc(SubjectID), start) |>
   dt_view()
 ```
 
