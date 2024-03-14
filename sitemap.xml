@@ -31,6 +31,9 @@
     <loc>https://umccr.github.io/dracarys/news/index.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/BcftoolsStatsFile.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/FastqcMetricsFile.html</loc>
   </url>
   <url>
@@ -70,6 +73,9 @@
     <loc>https://umccr.github.io/dracarys/reference/TsoAlignCollapseFusionCallerMetricsFile.html</loc>
   </url>
   <url>
+    <loc>https://umccr.github.io/dracarys/reference/TsoCombinedVariantOutputFile.html</loc>
+  </url>
+  <url>
     <loc>https://umccr.github.io/dracarys/reference/TsoCopyNumberVariantsVcfFile.html</loc>
   </url>
   <url>
@@ -77,6 +83,9 @@
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/TsoFusionsCsvFile.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/TsoMergedSmallVariantsGenomeVcfFile.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/TsoMergedSmallVariantsVcfFile.html</loc>
@@ -169,7 +178,10 @@
     <loc>https://umccr.github.io/dracarys/reference/gds_volumes_list.html</loc>
   </url>
   <url>
-    <loc>https://umccr.github.io/dracarys/reference/glims_read.html</loc>
+    <loc>https://umccr.github.io/dracarys/reference/glims_excel_read.html</loc>
+  </url>
+  <url>
+    <loc>https://umccr.github.io/dracarys/reference/glims_portal_read.html</loc>
   </url>
   <url>
     <loc>https://umccr.github.io/dracarys/reference/ica_token_validate.html</loc>
