@@ -126,8 +126,10 @@ add_totals <- function(x) {
 # Get metadata for workflows run within the date range
 # options(width = 150)
 fmt1 <- "%Y-%m-%dT%H:%M:%S"
-date_start <- as.POSIXct("2024-02-21T00:00:01", format = fmt1)
-date_end <- as.POSIXct("2024-02-23T23:59:59", format = fmt1)
+dstart <- "2024-03-08"
+dend <- "2024-03-10"
+date_start <- as.POSIXct(glue("{dstart}T00:00:01"), format = fmt1)
+date_end <- as.POSIXct(glue("{dend}T23:59:59"), format = fmt1)
 wf_order <- c(
   "bcl_convert",
   "tso_ctdna_tumor_only",
@@ -146,11 +148,11 @@ wf_order <- c(
 
 invisible(capture.output(dracarys:::awsvault_profile("upro")))
 lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
-# lims_raw <- dracarys::glims_read()
+# lims_raw <- dracarys::glims_read() # TODO: use glims_portal_read
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
-wf_query <- 'WHERE "start" >= date(\'2024-02-21\') AND "start" <= date(\'2024-02-24\') ORDER BY "start" DESC;'
+wf_query <- glue('WHERE "start" >= date(\'{dstart}\') AND "start" <= date(\'{dend}\') ORDER BY "start" DESC;')
 
 # pmeta_raw <- dracarys:::portal_meta_read_athena_tmp(wf_query)
 # saveRDS(pmeta_raw, file = pmeta_rds)
@@ -241,7 +243,7 @@ blank_lines()
 
 ## RuntimeVis
 
-```{r vistime, fig.width=20, fig.height = 13}
+```{r vistime, fig.width=20, fig.height = 16}
 p1 <- pmeta_sumy |>
   dplyr::arrange(sbj_lib, type_name) |>
   dplyr::group_by(sbj_lib, type_name) |>

@@ -886,3 +886,45 @@ portal_meta_read_athena_tmp <- function(x = NULL) {
   RAthena::dbGetQuery(con, q1) |>
     tibble::as_tibble()
 }
+
+#' Read Portal Limsrow Table
+#'
+#' Reads rows from the data portal's limsrow table, given a set of `LibraryID`s
+#' to query.
+#'
+#' @param libids Character vector of LibraryID values to query for.
+#'
+#' @return Tibble with all rows from the data portal limsrow table where
+#' there are hits with the `library_id` column.
+#' @export
+glims_portal_read <- function(libids) {
+  assertthat::assert_that(!is.null(libids), all(grepl("^L", libids)))
+  libids <- unique(libids)
+  RAthena::RAthena_options(clear_s3_resource = FALSE)
+  con <- DBI::dbConnect(
+    RAthena::athena(),
+    work_group = "data_portal",
+    rstudio_conn_tab = FALSE
+  )
+  q_quote <- shQuote(paste(libids, collapse = "|"))
+  q1 <- glue(
+    'SELECT * FROM "data_portal"."data_portal"."data_portal_limsrow" where REGEXP_LIKE("library_id", {q_quote});'
+  )
+  d <- RAthena::dbGetQuery(con, q1) |>
+    tibble::as_tibble()
+  DBI::dbDisconnect(con)
+  d
+}
+
+#' Read Google LIMS
+#'
+#' Reads UMCCR's Google LIMS spreadsheet.
+#'
+#' @return Tibble with all columns and rows from the Google LIMS spreadsheet.
+#' @export
+glims_excel_read <- function() {
+  lims_key <- googledrive::drive_find("^Google LIMS$", shared_drive = "LIMS")$id
+  lims <- lims_key |>
+    googlesheets4::read_sheet("Sheet1", na = c(".", "", "-"), col_types = "c")
+  lims |> readr::type_convert(col_types = readr::cols(.default = "c", Timestamp = "T"))
+}

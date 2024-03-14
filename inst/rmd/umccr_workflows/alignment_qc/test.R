@@ -32,6 +32,7 @@ dp_workflow_read <- function(start_date) {
   d
 }
 
+# TODO: use dracarys::glims_portal_read
 dp_lims_read <- function(libids) {
   assertthat::assert_that(!is.null(libids), all(grepl("^L", libids)))
   libids <- unique(libids)
@@ -52,7 +53,7 @@ dp_lims_read <- function(libids) {
 }
 
 # first read in the workflows table, extract metadata, then join with lims
-start_date <- "2024-02-20"
+start_date <- "2024-03-08"
 p_raw <- dp_workflow_read(start_date)
 
 wgs <- p_raw |>

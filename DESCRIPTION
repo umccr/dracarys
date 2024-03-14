@@ -43,7 +43,6 @@ Imports:
     readr,
     RJSONIO,
     rlang,
-    rmarkdown,
     scales,
     sessioninfo,
     tibble,
@@ -52,6 +51,7 @@ Suggests:
     SparkR,
     DBI,
     RAthena,
+    rmarkdown,
     testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE,
               roclets = c("namespace", "rd", "roxytest::testthat_roclet"))
