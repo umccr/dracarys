@@ -2,7 +2,7 @@
 #'
 #' Lists relevant files in an AWS S3 directory.
 #'
-#' @param s3dir GDS directory.
+#' @param s3dir S3 directory.
 #' @param pattern Pattern to further filter the returned file type tibble.
 #' @param page_size The size of each page to get in the AWS service call (def: 1000).
 #' @param max_items The total number of items to return in the command’s output (def: 1000).
@@ -42,7 +42,7 @@ s3_files_list_filter_relevant <- function(s3dir, pattern = NULL, page_size = 100
     ) |>
     dplyr::ungroup() |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
-    dplyr::select("path", "date_utc", "size", "type")
+    dplyr::select("path", "bname", "date_utc", "size", "type")
 
   if (presign) {
     d <- d |>
@@ -98,4 +98,59 @@ s3_search <- function(pat, rows) {
       size = fs::as_fs_bytes(.data$size)
     ) |>
     dplyr::select("path", "size", "date_aest", "id", "unique_hash")
+}
+
+#' dracarys S3 Download
+#'
+#' Download only S3 files that can be processed by dracarys.
+#'
+#' @param s3dir Full path to S3 directory.
+#' @param outdir Path to output directory.
+#' @param page_size Page size (def: 100).
+#' @param pattern Pattern to further filter the returned file type tibble.
+#' @param regexes Tibble with regex and function name.
+#' @param dryrun If TRUE, just list the files that will be downloaded (don't
+#' download them).
+#' @examples
+#' s3dir <- file.path(
+#'   "s3://umccr-primary-data-prod/UMCCR-Validation/SBJ00596",
+#'   "ctTSO/2021-03-17/PTC_SSqCMM05pc_L2100067"
+#' )
+#' outdir <- sub("s3:/", "~/s3", s3dir)
+#'
+#' @export
+dr_s3_download <- function(s3dir, outdir, page_size = 100, pattern = NULL, regexes = DR_FILE_REGEX, dryrun = FALSE) {
+  s3 <- paws.storage::s3()
+  e <- emojifont::emoji
+  fs::dir_create(outdir)
+  d <- s3_files_list_filter_relevant(s3dir, pattern = NULL, page_size = page_size, max_items = 1000, presign = FALSE, expiry_sec = 43200)
+  d <- d |>
+    dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
+    dplyr::select("type", "size", "path", "bname")
+
+  # download recognisable dracarys files to outdir/{bname}
+  pattern <- pattern %||% ".*" # keep all recognisable files
+  d_filt <- d |>
+    dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
+    dplyr::mutate(out = file.path(outdir, .data$bname))
+  if (!dryrun) {
+    cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {s3dir}}")
+    d_filt |>
+      dplyr::rowwise() |>
+      dplyr::mutate(
+        s3bucket = sub("s3://(.*?)/.*", "\\1", .data$path),
+        s3key = sub("s3://(.*?)/(.*)", "\\2", .data$path),
+        dl = list(
+          s3$download_file(
+            Bucket = .data$s3bucket, Key = .data$s3key, Filename = .data$out
+          )
+        )
+      )
+  } else {
+    cli::cli_alert_info("{date_log()} {e('camera')} Just list relevant files from {.file {s3dir}}")
+    d_filt |>
+      dplyr::select("path", "type", "size") |>
+      as.data.frame() |>
+      print()
+  }
 }

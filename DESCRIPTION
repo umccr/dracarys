@@ -38,6 +38,7 @@ Imports:
     jsonlite,
     knitr,
     lubridate,
+    paws.storage,
     purrr,
     R6,
     readr,
