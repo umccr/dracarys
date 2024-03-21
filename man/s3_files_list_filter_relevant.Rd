@@ -14,7 +14,7 @@ s3_files_list_filter_relevant(
 )
 }
 \arguments{
-\item{s3dir}{GDS directory.}
+\item{s3dir}{S3 directory.}
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
