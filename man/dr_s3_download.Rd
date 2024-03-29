@@ -34,7 +34,7 @@ Download only S3 files that can be processed by dracarys.
 s3dir <- file.path(
   "s3://umccr-primary-data-prod/UMCCR-Validation/SBJ00596",
   "ctTSO/2021-03-17/PTC_SSqCMM05pc_L2100067"
-  )
+)
 outdir <- sub("s3:/", "~/s3", s3dir)
 
 }

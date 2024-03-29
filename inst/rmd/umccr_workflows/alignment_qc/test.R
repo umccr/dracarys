@@ -53,7 +53,7 @@ dp_lims_read <- function(libids) {
 }
 
 # first read in the workflows table, extract metadata, then join with lims
-start_date <- "2024-03-08"
+start_date <- "2024-03-23"
 p_raw <- dp_workflow_read(start_date)
 
 wgs <- p_raw |>
