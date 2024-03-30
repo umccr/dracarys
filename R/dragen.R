@@ -1110,9 +1110,3 @@ WgsHistFile <- R6::R6Class(
     }
   )
 )
-
-# wts
-# - quant_metrics.csv
-# - quant.transcript_fragment_lengths.txt
-# - quant.transcript_coverage.txt
-# - saturation.txt

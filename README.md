@@ -23,10 +23,10 @@ install](https://anaconda.org/umccr/r-dracarys/badges/latest_release_date.svg)](
 ## 🏆 Aim
 
 Given a [ICA
-GDS](https://developer.illumina.com/illumina-connected-analytics) or
-local directory with results from a UMCCR workflow, {dracarys} will grab
-files of interest and transform them into ‘tidier’ structures for output
-into TSV/Parquet/RDS format for downstream ingestion into a
+GDS](https://developer.illumina.com/illumina-connected-analytics), AWS
+S3 or local directory with results from a UMCCR workflow, {dracarys}
+will grab files of interest and transform them into ‘tidier’ structures
+for output into TSV/Parquet/RDS format for downstream ingestion into a
 database/data lake. See supported [workflows](#supported-workflows),
 [running](#running) examples, and [CLI](#cli) options in the sections
 below.
@@ -87,18 +87,19 @@ docker pull --platform linux/amd64 ghcr.io/umccr/dracarys:X.X.X
 
 ## ✨ Supported Workflows
 
-{dracarys} supports most outputs from the following UMCCR workflows,
-including their [MultiQC](https://multiqc.info/) JSON output.
+{dracarys} supports most outputs from the following UMCCR workflows:
 
 | Workflow             | Description                                                                                                                                          |
 |----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| bcl_convert          | BCLConvert workflow (only MultiQC JSON)                                                                                                              |
+| bcl_convert          | BCLConvert workflow                                                                                                                                  |
 | tso_ctdna_tumor_only | UMCCR [ctDNA TSO500](https://support-docs.illumina.com/SW/DRAGEN_TSO500_ctDNA_v2.1/Content/SW/TSO500/WorkflowDiagram_appT500ctDNAlocal.htm) workflow |
 | wgs_alignment_qc     | UMCCR [DRAGEN DNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment)                             |
+| wts_alignment_qc     | UMCCR [DRAGEN RNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment)                             |
 | wts_tumor_only       |                                                                                                                                                      |
 | wgs_tumor_normal     | UMCCR Tumor/Normal DRAGEN workflow                                                                                                                   |
 | umccrise             | UMCCR [umccrise](https://github.com/umccr/umccrise) workflow                                                                                         |
 | rnasum               | UMCCR [RNAsum](rnasum-web) workflow                                                                                                                  |
+| sash                 | UMCCR [sash](sash-web) workflow                                                                                                                      |
 
 See which output files from these workflows are supported in [Supported
 Files](https://umccr.github.io/dracarys/articles/files.html).
@@ -121,7 +122,7 @@ export PATH="${dracarys_cli}:${PATH}"
 ```
 
     dracarys.R --version
-    dracarys.R 0.10.0
+    dracarys.R 0.13.0
 
     #-----------------------------------#
     dracarys.R --help
@@ -141,24 +142,24 @@ export PATH="${dracarys_cli}:${PATH}"
     #------- Tidy ----------------------#
     dracarys.R tidy --help
     usage: dracarys.R tidy [-h] -i IN_DIR -o OUT_DIR -p PREFIX [-t TOKEN]
-                           [-g GDS_LOCAL_DIR] [-f {tsv,parquet,both}] [-n] [-q]
+                           [-l LOCAL_DIR] [-f FORMAT] [-n] [-q]
 
     options:
       -h, --help            show this help message and exit
       -i IN_DIR, --in_dir IN_DIR
                             ⛄️ Directory with untidy UMCCR workflow results. Can
-                            be GDS or local.
+                            be GDS, S3 or local.
       -o OUT_DIR, --out_dir OUT_DIR
                             🔥 Directory to output tidy results.
       -p PREFIX, --prefix PREFIX
                             🎻 Prefix string used for all results.
       -t TOKEN, --token TOKEN
                             🙈 ICA access token. Default: ICA_ACCESS_TOKEN env var.
-      -g GDS_LOCAL_DIR, --gds_local_dir GDS_LOCAL_DIR
-                            📥 If input is a GDS directory, download the
+      -l LOCAL_DIR, --local_dir LOCAL_DIR
+                            📥 If input is a GDS/S3 directory, download the
                             recognisable files to this directory. Default:
-                            '<out_dir>/dracarys_gds_sync'.
-      -f {tsv,parquet,both}, --format {tsv,parquet,both}
+                            '<out_dir>/dracarys_<gds|s3>_sync'.
+      -f FORMAT, --format FORMAT
                             🎨 Format of output. Default: tsv.
       -n, --dryrun          🐫 Dry run - just show files to be tidied.
       -q, --quiet           😴 Shush all the logs.

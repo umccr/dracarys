@@ -1,0 +1,73 @@
+workflow	file	description
+wgs_alignment_qc	replay.json	
+wgs_alignment_qc	fastqc_metrics.csv	
+wgs_alignment_qc	fragment_length_hist.csv	
+wgs_alignment_qc	mapping_metrics.csv	
+wgs_alignment_qc	ploidy_estimation_metrics.csv	
+wgs_alignment_qc	time_metrics.csv	
+wgs_alignment_qc	trimmer_metrics.csv	
+wgs_alignment_qc	wgs_contig_mean_cov.csv	
+wgs_alignment_qc	wgs_coverage_metrics.csv	
+wgs_alignment_qc	wgs_fine_hist.csv	
+wgs_alignment_qc	wgs_hist.csv	
+wts_alignment_qc	replay.json	
+wts_alignment_qc	fastqc_metrics.csv	
+wts_alignment_qc	fragment_length_hist.csv	
+wts_alignment_qc	mapping_metrics.csv	
+wts_alignment_qc	ploidy_estimation_metrics.csv	
+wts_alignment_qc	time_metrics.csv	
+wts_alignment_qc	trimmer_metrics.csv	
+wts_alignment_qc	wgs_contig_mean_cov.csv	
+wts_alignment_qc	wgs_coverage_metrics.csv	
+wts_alignment_qc	wgs_fine_hist.csv	
+wts_alignment_qc	wgs_hist.csv	
+wts_alignment_qc	fusion_metrics.csv	**TODO**
+wts_alignment_qc	quant_metrics.csv	**TODO**: QC for RNA txs and quantification
+wts_alignment_qc	quant.transcript_fragment_lengths.txt	**TODO**: Full fragment length distribution of reads mapped to txs
+wts_alignment_qc	quant.transcript_coverage.txt	**TODO**: Coverage uniformity with avg of 5' to 3' cvg pattern along txs
+wts_alignment_qc	saturation.txt	**TODO**: sequencing saturation, num of unique splice junctions observed
+wts_tumor_only	replay.json	
+wts_tumor_only	fastqc_metrics.csv	
+wts_tumor_only	fragment_length_hist.csv	
+wts_tumor_only	mapping_metrics.csv	
+wts_tumor_only	ploidy_estimation_metrics.csv	
+wts_tumor_only	time_metrics.csv	
+wts_tumor_only	trimmer_metrics.csv	
+wts_tumor_only	wgs_contig_mean_cov.csv	
+wts_tumor_only	wgs_coverage_metrics.csv	
+wts_tumor_only	wgs_fine_hist.csv	
+wts_tumor_only	wgs_hist.csv	
+wts_tumor_only	fusion_metrics.csv	**TODO**
+wts_tumor_only	quant_metrics.csv	**TODO**: QC for RNA txs and quantification
+wts_tumor_only	quant.transcript_fragment_lengths.txt	**TODO**: Full fragment length distribution of reads mapped to txs
+wts_tumor_only	quant.transcript_coverage.txt	**TODO**: Coverage uniformity with avg of 5' to 3' cvg pattern along txs
+wts_tumor_only	saturation.txt	**TODO**: sequencing saturation, num of unique splice junctions observed
+wgs_tumor_normal-germ	replay.json	
+wgs_tumor_normal-germ	fastqc_metrics.csv	
+wgs_tumor_normal-germ	fragment_length_hist.csv	
+wgs_tumor_normal-germ	mapping_metrics.csv	
+wgs_tumor_normal-germ	ploidy_estimation_metrics.csv	
+wgs_tumor_normal-germ	roh.bed	**TODO**
+wgs_tumor_normal-germ	roh_metrics.csv	**TODO**
+wgs_tumor_normal-germ	time_metrics.csv	
+wgs_tumor_normal-germ	trimmer_metrics.csv	
+wgs_tumor_normal-germ	wgs_contig_mean_cov.csv	
+wgs_tumor_normal-germ	wgs_coverage_metrics.csv	
+wgs_tumor_normal-germ	wgs_fine_hist.csv	
+wgs_tumor_normal-germ	wgs_hist.csv	
+wgs_tumor_normal-germ	vc_metrics.csv	
+wgs_tumor_normal-som	replay.json	
+wgs_tumor_normal-som	cnv_metrics.csv	**TODO**
+wgs_tumor_normal-som	fastqc_metrics.csv	
+wgs_tumor_normal-som	fragment_length_hist.csv	
+wgs_tumor_normal-som	hrdscore.csv	**TODO**
+wgs_tumor_normal-som	mapping_metrics.csv	
+wgs_tumor_normal-som	ploidy_estimation_metrics.csv	
+wgs_tumor_normal-som	sv_metrics.csv	
+wgs_tumor_normal-som	time_metrics.csv	
+wgs_tumor_normal-som	trimmer_metrics.csv	
+wgs_tumor_normal-som	wgs_contig_mean_cov_tumor/normal.csv	
+wgs_tumor_normal-som	wgs_coverage_metrics_tumor/normal.csv	
+wgs_tumor_normal-som	wgs_fine_hist.csv	
+wgs_tumor_normal-som	wgs_hist.csv	
+wgs_tumor_normal-som	vc_metrics.csv	
