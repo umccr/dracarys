@@ -66,8 +66,29 @@ wgs_tumor_normal-som	ploidy_estimation_metrics.csv
 wgs_tumor_normal-som	sv_metrics.csv	
 wgs_tumor_normal-som	time_metrics.csv	
 wgs_tumor_normal-som	trimmer_metrics.csv	
-wgs_tumor_normal-som	wgs_contig_mean_cov_tumor/normal.csv	
-wgs_tumor_normal-som	wgs_coverage_metrics_tumor/normal.csv	
+wgs_tumor_normal-som	wgs_contig_mean_cov_(tumor/normal).csv	
+wgs_tumor_normal-som	wgs_coverage_metrics_(tumor/normal).csv	
 wgs_tumor_normal-som	wgs_fine_hist.csv	
 wgs_tumor_normal-som	wgs_hist.csv	
 wgs_tumor_normal-som	vc_metrics.csv	
+umccrise	cancer_report_tables/qc_summary.tsv.gz	
+umccrise	cancer_report_tables/hrd/chord.tsv.gz	
+umccrise	cancer_report_tables/hrd/hrdetect.tsv.gz	
+umccrise	cancer_report_tables/sigs/snv_2015.tsv.gz	
+umccrise	cancer_report_tables/sigs/snv_2020.tsv.gz	
+umccrise	coverage/(tumor/normal).mosdepth.summary.txt	
+umccrise	coverage/(tumor/normal).samtools_stats.txt	
+umccrise	oncoviruses/oncoviral_breakpoints.vcf	
+umccrise	oncoviruses/prioritized_oncoviruses.tsv	
+umccrise	purple/purple.cnv.gene.tsv	
+umccrise	purple/purple.cnv.somatic.tsv	
+umccrise	purple/purple.purity.tsv	
+umccrise	purple/purple.qc	
+umccrise	small_variants/stats/bcftools_stats.txt	
+umccrise	small_variants/stats/pass_bcftools_stats_germline.txt	
+umccrise	small_variants/stats/pass_predispose_bcftools_stats_germline.txt	
+umccrise	small_variants/somatic.pcgr.snvs_indels.tiers.tsv	
+umccrise	multiqc_report_data/multiqc_conpair.txt	Needed since conpair is not copied over to final dir
+oncoanalyser_wgs	amber/amber.homozygousregion.tsv	For BAF gaps
+oncoanalyser_wgs	amber/amber.qc	Includes ConsanguinityProportion, Contamination
+oncoanalyser_wgs	bamtools/wgsmetrics	
