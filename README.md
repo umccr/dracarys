@@ -89,17 +89,18 @@ docker pull --platform linux/amd64 ghcr.io/umccr/dracarys:X.X.X
 
 {dracarys} supports most outputs from the following UMCCR workflows:
 
-| Workflow             | Description                                                                                                                                          |
-|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| bcl_convert          | BCLConvert workflow                                                                                                                                  |
-| tso_ctdna_tumor_only | UMCCR [ctDNA TSO500](https://support-docs.illumina.com/SW/DRAGEN_TSO500_ctDNA_v2.1/Content/SW/TSO500/WorkflowDiagram_appT500ctDNAlocal.htm) workflow |
-| wgs_alignment_qc     | UMCCR [DRAGEN DNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment)                             |
-| wts_alignment_qc     | UMCCR [DRAGEN RNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment)                             |
-| wts_tumor_only       |                                                                                                                                                      |
-| wgs_tumor_normal     | UMCCR Tumor/Normal DRAGEN workflow                                                                                                                   |
-| umccrise             | UMCCR [umccrise](https://github.com/umccr/umccrise) workflow                                                                                         |
-| rnasum               | UMCCR [RNAsum](rnasum-web) workflow                                                                                                                  |
-| sash                 | UMCCR [sash](sash-web) workflow                                                                                                                      |
+| Workflow             | Description                                                                                                                                    |
+|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
+| bcl_convert          | [BCLConvert](https://emea.support.illumina.com/sequencing/sequencing_software/bcl-convert.html) workflow                                       |
+| tso_ctdna_tumor_only | [ctDNA TSO500](https://support-docs.illumina.com/SW/DRAGEN_TSO500_ctDNA_v2.1/Content/SW/TSO500/WorkflowDiagram_appT500ctDNAlocal.htm) workflow |
+| wgs_alignment_qc     | [DRAGEN DNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment) workflow                    |
+| wts_alignment_qc     | [DRAGEN RNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment) workflow                    |
+| wts_tumor_only       | [DRAGEN RNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) workflow                                |
+| wgs_tumor_normal     | [DRAGEN Tumor/Normal](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) workflow                       |
+| umccrise             | [umccrise](https://github.com/umccr/umccrise) workflow                                                                                         |
+| rnasum               | [RNAsum](https://github.com/umccr/RNAsum) workflow                                                                                             |
+| sash                 | [sash](https://github.com/scwatts/sash) workflow                                                                                               |
+| oncoanalyser         | [oncoanalyser](https://github.com/nf-core/oncoanalyser) workflow                                                                               |
 
 See which output files from these workflows are supported in [Supported
 Files](https://umccr.github.io/dracarys/articles/files.html).
