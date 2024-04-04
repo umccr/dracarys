@@ -88,7 +88,56 @@ umccrise	small_variants/stats/bcftools_stats.txt
 umccrise	small_variants/stats/pass_bcftools_stats_germline.txt	
 umccrise	small_variants/stats/pass_predispose_bcftools_stats_germline.txt	
 umccrise	small_variants/somatic.pcgr.snvs_indels.tiers.tsv	
+umccrise	small_variants/somatic.pcgr.json.gz	
 umccrise	multiqc_report_data/multiqc_conpair.txt	Needed since conpair is not copied over to final dir
+oncoanalyser_wgs	pipeline_info/execution_trace.txt	
+oncoanalyser_wgs	pipeline_info/software_versions.yml	
 oncoanalyser_wgs	amber/amber.homozygousregion.tsv	For BAF gaps
 oncoanalyser_wgs	amber/amber.qc	Includes ConsanguinityProportion, Contamination
 oncoanalyser_wgs	bamtools/wgsmetrics	
+oncoanalyser_wgs	chord/chord_prediction.txt	
+oncoanalyser_wgs	cuppa/cup.data.csv	
+oncoanalyser_wgs	cuppa/cuppa.conclusion.txt	
+oncoanalyser_wgs	flagstats/flagstat	
+oncoanalyser_wgs	lilac/lilac.candidates.coverage.tsv	
+oncoanalyser_wgs	lilac/lilac.qc.tsv	
+oncoanalyser_wgs	lilac/lilac.tsv	
+oncoanalyser_wgs	orange/orange.json	Has majority of columns from WGS results.
+oncoanalyser_wgs	purple/purple.cnv.gene.tsv	
+oncoanalyser_wgs	purple/purple.cnv.somatic.tsv	
+oncoanalyser_wgs	purple/purple.purity.tsv	
+oncoanalyser_wgs	purple/purple.qc	
+oncoanalyser_wgs	sigs/sig.allocation.tsv	
+oncoanalyser_wgs	sigs/sig.snv_counts.csv	
+oncoanalyser_wgs	virusbreakend/virusbreakend.vcf	
+oncoanalyser_wgs	virusbreakend/virusbreakend.vcf.summary.tsv	
+oncoanalyser_wgs	virusinterpreter/virus.annotated.tsv	
+oncoanalyser_wts	pipeline_info/execution_trace.txt	
+oncoanalyser_wts	pipeline_info/software_versions.yml	
+oncoanalyser_wts	cuppa/cup.data.csv	
+oncoanalyser_wts	isofox/isf.summary.csv	
+oncoanalyser_wgts	lilac/lilac.candidates.coverage.tsv	
+oncoanalyser_wgts	lilac/lilac.qc.tsv	
+oncoanalyser_wgts	lilac/lilac.tsv	
+oncoanalyser_wgts	orange/orange.json	Has majority of columns from WGS and WTS results.
+oncoanalyser_wgts	cuppa/cup.data.csv	
+oncoanalyser_wgts	cuppa/cuppa.conclusion.txt	
+sash	pipeline_info/execution_trace.txt	
+sash	pipeline_info/software_versions.yml	
+sash	cancer_report_tables/qc_summary.tsv.gz	
+sash	cancer_report_tables/hrd/chord.tsv.gz	
+sash	cancer_report_tables/hrd/hrdetect.tsv.gz	
+sash	cancer_report_tables/hrd/dragen.tsv.gz	
+sash	cancer_report_tables/sigs/snv_2015.tsv.gz	
+sash	cancer_report_tables/sigs/snv_2020.tsv.gz	
+sash	purple/purple.cnv.gene.tsv	
+sash	purple/purple.cnv.somatic.tsv	
+sash	purple/purple.purity.tsv	
+sash	purple/purple.qc	
+sash	smlv_somatic/report/pcgr/pcgr_acmg.grch38.snvs_indels.tiers.tsv	
+sash	smlv_somatic/report/pcgr/pcgr_acmg.grch38.json.gz	
+sash	smlv_somatic/report/somatic.bcftools_stats.txt	
+sash	smlv_somatic/report/somatic.variant_counts_process.json	
+sash	smlv_somatic/report/somatic.variant_counts_type.yaml	
+sash	smlv_germline/report/germline.bcftools_stats.txt	
+sash	smlv_germline/report/germline.variant_counts_type.yaml	
