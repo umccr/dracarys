@@ -4,30 +4,30 @@ output: rmarkdown::html_document
 ---
 
 ```{r knitr_opts, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+knitr::opts_chunk$set(comment = "#>")
 ```
 
 ```{r pkg_load, warning=FALSE, message=FALSE, echo=FALSE}
 require(dracarys)
-require(DT)
 require(dplyr)
+require(readr)
 ```
 
 Below are the files output from UMCCR workflows that are supported by {dracarys}.
 
-```{r echo=FALSE}
-dracarys::file_regex_getter() |>
-  dplyr::arrange(.data$fun) |>
-  DT::datatable(
-    filter = list(position = "top", clear = FALSE, plain = TRUE),
-    class = "cell-border display compact",
-    extensions = c("Scroller", "KeyTable"),
-    options = list(
-      scroller = TRUE, scrollY = 600, scrollX = TRUE, autoWidth = FALSE, keys = TRUE,
-      dom = "lfrtip"
-    )
-  )
+## Workflows {.tabset .tabset-pills}
+
+```{r results = "asis", echo=FALSE}
+l <- system.file("extdata/files_supported.tsv", package = "dracarys") |>
+  readr::read_tsv(col_types = readr::cols(.default = "c"))
+for (w in unique(l$workflow)) {
+  cat(paste0("\n### ", w))
+  l |>
+    dplyr::filter(workflow == w) |>
+    dplyr::mutate(N = dplyr::row_number()) |>
+    dplyr::select(N, file, description) |>
+    knitr::kable() |>
+    print()
+  cat("\n")
+}
 ```

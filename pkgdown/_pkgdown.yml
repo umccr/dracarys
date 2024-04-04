@@ -25,6 +25,8 @@ navbar:
         href: articles/flames.html
       - text: DevNotes
         href: articles/developers.html
+      - text: Files
+        href: articles/files.html
 
 news:
   one_page: true
