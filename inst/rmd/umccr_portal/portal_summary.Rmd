@@ -150,7 +150,7 @@ wf_order <- c(
 invisible(capture.output(rportal::awsvault_profile("upro")))
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
 wf_query <- glue('WHERE "start" >= date(\'{dstart}\') AND "start" <= date(\'{dend}\') ORDER BY "start" DESC;')
-# pmeta_raw <- dracarys:::portal_meta_read_athena_tmp(wf_query)
+# pmeta_raw <- rportal::portaldb_query_workflow(wf_query)
 # saveRDS(pmeta_raw, file = pmeta_rds)
 pmeta_raw <- readr::read_rds(pmeta_rds)
 pmeta <- pmeta_raw |>
@@ -158,7 +158,7 @@ pmeta <- pmeta_raw |>
   dplyr::mutate(type_name = factor(.data$type_name, levels = wf_order))
 
 lims_rds <- here(glue("nogit/data_portal/lims/{as.Date(date_end)}.rds"))
-# lims_raw <- dracarys::glims_excel_read() # TODO: use glims_portal_read
+# lims_raw <- dracarys::glims_excel_read() # TODO: use rportal
 # saveRDS(lims_raw, file = lims_rds)
 lims_raw <- readr::read_rds(lims_rds)
 
