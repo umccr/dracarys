@@ -40,6 +40,7 @@ knitr::opts_chunk$set(
   require(lubridate, include.only = "with_tz")
   require(purrr, include.only = "map")
   require(RColorBrewer, include.only = "brewer.pal")
+  require(rportal, include.only = "awsvault_profile")
   require(readr, include.only = "cols")
   require(tibble, include.only = "as_tibble")
   require(tidyr, include.only = "unnest")
@@ -146,7 +147,7 @@ wf_order <- c(
   "sash"
 )
 
-invisible(capture.output(dracarys:::awsvault_profile("upro")))
+invisible(capture.output(rportal::awsvault_profile("upro")))
 pmeta_rds <- here(glue("nogit/data_portal/workflows/{as.Date(date_end)}.rds"))
 wf_query <- glue('WHERE "start" >= date(\'{dstart}\') AND "start" <= date(\'{dend}\') ORDER BY "start" DESC;')
 # pmeta_raw <- dracarys:::portal_meta_read_athena_tmp(wf_query)

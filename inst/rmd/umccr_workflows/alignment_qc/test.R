@@ -9,10 +9,11 @@
   require(here)
   require(RAthena)
   require(readr)
+  require(rportal, include.only = c("awsvault_profile"))
 }
 
 # log into aws umccr prod account
-dracarys:::awsvault_profile("upro")
+rportal::awsvault_profile("upro")
 
 dp_workflow_read <- function(start_date) {
   RAthena::RAthena_options(clear_s3_resource = FALSE)
