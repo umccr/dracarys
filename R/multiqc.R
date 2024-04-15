@@ -83,6 +83,11 @@ multiqc_tidy_json <- function(j) {
     # use raw instead
     return(dracarys::multiqc_parse_raw(p))
   }
+  if (workflow == "interop") {
+    # general_stats_data is empty
+    # use raw instead
+    return(dracarys::multiqc_parse_raw_interop(p))
+  }
   d <- d |>
     # get rid of duplicated elements - see umccr/dracarys#96
     purrr::map(\(x) {
@@ -190,6 +195,9 @@ multiqc_rename_cols <- function(d) {
   if (length(ds) == 1 && ds == "bclconvert") {
     return("bcl_convert")
   }
+  if (length(ds) == 1 && ds == "Illumina InterOp Statistics") {
+    return("interop")
+  }
   return("UNKNOWN")
 }
 
@@ -240,6 +248,50 @@ multiqc_parse_raw <- function(p) {
     purrr::map(\(x) tidyr::nest(x, .by = "multiqc_sample")) |>
     dplyr::bind_rows(.id = "multiqc_tool")
 }
+
+#' Parse Interop MultiQC 'report_saved_raw_data' JSON Element
+#'
+#' Parses Interop MultiQC 'report_saved_raw_data' JSON Element.
+#' @param p Parsed Interop MultiQC JSON.
+#' @return A list with summary and per-lane tibbles.
+#' @export
+multiqc_parse_raw_interop <- function(p) {
+  x <- p[["report_saved_raw_data"]]
+  tool_nms <- names(x)
+  assertthat::assert_that(length(tool_nms) == 1, tool_nms == "interop_runsummary")
+  res <- list()
+  d <- x[[tool_nms]]
+  assertthat::assert_that(length(d) == 1, names(d) == "interop")
+  d <- d[["interop"]]
+  assertthat::assert_that(length(d) == 2, all(names(d) %in% c("summary", "details")))
+  # read metrics summary
+  d_sumy <- d[["summary"]] |>
+    purrr::map(\(x) unlist(x) |> tibble::as_tibble_row()) |>
+    dplyr::bind_rows(.id = "Read")
+  # read metrics per lane
+  dbl_cols <- c(
+    "Tiles", "Density", "Cluster PF",
+    "Reads", "Reads PF", "%>=Q30",
+    "Yield", "Aligned", "Error",
+    "Error (35)", "Error (75)", "Error (100)",
+    "% Occupied", "Intensity C1"
+  )
+  d_det <- d[["details"]] |>
+    purrr::discard(\(x) length(x) == 0) |>
+    purrr::map(\(x) {
+      tibble::as_tibble_row(x) |>
+        dplyr::mutate(dplyr::across(dplyr::everything(), .fns = as.character))
+    }) |>
+    dplyr::bind_rows(.id = "Lane-Read") |>
+    dplyr::arrange(.data$`Lane-Read`) |>
+    dplyr::mutate(dplyr::across(dplyr::all_of(dbl_cols), .fns = as.numeric)) |>
+    dplyr::mutate(dplyr::across(dplyr::all_of(dbl_cols), ~ replace(.x, is.nan(.x), NA_real_)))
+  list(
+    summary = d_sumy,
+    per_lane = d_det
+  )
+}
+
 
 # From https://github.com/multimeric/TidyMultiqc
 multiqc_kv_map <- function(l, func, map_keys = FALSE) {
