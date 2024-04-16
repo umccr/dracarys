@@ -10,7 +10,8 @@ multiqc_parse_raw(p)
 \item{p}{Parsed MultiQC JSON.}
 }
 \value{
-A list.
+A list of tibbles for each tool, where each tibble contains
+metrics per sample.
 }
 \description{
 Parses MultiQC 'report_saved_raw_data' JSON Element.
