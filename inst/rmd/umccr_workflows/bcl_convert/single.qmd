@@ -1,54 +1,37 @@
 ---
-author: "University of Melbourne Centre for Cancer Research"
-date: "`r date()`"
-output:
-  html_document:
-    theme: cosmo
-    code_download: true
-    toc: true
-  rmdformats::material:
-    highlight: kate
+title: "{{< meta params.title >}}"
+author: "UMCCR - Genomics Platform Group"
+date: now
+date-format: "YYYY-MM-DD HH:mm Z"
+execute:
+  echo: false
+  eval: true
+format:
+  html:
+    toc: false
+    toc-expand: 1
+    toc-title: Contents
+    toc-location: body
+    highlight-style: github
+    number-sections: false
+    link-external-icon: true
+    link-external-newwindow: true
+    embed-resources: true
+    code-copy: true
+    code-link: true
+    code-fold: true
+    code-block-border-left: true
+    smooth-scroll: true
+    grid:
+      body-width: 1300px
 params:
-  title: "UMCCR bcl_convert Report"
-  gds_outdir: "X"
-description: "UMCCR bcl_convert Report"
-title: "`r params$title`"
+  title: "UMCCR bcl_convert Workflow QC Report"
+  indir_tidy: "X"
 ---
-
-```{r knitr_opts, include=F}
-knitr::opts_chunk$set(
-  collapse = TRUE, echo = FALSE,
-  warning = FALSE, message = FALSE
-)
-```
-
-```{css}
-.navbar-brand {
-  padding: 5px 15px;
-}
-
-.dropdown:hover > .dropdown-menu {
-  display: block;
-}
-.dropdown > .dropdown-toggle:active {
-  pointer-events: none;
-}
-
-.main-container {
-  max-width: 1400px !important;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.navbar-default {
-  color: #11A7BB;
-  background-color: #11A7BB;
-}
-```
 
 ```{r load_pkgs}
 {
-  library(dplyr, include.only = c("mutate", "filter", "select", "count"))
+  library(dplyr)
   library(dracarys)
   library(DT, include.only = "datatable")
   library(ggplot2, include.only = c("ggplot", "aes"))
