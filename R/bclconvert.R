@@ -36,7 +36,7 @@ BclconvertReports <- R6::R6Class(
   )
 )
 
-#' Read BCLConvert Top Unknown Barcodes
+#' BCLConvert Top Unknown Barcodes
 #'
 #' Reads the `Top_Unknown_Barcodes.csv` file in the `Reports` directory
 #' output by BCLConvert.
@@ -60,7 +60,7 @@ bclconvert_read_topunknownbarcodes <- function(x) {
     dplyr::select("lane", "barcode", "n_reads")
 }
 
-#' Read BCLConvert Adapter Metrics
+#' BCLConvert Adapter Metrics
 #'
 #' Reads the `Adapter_Metrics.csv` file in the `Reports` directory
 #' output by BCLConvert.
@@ -83,13 +83,74 @@ bclconvert_read_adaptermetrics <- function(x) {
   )
   assertthat::assert_that(all(colnames(d) == old_nms))
   d |>
-    dplyr::rename(index1 = "index", n_reads = "# Reads") |>
+    dplyr::rename(
+      index1 = "index", n_reads = "# Reads", SampleID = "Sample_ID", lane = "Lane"
+    ) |>
     dplyr::mutate(barcode = ifelse(
       is.na(.data$index1), NA_character_, glue("{.data$index1}-{.data$index2}")
     )) |>
     dplyr::select(
-      "Lane", "Sample_ID", "barcode", "n_reads",
+      "lane", "SampleID", "barcode", "n_reads",
       "R1_AdapterBases", "R2_AdapterBases",
       "R1_SampleBases", "R2_SampleBases"
     )
+}
+
+#' BCLConvert Index Hopping Counts
+#'
+#' Reads the `Index_Hopping_Counts.csv` file in the `Reports` directory
+#' output by BCLConvert.
+#'
+#' @param x Path to `Index_Hopping_Counts.csv` file.
+#'
+#' @return Tibble
+#'
+#' @examples
+#' \dontrun{
+#' x <- here::here("nogit/bcl_convert/WGS_TsqNano/Reports/Index_Hopping_Counts.csv")
+#' bclconvert_read_indexhoppingcounts(x)
+#' }
+#' @export
+bclconvert_read_indexhoppingcounts <- function(x) {
+  d <- readr::read_csv(x, col_types = "ccccd")
+  old_nms <- c("Lane", "SampleID", "index", "index2", "# Reads")
+  assertthat::assert_that(all(colnames(d) == old_nms))
+  d |>
+    dplyr::rename(index1 = "index", n_reads = "# Reads", lane = "Lane") |>
+    dplyr::mutate(barcode = glue("{.data$index1}-{.data$index2}")) |>
+    dplyr::select("lane", "SampleID", "barcode", "n_reads")
+}
+
+#' BCLConvert Demultiplex Stats
+#'
+#' Reads the `Demultiplex_Stats.csv` file in the `Reports` directory
+#' output by BCLConvert.
+#'
+#' @param x Path to `Demultiplex_Stats.csv` file.
+#'
+#' @return Tibble
+#'
+#' @examples
+#' \dontrun{
+#' x <- here::here("nogit/bcl_convert/WGS_TsqNano/Reports/Demultiplex_Stats.csv")
+#' bclconvert_read_demultiplexstats(x)
+#' }
+#' @export
+bclconvert_read_demultiplexstats <- function(x) {
+  nms <- tibble::tribble(
+    ~new_nm, ~old_nm, ~class,
+    "lane", "Lane", "c",
+    "SampleID", "SampleID", "c",
+    "barcode", "Index", "c",
+    "n_reads", "# Reads", "d",
+    "n_perfect_idxreads", "# Perfect Index Reads", "d",
+    "n_one_mismatch_idxreads", "# One Mismatch Index Reads", "d",
+    "n_q30_bases", "# of >= Q30 Bases (PF)", "d",
+    "mean_quality_score", "Mean Quality Score (PF)", "d"
+  )
+  lookup <- tibble::deframe(nms[c("new_nm", "old_nm")])
+  d <- readr::read_csv(x, col_types = nms[["class"]])
+  assertthat::assert_that(all(colnames(d) == nms[["old_nm"]]))
+  d |>
+    dplyr::rename(dplyr::all_of(lookup))
 }
