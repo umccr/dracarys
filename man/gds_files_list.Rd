@@ -4,21 +4,54 @@
 \alias{gds_files_list}
 \title{GDS Files List}
 \usage{
-gds_files_list(gdsdir, token, page_size = 100, include = NULL)
+gds_files_list(
+  gdsdir,
+  token,
+  page_size = NULL,
+  include_url = FALSE,
+  no_recurse = TRUE,
+  page_token = NULL
+)
 }
 \arguments{
 \item{gdsdir}{Full path to GDS directory.}
 
 \item{token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
-\item{page_size}{Page size (def: 100).}
+\item{page_size}{Page size (def: 10).}
 
-\item{include}{Use PresignedUrl to include presigned URLs to all files within
-the GDS directory.}
+\item{include_url}{Include presigned URLs to all files within the GDS directory (def: FALSE).}
+
+\item{no_recurse}{Do not recurse through the file list i.e. just give the first <page_size> items
+without recursing further down the list using <page_token>.}
+
+\item{page_token}{Page token (def: NULL). Used internally for recursion.}
 }
 \value{
 Tibble with file basename, file size, file full data path, file dir name.
 }
 \description{
 List files on ICA GDS filesystem.
+}
+\examples{
+\dontrun{
+gdsdir <- file.path(
+  "gds://production/primary_data",
+  "240322_A00130_0290_BH5HLLDSXC/20240323f56ec5a5/WGS_TsqNano"
+)
+gdsdir <- file.path(
+  "gds://bssh.acddbfda498038ed99fa94fe79523959/Runs",
+  "240322_A00130_0290_BH5HLLDSXC_r.3TbcOsEKZUyetygkqIOXcg/InterOp"
+)
+gdsdir <- file.path(
+  "gds://production/analysis_data/SBJ00699/umccrise",
+  "202203277dcf8562/L2200352__L2100146/SBJ00699__MDX220105/coverage"
+)
+token <- ica_token_validate()
+page_size <- 11
+include_url <- TRUE
+page_token <- NULL
+no_recurse <- TRUE
+gds_files_list(gdsdir, token, page_size, include_url, no_recurse, page_token)
+}
 }
