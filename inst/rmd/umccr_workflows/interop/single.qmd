@@ -1,0 +1,189 @@
+---
+title: "{{< meta params.title >}}"
+author: "UMCCR - Genomics Platform Group"
+date: now
+date-format: "YYYY-MM-DD HH:mm Z"
+execute:
+  echo: false
+  eval: true
+format:
+  html:
+    toc: false
+    toc-expand: 1
+    toc-title: Contents
+    toc-location: body
+    highlight-style: github
+    number-sections: false
+    link-external-icon: true
+    link-external-newwindow: true
+    embed-resources: true
+    code-copy: true
+    code-link: true
+    code-fold: true
+    code-block-border-left: true
+    smooth-scroll: true
+    grid:
+      body-width: 1300px
+params:
+  title: "UMCCR InterOp Workflow QC Report"
+---
+
+```{r}
+#| label: load_pkgs
+#| message: false
+{
+  library(dplyr)
+  library(dracarys)
+  library(glue, include.only = "glue")
+  library(here, include.only = "here")
+  library(knitr, include.only = "kable")
+  library(purrr, include.only = "map")
+  library(reactable, include.only = "reactable")
+  library(tibble, include.only = "tibble")
+  library(tidyr, include.only = "unnest")
+}
+```
+
+## BSSH Run Directory Contents
+
+```{r}
+#| label: data_parse
+#| eval: true
+token <- dracarys::ica_token_validate()
+gds_outdir <- "gds://bssh.acddbfda498038ed99fa94fe79523959/Runs/240322_A00130_0290_BH5HLLDSXC_r.3TbcOsEKZUyetygkqIOXcg"
+
+# folders: .basespace, Config, Data, InstrumentAnalyticsLogs, **InterOp**, Logs, Recipe
+# d1 <- dracarys::gds_files_list(gds_outdir, token = token, page_size = 1000, no_recurse = FALSE)
+# TOTAL:   9,660
+#--------------
+# top level:   6
+# .basespace:  4
+# Config:      5
+# Data:    6,289
+# IALogs:    322
+# InterOp: 3,032
+# Logs:        1
+# Recipe:      1
+d1_toplevel <- dracarys::gds_files_list(gds_outdir, token = token, page_size = 100, no_recurse = FALSE, recursive = FALSE) |>
+  mutate(path = sub(gds_outdir, "", .data$path))
+d1_basespace <- dracarys::gds_files_list(file.path(gds_outdir, ".basespace"), token = token, page_size = 10, no_recurse = FALSE) |>
+  mutate(path = sub(file.path(gds_outdir, ".basespace"), "", .data$path))
+d1_config <- dracarys::gds_files_list(file.path(gds_outdir, "Config"), token = token, page_size = 10, no_recurse = FALSE) |>
+  mutate(path = sub(file.path(gds_outdir, "Config"), "", .data$path))
+d1_data <- dracarys::gds_files_list(file.path(gds_outdir, "Data"), token = token, page_size = 7000, no_recurse = FALSE) |>
+  mutate(path = sub(file.path(gds_outdir, "Data"), "", .data$path))
+d1_ialogs <- dracarys::gds_files_list(file.path(gds_outdir, "InstrumentAnalyticsLogs"), token = token, page_size = 400, no_recurse = FALSE) |>
+  mutate(path = sub(file.path(gds_outdir, "InstrumentAnalyticsLogs"), "", .data$path))
+d1_interop <- dracarys::gds_files_list(file.path(gds_outdir, "InterOp"), token = token, page_size = 4000, no_recurse = FALSE) |>
+  mutate(path = sub(file.path(gds_outdir, "InterOp"), "", .data$path))
+d1_logs <- dracarys::gds_files_list(file.path(gds_outdir, "Logs"), token = token, page_size = 10, no_recurse = FALSE) |>
+  mutate(path = sub(file.path(gds_outdir, "Logs"), "", .data$path))
+d1_recipe <- dracarys::gds_files_list(file.path(gds_outdir, "Recipe"), token = token, page_size = 10, no_recurse = FALSE) |>
+  mutate(path = sub(file.path(gds_outdir, "Recipe"), "", .data$path))
+```
+
+- GDS directory: __`r gds_outdir`__
+
+```{r}
+rtab <- function(x, ...) {
+  x |>
+    reactable::reactable(
+      bordered = TRUE,
+      filterable = TRUE,
+      fullWidth = TRUE,
+      highlight = TRUE,
+      defaultPageSize = 20,
+      height = 1000,
+      # resizable = TRUE,
+      searchable = TRUE,
+      sortable = TRUE,
+      striped = TRUE,
+      wrap = TRUE,
+      theme = reactable::reactableTheme(
+        borderColor = "#dfe2e5",
+        stripedColor = "#f6f8fa",
+        highlightColor = "#f0f5f9",
+        style = list(fontFamily = "monaco"),
+        searchInputStyle = list(width = "100%")
+      ),
+      ...
+    )
+}
+```
+
+
+::: {.panel-tabset}
+
+### `InterOp` (`r nrow(d1_interop)`)
+
+```{r}
+d1_interop |>
+  mutate(
+    size_num = as.numeric(.data$size),
+    size = as.character(.data$size)
+  ) |>
+  select(path, dname, size, size_num) |>
+  rtab()
+```
+
+### `TopLevel` (`r nrow(d1_toplevel)`)
+
+```{r}
+d1_toplevel |>
+  mutate(
+    size_num = as.numeric(.data$size),
+    size = as.character(.data$size)
+  ) |>
+  select(path, size, size_num) |>
+  rtab()
+```
+
+### `Data` (`r nrow(d1_data)`)
+
+```{r}
+d1_data |>
+  select(path, dname) |>
+  rtab()
+```
+
+### `IA Logs` (`r nrow(d1_ialogs)`)
+
+```{r}
+d1_ialogs |>
+  select(path) |>
+  rtab()
+```
+
+### `.basespace`
+
+```{r}
+d1_basespace |>
+  select(path) |>
+  rtab()
+```
+
+### `Config`
+
+```{r}
+d1_config |>
+  select(path) |>
+  rtab()
+```
+
+### `Logs`
+
+```{r}
+d1_logs |>
+  select(path) |>
+  rtab()
+```
+
+### `Recipe`
+
+```{r}
+d1_recipe |>
+  select(path) |>
+  rtab()
+```
+
+:::
