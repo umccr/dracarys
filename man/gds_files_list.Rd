@@ -10,7 +10,8 @@ gds_files_list(
   page_size = NULL,
   include_url = FALSE,
   no_recurse = TRUE,
-  page_token = NULL
+  page_token = NULL,
+  recursive = NULL
 )
 }
 \arguments{
@@ -26,6 +27,9 @@ gds_files_list(
 without recursing further down the list using <page_token>.}
 
 \item{page_token}{Page token (def: NULL). Used internally for recursion.}
+
+\item{recursive}{Should files be returned recursively \emph{in and under} the specified
+GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE).}
 }
 \value{
 Tibble with file basename, file size, file full data path, file dir name.
@@ -52,6 +56,7 @@ page_size <- 11
 include_url <- TRUE
 page_token <- NULL
 no_recurse <- TRUE
-gds_files_list(gdsdir, token, page_size, include_url, no_recurse, page_token)
+recursive <- NULL
+gds_files_list(gdsdir, token, page_size, include_url, no_recurse, page_token, recursive)
 }
 }
