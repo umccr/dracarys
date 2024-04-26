@@ -1,0 +1,56 @@
+---
+title: "{{< meta params.title >}}"
+author: "UMCCR - Genomics Platform Group"
+date: now
+date-format: "YYYY-MM-DD HH:mm Z"
+execute:
+  echo: false
+  eval: true
+format:
+  html:
+    toc: false
+    toc-expand: 1
+    toc-title: Contents
+    toc-location: body
+    highlight-style: github
+    number-sections: false
+    link-external-icon: true
+    link-external-newwindow: true
+    embed-resources: true
+    code-copy: true
+    code-link: true
+    code-fold: true
+    code-block-border-left: true
+    smooth-scroll: true
+    grid:
+      body-width: 1300px
+params:
+  title: "UMCCR InterOp Workflow QC Report"
+---
+
+```{r}
+#| label: load_pkgs
+#| message: false
+{
+  library(dplyr)
+  library(dracarys)
+  library(glue, include.only = "glue")
+  library(here, include.only = "here")
+  library(purrr, include.only = "map")
+  library(reactable, include.only = "reactable")
+  library(readr, include.only = "read_csv")
+  library(tibble, include.only = "tibble")
+  library(tidyr, include.only = "unnest")
+}
+```
+
+## Introduction
+
+Here we're exploring the Illumina InterOp parsing libraries from <https://github.com/Illumina/interop>.
+
+```{r}
+d <- # here("nogit/interop_raw_data/interop_results/imaging_table_results.txt.gz") |>
+  here("nogit/interop_raw_data/interop_results/tmp.csv") |>
+  readr::read_csv(comment = "#", col_names = TRUE, col_types = readr::cols(.default = "c"))
+```
+
