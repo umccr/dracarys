@@ -34,11 +34,13 @@ params:
 {
   library(dplyr)
   library(dracarys)
+  library(ggplot2, include.only = c("ggplot", "aes"))
   library(glue, include.only = "glue")
   library(here, include.only = "here")
   library(purrr, include.only = "map")
   library(reactable, include.only = "reactable")
   library(readr, include.only = "read_csv")
+  library(stringr, include.only = "str_split_1")
   library(tibble, include.only = "tibble")
   library(tidyr, include.only = "unnest")
 }
@@ -49,8 +51,34 @@ params:
 Here we're exploring the Illumina InterOp parsing libraries from <https://github.com/Illumina/interop>.
 
 ```{r}
-d <- # here("nogit/interop_raw_data/interop_results/imaging_table_results.txt.gz") |>
-  here("nogit/interop_raw_data/interop_results/tmp.csv") |>
-  readr::read_csv(comment = "#", col_names = TRUE, col_types = readr::cols(.default = "c"))
+hdr <- here("nogit/interop_raw_data/interop_results/tmp.csv") |>
+  readr::read_lines(skip = 2, n_max = 1)
+get_hdr <- function(hdr) {
+  hdr1 <- str_split_1(hdr, ",")
+  weird_split <- function(x) {
+    if (!grepl(";", x)) {
+      return(x)
+    }
+    title <- sub("(.*)<(.*)>", "\\1", x)
+    cats <- sub("(.*)<(.*)>", "\\2", x)
+    cats_split <- stringr::str_split_1(cats, ";")
+    res <- paste(title, cats_split, sep = "_")
+    res
+  }
+  hdr1 |>
+    purrr::map(weird_split) |>
+    unlist()
+}
+cnames <- get_hdr(hdr)
+ctypes <- list(
+  .default = "d", Lane = "c", Tile = "c", Cycle = "c", Read = "c",
+  "Cycle Within Read" = "c"
+)
+d <- here("nogit/interop_raw_data/interop_results/imaging_table_results.txt.gz") |>
+  readr::read_csv(skip = 3, col_names = cnames, col_types = ctypes)
+d |>
+  distinct(Lane, `% Occupied`, `% Pass Filter`) |>
+  ggplot(aes(x = `% Occupied`, y = `% Pass Filter`)) +
+  ggplot2::geom_point(aes(colour = Lane), alpha = 0.6)
 ```
 
