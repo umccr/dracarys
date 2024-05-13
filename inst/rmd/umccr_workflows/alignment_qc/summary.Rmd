@@ -9,7 +9,7 @@ output:
     highlight: kate
 params:
   title: "UMCCR Alignment QC Summary Report"
-  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-03-23_wgts.rds")
+  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-04-14_wgts.rds")
 description: "UMCCR Alignment QC Summary Report"
 title: "`r params$title`"
 ---
@@ -48,9 +48,13 @@ knitr::opts_chunk$set(
 }
 ```
 
-```{r data_setup}
-# source(here::here("inst/rmd/umccr_workflows/alignment_qc/params/pd.R")) # for use with 'Run All Chunks Above'
+```{r eval=interactive()}
+params <- list(
+  meta = here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-04-14_wgts.rds")
+)
+```
 
+```{r data_setup}
 ggplot2::theme_set(ggplot2::theme_bw())
 meta <- params[["meta"]] |> readr::read_rds()
 stopifnot(all(dir.exists(meta$outdir)))
