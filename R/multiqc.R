@@ -221,7 +221,8 @@ multiqc_parse_gen <- function(p) {
 #'
 #' Parses MultiQC 'report_saved_raw_data' JSON Element.
 #' @param p Parsed MultiQC JSON.
-#' @return A list.
+#' @return A list of tibbles for each tool, where each tibble contains
+#' metrics per sample.
 #' @export
 multiqc_parse_raw <- function(p) {
   x <- p[["report_saved_raw_data"]]
@@ -244,9 +245,7 @@ multiqc_parse_raw <- function(p) {
     res[[tool]] <- res[[tool]] |>
       dplyr::bind_rows(.id = "multiqc_sample")
   }
-  res |>
-    purrr::map(\(x) tidyr::nest(x, .by = "multiqc_sample")) |>
-    dplyr::bind_rows(.id = "multiqc_tool")
+  res
 }
 
 #' Parse Interop MultiQC 'report_saved_raw_data' JSON Element

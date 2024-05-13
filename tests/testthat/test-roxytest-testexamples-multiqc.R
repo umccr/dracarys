@@ -2,7 +2,7 @@
 
 # File R/multiqc.R: @testexamples
 
-test_that("Function multiqc_date_fmt() @ L349", {
+test_that("Function multiqc_date_fmt() @ L348", {
   
   cdate <- "2023-04-07, 09:09 UTC"
   (res1 <- multiqc_date_fmt(cdate))

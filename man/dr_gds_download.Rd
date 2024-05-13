@@ -11,7 +11,8 @@ dr_gds_download(
   page_size = 100,
   pattern = NULL,
   dryrun = FALSE,
-  regexes = DR_FILE_REGEX
+  regexes = DR_FILE_REGEX,
+  recursive = NULL
 )
 }
 \arguments{
@@ -29,6 +30,9 @@ dr_gds_download(
 download them).}
 
 \item{regexes}{Tibble with regex and function name.}
+
+\item{recursive}{Should files be returned recursively \emph{in and under} the specified
+GDS directory (TRUE), or \emph{only directly in} the specified GDS directory (FALSE) (def: TRUE).}
 }
 \description{
 Download only GDS files that can be processed by dracarys.

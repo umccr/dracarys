@@ -8,7 +8,7 @@ gds_files_list_filter_relevant(
   gdsdir,
   token,
   pattern = NULL,
-  include = NULL,
+  include_url = FALSE,
   page_size = 100,
   regexes = DR_FILE_REGEX
 )
@@ -20,10 +20,9 @@ gds_files_list_filter_relevant(
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
-\item{include}{Use PresignedUrl to include presigned URLs to all files within}
+\item{include_url}{Include presigned URLs to all files within the GDS directory (def: FALSE).}
 
-\item{page_size}{Page size (def: 100).
-the GDS directory.}
+\item{page_size}{Page size (def: 100).}
 
 \item{regexes}{Tibble with regex and function name.}
 }
