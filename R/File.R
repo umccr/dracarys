@@ -1,7 +1,7 @@
 #' File R6 Class
 #'
 #' @description File is a base R6 class representing a TSV/CSV/JSON output from
-#' a DRAGEN workflow.
+#' a UMCCR workflow.
 #'
 #' A File has a path, a basename, a type, and can be a presigned URL.
 #'

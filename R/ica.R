@@ -226,7 +226,7 @@ gds_volumes_list <- function(token, page_size = 10) {
 #' download them).
 #' @param regexes Tibble with regex and function name.
 #' @param recursive Should files be returned recursively _in and under_ the specified
-#' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE).
+#' GDS directory (TRUE), or _only directly in_ the specified GDS directory (FALSE) (def: TRUE).
 #'
 #' @export
 dr_gds_download <- function(gdsdir, outdir, token, page_size = 100, pattern = NULL,
