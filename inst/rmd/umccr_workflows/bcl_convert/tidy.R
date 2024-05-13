@@ -1,5 +1,10 @@
 #!/usr/bin/env Rscript
 
+# Each bcl_convert run consists of:
+# - one or more Reports directories
+# - one interop_multiqc directory
+# - one bclconvert_multiqc directory
+
 {
   require(dplyr)
   require(dracarys, include.only = "MultiqcFile")
@@ -12,7 +17,7 @@
 rportal::awsvault_profile("upro")
 query_workflow_bclconvert <- function(start_date) {
   q1 <- glue(
-    'WHERE "start" > date(\'{start_date}\') AND REGEXP_LIKE("type_name", \'bcl_convert\') ',
+    'WHERE REGEXP_LIKE("type_name", \'bcl_convert\') AND "start" > date(\'{start_date}\') ',
     'ORDER BY "start" DESC;'
   )
   rportal::portaldb_query_workflow(q1)
@@ -27,19 +32,19 @@ query_limsrow_libids <- function(libids) {
 }
 
 # first read in the workflows table, extract metadata, then join with lims
-start_date <- "2024-04-14"
+start_date <- "2024-05-09"
 
 #-- workflows --#
-# p_raw <- query_workflow_bclconvert(start_date)
 p_rds <- here(glue("nogit/bcl_convert/rds/{start_date}_p.rds"))
+# p_raw <- query_workflow_bclconvert(start_date)
 # fs::dir_create(dirname(p_rds))
 # saveRDS(p_raw, p_rds)
 p_raw <- readRDS(p_rds)
 p <- p_raw |>
   rportal::meta_bcl_convert(status = "Succeeded")
 #-- lims --#
-# lims_raw <- query_limsrow_libids(p$LibraryID)
 lims_rds <- here(glue("nogit/bcl_convert/rds/{start_date}_lims.rds"))
+# lims_raw <- query_limsrow_libids(p$LibraryID)
 # fs::dir_create(dirname(lims_rds))
 # saveRDS(lims_raw, lims_rds)
 lims_raw <- readRDS(lims_rds)
@@ -47,7 +52,8 @@ lims <- lims_raw |>
   select(
     SubjectID = "subject_id", LibraryID = "library_id", SampleID = "sample_id",
     "type", "phenotype", "source",
-    ProjectOwner = "project_owner", ProjectName = "project_name", "workflow"
+    ProjectOwner = "project_owner", ProjectName = "project_name", "workflow",
+    "assay"
   ) |>
   distinct()
 
@@ -60,19 +66,16 @@ d <- p |>
     "gds_indir_bcl", "gds_outdir_multiqc", "gds_outdir_multiqc_interop",
     "type", "source",
     "ProjectName", "ProjectOwner",
-    "workflow", "start", "end", "portal_run_id",
+    "workflow", "assay", "start", "end", "portal_run_id",
   )
 
+# runfolder_name then batch_name
 report_dirs <- d |>
   distinct(gds_outdir_reports)
-
-x <- report_dirs |>
-  rowwise() |>
-  mutate(
-    contents = list(dracarys::gds_files_list(gds_outdir_reports, token = Sys.getenv("ICA_ACCESS_TOKEN"), page_size = 20))
-  ) |>
-  ungroup()
-
+multiqc_bcl <- d |>
+  distinct(gds_outdir_multiqc)
+multiqc_interop <- d |>
+  distinct(gds_outdir_multiqc_interop)
 
 # tidy_script <- system.file("cli/dracarys.R", package = "dracarys")
 # meta <- d |>
