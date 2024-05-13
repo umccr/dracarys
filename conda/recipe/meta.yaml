@@ -28,9 +28,6 @@ requirements:
     - r-ggplot2
     - r-ggrepel
     - r-glue
-    - r-googledrive
-    - r-googlesheets4
-    - r-here
     - r-httr
     - r-jose
     - r-jsonlite
@@ -61,9 +58,6 @@ requirements:
     - r-ggplot2
     - r-ggrepel
     - r-glue
-    - r-googledrive
-    - r-googlesheets4
-    - r-here
     - r-httr
     - r-jose
     - r-jsonlite

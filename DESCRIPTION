@@ -30,8 +30,6 @@ Imports:
     ggplot2,
     ggrepel,
     glue,
-    googledrive,
-    googlesheets4,
     here,
     httr,
     jose,
@@ -50,8 +48,6 @@ Imports:
     tidyr
 Suggests:
     SparkR,
-    DBI,
-    RAthena,
     rmarkdown,
     testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE,
