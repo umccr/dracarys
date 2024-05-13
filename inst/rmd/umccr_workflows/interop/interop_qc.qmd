@@ -78,7 +78,10 @@ d <- here("nogit/interop_raw_data/interop_results/imaging_table_results.txt.gz")
   readr::read_csv(skip = 3, col_names = cnames, col_types = ctypes)
 d |>
   distinct(Lane, `% Occupied`, `% Pass Filter`) |>
-  ggplot(aes(x = `% Occupied`, y = `% Pass Filter`)) +
-  ggplot2::geom_point(aes(colour = Lane), alpha = 0.6)
+  ggplot2::ggplot(aes(x = `% Occupied`, y = `% Pass Filter`)) +
+  ggplot2::geom_point(aes(colour = Lane), alpha = 0.6) +
+  ggplot2::xlim(0, 100) +
+  ggplot2::ylim(0, 100) +
+  ggplot2::theme_bw()
 ```
 
