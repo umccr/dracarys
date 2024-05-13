@@ -28,11 +28,13 @@ requirements:
     - r-ggplot2
     - r-ggrepel
     - r-glue
+    - r-here
     - r-httr
     - r-jose
     - r-jsonlite
     - r-knitr
     - r-lubridate
+    - r-paws.storage
     - r-purrr
     - r-r6
     - r-readr
@@ -58,11 +60,13 @@ requirements:
     - r-ggplot2
     - r-ggrepel
     - r-glue
+    - r-here
     - r-httr
     - r-jose
     - r-jsonlite
     - r-knitr
     - r-lubridate
+    - r-paws.storage
     - r-purrr
     - r-r6
     - r-readr
