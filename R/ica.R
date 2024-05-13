@@ -5,16 +5,17 @@
 #' @param gdsdir GDS directory.
 #' @param token ICA access token.
 #' @param pattern Pattern to further filter the returned file type tibble.
-#' @param include_url Include presigned URLs to all files within the GDS directory (def: FALSE).
+#' @param include Use PresignedUrl to include presigned URLs to all files within
 #' @param page_size Page size (def: 100).
+#' the GDS directory.
 #' @param regexes Tibble with regex and function name.
 #'
 #' @return A tibble with type, bname, size, file_id, path, and presigned URL.
 #' @export
-gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, include_url = FALSE, page_size = 100, regexes = DR_FILE_REGEX) {
+gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, include = NULL, page_size = 100, regexes = DR_FILE_REGEX) {
   pattern <- pattern %||% ".*" # keep all recognisable files by default
   cols_sel <- c("type", "bname", "size", "file_id", "path", "presigned_url")
-  d <- dracarys::gds_files_list(gdsdir, token, include_url = include_url, page_size = page_size) |>
+  d <- dracarys::gds_files_list(gdsdir, token, include = include, page_size = page_size) |>
     dplyr::rowwise() |>
     dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
     dplyr::ungroup() |>
@@ -83,42 +84,13 @@ gds_file_download <- function(gds, out, token = Sys.getenv("ICA_ACCESS_TOKEN")) 
 #'
 #' @param gdsdir Full path to GDS directory.
 #' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
-#' @param page_size Page size (def: 10).
-#' @param include_url Include presigned URLs to all files within the GDS directory (def: FALSE).
-#' @param page_token Page token (def: NULL). Used internally for recursion.
-#' @param no_recurse Do not recurse through the file list i.e. just give the first <page_size> items
-#' without recursing further down the list using <page_token>.
-#' @param recursive Should files be returned recursively _in and under_ the specified
-#' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE).
+#' @param page_size Page size (def: 100).
+#' @param include Use PresignedUrl to include presigned URLs to all files within
+#' the GDS directory.
 #'
 #' @return Tibble with file basename, file size, file full data path, file dir name.
-#' @examples
-#' \dontrun{
-#' gdsdir <- file.path(
-#'   "gds://production/primary_data",
-#'   "240322_A00130_0290_BH5HLLDSXC/20240323f56ec5a5/WGS_TsqNano"
-#' )
-#' gdsdir <- file.path(
-#'   "gds://bssh.acddbfda498038ed99fa94fe79523959/Runs",
-#'   "240322_A00130_0290_BH5HLLDSXC_r.3TbcOsEKZUyetygkqIOXcg/InterOp"
-#' )
-#' gdsdir <- file.path(
-#'   "gds://production/analysis_data/SBJ00699/umccrise",
-#'   "202203277dcf8562/L2200352__L2100146/SBJ00699__MDX220105/coverage"
-#' )
-#' token <- ica_token_validate()
-#' page_size <- 11
-#' include_url <- TRUE
-#' page_token <- NULL
-#' no_recurse <- TRUE
-#' recursive <- NULL
-#' gds_files_list(gdsdir, token, page_size, include_url, no_recurse, page_token, recursive)
-#' }
 #' @export
-gds_files_list <- function(gdsdir, token, page_size = NULL, include_url = FALSE,
-                           no_recurse = TRUE, page_token = NULL, recursive = NULL) {
-  assertthat::assert_that(is.logical(no_recurse), is.logical(include_url))
-  assertthat::assert_that(is.null(recursive) || is.logical(recursive))
+gds_files_list <- function(gdsdir, token, page_size = 100, include = NULL) {
   token <- ica_token_validate(token)
   assertthat::assert_that(grepl("^gds://", gdsdir))
   gdsdir_original <- gdsdir
@@ -128,49 +100,34 @@ gds_files_list <- function(gdsdir, token, page_size = NULL, include_url = FALSE,
   base_url <- "https://aps2.platform.illumina.com/v1"
   volname <- sub("gds://(.*?)/.*", "\\1", gdsdir)
   path2 <- sub("gds://(.*?)/(.*)", "\\2", gdsdir)
-  page_size <- ifelse(is.null(page_size), "", glue("&pageSize={page_size}"))
-  query_url <- glue("{base_url}/files?volume.name={volname}&path=/{path2}*{page_size}")
-  if (include_url) {
-    query_url <- glue("{query_url}&include=PresignedUrl")
+  query_url <- glue("{base_url}/files?volume.name={volname}&path=/{path2}*&pageSize={page_size}")
+  if (!is.null(include)) {
+    .url_include_presignedurl <- function(x, incl) {
+      assertthat::assert_that(incl == "PresignedUrl")
+      glue("{x}&include=PresignedUrl")
+    }
+    query_url <- .url_include_presignedurl(query_url, include)
   }
-  if (!is.null(page_token)) {
-    query_url <- glue("{query_url}&pageToken={page_token}")
-  }
-  if (!is.null(recursive)) {
-    # without specifying recursive, it's true by default
-    recursive <- ifelse(recursive, "true", "false")
-    query_url <- glue("{query_url}&recursive={recursive}")
-  }
-  query_res <- httr::GET(
+  res <- httr::GET(
     query_url,
     httr::add_headers(Authorization = glue("Bearer {token}")),
     httr::accept_json()
   )
-  j <- jsonlite::fromJSON(httr::content(x = query_res, type = "text", encoding = "UTF-8"), simplifyVector = FALSE)
+  j <- jsonlite::fromJSON(httr::content(x = res, type = "text", encoding = "UTF-8"), simplifyVector = FALSE)
   if (j[["itemCount"]] == 0) {
     if (likely_file(gdsdir_original)) {
       cli::cli_abort("{date_log()} ERROR: Is the input directory a file perhaps?\n{.file {gdsdir_original}}")
     }
-    # if <somehow> there is a nextPageToken then abort, else continue
-    if (!is.null(j[["nextPageToken"]])) {
-      msg <- paste0(
-        "{date_log()} ERROR: ",
-        "No GDS files listed in the input directory. Please confirm you can ",
-        "access the following GDS input directory with your token: ",
-        "{.file {gdsdir_original}}"
-      )
-      cli::cli_abort(msg)
-    }
+    msg <- paste0(
+      "{date_log()} ERROR: ",
+      "No GDS files listed in the input directory. Please confirm you can ",
+      "access the following GDS input directory with your token: ",
+      "{.file {gdsdir_original}}"
+    )
+    cli::cli_abort(msg)
   } # endif
-  d <- j[["items"]] |>
-    purrr::map(\(x) c(file_id = x[["id"]], path = x[["path"]], size = x[["sizeInBytes"]], presigned_url = x[["presignedUrl"]])) |>
-    dplyr::bind_rows()
-  if (nrow(d) == 0) {
-    # We've iterated through all available items, and the next page has 0 items.
-    # So dplyr::bind_rows(d, NULL) will return d.
-    return(NULL)
-  }
-  res <- d |>
+  d <- purrr::map_df(j[["items"]], function(x) c(file_id = x[["id"]], path = x[["path"]], size = x[["sizeInBytes"]], presigned_url = x[["presignedUrl"]]))
+  d |>
     dplyr::mutate(
       size = fs::as_fs_bytes(.data$size),
       bname = basename(.data$path),
@@ -178,15 +135,6 @@ gds_files_list <- function(gdsdir, token, page_size = NULL, include_url = FALSE,
       dname = basename(dirname(.data$path))
     ) |>
     dplyr::select(dplyr::any_of(c("file_id", "bname", "size", "path", "dname", "presigned_url")))
-  if (!is.null(j[["nextPageToken"]]) && !no_recurse) {
-    res2 <- gds_files_list(
-      gdsdir = gdsdir, token = token, page_size = NULL,
-      include_url = include_url, no_recurse = FALSE, page_token = j[["nextPageToken"]],
-      recursive = NULL
-    )
-    res <- dplyr::bind_rows(res, res2)
-  }
-  res
 }
 
 #' List GDS Volumes
@@ -225,18 +173,13 @@ gds_volumes_list <- function(token, page_size = 10) {
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
 #' @param regexes Tibble with regex and function name.
-#' @param recursive Should files be returned recursively _in and under_ the specified
-#' GDS directory (TRUE), or _only directly in_ the specified GDS directory (FALSE) (def: TRUE).
 #'
 #' @export
-dr_gds_download <- function(gdsdir, outdir, token, page_size = 100, pattern = NULL,
-                            dryrun = FALSE, regexes = DR_FILE_REGEX, recursive = NULL) {
+dr_gds_download <- function(gdsdir, outdir, token, page_size = 100,
+                            pattern = NULL, dryrun = FALSE, regexes = DR_FILE_REGEX) {
   e <- emojifont::emoji
   fs::dir_create(outdir)
-  d <- gds_files_list(
-    gdsdir = gdsdir, token = token, page_size = page_size,
-    no_recurse = FALSE, recursive = recursive
-  ) |>
+  d <- gds_files_list(gdsdir = gdsdir, token = token, page_size = page_size) |>
     dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
     dplyr::select("file_id", "dname", "type", "size", "path", "bname")
 
