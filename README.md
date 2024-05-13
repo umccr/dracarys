@@ -123,7 +123,7 @@ export PATH="${dracarys_cli}:${PATH}"
 ```
 
     dracarys.R --version
-    dracarys.R 0.13.0
+    dracarys.R 0.14.0
 
     #-----------------------------------#
     dracarys.R --help
