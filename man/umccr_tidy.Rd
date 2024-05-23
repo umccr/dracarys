@@ -12,7 +12,8 @@ umccr_tidy(
   out_format = "tsv",
   dryrun = FALSE,
   token = Sys.getenv("ICA_ACCESS_TOKEN"),
-  pattern = NULL
+  pattern = NULL,
+  regexes = DR_FILE_REGEX
 )
 }
 \arguments{
@@ -23,7 +24,7 @@ umccr_tidy(
 \item{prefix}{Prefix of output file(s).}
 
 \item{local_dir}{If \code{indir} is a GDS or S3 directory, 'recognisable' files
-will be first downloaded to this directory.}
+will be first downloaded to this directory (def: <out_dir>/dracarys_<s3_or_gds>_sync).}
 
 \item{out_format}{Format of output (tsv, parquet, both) (def: tsv).}
 
@@ -33,6 +34,8 @@ will be first downloaded to this directory.}
 
 \item{pattern}{Pattern to further filter the returned file type tibble (see
 \code{name} column in the \code{DR_FILE_REGEX} tibble).}
+
+\item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 }
 \value{
 Tibble with path to input file and the resultant tidy object.
