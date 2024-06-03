@@ -3,28 +3,19 @@
 #' @description Workflow is a base R6 class representing a bioinformatic
 #' workflow run from a UMCCR workflow manager.
 #'
-#' A Workflow has:
-#'
-#' - prid
-#' - type
-#' - start
-#' - end
-#' - status
-#' - input
-#' - output
 #' @examples
 #' p1 <- system.file("extdata/portaldb_workflow_top4.rds", package = "rportal") |>
 #'   readRDS() |>
 #'   dplyr::filter(type_name == "umccrise") |>
 #'   dplyr::slice(1)
-#' w <- Workflow$new(
+#' w <- Wf$new(
 #'   prid = p1$portal_run_id, type = p1$type_name, start = p1$start, end = p1$end,
 #'   status = p1$end_status, input = p1$input, output = p1$output
 #' )
 #' w
 #' @export
-Workflow <- R6::R6Class(
-  "Workflow",
+Wf <- R6::R6Class(
+  "Wf",
   public = list(
     #' @field prid Portal run ID.
     #' @field type Workflow type.
