@@ -9,7 +9,7 @@ output:
     highlight: kate
 params:
   title: "UMCCR Alignment QC Summary Report"
-  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-04-14_wgts.rds")
+  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-05-30_wgts.rds")
 description: "UMCCR Alignment QC Summary Report"
 title: "`r params$title`"
 ---
@@ -33,7 +33,7 @@ knitr::opts_chunk$set(
 ```{r load_pkgs}
 {
   require(dplyr)
-  require(dracarys)
+  require(dracarys, include.only = "session_info_tbls")
   require(DT, include.only = "datatable")
   require(forcats, include.only = "fct_rev")
   require(glue, include.only = "glue")
@@ -50,7 +50,7 @@ knitr::opts_chunk$set(
 
 ```{r eval=interactive()}
 params <- list(
-  meta = here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-04-14_wgts.rds")
+  meta = here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-05-30_wgts.rds")
 )
 ```
 
@@ -669,7 +669,7 @@ plotly::subplot(d_hist1, d_hist2, shareY = TRUE, titleY = TRUE, titleX = TRUE, n
 ```{r finehist, eval=eval$WgsFineHistFile, fig.height=10, fig.width=12}
 d_fhist <- dr_unnest("WgsFineHistFile")
 d_fhist |>
-  WgsFineHistFile$public_methods$plot(c(0, 150)) +
+  dracarys::WgsFineHistFile$public_methods$plot(c(0, 150)) +
   facet_wrap(~ forcats::fct_rev(umccrid), scales = "free_y")
 ```
 
