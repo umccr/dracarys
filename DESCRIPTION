@@ -47,7 +47,6 @@ Imports:
     tibble,
     tidyr
 Suggests:
-    SparkR,
     rmarkdown,
     testthat (>= 3.0.0)
 Roxygen: list(markdown = TRUE,
