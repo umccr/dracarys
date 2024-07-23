@@ -9,7 +9,7 @@ output:
     highlight: kate
 params:
   title: "UMCCR Alignment QC Summary Report"
-  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-05-30_wgts.rds")
+  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-06-28_wgts.rds")
 description: "UMCCR Alignment QC Summary Report"
 title: "`r params$title`"
 ---
@@ -46,12 +46,6 @@ knitr::opts_chunk$set(
   require(ggplot2)
   require(tidyr, include.only = "unnest")
 }
-```
-
-```{r eval=interactive()}
-params <- list(
-  meta = here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-05-30_wgts.rds")
-)
 ```
 
 ```{r data_setup}
@@ -117,6 +111,7 @@ eval <- dat |>
 d <- dat |>
   select("umccrid", "phenotype", "type", "source/qual", "ftype", "dat") |>
   tidyr::nest(data = c("umccrid", "phenotype", "type", "source/qual", "dat"))
+
 # sample-specific access
 # d_samp <- dat |>
 #   select("umccrid", "phenotype", "type", "ftype", "dat") |>
@@ -478,7 +473,7 @@ f1 |>
 
 ### Positional Base Mean Quality ('Per-Position Mean Quality Scores')
 
-```{r fqc_bmq, fig.height=42}
+```{r fqc_bmq, fig.height=80}
 f1 <- dr_unnest("FastqcMetricsFile_positional_base_mean_quality")
 ggplot() +
   geom_rect(
