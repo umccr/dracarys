@@ -31,7 +31,7 @@ query_limsrow_libids <- function(libids) {
 }
 
 # first read in the workflows table, extract metadata, then join with lims
-start_date <- "2024-05-30"
+start_date <- "2024-08-03"
 p_raw <- query_workflow_alignqc(start_date)
 
 wgs <- p_raw |>
@@ -44,9 +44,9 @@ lims <- query_limsrow_libids(p$LibraryID)
 d <- p |>
   left_join(lims, by = c("SubjectID" = "subject_id", "LibraryID" = "library_id")) |>
   select(
-    "SubjectID", "LibraryID", "SampleID", "Lane", "phenotype", "type", "source",
-    "quality", "assay", "external_subject_id", "project_name", "project_owner",
-    "workflow", "start", "end", "portal_run_id", "gds_outdir_dragen"
+    "SubjectID", "LibraryID", "SampleID", "lane", "phenotype", "type", "source",
+    "assay", "external_subject_id", "project_name", "project_owner",
+    "start", "end", "portal_run_id", "gds_outdir_dragen"
   ) |>
   mutate(rownum = row_number())
 
