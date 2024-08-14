@@ -9,10 +9,7 @@ Contains methods for reading and processing files output from the UMCCR
 }
 \examples{
 \dontrun{
-indir <- file.path(
-  "~/icav1/g/production/analysis_data/SBJ00596/tso_ctdna_tumor_only",
-  "2024050555972acf/L2400482/Results/PTC_ctTSO240429_L2400482/dracarys_gds_sync"
-)
+indir <- file.path()
 sample_id <- "PTC_ctTSO240429"
 library_id <- "L2400482"
 d <- TsoCombinedVariantOutputFile$new(x)

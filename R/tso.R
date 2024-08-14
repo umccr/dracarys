@@ -1,3 +1,31 @@
+#' tso_ctdna_tumor_only Wf R6 Class
+#'
+#' @description
+#' Contains methods for reading and processing files output from the UMCCR
+#' `tso_ctdna_tumor_only` workflow.
+#'
+#' @examples
+#' \dontrun{
+#' x <- file.path(
+#'   "~/icav1/g/production/analysis_data/SBJ00596/tso_ctdna_tumor_only",
+#'   "2024050555972acf/L2400482/Results/PTC_ctTSO240429_L2400482/dracarys_gds_sync"
+#' )
+#' sample_id <- "PTC_ctTSO240429"
+#' library_id <- "L2400482"
+#' d <- TsoCombinedVariantOutputFile$new(x)
+#' d$read()
+#' }
+#' @export
+Wf_tso_ctdna_tumor_only <- R6::R6Class(
+  "Wf_tso_ctdna_tumor_only",
+  public = list(
+    #' @field sid SampleID.
+    #' @field lid LibraryID.
+    sid = NULL,
+    lid = NULL
+  )
+)
+
 #' TsoCombinedVariantOutputFile R6 Class
 #'
 #' @description
