@@ -6,10 +6,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' indir <- file.path(
-#'   "~/icav1/g/production/analysis_data/SBJ00596/tso_ctdna_tumor_only",
-#'   "2024050555972acf/L2400482/Results/PTC_ctTSO240429_L2400482/dracarys_gds_sync"
-#' )
+#' indir <- file.path()
 #' sample_id <- "PTC_ctTSO240429"
 #' library_id <- "L2400482"
 #' d <- TsoCombinedVariantOutputFile$new(x)
@@ -160,16 +157,35 @@ BclconvertReports <- R6::R6Class(
         d |>
           dplyr::rename(dplyr::all_of(lookup))
       }
+      .read_fastqlist <- function(x) {
+        nms <- tibble::tribble(
+          ~new_nm, ~old_nm, ~class,
+          "rgid", "RGID", "c",
+          "rgsm", "RGSM", "c",
+          "rglb", "RGLB", "c",
+          "lane", "Lane", "c",
+          "1", "Read1File", "c",
+          "2", "Read2File", "c"
+        )
+        lookup <- tibble::deframe(nms[c("new_nm", "old_nm")])
+        d <- readr::read_csv(x, col_types = readr::cols(.default = "c"))
+        assertthat::assert_that(all(colnames(d) == nms[["old_nm"]]))
+        d |>
+          dplyr::rename(dplyr::all_of(lookup)) |>
+          tidyr::pivot_longer(c("1", "2"), names_to = "read", values_to = "path")
+      }
 
       am <- .read_adaptermetrics(file.path(p, "Adapter_Metrics.csv"))
       ds <- .read_demultiplexstats(file.path(p, "Demultiplex_Stats.csv"))
       ih <- .read_indexhoppingcounts(file.path(p, "Index_Hopping_Counts.csv"))
       ub <- .read_topunknownbarcodes(file.path(p, "Top_Unknown_Barcodes.csv"))
+      fq <- .read_fastqlist(file.path(p, "fastq_list.csv"))
       list(
         adapter_metrics = am,
         demultiplex_stats = ds,
         index_hopping_counts = ih,
-        top_unknown_barcodes = ub
+        top_unknown_barcodes = ub,
+        fastq_list = fq
       )
     },
 
