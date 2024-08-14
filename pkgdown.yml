@@ -1,12 +1,11 @@
-pandoc: '3.2'
-pkgdown: 2.0.9
+pandoc: '3.3'
+pkgdown: 2.1.0
 pkgdown_sha: ~
 articles:
   developers: developers.html
   files: files.html
   flames: flames.html
-last_built: 2024-05-13T13:16Z
+last_built: 2024-08-14T13:43Z
 urls:
   reference: https://umccr.github.io/dracarys/reference
   article: https://umccr.github.io/dracarys/articles
-
