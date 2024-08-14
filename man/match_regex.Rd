@@ -9,7 +9,7 @@ match_regex(x, regexes = DR_FILE_REGEX)
 \arguments{
 \item{x}{File to match.}
 
-\item{regexes}{Tibble with regex and function name.}
+\item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 }
 \value{
 The function corresponding to the matching regex from \code{DR_FILE_REGEX}, or

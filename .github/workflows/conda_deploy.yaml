@@ -33,7 +33,7 @@ jobs:
         run: |
           dvc pull
           ls -l inst/extdata/*
-          conda mambabuild --R 4.2 ${recipe_path} -c conda-forge --token ${atoken}
+          conda mambabuild --R 4.3.3 ${recipe_path} -c conda-forge --token ${atoken}
       - name: 🔒 Conda lock
         run: |
           conda-lock lock --file ${env_yaml_path}/dracarys.yaml -p linux-64
@@ -99,7 +99,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: 🐳 Docker img build and push
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           tags: ghcr.io/${{ github.repository }}:${{ env.VERSION }}
           context: . # yes, dot

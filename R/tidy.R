@@ -7,12 +7,13 @@
 #' @param prefix Prefix of output file(s).
 #' @param out_dir Output directory.
 #' @param local_dir If `indir` is a GDS or S3 directory, 'recognisable' files
-#' will be first downloaded to this directory.
+#' will be first downloaded to this directory (def: <out_dir>/dracarys_<s3_or_gds>_sync).
 #' @param dryrun Just list the files that will be downloaded (def: FALSE).
 #' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
 #' @param out_format Format of output (tsv, parquet, both) (def: tsv).
 #' @param pattern Pattern to further filter the returned file type tibble (see
 #' `name` column in the `DR_FILE_REGEX` tibble).
+#' @param regexes Tibble with `regex` and `fun`ction name.
 #'
 #' @return Tibble with path to input file and the resultant tidy object.
 #' @examples
@@ -46,7 +47,7 @@
 umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
                        local_dir = NULL, out_format = "tsv",
                        dryrun = FALSE, token = Sys.getenv("ICA_ACCESS_TOKEN"),
-                       pattern = NULL) {
+                       pattern = NULL, regexes = DR_FILE_REGEX) {
   assertthat::assert_that(!is.null(in_dir), !is.null(out_dir), !is.null(prefix))
   dr_output_format_valid(out_format)
   e <- emojifont::emoji
@@ -86,17 +87,17 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
       tibble::as_tibble_col(column_name = "path") |>
       dplyr::mutate(
         bname = basename(.data$path),
-        type = purrr::map_chr(.data$bname, match_regex)
+        type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes = regexes))
       ) |>
       dplyr::filter(!is.na(.data$type))
 
     if (nrow(d) == 0) {
-      regex <- DR_FILE_REGEX |>
+      regex <- regexes |>
         dplyr::pull("regex") |>
         sort()
       msg <- paste(
         "No UMCCR files for dracarys were found in {.file {in_dir}}.",
-        "See current supported regexes: {regex}."
+        "See supported regexes: {regex}."
       )
       cli::cli_abort(msg)
     }

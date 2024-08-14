@@ -4,7 +4,7 @@
 #' a match, it returns the 'name' of that match.
 #'
 #' @param x File to match.
-#' @param regexes Tibble with regex and function name.
+#' @param regexes Tibble with `regex` and `fun`ction name.
 #'
 #' @return The function corresponding to the matching regex from `DR_FILE_REGEX`, or
 #' NA if there is no match made.

@@ -9,7 +9,7 @@ output:
     highlight: kate
 params:
   title: "UMCCR Alignment QC Summary Report"
-  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-04-14_wgts.rds")
+  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-08-03_wgts.rds")
 description: "UMCCR Alignment QC Summary Report"
 title: "`r params$title`"
 ---
@@ -33,7 +33,7 @@ knitr::opts_chunk$set(
 ```{r load_pkgs}
 {
   require(dplyr)
-  require(dracarys)
+  require(dracarys, include.only = "session_info_tbls")
   require(DT, include.only = "datatable")
   require(forcats, include.only = "fct_rev")
   require(glue, include.only = "glue")
@@ -46,12 +46,6 @@ knitr::opts_chunk$set(
   require(ggplot2)
   require(tidyr, include.only = "unnest")
 }
-```
-
-```{r eval=interactive()}
-params <- list(
-  meta = here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-04-14_wgts.rds")
-)
 ```
 
 ```{r data_setup}
@@ -93,10 +87,9 @@ dat <- meta |>
   rowwise() |>
   mutate(
     fpaths = list(filepaths(indir = .data$outdir, sampleid = .data$SampleID)),
-    umccrid = glue("{.data$SubjectID}_{.data$LibraryID}_LN{.data$Lane}"),
-    `source/qual` = glue("{.data$source}/{.data$quality}")
+    umccrid = glue("{.data$SubjectID}_{.data$LibraryID}_LN{.data$lane}")
   ) |>
-  select("umccrid", "phenotype", "type", "source/qual", "fpaths") |>
+  select("umccrid", "phenotype", "type", "source", "fpaths") |>
   tidyr::unnest(fpaths) |>
   filter(.data$file_exists) |>
   rowwise() |>
@@ -115,8 +108,9 @@ eval <- dat |>
 
 # filetype-specific access
 d <- dat |>
-  select("umccrid", "phenotype", "type", "source/qual", "ftype", "dat") |>
-  tidyr::nest(data = c("umccrid", "phenotype", "type", "source/qual", "dat"))
+  select("umccrid", "phenotype", "type", "source", "ftype", "dat") |>
+  tidyr::nest(data = c("umccrid", "phenotype", "type", "source", "dat"))
+
 # sample-specific access
 # d_samp <- dat |>
 #   select("umccrid", "phenotype", "type", "ftype", "dat") |>
@@ -134,7 +128,7 @@ dr_unnest <- function(x1) {
     ungroup() |>
     filter(nrows > 0) |>
     tidyr::unnest(dat) |>
-    select("umccrid", "phenotype", "type", "source/qual", everything(), -c("ftype", "nrows"))
+    select("umccrid", "phenotype", "type", "source", everything(), -c("ftype", "nrows"))
 }
 
 dt_view <- function(x, caption = NULL, scroll_y = 10 + min(nrow(x) * 35, 570), ...) {
@@ -178,12 +172,12 @@ type_col <- list(
 
 ```{r meta}
 meta |>
-  arrange(desc(SubjectID), type, LibraryID, Lane) |>
+  arrange(desc(SubjectID), type, LibraryID, lane) |>
   mutate(
     SubjectID = get_sbj_url(.data$SubjectID),
     durationMin = round(end - start)
   ) |>
-  select(SubjectID, type, LibraryID, Lane, durationMin, everything(), -c("indir", "outdir", "cmd")) |>
+  select(SubjectID, type, LibraryID, lane, durationMin, everything(), -c("indir", "outdir", "cmd")) |>
   dt_view(escape = FALSE) |>
   DT::formatStyle(
     "type",
@@ -202,7 +196,7 @@ d_map <- dr_unnest("MappingMetricsFile") |>
   arrange(type, desc(umccrid)) |>
   select(
     umccrid, phenotype, type,
-    `source/qual`,
+    source,
     tot = reads_tot_rg_dragen,
     dup = reads_num_dupmarked_dragen,
     `dup%` = reads_num_dupmarked_dragen_pct,
@@ -271,7 +265,7 @@ d_pl <- dr_unnest("PloidyEstimationMetricsFile") |>
   arrange(desc(umccrid))
 d_pl_metrics <- d_pl |>
   select(
-    umccrid, phenotype, type, `source/qual`,
+    umccrid, phenotype, type, source,
     ploidy = ploidy_est_dragen,
     cvg_auto_med_ploidy = cov_auto_median_dragen,
     cvg_x_med_ploidy = cov_x_median_dragen,
@@ -280,9 +274,9 @@ d_pl_metrics <- d_pl |>
 # cov_genome_pct_* metrics are in the Hist data, so filter out here
 d_cvg <- dr_unnest("WgsCoverageMetricsFile") |>
   arrange(type, desc(umccrid)) |>
-  left_join(d_pl_metrics, by = c("umccrid", "phenotype", "type", "source/qual")) |>
+  left_join(d_pl_metrics, by = c("umccrid", "phenotype", "type", "source")) |>
   select(
-    umccrid, phenotype, type, `source/qual`,
+    umccrid, phenotype, type, source,
     ploidy,
     cvg_auto_avg = cov_avg_auto_over_genome_dragen,
     cvg_auto_med = cov_median_auto_over_genome_dragen,
@@ -324,7 +318,7 @@ d_cvg |>
 d_tr <- dr_unnest("TrimmerMetricsFile") |>
   arrange(type, desc(umccrid)) |>
   select(
-    umccrid, phenotype, type, `source/qual`,
+    umccrid, phenotype, type, source,
     reads_tot = reads_tot_input_dragen,
     read_len_avg = read_len_avg_dragen,
     `polygkmers3r1_remain%` = polygkmers3r1_remaining_dragen_pct,
@@ -478,7 +472,7 @@ f1 |>
 
 ### Positional Base Mean Quality ('Per-Position Mean Quality Scores')
 
-```{r fqc_bmq, fig.height=42}
+```{r fqc_bmq, fig.height=80}
 f1 <- dr_unnest("FastqcMetricsFile_positional_base_mean_quality")
 ggplot() +
   geom_rect(
@@ -669,7 +663,7 @@ plotly::subplot(d_hist1, d_hist2, shareY = TRUE, titleY = TRUE, titleX = TRUE, n
 ```{r finehist, eval=eval$WgsFineHistFile, fig.height=10, fig.width=12}
 d_fhist <- dr_unnest("WgsFineHistFile")
 d_fhist |>
-  WgsFineHistFile$public_methods$plot(c(0, 150)) +
+  dracarys::WgsFineHistFile$public_methods$plot(c(0, 150)) +
   facet_wrap(~ forcats::fct_rev(umccrid), scales = "free_y")
 ```
 

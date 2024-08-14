@@ -23,6 +23,48 @@ gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, includ
   d
 }
 
+#' List FASTQs In GDS Directory
+#'
+#' @param gdsdir GDS directory.
+#' @param token ICA access token.
+#' @param include_url Include presigned URLs to all files within the GDS directory.
+#' @param page_size Page size.
+#'
+#' @return A tibble with type, bname, size, file_id, path, and presigned URL.
+#'
+#' @examples
+#' \dontrun{
+#' prim <- "gds://production/primary_data"
+#' run <- "240719_A00130_0323_BHMCYHDSXC/202407205bad380d/BiModal_BM-5L"
+#' gdsdir <- file.path(prim, run)
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
+#' include_url <- F
+#' page_size <- 100
+#' gds_files_list_fastq(gdsdir, token, include_url, page_size)
+#' }
+#' @export
+gds_files_list_fastq <- function(gdsdir, token, include_url = FALSE, page_size = 100) {
+  fq_regex <- tibble::tribble(
+    ~regex, ~fun,
+    "fastq\\.gz$", "FASTQ"
+  )
+  g <- gds_files_list_filter_relevant(
+    gdsdir = gdsdir, token = token, pattern = NULL, include_url = include_url,
+    page_size = page_size, regexes = fq_regex
+  )
+  assertthat::assert_that(
+    all(colnames(g) == c("type", "bname", "size", "file_id", "path"))
+  )
+  g |>
+    dplyr::mutate(
+      size_chr = as.character(.data$size),
+      size_num = as.numeric(.data$size)
+    ) |>
+    dplyr::select(
+      "type", "bname", "size", "size_chr", "size_num", "file_id", "path"
+    )
+}
+
 #' GDS File Presigned URL
 #'
 #' Returns presigned URL of given GDS file.
