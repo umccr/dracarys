@@ -1,6 +1,6 @@
 package:
   name: r-dracarys
-  version: 0.14.0 # bump2version
+  version: 0.15.0 # bump2version
 
 source:
   path: ../..
