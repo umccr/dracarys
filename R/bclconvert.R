@@ -1,4 +1,4 @@
-#' bcl_convert Wf R6 Class
+#' Wf bcl_convert R6 Class
 #'
 #' @description
 #' Contains methods for reading and processing files output from the UMCCR
@@ -99,24 +99,30 @@ BclconvertReports <- R6::R6Class(
         "Adapter_Metrics.csv", "Demultiplex_Stats.csv",
         "Index_Hopping_Counts.csv", "Top_Unknown_Barcodes.csv"
       )
-      assertthat::assert_that(
-        all(req_fnames %in% self$contents[["bname"]])
-      )
-      .read_topunknownbarcodes <- function(x) {
-        d <- readr::read_csv(x, col_types = "cccd")
-        assertthat::assert_that(all(colnames(d) == c("Lane", "index", "index2", "# Reads")))
+      read_topunknownbarcodes <- function(x) {
+        cnames <- c("Lane", "index", "index2", "# Reads")
+        ctypes <- "cccd"
+        if (!file.exists(x)) {
+          return(empty_tbl(cnames, ctypes))
+        }
+        d <- readr::read_csv(x, col_types = ctypes)
+        assertthat::assert_that(all(colnames(d) == cnames))
         d |>
           rlang::set_names(c("lane", "index1", "index2", "n_reads")) |>
           dplyr::mutate(barcode = glue("{.data$index1}-{.data$index2}") |> as.character()) |>
           dplyr::select("lane", "barcode", "n_reads")
       }
-      .read_adaptermetrics <- function(x) {
-        d <- readr::read_csv(x, col_types = "ccccddddd")
-        old_nms <- c(
+      read_adaptermetrics <- function(x) {
+        cnames <- c(
           "Lane", "Sample_ID", "index", "index2", "R1_AdapterBases",
           "R1_SampleBases", "R2_AdapterBases", "R2_SampleBases", "# Reads"
         )
-        assertthat::assert_that(all(colnames(d) == old_nms))
+        ctypes <- "ccccddddd"
+        if (!file.exists(x)) {
+          return(empty_tbl(cnames, ctypes))
+        }
+        d <- readr::read_csv(x, col_types = ctypes)
+        assertthat::assert_that(all(colnames(d) == cnames))
         d |>
           dplyr::rename(
             index1 = "index", n_reads = "# Reads", SampleID = "Sample_ID", lane = "Lane"
@@ -130,16 +136,20 @@ BclconvertReports <- R6::R6Class(
             "R1_SampleBases", "R2_SampleBases"
           )
       }
-      .read_indexhoppingcounts <- function(x) {
-        d <- readr::read_csv(x, col_types = "ccccd")
-        old_nms <- c("Lane", "SampleID", "index", "index2", "# Reads")
-        assertthat::assert_that(all(colnames(d) == old_nms))
+      read_indexhoppingcounts <- function(x) {
+        cnames <- c("Lane", "SampleID", "index", "index2", "# Reads")
+        ctypes <- "ccccd"
+        if (!file.exists(x)) {
+          return(empty_tbl(cnames, ctypes))
+        }
+        d <- readr::read_csv(x, col_types = ctypes)
+        assertthat::assert_that(all(colnames(d) == cnames))
         d |>
           dplyr::rename(index1 = "index", n_reads = "# Reads", lane = "Lane") |>
           dplyr::mutate(barcode = glue("{.data$index1}-{.data$index2}")) |>
           dplyr::select("lane", "SampleID", "barcode", "n_reads")
       }
-      .read_demultiplexstats <- function(x) {
+      read_demultiplexstats <- function(x) {
         nms <- tibble::tribble(
           ~new_nm, ~old_nm, ~class,
           "lane", "Lane", "c",
@@ -152,12 +162,17 @@ BclconvertReports <- R6::R6Class(
           "mean_quality_score", "Mean Quality Score (PF)", "d"
         )
         lookup <- tibble::deframe(nms[c("new_nm", "old_nm")])
-        d <- readr::read_csv(x, col_types = nms[["class"]])
-        assertthat::assert_that(all(colnames(d) == nms[["old_nm"]]))
+        cnames <- nms[["old_nm"]]
+        ctypes <- nms[["class"]]
+        if (!file.exists(x)) {
+          return(empty_tbl(cnames, ctypes))
+        }
+        d <- readr::read_csv(x, col_types = ctypes)
+        assertthat::assert_that(all(colnames(d) == cnames))
         d |>
           dplyr::rename(dplyr::all_of(lookup))
       }
-      .read_fastqlist <- function(x) {
+      read_fastqlist <- function(x) {
         nms <- tibble::tribble(
           ~new_nm, ~old_nm, ~class,
           "rgid", "RGID", "c",
@@ -168,18 +183,23 @@ BclconvertReports <- R6::R6Class(
           "2", "Read2File", "c"
         )
         lookup <- tibble::deframe(nms[c("new_nm", "old_nm")])
-        d <- readr::read_csv(x, col_types = readr::cols(.default = "c"))
-        assertthat::assert_that(all(colnames(d) == nms[["old_nm"]]))
+        cnames <- nms[["old_nm"]]
+        ctypes <- nms[["class"]]
+        if (!file.exists(x)) {
+          return(empty_tbl(cnames, ctypes))
+        }
+        d <- readr::read_csv(x, col_types = ctypes)
+        assertthat::assert_that(all(colnames(d) == cnames))
         d |>
           dplyr::rename(dplyr::all_of(lookup)) |>
           tidyr::pivot_longer(c("1", "2"), names_to = "read", values_to = "path")
       }
-
-      am <- .read_adaptermetrics(file.path(p, "Adapter_Metrics.csv"))
-      ds <- .read_demultiplexstats(file.path(p, "Demultiplex_Stats.csv"))
-      ih <- .read_indexhoppingcounts(file.path(p, "Index_Hopping_Counts.csv"))
-      ub <- .read_topunknownbarcodes(file.path(p, "Top_Unknown_Barcodes.csv"))
-      fq <- .read_fastqlist(file.path(p, "fastq_list.csv"))
+      # now return all as list elements
+      am <- read_adaptermetrics(file.path(p, "Adapter_Metrics.csv"))
+      ds <- read_demultiplexstats(file.path(p, "Demultiplex_Stats.csv"))
+      ih <- read_indexhoppingcounts(file.path(p, "Index_Hopping_Counts.csv"))
+      ub <- read_topunknownbarcodes(file.path(p, "Top_Unknown_Barcodes.csv"))
+      fq <- read_fastqlist(file.path(p, "fastq_list.csv"))
       list(
         adapter_metrics = am,
         demultiplex_stats = ds,
