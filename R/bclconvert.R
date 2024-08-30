@@ -41,7 +41,8 @@ Wf_bcl_convert <- R6::R6Class(
 #'
 #' @examples
 #' \dontrun{
-#' b <- BclconvertReports$new(here::here("nogit/bcl_convert/WGS_TsqNano/Reports"))
+#' p1 <- "240816_A01052_0220_AHM7VHDSXC/202408195d4f2fc4/Reports"
+#' b <- BclconvertReports$new(here::here("nogit/bcl_convert", p1))
 #' b$path
 #' b$contents
 #' d <- b$read()
@@ -95,10 +96,25 @@ BclconvertReports <- R6::R6Class(
     #' @export
     read = function() {
       p <- self$path
-      req_fnames <- c(
-        "Adapter_Metrics.csv", "Demultiplex_Stats.csv",
-        "Index_Hopping_Counts.csv", "Top_Unknown_Barcodes.csv"
-      )
+      read_adaptercyclemetrics <- function(x) {
+        cnames <- c(
+          "Lane", "Sample_ID", "index", "index2", "ReadNumber", "Cycle",
+          "NumClustersWithAdapterAtCycle", "% At Cycle"
+        )
+        ctypes <- "ccccccdd"
+        if (!file.exists(x)) {
+          return(empty_tbl(cnames, ctypes))
+        }
+        d <- readr::read_csv(x, col_types = ctypes)
+        assertthat::assert_that(all(colnames(d) == cnames))
+        d |>
+          rlang::set_names(
+            c(
+              "lane", "sampleid", "index1", "index2",
+              "readnum", "cycle", "nclustadapt", "cycpct"
+            )
+          )
+      }
       read_topunknownbarcodes <- function(x) {
         cnames <- c("Lane", "index", "index2", "# Reads")
         ctypes <- "cccd"
