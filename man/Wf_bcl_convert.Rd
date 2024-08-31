@@ -2,7 +2,7 @@
 % Please edit documentation in R/bclconvert.R
 \name{Wf_bcl_convert}
 \alias{Wf_bcl_convert}
-\title{bcl_convert Wf R6 Class}
+\title{Wf bcl_convert R6 Class}
 \description{
 Contains methods for reading and processing files output from the UMCCR
 \code{bcl_convert} workflow.

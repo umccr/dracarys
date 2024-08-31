@@ -5,11 +5,14 @@
 \title{BclconvertReports R6 Class}
 \description{
 Reads and writes tidy versions of files within the \code{Reports} directory output
-from BCLConvert.
+from BCLConvert v4.2.7. See the DRAGEN v4.2 documentation at
+https://support-docs.illumina.com/SW/dragen_v42/Content/SW/DRAGEN/OutputFiles.htm.
 }
 \examples{
 \dontrun{
-b <- BclconvertReports$new(here::here("nogit/bcl_convert/WGS_TsqNano/Reports"))
+p1 <- "240816_A01052_0220_AHM7VHDSXC/202408195d4f2fc4/Reports"
+b <- here::here("nogit/bcl_convert", p1) |>
+  BclconvertReports$new()
 b$path
 b$contents
 d <- b$read()
@@ -31,6 +34,12 @@ b$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
 \itemize{
 \item \href{#method-BclconvertReports-new}{\code{BclconvertReports$new()}}
 \item \href{#method-BclconvertReports-print}{\code{BclconvertReports$print()}}
+\item \href{#method-BclconvertReports-read_adaptermetrics}{\code{BclconvertReports$read_adaptermetrics()}}
+\item \href{#method-BclconvertReports-read_adaptercyclemetrics}{\code{BclconvertReports$read_adaptercyclemetrics()}}
+\item \href{#method-BclconvertReports-read_demultiplexstats}{\code{BclconvertReports$read_demultiplexstats()}}
+\item \href{#method-BclconvertReports-read_indexhoppingcounts}{\code{BclconvertReports$read_indexhoppingcounts()}}
+\item \href{#method-BclconvertReports-read_topunknownbarcodes}{\code{BclconvertReports$read_topunknownbarcodes()}}
+\item \href{#method-BclconvertReports-read_fastqlist}{\code{BclconvertReports$read_fastqlist()}}
 \item \href{#method-BclconvertReports-read}{\code{BclconvertReports$read()}}
 \item \href{#method-BclconvertReports-write}{\code{BclconvertReports$write()}}
 \item \href{#method-BclconvertReports-clone}{\code{BclconvertReports$clone()}}
@@ -66,6 +75,169 @@ Print details about the BclconvertReports directory.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_adaptermetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_adaptermetrics}{}}}
+\subsection{Method \code{read_adaptermetrics()}}{
+Read Adapter_Metrics.csv file.
+\itemize{
+\item lane: lane number.
+\item sampleid: sample ID from sample sheet.
+\item indexes: index/index2 from sample sheet for this sample.
+\item readnum: read number.
+\item adapter_bases: total number of bases trimmed as adapter from the read.
+\item sample_bases: total number of bases not trimmed from the read.
+\item adapter_bases_pct: percentage of bases trimmed as adapter from the read.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_adaptermetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to Adapter_Metrics.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_adaptercyclemetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_adaptercyclemetrics}{}}}
+\subsection{Method \code{read_adaptercyclemetrics()}}{
+Read Adapter_Cycle_Metrics.csv file.
+\itemize{
+\item lane: lane number.
+\item sampleid: sample ID from sample sheet.
+\item indexes: index/index2 from sample sheet for this sample.
+\item read: read number.
+\item cycle: cycle number.
+\item cluster_n: number of clusters where the adapter was detected
+to begin precisely at this cycle.
+\item cluster_pct: percentage of all clusters where the adapter was detected
+to begin precisely at this cycle.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_adaptercyclemetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to Adapter_Cycle_Metrics.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_demultiplexstats"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_demultiplexstats}{}}}
+\subsection{Method \code{read_demultiplexstats()}}{
+Read Demultiplex_Stats.csv file.
+\itemize{
+\item lane: lane number.
+\item sampleid: sample ID from sample sheet.
+\item indexes: index/index2 from sample sheet for this sample.
+\item reads_n: total number of pass-filter reads mapping to this sample for the lane.
+\item perfect_idxreads_n: number of mapped reads with barcodes matching the indexes exactly.
+\item one_mismatch_idxreads_n: number of mapped reads with barcodes matched with one base mismatched.
+\item two_mismatch_idxreads_n: number of mapped reads with barcodes matched with two bases mismatched.
+\item reads_pct: percentage of pass-filter reads mapping to this sample for the lane.
+\item perfect_idxreads_pct: percentage of mapped reads with barcodes matching the indexess exactly.
+\item one_mismatch_idxreads_pct: percentage of mapped reads with one mismatch to the indexes.
+\item two_mismatch_idxreads_pct: percentage of mapped reads with two mismatches to the indexes.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_demultiplexstats(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to Demultiplex_Stats.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_indexhoppingcounts"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_indexhoppingcounts}{}}}
+\subsection{Method \code{read_indexhoppingcounts()}}{
+Read Index_Hopping_Counts.csv file.
+\itemize{
+\item lane: lane number.
+\item sampleid: sample ID from sample sheet.
+\item indexes: index/index2 from sample sheet for this sample.
+\item reads_n: total number of pass-filter reads mapping to the indexes.
+\item reads_hopped_pct: percentage of hopped pass-filter reads mapping to the indexes.
+\item reads_pct: percentage of all pass-filter reads mapping to the indexes.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_indexhoppingcounts(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to Index_Hopping_Counts.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_topunknownbarcodes"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_topunknownbarcodes}{}}}
+\subsection{Method \code{read_topunknownbarcodes()}}{
+Read Top_Unknown_Barcodes.csv file.
+\itemize{
+\item lane: lane number.
+\item indexes: index/index2 of this unlisted sequence.
+\item reads_n: total number of pass-filter reads mapping to the indexes.
+\item unknownbcodes_pct: percentage of unknown pass-filter reads mapping to the indexes.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_topunknownbarcodes(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to Top_Unknown_Barcodes.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_fastqlist"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_fastqlist}{}}}
+\subsection{Method \code{read_fastqlist()}}{
+Read fastq_list.csv file.
+\itemize{
+\item rgid: read group.
+\item rgsm: sample ID.
+\item rglb: library.
+\item lane: flow cell lane.
+\item readnum: read number (1 or 2).
+\item filepath: path to the FASTQ file.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_fastqlist(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to fastq_list.csv file.}
 }
 \if{html}{\out{</div>}}
 }

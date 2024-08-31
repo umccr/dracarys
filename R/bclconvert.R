@@ -37,7 +37,8 @@ Wf_bcl_convert <- R6::R6Class(
 #'
 #' @description
 #' Reads and writes tidy versions of files within the `Reports` directory output
-#' from BCLConvert.
+#' from BCLConvert v4.2.7. See the DRAGEN v4.2 documentation at
+#' https://support-docs.illumina.com/SW/dragen_v42/Content/SW/DRAGEN/OutputFiles.htm.
 #'
 #' @examples
 #' \dontrun{
@@ -90,173 +91,243 @@ BclconvertReports <- R6::R6Class(
       invisible(self)
     },
 
+    #' @description Read Adapter_Metrics.csv file.
+    #'
+    #' - lane: lane number.
+    #' - sampleid: sample ID from sample sheet.
+    #' - indexes: index/index2 from sample sheet for this sample.
+    #' - readnum: read number.
+    #' - adapter_bases: total number of bases trimmed as adapter from the read.
+    #' - sample_bases: total number of bases not trimmed from the read.
+    #' - adapter_bases_pct: percentage of bases trimmed as adapter from the read.
+    #' @param x (`character(1)`)\cr
+    #'   Path to Adapter_Metrics.csv file.
+    read_adaptermetrics = function(x) {
+      cnames <- list(
+        old = c(
+          "Lane", "Sample_ID", "index", "index2", "ReadNumber",
+          "AdapterBases", "SampleBases", "% Adapter Bases"
+        ),
+        new = c(
+          "lane", "sampleid", "indexes", "readnum", "adapter_bases",
+          "sample_bases", "adapter_bases_pct"
+        )
+      )
+      ctypes <- list(
+        old = "cccccddd",
+        new = "ccccddd"
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        dplyr::mutate(indexes = ifelse(
+          is.na(.data$index), NA_character_, paste0(.data$index, "-", .data$index2)
+        )) |>
+        dplyr::select(-c("index", "index2")) |>
+        dplyr::relocate("indexes", .after = "Sample_ID") |>
+        rlang::set_names(cnames$new)
+    },
+
+    #' @description Read Adapter_Cycle_Metrics.csv file.
+    #'
+    #' - lane: lane number.
+    #' - sampleid: sample ID from sample sheet.
+    #' - indexes: index/index2 from sample sheet for this sample.
+    #' - read: read number.
+    #' - cycle: cycle number.
+    #' - cluster_n: number of clusters where the adapter was detected
+    #'   to begin precisely at this cycle.
+    #' - cluster_pct: percentage of all clusters where the adapter was detected
+    #'   to begin precisely at this cycle.
+    #' @param x (`character(1)`)\cr
+    #'   Path to Adapter_Cycle_Metrics.csv file.
+    read_adaptercyclemetrics = function(x) {
+      cnames <- list(
+        old = c(
+          "Lane", "Sample_ID", "index", "index2", "ReadNumber", "Cycle",
+          "NumClustersWithAdapterAtCycle", "% At Cycle"
+        ),
+        new = c(
+          "lane", "sampleid", "indexes", "read", "cycle",
+          "cluster_n", "cluster_pct"
+        )
+      )
+      ctypes <- list(
+        old = "ccccccdd",
+        new = "cccccdd"
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        dplyr::mutate(indexes = paste0(.data$index, "-", .data$index2)) |>
+        dplyr::select(-c("index", "index2")) |>
+        dplyr::relocate("indexes", .after = "Sample_ID") |>
+        rlang::set_names(cnames$new)
+    },
+
+    #' @description Read Demultiplex_Stats.csv file.
+    #'
+    #' - lane: lane number.
+    #' - sampleid: sample ID from sample sheet.
+    #' - indexes: index/index2 from sample sheet for this sample.
+    #' - reads_n: total number of pass-filter reads mapping to this sample for the lane.
+    #' - perfect_idxreads_n: number of mapped reads with barcodes matching the indexes exactly.
+    #' - one_mismatch_idxreads_n: number of mapped reads with barcodes matched with one base mismatched.
+    #' - two_mismatch_idxreads_n: number of mapped reads with barcodes matched with two bases mismatched.
+    #' - reads_pct: percentage of pass-filter reads mapping to this sample for the lane.
+    #' - perfect_idxreads_pct: percentage of mapped reads with barcodes matching the indexess exactly.
+    #' - one_mismatch_idxreads_pct: percentage of mapped reads with one mismatch to the indexes.
+    #' - two_mismatch_idxreads_pct: percentage of mapped reads with two mismatches to the indexes.
+    #' @param x (`character(1)`)\cr
+    #'   Path to Demultiplex_Stats.csv file.
+    read_demultiplexstats = function(x) {
+      cnames <- list(
+        old = c(
+          "Lane", "SampleID", "Index", "# Reads", "# Perfect Index Reads",
+          "# One Mismatch Index Reads", "# Two Mismatch Index Reads",
+          "% Reads", "% Perfect Index Reads", "% One Mismatch Index Reads",
+          "% Two Mismatch Index Reads"
+        ),
+        new = c(
+          "lane", "sampleid", "indexes", "reads_n", "perfect_idxreads_n",
+          "one_mismatch_idxreads_n", "two_mismatch_idxreads_n",
+          "reads_pct", "perfect_idxreads_pct",
+          "one_mismatch_idxreads_pct", "two_mismatch_idxreads_pct"
+        )
+      )
+      ctypes <- list(
+        old = "cccdddddddd",
+        new = "cccdddddddd"
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        rlang::set_names(cnames$new)
+    },
+
+
+    #' @description Read Index_Hopping_Counts.csv file.
+    #'
+    #' - lane: lane number.
+    #' - sampleid: sample ID from sample sheet.
+    #' - indexes: index/index2 from sample sheet for this sample.
+    #' - reads_n: total number of pass-filter reads mapping to the indexes.
+    #' - reads_hopped_pct: percentage of hopped pass-filter reads mapping to the indexes.
+    #' - reads_pct: percentage of all pass-filter reads mapping to the indexes.
+    #' @param x (`character(1)`)\cr
+    #'   Path to Index_Hopping_Counts.csv file.
+    read_indexhoppingcounts = function(x) {
+      cnames <- list(
+        old = c(
+          "Lane", "SampleID", "index", "index2", "# Reads",
+          "% of Hopped Reads", "% of All Reads"
+        ),
+        new = c(
+          "lane", "sampleid", "indexes",
+          "reads_n", "reads_hopped_pct", "reads_pct"
+        )
+      )
+      ctypes <- list(
+        old = "ccccd",
+        new = "cccddd"
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        dplyr::mutate(indexes = paste0(.data$index, "-", .data$index2)) |>
+        dplyr::select(-c("index", "index2")) |>
+        dplyr::relocate("indexes", .after = "SampleID") |>
+        rlang::set_names(cnames$new)
+    },
+
+
+    #' @description Read Top_Unknown_Barcodes.csv file.
+    #'
+    #' - lane: lane number.
+    #' - indexes: index/index2 of this unlisted sequence.
+    #' - reads_n: total number of pass-filter reads mapping to the indexes.
+    #' - unknownbcodes_pct: percentage of unknown pass-filter reads mapping to the indexes.
+    #' @param x (`character(1)`)\cr
+    #'   Path to Top_Unknown_Barcodes.csv file.
+    read_topunknownbarcodes = function(x) {
+      cnames <- list(
+        old = c("Lane", "index", "index2", "# Reads", "% of Unknown Barcodes", "% of All Reads"),
+        new = c("lane", "indexes", "reads_n", "unknownbcodes_pct", "reads_pct")
+      )
+      ctypes <- list(
+        old = "cccddd",
+        new = "ccddd"
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        dplyr::mutate(indexes = paste0(.data$index, "-", .data$index2)) |>
+        dplyr::select(-c("index", "index2")) |>
+        dplyr::relocate("indexes", .after = "Lane") |>
+        rlang::set_names(cnames$new)
+    },
+
+
+    #' @description Read fastq_list.csv file.
+    #'
+    #' - rgid: read group.
+    #' - rgsm: sample ID.
+    #' - rglb: library.
+    #' - lane: flow cell lane.
+    #' - readnum: read number (1 or 2).
+    #' - filepath: path to the FASTQ file.
+    #' @param x (`character(1)`)\cr
+    #'   Path to fastq_list.csv file.
+    read_fastqlist = function(x) {
+      cnames <- list(
+        old = c("RGID", "RGSM", "RGLB", "Lane", "Read1File", "Read2File"),
+        new = c("rgid", "rgsm", "rglb", "lane", "readnum", "filepath")
+      )
+      ctypes <- list(
+        old = c("cccccc"),
+        new = c("cccccc")
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        tidyr::pivot_longer(c("Read1File", "Read2File"), names_to = "readnum", values_to = "filepath") |>
+        dplyr::mutate(readnum = sub("Read(.)File", "\\1", .data$readnum)) |>
+        rlang::set_names(cnames$new)
+    },
+
     #' @description
     #' Reads contents of `Reports` directory output by BCLConvert.
     #'
     #' @return A list of tibbles.
     #' @export
     read = function() {
-      p <- self$path
-      read_adaptercyclemetrics <- function(x) {
-        cnames <- list(
-          old = c(
-            "Lane", "Sample_ID", "index", "index2", "ReadNumber", "Cycle",
-            "NumClustersWithAdapterAtCycle", "% At Cycle"
-          ),
-          new = c(
-            "lane", "sampleid", "barcode", "readnum", "cycle",
-            "clustadapt_n", "cycle_pct"
-          )
-        )
-        ctypes <- list(
-          old = "ccccccdd",
-          new = "cccccdd"
-        )
-        if (!file.exists(x)) {
-          return(empty_tbl(cnames$new, ctypes$new))
-        }
-        d <- readr::read_csv(x, col_types = ctypes$old)
-        assertthat::assert_that(all(colnames(d) == cnames$old))
-        d |>
-          dplyr::mutate(barcode = paste0(.data$index, "-", .data$index2)) |>
-          dplyr::select(-c("index", "index2")) |>
-          dplyr::relocate("barcode", .after = "Sample_ID") |>
-          rlang::set_names(cnames$new)
-      }
-      read_topunknownbarcodes <- function(x) {
-        cnames <- list(
-          old = c("Lane", "index", "index2", "# Reads", "% of Unknown Barcodes", "% of All Reads"),
-          new = c("lane", "barcode", "reads_n", "unknownbcodes_pct", "reads_pct")
-        )
-        ctypes <- list(
-          old = "cccddd",
-          new = "ccddd"
-        )
-        if (!file.exists(x)) {
-          return(empty_tbl(cnames$new, ctypes$new))
-        }
-        d <- readr::read_csv(x, col_types = ctypes$old)
-        assertthat::assert_that(all(colnames(d) == cnames$old))
-        d |>
-          dplyr::mutate(barcode = paste0(.data$index, "-", .data$index2)) |>
-          dplyr::select(-c("index", "index2")) |>
-          dplyr::relocate("barcode", .after = "Lane") |>
-          rlang::set_names(cnames$new)
-      }
-      read_adaptermetrics <- function(x) {
-        cnames <- list(
-          old = c(
-            "Lane", "Sample_ID", "index", "index2", "ReadNumber",
-            "AdapterBases", "SampleBases", "% Adapter Bases"
-          ),
-          new = c(
-            "lane", "sampleid", "barcode", "readnum", "adapter_bases",
-            "sample_bases", "adapter_bases_pct"
-          )
-        )
-        ctypes <- list(
-          old = "cccccddd",
-          new = "ccccddd"
-        )
-        if (!file.exists(x)) {
-          return(empty_tbl(cnames$new, ctypes$new))
-        }
-        d <- readr::read_csv(x, col_types = ctypes$old)
-        assertthat::assert_that(all(colnames(d) == cnames$old))
-        d |>
-          dplyr::mutate(barcode = ifelse(
-            is.na(.data$index), NA_character_, paste0(.data$index, "-", .data$index2)
-          )) |>
-          dplyr::select(-c("index", "index2")) |>
-          dplyr::relocate("barcode", .after = "Sample_ID") |>
-          rlang::set_names(cnames$new)
-      }
-      read_indexhoppingcounts <- function(x) {
-        cnames <- list(
-          old = c(
-            "Lane", "SampleID", "index", "index2", "# Reads",
-            "% of Hopped Reads", "% of All Reads"
-          ),
-          new = c(
-            "lane", "sampleid", "barcode",
-            "reads_n", "reads_hopped_pct", "reads_pct"
-          )
-        )
-        ctypes <- list(
-          old = "ccccd",
-          new = "cccddd"
-        )
-        if (!file.exists(x)) {
-          return(empty_tbl(cnames$new, ctypes$new))
-        }
-        d <- readr::read_csv(x, col_types = ctypes$old)
-        assertthat::assert_that(all(colnames(d) == cnames$old))
-        d |>
-          dplyr::mutate(barcode = paste0(.data$index, "-", .data$index2)) |>
-          dplyr::select(-c("index", "index2")) |>
-          dplyr::relocate("barcode", .after = "SampleID") |>
-          rlang::set_names(cnames$new)
-      }
-      read_demultiplexstats <- function(x) {
-        cnames <- list(
-          old = c(
-            "Lane", "SampleID", "Index", "# Reads", "# Perfect Index Reads",
-            "# One Mismatch Index Reads", "# Two Mismatch Index Reads",
-            "% Reads", "% Perfect Index Reads", "% One Mismatch Index Reads",
-            "% Two Mismatch Index Reads"
-          ),
-          new = c(
-            "lane", "sampleid", "barcode", "reads_n", "perfect_idxreads_n",
-            "one_mismatch_idxreads_n", "two_mismatch_idxreads_n",
-            "reads_pct", "perfect_idxreads_pct",
-            "one_mismatch_idxreads_pct", "two_mismatch_idxreads_pct"
-          )
-        )
-        ctypes <- list(
-          old = "cccdddddddd",
-          new = "cccdddddddd"
-        )
-        if (!file.exists(x)) {
-          return(empty_tbl(cnames$new, ctypes$new))
-        }
-        d <- readr::read_csv(x, col_types = ctypes$old)
-        assertthat::assert_that(all(colnames(d) == cnames$old))
-        d |>
-          rlang::set_names(cnames$new)
-      }
-      read_fastqlist <- function(x) {
-        cnames <- list(
-          old = c("RGID", "RGSM", "RGLB", "Lane", "Read1File", "Read2File"),
-          new = c("rgid", "rgsm", "rglb", "lane", "readnum", "filepath")
-        )
-        ctypes <- list(
-          old = c("cccccc"),
-          new = c("cccccc")
-        )
-        if (!file.exists(x)) {
-          return(empty_tbl(cnames$new, ctypes$new))
-        }
-        d <- readr::read_csv(x, col_types = ctypes$old)
-        assertthat::assert_that(all(colnames(d) == cnames$old))
-        d |>
-          tidyr::pivot_longer(c("Read1File", "Read2File"), names_to = "readnum", values_to = "filepath") |>
-          dplyr::mutate(readnum = sub("Read(.)File", "\\1", .data$readnum)) |>
-          rlang::set_names(cnames$new)
-      }
       # now return all as list elements
-      ac <- read_adaptercyclemetrics(file.path(p, "Adapter_Cycle_Metrics.csv"))
-      am <- read_adaptermetrics(file.path(p, "Adapter_Metrics.csv"))
-      ds <- read_demultiplexstats(file.path(p, "Demultiplex_Stats.csv"))
-      ih <- read_indexhoppingcounts(file.path(p, "Index_Hopping_Counts.csv"))
-      ub <- read_topunknownbarcodes(file.path(p, "Top_Unknown_Barcodes.csv"))
-      fq <- read_fastqlist(file.path(p, "fastq_list.csv"))
+      p <- self$path
       list(
-        adapter_cycle_metrics = ac,
-        adapter_metrics = am,
-        demultiplex_stats = ds,
-        index_hopping_counts = ih,
-        top_unknown_barcodes = ub,
-        fastq_list = fq
+        adapter_cycle_metrics = read_adaptercyclemetrics(file.path(p, "Adapter_Cycle_Metrics.csv")),
+        adapter_metrics = read_adaptermetrics(file.path(p, "Adapter_Metrics.csv")),
+        demultiplex_stats = read_demultiplexstats(file.path(p, "Demultiplex_Stats.csv")),
+        index_hopping_counts = read_indexhoppingcounts(file.path(p, "Index_Hopping_Counts.csv")),
+        top_unknown_barcodes = read_topunknownbarcodes(file.path(p, "Top_Unknown_Barcodes.csv")),
+        fastq_list = read_fastqlist(file.path(p, "fastq_list.csv"))
       )
     },
 
