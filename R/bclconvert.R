@@ -91,46 +91,6 @@ BclconvertReports <- R6::R6Class(
       invisible(self)
     },
 
-    #' @description Read Adapter_Metrics.csv file.
-    #'
-    #' - lane: lane number.
-    #' - sampleid: sample ID from sample sheet.
-    #' - indexes: index/index2 from sample sheet for this sample.
-    #' - readnum: read number.
-    #' - adapter_bases: total number of bases trimmed as adapter from the read.
-    #' - sample_bases: total number of bases not trimmed from the read.
-    #' - adapter_bases_pct: percentage of bases trimmed as adapter from the read.
-    #' @param x (`character(1)`)\cr
-    #'   Path to Adapter_Metrics.csv file.
-    read_adaptermetrics = function(x) {
-      cnames <- list(
-        old = c(
-          "Lane", "Sample_ID", "index", "index2", "ReadNumber",
-          "AdapterBases", "SampleBases", "% Adapter Bases"
-        ),
-        new = c(
-          "lane", "sampleid", "indexes", "readnum", "adapter_bases",
-          "sample_bases", "adapter_bases_pct"
-        )
-      )
-      ctypes <- list(
-        old = "cccccddd",
-        new = "ccccddd"
-      )
-      if (!file.exists(x)) {
-        return(empty_tbl(cnames$new, ctypes$new))
-      }
-      d <- readr::read_csv(x, col_types = ctypes$old)
-      assertthat::assert_that(all(colnames(d) == cnames$old))
-      d |>
-        dplyr::mutate(indexes = ifelse(
-          is.na(.data$index), NA_character_, paste0(.data$index, "-", .data$index2)
-        )) |>
-        dplyr::select(-c("index", "index2")) |>
-        dplyr::relocate("indexes", .after = "Sample_ID") |>
-        rlang::set_names(cnames$new)
-    },
-
     #' @description Read Adapter_Cycle_Metrics.csv file.
     #'
     #' - lane: lane number.
@@ -166,6 +126,46 @@ BclconvertReports <- R6::R6Class(
       assertthat::assert_that(all(colnames(d) == cnames$old))
       d |>
         dplyr::mutate(indexes = paste0(.data$index, "-", .data$index2)) |>
+        dplyr::select(-c("index", "index2")) |>
+        dplyr::relocate("indexes", .after = "Sample_ID") |>
+        rlang::set_names(cnames$new)
+    },
+
+    #' @description Read Adapter_Metrics.csv file.
+    #'
+    #' - lane: lane number.
+    #' - sampleid: sample ID from sample sheet.
+    #' - indexes: index/index2 from sample sheet for this sample.
+    #' - readnum: read number.
+    #' - adapter_bases: total number of bases trimmed as adapter from the read.
+    #' - sample_bases: total number of bases not trimmed from the read.
+    #' - adapter_bases_pct: percentage of bases trimmed as adapter from the read.
+    #' @param x (`character(1)`)\cr
+    #'   Path to Adapter_Metrics.csv file.
+    read_adaptermetrics = function(x) {
+      cnames <- list(
+        old = c(
+          "Lane", "Sample_ID", "index", "index2", "ReadNumber",
+          "AdapterBases", "SampleBases", "% Adapter Bases"
+        ),
+        new = c(
+          "lane", "sampleid", "indexes", "readnum", "adapter_bases",
+          "sample_bases", "adapter_bases_pct"
+        )
+      )
+      ctypes <- list(
+        old = "cccccddd",
+        new = "ccccddd"
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        dplyr::mutate(indexes = ifelse(
+          is.na(.data$index), NA_character_, paste0(.data$index, "-", .data$index2)
+        )) |>
         dplyr::select(-c("index", "index2")) |>
         dplyr::relocate("indexes", .after = "Sample_ID") |>
         rlang::set_names(cnames$new)
@@ -214,6 +214,115 @@ BclconvertReports <- R6::R6Class(
         rlang::set_names(cnames$new)
     },
 
+    #' @description Read Demultiplex_Tile_Stats.csv file.
+    #'
+    #' - lane: lane number.
+    #' - sampleid: sample ID from sample sheet.
+    #' - indexes: index/index2 from sample sheet for this sample.
+    #' - tile: tile number.
+    #' - reads_n: total number of pass-filter reads mapping to this sample for the lane.
+    #' - reads_pct: percentage of pass-filter reads mapping to this sample for the lane.
+    #' @param x (`character(1)`)\cr
+    #'   Path to Demultiplex_Tile_Stats.csv file.
+    read_demultiplextilestats = function(x) {
+      cnames <- list(
+        old = c("Lane", "SampleID", "Index", "Tile", "# Reads", "% Reads"),
+        new = c("lane", "sampleid", "indexes", "tile", "reads_n", "reads_pct")
+      )
+      ctypes <- list(
+        old = "ccccdd",
+        new = "ccccdd"
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        rlang::set_names(cnames$new)
+    },
+
+    #' @description Read Quality_Metrics.csv file.
+    #'
+    #' - lane: lane number.
+    #' - sampleid: sample ID from sample sheet.
+    #' - indexes: index/index2 from sample sheet for this sample.
+    #' - readnum: read number (1 or 2).
+    #' - yield: number of bases mapping.
+    #' - yieldq30: number of bases with quality score >= 30 mapping.
+    #' - qscore_sum: sum of quality scores of bases mapping.
+    #' - qscore_mean_pf: mean quality score of bases mapping.
+    #' - q30_pct: percentage of bases with quality score >= 30 mapping.
+    #' @param x (`character(1)`)\cr
+    #'   Path to Quality_Metrics.csv file.
+    read_qualitymetrics = function(x) {
+      cnames <- list(
+        old = c(
+          "Lane", "SampleID", "index", "index2", "ReadNumber", "Yield",
+          "YieldQ30", "QualityScoreSum", "Mean Quality Score (PF)", "% Q30"
+        ),
+        new = c(
+          "lane", "sampleid", "indexes", "readnum", "yield",
+          "yieldq30", "qscore_sum", "qscore_mean_pf", "q30_pct"
+        )
+      )
+      ctypes <- list(
+        old = "cccccddddd",
+        new = "ccccddddd"
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        dplyr::mutate(indexes = paste0(.data$index, "-", .data$index2)) |>
+        dplyr::select(-c("index", "index2")) |>
+        dplyr::relocate("indexes", .after = "SampleID") |>
+        rlang::set_names(cnames$new)
+    },
+
+
+    #' @description Read Quality_Tile_Metrics.csv file.
+    #'
+    #' - lane: lane number.
+    #' - sampleid: sample ID from sample sheet.
+    #' - indexes: index/index2 from sample sheet for this sample.
+    #' - readnum: read number (1 or 2).
+    #' - tile: tile number.
+    #' - yield: number of bases mapping.
+    #' - yieldq30: number of bases with quality score >= 30 mapping.
+    #' - qscore_sum: sum of quality scores of bases mapping.
+    #' - qscore_mean_pf: mean quality score of bases mapping.
+    #' - q30_pct: percentage of bases with quality score >= 30 mapping.
+    #' @param x (`character(1)`)\cr
+    #'   Path to Quality_Tile_Metrics.csv file.
+    read_qualitytilemetrics = function(x) {
+      cnames <- list(
+        old = c(
+          "Lane", "SampleID", "index", "index2", "ReadNumber", "Tile", "Yield",
+          "YieldQ30", "QualityScoreSum", "Mean Quality Score (PF)", "% Q30"
+        ),
+        new = c(
+          "lane", "sampleid", "indexes", "readnum", "tile", "yield",
+          "yieldq30", "qscore_sum", "qscore_mean_pf", "q30_pct"
+        )
+      )
+      ctypes <- list(
+        old = "ccccccddddd",
+        new = "cccccddddd"
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d <- readr::read_csv(x, col_types = ctypes$old)
+      assertthat::assert_that(all(colnames(d) == cnames$old))
+      d |>
+        dplyr::mutate(indexes = paste0(.data$index, "-", .data$index2)) |>
+        dplyr::select(-c("index", "index2")) |>
+        dplyr::relocate("indexes", .after = "SampleID") |>
+        rlang::set_names(cnames$new)
+    },
 
     #' @description Read Index_Hopping_Counts.csv file.
     #'
@@ -252,7 +361,6 @@ BclconvertReports <- R6::R6Class(
         rlang::set_names(cnames$new)
     },
 
-
     #' @description Read Top_Unknown_Barcodes.csv file.
     #'
     #' - lane: lane number.
@@ -281,7 +389,6 @@ BclconvertReports <- R6::R6Class(
         dplyr::relocate("indexes", .after = "Lane") |>
         rlang::set_names(cnames$new)
     },
-
 
     #' @description Read fastq_list.csv file.
     #'
@@ -322,12 +429,15 @@ BclconvertReports <- R6::R6Class(
       # now return all as list elements
       p <- self$path
       list(
-        adapter_cycle_metrics = read_adaptercyclemetrics(file.path(p, "Adapter_Cycle_Metrics.csv")),
-        adapter_metrics = read_adaptermetrics(file.path(p, "Adapter_Metrics.csv")),
-        demultiplex_stats = read_demultiplexstats(file.path(p, "Demultiplex_Stats.csv")),
-        index_hopping_counts = read_indexhoppingcounts(file.path(p, "Index_Hopping_Counts.csv")),
-        top_unknown_barcodes = read_topunknownbarcodes(file.path(p, "Top_Unknown_Barcodes.csv")),
-        fastq_list = read_fastqlist(file.path(p, "fastq_list.csv"))
+        adapter_cycle_metrics = self$read_adaptercyclemetrics(file.path(p, "Adapter_Cycle_Metrics.csv")),
+        adapter_metrics = self$read_adaptermetrics(file.path(p, "Adapter_Metrics.csv")),
+        demultiplex_stats = self$read_demultiplexstats(file.path(p, "Demultiplex_Stats.csv")),
+        demultiplex_tile_stats = self$read_demultiplextilestats(file.path(p, "Demultiplex_Tile_Stats.csv")),
+        quality_metrics = self$read_qualitymetrics(file.path(p, "Quality_Metrics.csv")),
+        quality_tile_metrics = self$read_qualitytilemetrics(file.path(p, "Quality_Tile_Metrics.csv")),
+        index_hopping_counts = self$read_indexhoppingcounts(file.path(p, "Index_Hopping_Counts.csv")),
+        top_unknown_barcodes = self$read_topunknownbarcodes(file.path(p, "Top_Unknown_Barcodes.csv")),
+        fastq_list = self$read_fastqlist(file.path(p, "fastq_list.csv"))
       )
     },
 

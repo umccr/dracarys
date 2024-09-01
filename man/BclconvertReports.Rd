@@ -34,9 +34,12 @@ b$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
 \itemize{
 \item \href{#method-BclconvertReports-new}{\code{BclconvertReports$new()}}
 \item \href{#method-BclconvertReports-print}{\code{BclconvertReports$print()}}
-\item \href{#method-BclconvertReports-read_adaptermetrics}{\code{BclconvertReports$read_adaptermetrics()}}
 \item \href{#method-BclconvertReports-read_adaptercyclemetrics}{\code{BclconvertReports$read_adaptercyclemetrics()}}
+\item \href{#method-BclconvertReports-read_adaptermetrics}{\code{BclconvertReports$read_adaptermetrics()}}
 \item \href{#method-BclconvertReports-read_demultiplexstats}{\code{BclconvertReports$read_demultiplexstats()}}
+\item \href{#method-BclconvertReports-read_demultiplextilestats}{\code{BclconvertReports$read_demultiplextilestats()}}
+\item \href{#method-BclconvertReports-read_qualitymetrics}{\code{BclconvertReports$read_qualitymetrics()}}
+\item \href{#method-BclconvertReports-read_qualitytilemetrics}{\code{BclconvertReports$read_qualitytilemetrics()}}
 \item \href{#method-BclconvertReports-read_indexhoppingcounts}{\code{BclconvertReports$read_indexhoppingcounts()}}
 \item \href{#method-BclconvertReports-read_topunknownbarcodes}{\code{BclconvertReports$read_topunknownbarcodes()}}
 \item \href{#method-BclconvertReports-read_fastqlist}{\code{BclconvertReports$read_fastqlist()}}
@@ -80,33 +83,6 @@ Print details about the BclconvertReports directory.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-BclconvertReports-read_adaptermetrics"></a>}}
-\if{latex}{\out{\hypertarget{method-BclconvertReports-read_adaptermetrics}{}}}
-\subsection{Method \code{read_adaptermetrics()}}{
-Read Adapter_Metrics.csv file.
-\itemize{
-\item lane: lane number.
-\item sampleid: sample ID from sample sheet.
-\item indexes: index/index2 from sample sheet for this sample.
-\item readnum: read number.
-\item adapter_bases: total number of bases trimmed as adapter from the read.
-\item sample_bases: total number of bases not trimmed from the read.
-\item adapter_bases_pct: percentage of bases trimmed as adapter from the read.
-}
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_adaptermetrics(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{(\code{character(1)})\cr
-Path to Adapter_Metrics.csv file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-BclconvertReports-read_adaptercyclemetrics"></a>}}
 \if{latex}{\out{\hypertarget{method-BclconvertReports-read_adaptercyclemetrics}{}}}
 \subsection{Method \code{read_adaptercyclemetrics()}}{
@@ -131,6 +107,33 @@ to begin precisely at this cycle.
 \describe{
 \item{\code{x}}{(\code{character(1)})\cr
 Path to Adapter_Cycle_Metrics.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_adaptermetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_adaptermetrics}{}}}
+\subsection{Method \code{read_adaptermetrics()}}{
+Read Adapter_Metrics.csv file.
+\itemize{
+\item lane: lane number.
+\item sampleid: sample ID from sample sheet.
+\item indexes: index/index2 from sample sheet for this sample.
+\item readnum: read number.
+\item adapter_bases: total number of bases trimmed as adapter from the read.
+\item sample_bases: total number of bases not trimmed from the read.
+\item adapter_bases_pct: percentage of bases trimmed as adapter from the read.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_adaptermetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to Adapter_Metrics.csv file.}
 }
 \if{html}{\out{</div>}}
 }
@@ -162,6 +165,91 @@ Read Demultiplex_Stats.csv file.
 \describe{
 \item{\code{x}}{(\code{character(1)})\cr
 Path to Demultiplex_Stats.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_demultiplextilestats"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_demultiplextilestats}{}}}
+\subsection{Method \code{read_demultiplextilestats()}}{
+Read Demultiplex_Tile_Stats.csv file.
+\itemize{
+\item lane: lane number.
+\item sampleid: sample ID from sample sheet.
+\item indexes: index/index2 from sample sheet for this sample.
+\item tile: tile number.
+\item reads_n: total number of pass-filter reads mapping to this sample for the lane.
+\item reads_pct: percentage of pass-filter reads mapping to this sample for the lane.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_demultiplextilestats(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to Demultiplex_Tile_Stats.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_qualitymetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_qualitymetrics}{}}}
+\subsection{Method \code{read_qualitymetrics()}}{
+Read Quality_Metrics.csv file.
+\itemize{
+\item lane: lane number.
+\item sampleid: sample ID from sample sheet.
+\item indexes: index/index2 from sample sheet for this sample.
+\item readnum: read number (1 or 2).
+\item yield: number of bases mapping.
+\item yieldq30: number of bases with quality score >= 30 mapping.
+\item qscore_sum: sum of quality scores of bases mapping.
+\item qscore_mean_pf: mean quality score of bases mapping.
+\item q30_pct: percentage of bases with quality score >= 30 mapping.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_qualitymetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to Quality_Metrics.csv file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-BclconvertReports-read_qualitytilemetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-BclconvertReports-read_qualitytilemetrics}{}}}
+\subsection{Method \code{read_qualitytilemetrics()}}{
+Read Quality_Tile_Metrics.csv file.
+\itemize{
+\item lane: lane number.
+\item sampleid: sample ID from sample sheet.
+\item indexes: index/index2 from sample sheet for this sample.
+\item readnum: read number (1 or 2).
+\item tile: tile number.
+\item yield: number of bases mapping.
+\item yieldq30: number of bases with quality score >= 30 mapping.
+\item qscore_sum: sum of quality scores of bases mapping.
+\item qscore_mean_pf: mean quality score of bases mapping.
+\item q30_pct: percentage of bases with quality score >= 30 mapping.
+}
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{BclconvertReports$read_qualitytilemetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to Quality_Tile_Metrics.csv file.}
 }
 \if{html}{\out{</div>}}
 }
