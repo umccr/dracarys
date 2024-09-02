@@ -1,27 +1,66 @@
-#' UmChordTsvFile R6 Class
+#' UmccriseCanRepTables R6 Class
 #'
 #' @description
-#' Contains methods for reading and displaying contents of the
-#' `chord.tsv.gz` file output from umccrise.
+#' Reads and writes tidy versions of files within the `cancer_report_tables` directory
+#' output from the `umccrise` workflow.
 #'
 #' @examples
 #' \dontrun{
-#' x <- "/path/to/chord.tsv.gz"
-#' d <- UmChordTsvFile$new(x)
-#' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+#' p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
+#' p2 <- "L2101566__L2101565/SBJ01155__PRJ211091/cancer_report_tables"
+#' p <- file.path(p1, p2)
+#' obj <- UmccriseCanRepTables$new(p)
+#' obj$path
+#' obj$contents
+#' d <- obj$read()
+#' b$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
 #' }
+#'
 #' @export
-UmChordTsvFile <- R6::R6Class(
-  "UmChordTsvFile",
-  inherit = File,
+UmccriseCanRepTables <- R6::R6Class(
+  "UmccriseCanRepTables",
   public = list(
-    #' @description
-    #' Reads the `chord.tsv.gz` file output from umccrise.
+    #' @field path Path to the `cancer_report_tables` directory.
+    #' @field contents Tibble with file path, basename, and size.
+    path = NULL,
+    contents = NULL,
+    #' @description Create a new UmccriseCanRepTables object.
+    #' @param path Path to the `cancer_report_tables` directory.
+    initialize = function(path = NULL) {
+      stopifnot(is.character(path), length(path) == 1)
+      self$path <- normalizePath(path)
+      self$contents <- fs::dir_info(path) |>
+        dplyr::mutate(
+          bname = basename(.data$path),
+          size = as.character(trimws(.data$size))
+        ) |>
+        dplyr::select("path", "bname", "size")
+    },
+    #' @description Print details about the cancer_report_tables directory.
+    #' @param ... (ignored).
+    print = function(...) {
+      bnames <- self$contents |>
+        dplyr::mutate(
+          low = tolower(.data$bname),
+        ) |>
+        dplyr::arrange(.data$low) |>
+        dplyr::mutate(
+          n = dplyr::row_number(),
+          bn = glue("{.data$n}. {.data$bname} ({.data$size})")
+        ) |>
+        dplyr::pull("bn")
+      cat("#--- UmccriseCanRepTables ---#\n")
+      cat(glue("Path: {self$path}"), "\n")
+      cat("Contents:\n")
+      cat(bnames, sep = "\n")
+      invisible(self)
+    },
+
+    #' @description Read `chord.tsv.gz` file output from umccrise.
     #'
-    #' @return A tibble.
-    read = function() {
-      x <- self$path
+    #' @param x (`character(1)`)\cr
+    #'   Path to `chord.tsv.gz` file.
+    read_chordtsv = function(x) {
       ct <- readr::cols_only(
         p_hrd = "d",
         hr_status = "c",
@@ -31,49 +70,11 @@ UmChordTsvFile <- R6::R6Class(
       )
       read_tsvgz(x, col_types = ct)
     },
-
-    #' @description
-    #' Writes a tidy version of the `chord.tsv.gz` file output from umccrise.
+    #' @description Read `hrdetect.tsv.gz` file output from umccrise.
     #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}_chord")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' UmHrdetectTsvFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `hrdetect.tsv.gz` file output from umccrise.
-#'
-#' @examples
-#' \dontrun{
-#' x <- "/path/to/hrdetect.tsv.gz"
-#' d <- UmHrdetectTsvFile$new(x)
-#' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
-#' }
-#' @export
-UmHrdetectTsvFile <- R6::R6Class(
-  "UmHrdetectTsvFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `hrdetect.tsv.gz` file output from umccrise.
-    #'
-    #' @return A tibble.
-    read = function() {
-      x <- self$path
+    #' @param x (`character(1)`)\cr
+    #'   Path to `hrdetect.tsv.gz` file.
+    read_hrdetecttsv = function(x) {
       ct <- readr::cols(
         .default = "d",
         sample = "c"
@@ -82,49 +83,12 @@ UmHrdetectTsvFile <- R6::R6Class(
         dplyr::select(-c("sample"))
     },
 
-    #' @description
-    #' Writes a tidy version of the `hrdetect.tsv.gz` file output from umccrise.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}_hrdetect")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
 
-#' UmSigsSnvFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `snv_20XX.tsv.gz` file with SNV signatures output from umccrise.
-#'
-#' @examples
-#' \dontrun{
-#' x <- "/path/to/snv_2015.tsv.gz"
-#' d <- UmSigsSnvFile$new(x)
-#' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
-#' }
-#' @export
-UmSigsSnvFile <- R6::R6Class(
-  "UmSigsSnvFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `snv.tsv.gz` file output from umccrise.
+    #' @description Read `snv_20XX.tsv.gz` file output from umccrise.
     #'
-    #' @return A tibble.
-    read = function() {
-      x <- self$path
-      version <- dplyr::if_else(grepl("2015\\.tsv.\\gz", x), "2015", "2020")
+    #' @param x (`character(1)`)\cr
+    #'   Path to `snv_20XX.tsv.gz` file.
+    read_sigs = function(x) {
       ct <- readr::cols(
         .default = "d",
         Signature = "c"
@@ -132,48 +96,11 @@ UmSigsSnvFile <- R6::R6Class(
       read_tsvgz(x, col_types = ct)
     },
 
-    #' @description
-    #' Writes a tidy version of the `snv_20XX.tsv.gz` signature file output from umccrise.
+    #' @description Read `qc_summary.tsv.gz` file output from umccrise.
     #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir, prefix, out_format = "tsv") {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}_sigs_snv")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' UmQcSumFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `qc_summary.tsv.gz` file with QC summary metrics output from umccrise.
-#'
-#' @examples
-#' \dontrun{
-#' x <- "/path/to/snv_2015.tsv.gz"
-#' d <- UmQcSumFile$new(x)
-#' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
-#' }
-#' @export
-UmQcSumFile <- R6::R6Class(
-  "UmQcSumFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `qc_summary.tsv.gz` file output from umccrise.
-    #'
-    #' @return A tibble.
-    read = function() {
-      x <- self$path
+    #' @param x (`character(1)`)\cr
+    #'   Path to `qc_summary.tsv.gz` file.
+    read_qcsummarytsv = function(x) {
       d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
       d |>
         dplyr::select("variable", "value") |>
@@ -202,25 +129,8 @@ UmQcSumFile <- R6::R6Class(
           "hrd_chord", "hrd_hrdetect", "contamination_hmf",
           "deleted_genes_hmf", "tmb_hmf", "tml_hmf",
           wgd_hmf = "WGD",
-          hypermutated, bpi_enabled
+          "hypermutated", "bpi_enabled"
         )
-    },
-
-    #' @description
-    #' Writes a tidy version of the `qc_summary.tsv.gz` QC summary file output
-    #' from umccrise.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}_qc_summary")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
     }
   )
 )
