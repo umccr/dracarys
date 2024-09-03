@@ -5,11 +5,8 @@
   require(dracarys, include.only = "umccr_tidy")
   require(glue, include.only = "glue")
   require(here, include.only = "here")
-  require(rportal, include.only = c("awsvault_profile"))
+  require(rportal, include.only = c("portaldb_query_workflow"))
 }
-
-# log into aws umccr prod account
-rportal::awsvault_profile("upro")
 
 query_workflow_alignqc <- function(start_date) {
   wfs <- c("wgs_alignment_qc", "wts_alignment_qc") |>
