@@ -443,8 +443,8 @@ BclconvertReports <- R6::R6Class(
 #'
 #' @examples
 #' \dontrun{
-#' p1 <- "240816_A01052_0220_AHM7VHDSXC/202408195d4f2fc4/Reports"
-#' b <- here::here("nogit/bcl_convert", p1) |>
+#' p1 <- "nogit/bcl_convert/WGS_TsqNano/Reports"
+#' b <- here::here(p1) |>
 #'   BclconvertReports375$new()
 #' b$path
 #' b$contents
@@ -494,29 +494,22 @@ BclconvertReports375 <- R6::R6Class(
 
     #' @description Read Adapter_Metrics.csv file.
     #'
-    #' - lane: lane number.
-    #' - sampleid: sample ID from sample sheet.
-    #' - indexes: index/index2 from sample sheet for this sample.
-    #' - readnum: read number.
-    #' - adapter_bases: total number of bases trimmed as adapter from the read.
-    #' - sample_bases: total number of bases not trimmed from the read.
-    #' - adapter_bases_pct: percentage of bases trimmed as adapter from the read.
     #' @param x (`character(1)`)\cr
     #'   Path to Adapter_Metrics.csv file.
     read_adaptermetrics = function(x) {
       cnames <- list(
         old = c(
-          "Lane", "Sample_ID", "index", "index2", "ReadNumber",
-          "AdapterBases", "SampleBases", "% Adapter Bases"
+          "Lane", "Sample_ID", "index", "index2", "R1_AdapterBases",
+          "R1_SampleBases", "R2_AdapterBases", "R2_SampleBases", "# Reads"
         ),
         new = c(
-          "lane", "sampleid", "indexes", "readnum", "adapter_bases",
-          "sample_bases", "adapter_bases_pct"
+          "lane", "sampleid", "indexes", "adapter_bases_r1", "sample_bases_r1",
+          "adapter_bases_r2", "sample_bases_r2", "reads_n"
         )
       )
       ctypes <- list(
-        old = "cccccddd",
-        new = "ccccddd"
+        old = "ccccddddd",
+        new = "cccddddd"
       )
       if (!file.exists(x)) {
         return(empty_tbl(cnames$new, ctypes$new))
@@ -534,37 +527,23 @@ BclconvertReports375 <- R6::R6Class(
 
     #' @description Read Demultiplex_Stats.csv file.
     #'
-    #' - lane: lane number.
-    #' - sampleid: sample ID from sample sheet.
-    #' - indexes: index/index2 from sample sheet for this sample.
-    #' - reads_n: total number of pass-filter reads mapping to this sample for the lane.
-    #' - perfect_idxreads_n: number of mapped reads with barcodes matching the indexes exactly.
-    #' - one_mismatch_idxreads_n: number of mapped reads with barcodes matched with one base mismatched.
-    #' - two_mismatch_idxreads_n: number of mapped reads with barcodes matched with two bases mismatched.
-    #' - reads_pct: percentage of pass-filter reads mapping to this sample for the lane.
-    #' - perfect_idxreads_pct: percentage of mapped reads with barcodes matching the indexess exactly.
-    #' - one_mismatch_idxreads_pct: percentage of mapped reads with one mismatch to the indexes.
-    #' - two_mismatch_idxreads_pct: percentage of mapped reads with two mismatches to the indexes.
     #' @param x (`character(1)`)\cr
     #'   Path to Demultiplex_Stats.csv file.
     read_demultiplexstats = function(x) {
       cnames <- list(
         old = c(
           "Lane", "SampleID", "Index", "# Reads", "# Perfect Index Reads",
-          "# One Mismatch Index Reads", "# Two Mismatch Index Reads",
-          "% Reads", "% Perfect Index Reads", "% One Mismatch Index Reads",
-          "% Two Mismatch Index Reads"
+          "# One Mismatch Index Reads", "# of >= Q30 Bases (PF)",
+          "Mean Quality Score (PF)"
         ),
         new = c(
           "lane", "sampleid", "indexes", "reads_n", "perfect_idxreads_n",
-          "one_mismatch_idxreads_n", "two_mismatch_idxreads_n",
-          "reads_pct", "perfect_idxreads_pct",
-          "one_mismatch_idxreads_pct", "two_mismatch_idxreads_pct"
+          "one_mismatch_idxreads_n", "q30_bases_n", "qscore_mean_pf"
         )
       )
       ctypes <- list(
-        old = "cccdddddddd",
-        new = "cccdddddddd"
+        old = "cccddddd",
+        new = "cccddddd"
       )
       if (!file.exists(x)) {
         return(empty_tbl(cnames$new, ctypes$new))
@@ -577,28 +556,16 @@ BclconvertReports375 <- R6::R6Class(
 
     #' @description Read Index_Hopping_Counts.csv file.
     #'
-    #' - lane: lane number.
-    #' - sampleid: sample ID from sample sheet.
-    #' - indexes: index/index2 from sample sheet for this sample.
-    #' - reads_n: total number of pass-filter reads mapping to the indexes.
-    #' - reads_hopped_pct: percentage of hopped pass-filter reads mapping to the indexes.
-    #' - reads_pct: percentage of all pass-filter reads mapping to the indexes.
     #' @param x (`character(1)`)\cr
     #'   Path to Index_Hopping_Counts.csv file.
     read_indexhoppingcounts = function(x) {
       cnames <- list(
-        old = c(
-          "Lane", "SampleID", "index", "index2", "# Reads",
-          "% of Hopped Reads", "% of All Reads"
-        ),
-        new = c(
-          "lane", "sampleid", "indexes",
-          "reads_n", "reads_hopped_pct", "reads_pct"
-        )
+        old = c("Lane", "SampleID", "index", "index2", "# Reads"),
+        new = c("lane", "sampleid", "indexes", "reads_n")
       )
       ctypes <- list(
         old = "ccccd",
-        new = "cccddd"
+        new = "cccd"
       )
       if (!file.exists(x)) {
         return(empty_tbl(cnames$new, ctypes$new))
@@ -614,20 +581,16 @@ BclconvertReports375 <- R6::R6Class(
 
     #' @description Read Top_Unknown_Barcodes.csv file.
     #'
-    #' - lane: lane number.
-    #' - indexes: index/index2 of this unlisted sequence.
-    #' - reads_n: total number of pass-filter reads mapping to the indexes.
-    #' - unknownbcodes_pct: percentage of unknown pass-filter reads mapping to the indexes.
     #' @param x (`character(1)`)\cr
     #'   Path to Top_Unknown_Barcodes.csv file.
     read_topunknownbarcodes = function(x) {
       cnames <- list(
-        old = c("Lane", "index", "index2", "# Reads", "% of Unknown Barcodes", "% of All Reads"),
-        new = c("lane", "indexes", "reads_n", "unknownbcodes_pct", "reads_pct")
+        old = c("Lane", "index", "index2", "# Reads"),
+        new = c("lane", "indexes", "reads_n")
       )
       ctypes <- list(
-        old = "cccddd",
-        new = "ccddd"
+        old = "cccd",
+        new = "ccd"
       )
       if (!file.exists(x)) {
         return(empty_tbl(cnames$new, ctypes$new))
