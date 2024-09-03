@@ -13,7 +13,7 @@
 #' obj$path
 #' obj$contents
 #' d <- obj$read()
-#' b$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
+#' obj$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
 #' }
 #'
 #' @export
@@ -29,7 +29,7 @@ UmccriseCanRepTables <- R6::R6Class(
     initialize = function(path = NULL) {
       stopifnot(is.character(path), length(path) == 1)
       self$path <- normalizePath(path)
-      self$contents <- fs::dir_info(path) |>
+      self$contents <- fs::dir_info(path, type = "file", recurse = TRUE) |>
         dplyr::mutate(
           bname = basename(.data$path),
           size = as.character(trimws(.data$size))
@@ -54,6 +54,21 @@ UmccriseCanRepTables <- R6::R6Class(
       cat("Contents:\n")
       cat(bnames, sep = "\n")
       invisible(self)
+    },
+    #' @description Returns file with given pattern from the cancer_report_tables directory.
+    #' @param pat File pattern to look for.
+    grep_file = function(pat) {
+      x <- self$contents |>
+        dplyr::filter(grepl(pat, .data$path)) |>
+        dplyr::pull(.data$path)
+      if (length(x) > 1) {
+        fnames <- paste(x, collapse = ", ")
+        cli::cli_abort("More than 1 match found for {pat} ({fnames}). Aborting.")
+      }
+      if (length(x) == 0) {
+        return("") # file.exists("") returns FALSE
+      }
+      return(x)
     },
 
     #' @description Read `chord.tsv.gz` file output from umccrise.
@@ -131,6 +146,49 @@ UmccriseCanRepTables <- R6::R6Class(
           wgd_hmf = "WGD",
           "hypermutated", "bpi_enabled"
         )
+    },
+    #' @description
+    #' Reads contents of `cancer_report_tables` directory output by umccrise.
+    #'
+    #' @return A list of tibbles.
+    #' @export
+    read = function() {
+      # now return all as list elements
+      list(
+        chord = self$grep_file("-chord\\.tsv\\.gz$") |> self$read_chordtsv(),
+        hrdetect = self$grep_file("-hrdetect\\.tsv\\.gz$") |> self$read_hrdetecttsv(),
+        sigs2015 = self$grep_file("-snv_2015\\.tsv\\.gz$") |> self$read_sigs(),
+        sigs2020 = self$grep_file("-snv_2020\\.tsv\\.gz$") |> self$read_sigs(),
+        sigsdbs = self$grep_file("-dbs\\.tsv\\.gz$") |> self$read_sigs(),
+        sigsindel = self$grep_file("-indel\\.tsv\\.gz$") |> self$read_sigs(),
+        qcsum = self$grep_file("-qc_summary\\.tsv\\.gz$") |> self$read_qcsummarytsv()
+      )
+    },
+
+    #' @description
+    #' Writes tidied contents of `cancer_report_tables` directory output by umccrise.
+    #'
+    #' @param d Parsed object from `self$read()`.
+    #' @param prefix Prefix of output file(s).
+    #' @param out_dir Output directory.
+    #' @param out_format Format of output file(s).
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+      if (!is.null(out_dir)) {
+        prefix <- file.path(out_dir, prefix)
+      }
+      d_write <- d |>
+        tibble::enframe(name = "section") |>
+        dplyr::rowwise() |>
+        dplyr::mutate(
+          section_low = tolower(.data$section),
+          p = glue("{prefix}_{.data$section_low}"),
+          out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
+        ) |>
+        dplyr::ungroup() |>
+        dplyr::select("section", "value") |>
+        tibble::deframe()
+      invisible(d_write)
     }
   )
 )
