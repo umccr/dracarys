@@ -61,11 +61,11 @@ DR_FILE_REGEX <- tibble::tribble(
   "multiqc_data\\.json", "MultiqcFile",
   "somatic\\.pcgr\\.json\\.gz$", "PcgrJsonFile",
   "somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$", "PcgrTiersFile",
-  "chord\\.tsv\\.gz$", "UmChordTsvFile",
-  "hrdetect\\.tsv\\.gz$", "UmHrdetectTsvFile",
-  "snv_2015\\.tsv\\.gz$", "UmSigsSnvFile",
-  "snv_2020\\.tsv\\.gz$", "UmSigsSnvFile",
-  "-qc_summary\\.tsv\\.gz$", "UmQcSumFile",
+  # "chord\\.tsv\\.gz$", "UmChordTsvFile",
+  # "hrdetect\\.tsv\\.gz$", "UmHrdetectTsvFile",
+  # "snv_2015\\.tsv\\.gz$", "UmSigsSnvFile",
+  # "snv_2020\\.tsv\\.gz$", "UmSigsSnvFile",
+  # "-qc_summary\\.tsv\\.gz$", "UmQcSumFile",
   "bcftools_stats\\.txt$", "BcftoolsStatsFile"
 )
 

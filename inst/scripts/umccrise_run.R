@@ -1,74 +1,62 @@
 require(dracarys)
-require(here)
-require(glue)
+require(rportal, include.only = "portaldb_query_workflow")
+require(here, include.only = "here")
+require(glue, include.only = "glue")
+require(readr, include.only = "read_rds")
 require(dplyr)
-require(readr)
+require(tidyr, include.only = "separate_wider_delim")
 
-#---- GDS ----#
-# read last 1000 umccrise runs from portal
-# 475 from 2022-01-24 until 2023-09-03, of which 449 Succeeded
-date1 <- "2023-09-04"
-pmeta_raw_rds <- here(glue("nogit/umccrise/rds/portal_meta/{date1}_pmeta_raw.rds"))
-# pmeta_raw <- dracarys::portal_meta_read(rows = 1000, params = "&type_name=umccrise")
-# saveRDS(pmeta_raw, file = pmeta_raw_rds)
-pmeta <- readr::read_rds(pmeta_raw_rds) |>
-  dracarys::meta_umccrise(status = "Succeeded")
-lims_raw_rds <- here(glue("nogit/umccrise/rds/lims/{date1}_lims_raw.rds"))
-# lims_raw <- dracarys::glims_read()
+start_date <- "2024-08-29"
+query_workflow_umccrise <- function(start_date) {
+  q1 <- glue(
+    "WHERE \"type_name\" = 'umccrise' AND  \"start\" > date(\'{start_date}\') ",
+    "ORDER BY \"start\" DESC;"
+  )
+  rportal::portaldb_query_workflow(q1)
+}
+
+query_limsrow_libids <- function(libids) {
+  assertthat::assert_that(!is.null(libids), all(grepl("^L", libids)))
+  libids <- unique(libids) |>
+    paste(collapse = "|")
+  q1 <- glue("WHERE REGEXP_LIKE(\"library_id\", '{libids}');")
+  rportal::portaldb_query_limsrow(q1)
+}
+
+# p_raw <- query_workflow_umccrise(start_date)
+p_raw_rds <- here(glue("nogit/data_portal/workflows/{start_date}.rds"))
+# saveRDS(p_raw, file = p_raw_rds)
+p_raw <- readr::read_rds(p_raw_rds)
+
+p <- p_raw |>
+  rportal::meta_umccrise(status = "Succeeded")
+# lims_raw <- query_limsrow_libids(p$LibraryID_tumor)
+lims_raw_rds <- here(glue("nogit/data_portal/lims/{start_date}.rds"))
 # saveRDS(lims_raw, file = lims_raw_rds)
+# L2100192 is L2100192_rerun in the lims, 15 libs are rerun/topup/topup2
 lims_raw <- readr::read_rds(lims_raw_rds)
 lims <- lims_raw |>
-  filter(Type == "WGS") |>
-  filter(LibraryID %in% c(pmeta$LibraryID_normal, pmeta$LibraryID_tumor))
-table(pmeta$LibraryID_tumor %in% lims$LibraryID)
-table(pmeta$LibraryID_normal %in% lims$LibraryID)
+  tidyr::separate_wider_delim(
+    library_id,
+    delim = "_", names = c("library_id", "topup_or_rerun"), too_few = "align_start"
+  ) |>
+  select(
+    subject_id, library_id, sample_id, sample_name,
+    external_subject_id, external_sample_id,
+    project_name, project_owner,
+    source, quality
+  ) |>
+  distinct()
+table(lims$library_id %in% p$LibraryID_tumor) # double-check
 
-# The final results sit under gds_outdir_umccrise/<SubjectID>__<SampleID_tumor>/
-# We need to get the SampleID_tumor for runs before 2023-04-07. We can do that
-# by using the LibraryID_tumor to match up with the glims.
-missing_tumor_sampleid <- pmeta |>
-  filter(end < "2023-04-07") |>
-  pull(LibraryID_tumor)
-
-table(missing_tumor_sampleid %in% lims$LibraryID)
-libid2sampid <- lims |>
-  filter(LibraryID %in% missing_tumor_sampleid) |>
-  select(LibraryID_tumor = LibraryID, SampleID_tumor = SampleID)
-
-d <- pmeta |>
-  left_join(libid2sampid, by = "LibraryID_tumor") |>
-  mutate(SampleID_tumor = if_else(is.na(SampleID_tumor.x), SampleID_tumor.y, SampleID_tumor.x)) |>
-  select(-c(SampleID_tumor.x, SampleID_tumor.y)) |>
-  relocate(SampleID_tumor, .before = SampleID_normal) |>
-  mutate(gds_outdir_umccrise = glue("{.data$gds_outdir_umccrise}/{.data$SubjectID}__{.data$SampleID_tumor}"))
+d <- p |>
+  left_join(lims, by = c("LibraryID_tumor" = "library_id")) |>
+  mutate(gds_outdir_umccrise = glue("{.data$gds_outdir_umccrise}/{.data$SubjectID}__{.data$SampleID_tumor}")) |>
+  select(
+    wfr_id, version, end_status, start, end, portal_run_id, SubjectID, LibraryID_tumor, LibraryID_normal,
+    SampleID_tumor, SampleID_normal, gds_outdir_umccrise, gds_indir_dragen_somatic, external_subject_id, external_sample_id,
+    project_owner, project_name, source, quality
+  )
 d
 
-# final portal meta for umccrise runs
-# columns:
-# "id", "wfr_name", "wfr_id", "version", "end_status", "start", "end", "portal_run_id",
-# "SubjectID", "LibraryID_tumor", "LibraryID_normal", "SampleID_tumor", "SampleID_normal",
-# "gds_outdir_umccrise", "gds_indir_dragen_somatic", "gds_indir_dragen_germline", "gds_infile_genomes_tar"
-saveRDS(d, file = here(glue("nogit/umccrise/rds/portal_meta/{date1}_pmeta_final.rds")))
-
-#---- S3 ----#
-pat <- "qc_summary.tsv.gz"
-rows <- 1000
-d_s3_raw <- dracarys::s3_search(pat = pat, rows = rows)
-
-d_s3 <- d_s3_raw |>
-  arrange(desc(date_aest)) |>
-  mutate(
-    bname = basename(path),
-    dir1 = dirname(path), # path/to/dirA/cancer_report_tables
-    dir2 = basename(dirname(dir1)), # dirA
-    sbj_samp_lib = sub(".*__(.*)", "\\1", dir2),
-    SubjectID = sub("(SBJ[0-9]{5})_.*", "\\1", sbj_samp_lib),
-    SampleID_tumor = sub("SBJ.*?_(.*?)_.*", "\\1", sbj_samp_lib),
-    LibraryID_tumor = sub("SBJ.*?_.*?_(.*)", "\\1", sbj_samp_lib),
-    rerun = grepl("rerun", .data$LibraryID_tumor)
-  ) |>
-  select(dir1, SubjectID, LibraryID_tumor, SampleID_tumor, date = date_aest, rerun)
-
-date2 <- "2023-09-12"
-saveRDS(d_s3, file = here(glue("nogit/umccrise/rds/portal_meta/{date2}_pmeta_s3.rds")))
-# now we have S3 paths and metadata, so all we need is to generate presigned URLs and read the data
+saveRDS(d, file = here(glue("nogit/data_portal/workflows/umccrise_tidy_{start_date}.rds")))
