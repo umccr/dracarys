@@ -1,3 +1,119 @@
+#' Wf_umccrise R6 Class
+#'
+#' @description
+#' Reads and writes tidy versions of files from the `umccrise` workflow
+#'
+#' @examples
+#' \dontrun{
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN") |> ica_token_validate()
+#' SubjectID <- "SBJ01155"
+#' SampleID_tumor <- "PRJ211091"
+#' gdsdir1 <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043"
+#' gdsdir <- file.path(gdsdir1, "L2101566__L2101565")
+#' obj <- Wf_umccrise$new(gdsdir)
+#' gds_files <- obj$gds_list(gdsdir, token, SubjectID, SampleID_tumor)
+#' outdir <- file.path(sub("gds://", "", gdsdir))
+#' outdir <- file.path(normalizePath("~/icav1/g"), outdir)
+#' out_files <- obj$gds_download(gds_files = gds_files, outdir = outdir, token = token)
+#'
+#'
+#'
+#'
+#'
+#' p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
+#' p2 <- "L2101566__L2101565"
+#' p <- file.path(p1, p2)
+#' obj <- Wf_umccrise$new(p)
+#' obj$path
+#' obj$contents
+#' d <- obj$read()
+#' obj$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
+#' }
+#'
+#' @export
+Wf_umccrise <- R6::R6Class(
+  "Wf_umccrise",
+  public = list(
+    #' @field path Path to the `umccrise` directory.
+    #' @field contents Tibble with file path, basename, and size.
+    path = NULL,
+    contents = NULL,
+    #' @description Create a new Wf_umccrise object.
+    #' @param path Path to the `umccrise` directory.
+    initialize = function(path = NULL) {
+      stopifnot(is.character(path), length(path) == 1)
+      # self$path <- normalizePath(path)
+      self$path <- path
+      # self$contents <- fs::dir_info(path, type = "file", recurse = TRUE) |>
+      #   dplyr::mutate(
+      #     bname = basename(.data$path),
+      #     size = as.character(trimws(.data$size))
+      #   ) |>
+      #   dplyr::select("path", "bname", "size")
+    },
+    #' @description List Relevant Files In umccrise GDS Directory
+    #' @param gdsdir Path to the `umccrise` directory.
+    #' @param SubjectID The SubjectID of the sample (used to construct path).
+    #' @param SampleID_tumor The SampleID of the tumor sample (used to construct path).
+    #' @param token ICA access token.
+    gds_list = function(gdsdir, SubjectID, SampleID_tumor, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+      reg1 <- tibble::tribble(
+        ~regex, ~fun,
+        # "-somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$", "PcgrTiersFile",
+        "-chord\\.tsv\\.gz$", "UmChordTsvFile",
+        "-hrdetect\\.tsv\\.gz$", "UmHrdetectTsvFile",
+        "-snv_2015\\.tsv\\.gz$", "UmSigsSnvFile",
+        "-snv_2020\\.tsv\\.gz$", "UmSigsSnvFile",
+        "-dbs\\.tsv\\.gz$", "UmSigsDbsFile",
+        "-indel\\.tsv\\.gz$", "UmSigsIndelFile",
+        "-qc_summary\\.tsv\\.gz$", "UmQcSumFile"
+      )
+      reg2 <- tibble::tribble(
+        ~regex, ~fun,
+        "-somatic\\.pcgr\\.json\\.gz$", "PcgrJsonFile"
+      )
+
+      dir_fin <- file.path(gdsdir, glue("{SubjectID}__{SampleID_tumor}"))
+      dir_wrk <- file.path(gdsdir, "work", glue("{SubjectID}__{SampleID_tumor}"))
+      dir_wrk_pcgr <- file.path(dir_wrk, "pcgr") # for pcgr json
+      f1 <- gds_files_list_filter_relevant(gdsdir = dir_fin, token, page_size = 300, regexes = reg1)
+      f2 <- gds_files_list_filter_relevant(gdsdir = dir_wrk_pcgr, token, page_size = 50, regexes = reg2)
+      gds_files <- dplyr::bind_rows(f1, f2)
+      return(gds_files)
+    },
+
+    #' @description GDS File Download via API
+    #'
+    #' @param gds_files Tibble with bname and file_id for umccrise files.
+    #' @param outdir Directory to output files (loosely, not in a structured manner).
+    #' @param token ICA access token.
+    gds_download = function(gds_files, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+      assertthat::assert_that(all(c("bname", "file_id") %in% colnames(gds_files)))
+      gds_files |>
+        dplyr::rowwise() |>
+        dplyr::mutate(
+          out = file.path(outdir, .data$bname),
+          out_dl = gds_file_download_api(.data$file_id, .data$out, token)
+        )
+    },
+    #' @description
+    tidy = function(indir, out_files) {
+      obj_canrep <- UmccriseCanRepTables$new(indir)
+      canrep_parse <- obj_canrep$read()
+      pcgr_json <- out_files |>
+        dplyr::filter(.data$type == "PcgrJsonFile") |>
+        dplyr::pull("out")
+      pcgr_json_parse <- PcgrJsonFile$new(pcgr_json)$read()
+      d <- canrep_parse
+      d[["pcgr_json"]] <- pcgr_json_parse[["metrics"]]
+      d
+    }
+  )
+)
+
+
+
+
 #' UmccriseCanRepTables R6 Class
 #'
 #' @description
@@ -163,32 +279,6 @@ UmccriseCanRepTables <- R6::R6Class(
         sigsindel = self$grep_file("-indel\\.tsv\\.gz$") |> self$read_sigs(),
         qcsum = self$grep_file("-qc_summary\\.tsv\\.gz$") |> self$read_qcsummarytsv()
       )
-    },
-
-    #' @description
-    #' Writes tidied contents of `cancer_report_tables` directory output by umccrise.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      d_write <- d |>
-        tibble::enframe(name = "section") |>
-        dplyr::rowwise() |>
-        dplyr::mutate(
-          section_low = tolower(.data$section),
-          p = glue("{prefix}_{.data$section_low}"),
-          out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
-        ) |>
-        dplyr::ungroup() |>
-        dplyr::select("section", "value") |>
-        tibble::deframe()
-      invisible(d_write)
     }
   )
 )

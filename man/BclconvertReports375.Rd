@@ -10,8 +10,8 @@ https://support-docs.illumina.com/SW/dragen_v42/Content/SW/DRAGEN/OutputFiles.ht
 }
 \examples{
 \dontrun{
-p1 <- "240816_A01052_0220_AHM7VHDSXC/202408195d4f2fc4/Reports"
-b <- here::here("nogit/bcl_convert", p1) |>
+p1 <- "nogit/bcl_convert/WGS_TsqNano/Reports"
+b <- here::here(p1) |>
   BclconvertReports375$new()
 b$path
 b$contents

@@ -40,7 +40,6 @@ obj$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
 \item \href{#method-UmccriseCanRepTables-read_sigs}{\code{UmccriseCanRepTables$read_sigs()}}
 \item \href{#method-UmccriseCanRepTables-read_qcsummarytsv}{\code{UmccriseCanRepTables$read_qcsummarytsv()}}
 \item \href{#method-UmccriseCanRepTables-read}{\code{UmccriseCanRepTables$read()}}
-\item \href{#method-UmccriseCanRepTables-write}{\code{UmccriseCanRepTables$write()}}
 \item \href{#method-UmccriseCanRepTables-clone}{\code{UmccriseCanRepTables$clone()}}
 }
 }
@@ -178,37 +177,6 @@ Reads contents of \code{cancer_report_tables} directory output by umccrise.
 
 \subsection{Returns}{
 A list of tibbles.
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-UmccriseCanRepTables-write"></a>}}
-\if{latex}{\out{\hypertarget{method-UmccriseCanRepTables-write}{}}}
-\subsection{Method \code{write()}}{
-Writes tidied contents of \code{cancer_report_tables} directory output by umccrise.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{UmccriseCanRepTables$write(
-  d,
-  out_dir = NULL,
-  prefix,
-  out_format = "tsv",
-  drid = NULL
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{d}}{Parsed object from \code{self$read()}.}
-
-\item{\code{out_dir}}{Output directory.}
-
-\item{\code{prefix}}{Prefix of output file(s).}
-
-\item{\code{out_format}}{Format of output file(s).}
-
-\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
-}
-\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
