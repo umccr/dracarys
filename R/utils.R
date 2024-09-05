@@ -193,6 +193,24 @@ read_jsongz_rjsonio <- function(x, ...) {
   RJSONIO::fromJSON(x, ...)
 }
 
+#' Grep File Pattern
+#'
+#' @param path Path to look for file.
+#' @param regexp A regular expression (e.g. [.]csv$) passed on to `grep()` to filter paths.
+#'
+#' @return The path to the file or an empty string if no match is found.
+#' @export
+grep_file <- function(path = ".", regexp) {
+  x <- fs::dir_ls(path, recurse = TRUE, type = "file", regexp = regexp)
+  if (length(x) > 1) {
+    fnames <- paste(x, collapse = ", ")
+    cli::cli_abort("More than 1 match found for {regexp} ({fnames}). Aborting.")
+  }
+  if (length(x) == 0) {
+    return("") # file.exists("") returns FALSE
+  }
+  return(x)
+}
 
 
 #' @noRd

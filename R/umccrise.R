@@ -11,23 +11,13 @@
 #' gdsdir1 <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043"
 #' gdsdir <- file.path(gdsdir1, "L2101566__L2101565")
 #' obj <- Wf_umccrise$new(gdsdir)
-#' gds_files <- obj$gds_list(gdsdir, token, SubjectID, SampleID_tumor)
+#' gds_files <- obj$gds_list(
+#'   gdsdir = gdsdir, token = token, SubjectID = SubjectID, SampleID_tumor
+#' )
 #' outdir <- file.path(sub("gds://", "", gdsdir))
 #' outdir <- file.path(normalizePath("~/icav1/g"), outdir)
 #' out_files <- obj$gds_download(gds_files = gds_files, outdir = outdir, token = token)
-#'
-#'
-#'
-#'
-#'
-#' p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
-#' p2 <- "L2101566__L2101565"
-#' p <- file.path(p1, p2)
-#' obj <- Wf_umccrise$new(p)
-#' obj$path
-#' obj$contents
-#' d <- obj$read()
-#' obj$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
+#' tidy1 <- obj$tidy(indir = outdir, out_files = out_files)
 #' }
 #'
 #' @export
@@ -42,14 +32,7 @@ Wf_umccrise <- R6::R6Class(
     #' @param path Path to the `umccrise` directory.
     initialize = function(path = NULL) {
       stopifnot(is.character(path), length(path) == 1)
-      # self$path <- normalizePath(path)
       self$path <- path
-      # self$contents <- fs::dir_info(path, type = "file", recurse = TRUE) |>
-      #   dplyr::mutate(
-      #     bname = basename(.data$path),
-      #     size = as.character(trimws(.data$size))
-      #   ) |>
-      #   dplyr::select("path", "bname", "size")
     },
     #' @description List Relevant Files In umccrise GDS Directory
     #' @param gdsdir Path to the `umccrise` directory.
@@ -66,13 +49,13 @@ Wf_umccrise <- R6::R6Class(
         "-snv_2020\\.tsv\\.gz$", "UmSigsSnvFile",
         "-dbs\\.tsv\\.gz$", "UmSigsDbsFile",
         "-indel\\.tsv\\.gz$", "UmSigsIndelFile",
-        "-qc_summary\\.tsv\\.gz$", "UmQcSumFile"
+        "-qc_summary\\.tsv\\.gz$", "UmQcSumFile",
+        "multiqc_conpair.txt", "UmConpairMultiqc"
       )
       reg2 <- tibble::tribble(
         ~regex, ~fun,
         "-somatic\\.pcgr\\.json\\.gz$", "PcgrJsonFile"
       )
-
       dir_fin <- file.path(gdsdir, glue("{SubjectID}__{SampleID_tumor}"))
       dir_wrk <- file.path(gdsdir, "work", glue("{SubjectID}__{SampleID_tumor}"))
       dir_wrk_pcgr <- file.path(dir_wrk, "pcgr") # for pcgr json
@@ -96,23 +79,65 @@ Wf_umccrise <- R6::R6Class(
           out_dl = gds_file_download_api(.data$file_id, .data$out, token)
         )
     },
-    #' @description
+
+    #' @description Tidy up the output files from umccrise
+    #'
+    #' @param indir Path to the `umccrise` directory.
+    #' @param out_files Tibble with file path, basename, and size.
     tidy = function(indir, out_files) {
       obj_canrep <- UmccriseCanRepTables$new(indir)
       canrep_parse <- obj_canrep$read()
       pcgr_json <- out_files |>
         dplyr::filter(.data$type == "PcgrJsonFile") |>
-        dplyr::pull("out")
-      pcgr_json_parse <- PcgrJsonFile$new(pcgr_json)$read()
+        dplyr::pull("out") |>
+        PcgrJsonFile$new() |>
+        read()
+      conpair_tsv <- out_files |>
+        dplyr::filter(.data$type == "UmConpairMultiqc") |>
+        dplyr::pull("out") |>
+        self$read_conpairmultiqc()
       d <- canrep_parse
-      d[["pcgr_json"]] <- pcgr_json_parse[["metrics"]]
+      d[["pcgr_json"]] <- pcgr_json[["metrics"]]
+      d[["conpair"]] <- conpair_tsv
       d
+    },
+
+    #' @description Read multiqc_conpair.txt file.
+    #'
+    #' @param x (`character(1)`)\cr
+    #'   Path to multiqc_conpair.txt file.
+    read_conpairmultiqc = function(x) {
+      um_ref_samples <- c("Alice", "Bob", "Chen", "Elon", "Dakota")
+      um_ref_samples <- paste0(um_ref_samples, rep(c("_T", "_B", ""), each = length(um_ref_samples)))
+      cnames <- list(
+        old = c(
+          "Sample", "concordance_concordance", "concordance_used_markers",
+          "concordance_total_markers", "concordance_marker_threshold",
+          "concordance_min_mapping_quality", "concordance_min_base_quality",
+          "contamination"
+        ),
+        new = c(
+          "sampleid", "contamination", "concordance", "markers_used",
+          "markers_total", "marker_threshold",
+          "mapq_min", "baseq_min"
+        )
+      )
+      ctypes <- list(
+        old = c("cddddddd"),
+        new = c("cddddddd")
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
+      }
+      d1 <- readr::read_tsv(x, col_types = readr::cols(.default = "d", Sample = "c"))
+      assertthat::assert_that(all(colnames(d1) == cnames$old))
+      d1 |>
+        dplyr::filter(!.data$Sample %in% um_ref_samples) |>
+        dplyr::relocate("contamination", .after = "Sample") |>
+        rlang::set_names(cnames$new)
     }
   )
 )
-
-
-
 
 #' UmccriseCanRepTables R6 Class
 #'
@@ -123,7 +148,7 @@ Wf_umccrise <- R6::R6Class(
 #' @examples
 #' \dontrun{
 #' p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
-#' p2 <- "L2101566__L2101565/SBJ01155__PRJ211091/cancer_report_tables"
+#' p2 <- "L2101566__L2101565"
 #' p <- file.path(p1, p2)
 #' obj <- UmccriseCanRepTables$new(p)
 #' obj$path
@@ -170,21 +195,6 @@ UmccriseCanRepTables <- R6::R6Class(
       cat("Contents:\n")
       cat(bnames, sep = "\n")
       invisible(self)
-    },
-    #' @description Returns file with given pattern from the cancer_report_tables directory.
-    #' @param pat File pattern to look for.
-    grep_file = function(pat) {
-      x <- self$contents |>
-        dplyr::filter(grepl(pat, .data$path)) |>
-        dplyr::pull(.data$path)
-      if (length(x) > 1) {
-        fnames <- paste(x, collapse = ", ")
-        cli::cli_abort("More than 1 match found for {pat} ({fnames}). Aborting.")
-      }
-      if (length(x) == 0) {
-        return("") # file.exists("") returns FALSE
-      }
-      return(x)
     },
 
     #' @description Read `chord.tsv.gz` file output from umccrise.
@@ -269,15 +279,16 @@ UmccriseCanRepTables <- R6::R6Class(
     #' @return A list of tibbles.
     #' @export
     read = function() {
+      x <- self$path
       # now return all as list elements
       list(
-        chord = self$grep_file("-chord\\.tsv\\.gz$") |> self$read_chordtsv(),
-        hrdetect = self$grep_file("-hrdetect\\.tsv\\.gz$") |> self$read_hrdetecttsv(),
-        sigs2015 = self$grep_file("-snv_2015\\.tsv\\.gz$") |> self$read_sigs(),
-        sigs2020 = self$grep_file("-snv_2020\\.tsv\\.gz$") |> self$read_sigs(),
-        sigsdbs = self$grep_file("-dbs\\.tsv\\.gz$") |> self$read_sigs(),
-        sigsindel = self$grep_file("-indel\\.tsv\\.gz$") |> self$read_sigs(),
-        qcsum = self$grep_file("-qc_summary\\.tsv\\.gz$") |> self$read_qcsummarytsv()
+        chord = grep_file(x, "-chord\\.tsv\\.gz$") |> self$read_chordtsv(),
+        hrdetect = grep_file(x, "-hrdetect\\.tsv\\.gz$") |> self$read_hrdetecttsv(),
+        sigs2015 = grep_file(x, "-snv_2015\\.tsv\\.gz$") |> self$read_sigs(),
+        sigs2020 = grep_file(x, "-snv_2020\\.tsv\\.gz$") |> self$read_sigs(),
+        sigsdbs = grep_file(x, "-dbs\\.tsv\\.gz$") |> self$read_sigs(),
+        sigsindel = grep_file(x, "-indel\\.tsv\\.gz$") |> self$read_sigs(),
+        qcsum = grep_file(x, "-qc_summary\\.tsv\\.gz$") |> self$read_qcsummarytsv()
       )
     }
   )

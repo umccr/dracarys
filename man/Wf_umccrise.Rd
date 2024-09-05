@@ -8,29 +8,19 @@ Reads and writes tidy versions of files from the \code{umccrise} workflow
 }
 \examples{
 \dontrun{
-token <- Sys.getenv("ICA_ACCESS_TOKEN")
+token <- Sys.getenv("ICA_ACCESS_TOKEN") |> ica_token_validate()
 SubjectID <- "SBJ01155"
 SampleID_tumor <- "PRJ211091"
 gdsdir1 <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043"
 gdsdir <- file.path(gdsdir1, "L2101566__L2101565")
 obj <- Wf_umccrise$new(gdsdir)
-gds_files <- obj$gds_list(gdsdir, token, SubjectID, SampleID_tumor)
+gds_files <- obj$gds_list(
+  gdsdir = gdsdir, token = token, SubjectID = SubjectID, SampleID_tumor
+)
 outdir <- file.path(sub("gds://", "", gdsdir))
 outdir <- file.path(normalizePath("~/icav1/g"), outdir)
 out_files <- obj$gds_download(gds_files = gds_files, outdir = outdir, token = token)
-
-
-
-
-
-p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
-p2 <- "L2101566__L2101565"
-p <- file.path(p1, p2)
-obj <- Wf_umccrise$new(p)
-obj$path
-obj$contents
-d <- obj$read()
-obj$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
+tidy1 <- obj$tidy(indir = outdir, out_files = out_files)
 }
 
 }
@@ -50,6 +40,7 @@ obj$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
 \item \href{#method-Wf_umccrise-gds_list}{\code{Wf_umccrise$gds_list()}}
 \item \href{#method-Wf_umccrise-gds_download}{\code{Wf_umccrise$gds_download()}}
 \item \href{#method-Wf_umccrise-tidy}{\code{Wf_umccrise$tidy()}}
+\item \href{#method-Wf_umccrise-read_conpairmultiqc}{\code{Wf_umccrise$read_conpairmultiqc()}}
 \item \href{#method-Wf_umccrise-clone}{\code{Wf_umccrise$clone()}}
 }
 }
@@ -74,28 +65,91 @@ Create a new Wf_umccrise object.
 \if{html}{\out{<a id="method-Wf_umccrise-gds_list"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf_umccrise-gds_list}{}}}
 \subsection{Method \code{gds_list()}}{
+List Relevant Files In umccrise GDS Directory
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$gds_list(gdsdir, token, SubjectID, SampleID_tumor)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$gds_list(
+  gdsdir,
+  SubjectID,
+  SampleID_tumor,
+  token = Sys.getenv("ICA_ACCESS_TOKEN")
+)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{gdsdir}}{Path to the \code{umccrise} directory.}
+
+\item{\code{SubjectID}}{The SubjectID of the sample (used to construct path).}
+
+\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (used to construct path).}
+
+\item{\code{token}}{ICA access token.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf_umccrise-gds_download"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf_umccrise-gds_download}{}}}
 \subsection{Method \code{gds_download()}}{
+GDS File Download via API
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$gds_download(gds_files, outdir, token)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$gds_download(
+  gds_files,
+  outdir,
+  token = Sys.getenv("ICA_ACCESS_TOKEN")
+)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{gds_files}}{Tibble with bname and file_id for umccrise files.}
+
+\item{\code{outdir}}{Directory to output files (loosely, not in a structured manner).}
+
+\item{\code{token}}{ICA access token.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf_umccrise-tidy"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf_umccrise-tidy}{}}}
 \subsection{Method \code{tidy()}}{
+Tidy up the output files from umccrise
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$tidy(indir, out_files)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{indir}}{Path to the \code{umccrise} directory.}
+
+\item{\code{out_files}}{Tibble with file path, basename, and size.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_conpairmultiqc"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_conpairmultiqc}{}}}
+\subsection{Method \code{read_conpairmultiqc()}}{
+Read multiqc_conpair.txt file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_conpairmultiqc(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{(\code{character(1)})\cr
+Path to multiqc_conpair.txt file.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf_umccrise-clone"></a>}}

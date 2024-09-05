@@ -10,7 +10,7 @@ output from the \code{umccrise} workflow.
 \examples{
 \dontrun{
 p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
-p2 <- "L2101566__L2101565/SBJ01155__PRJ211091/cancer_report_tables"
+p2 <- "L2101566__L2101565"
 p <- file.path(p1, p2)
 obj <- UmccriseCanRepTables$new(p)
 obj$path
@@ -34,7 +34,6 @@ obj$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
 \itemize{
 \item \href{#method-UmccriseCanRepTables-new}{\code{UmccriseCanRepTables$new()}}
 \item \href{#method-UmccriseCanRepTables-print}{\code{UmccriseCanRepTables$print()}}
-\item \href{#method-UmccriseCanRepTables-grep_file}{\code{UmccriseCanRepTables$grep_file()}}
 \item \href{#method-UmccriseCanRepTables-read_chordtsv}{\code{UmccriseCanRepTables$read_chordtsv()}}
 \item \href{#method-UmccriseCanRepTables-read_hrdetecttsv}{\code{UmccriseCanRepTables$read_hrdetecttsv()}}
 \item \href{#method-UmccriseCanRepTables-read_sigs}{\code{UmccriseCanRepTables$read_sigs()}}
@@ -73,23 +72,6 @@ Print details about the cancer_report_tables directory.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-UmccriseCanRepTables-grep_file"></a>}}
-\if{latex}{\out{\hypertarget{method-UmccriseCanRepTables-grep_file}{}}}
-\subsection{Method \code{grep_file()}}{
-Returns file with given pattern from the cancer_report_tables directory.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{UmccriseCanRepTables$grep_file(pat)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{pat}}{File pattern to look for.}
 }
 \if{html}{\out{</div>}}
 }
