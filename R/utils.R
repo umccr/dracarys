@@ -1,3 +1,29 @@
+#' List Relevant Files In Local Directory
+#'
+#' Lists relevant files in a local directory.
+#'
+#' @param path Path to local directory.
+#' @param regexes Tibble with `regex` and `fun`ction name.
+#'
+#' @return A tibble with type, bname, size, file_id, path, and presigned URL.
+#'
+#' @examples
+#' \dontrun{
+#' path <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise"
+#' local_files_list_filter_relevant(path, regexes = DR_FILE_REGEX)
+#' }
+#' @export
+local_files_list_filter_relevant <- function(path, regexes = DR_FILE_REGEX) {
+  fs::dir_ls(path = path, recurse = TRUE, type = "file") |>
+    tibble::as_tibble_col(column_name = "path") |>
+    dplyr::mutate(
+      bname = basename(.data$path),
+      type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes = regexes))
+    ) |>
+    dplyr::filter(!is.na(.data$type)) |>
+    dplyr::select("type", "bname", "path")
+}
+
 #' Print current timestamp for logging
 #'
 #' @return Current timestamp as character.

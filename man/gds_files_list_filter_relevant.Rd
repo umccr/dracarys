@@ -6,11 +6,12 @@
 \usage{
 gds_files_list_filter_relevant(
   gdsdir,
-  token,
+  token = Sys.getenv("ICA_ACCESS_TOKEN"),
   pattern = NULL,
   include_url = FALSE,
   page_size = 100,
-  regexes = DR_FILE_REGEX
+  regexes = DR_FILE_REGEX,
+  ...
 )
 }
 \arguments{
@@ -24,10 +25,14 @@ gds_files_list_filter_relevant(
 
 \item{page_size}{Page size (def: 100).}
 
-\item{regexes}{Tibble with regex and function name.}
+\item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 }
 \value{
 A tibble with type, bname, size, file_id, path, and presigned URL.
+\dontrun{
+gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
+gds_files_list_filter_relevant(gdsdir)
+}
 }
 \description{
 Lists relevant files in a GDS directory.

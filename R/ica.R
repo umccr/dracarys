@@ -7,14 +7,22 @@
 #' @param pattern Pattern to further filter the returned file type tibble.
 #' @param include_url Include presigned URLs to all files within the GDS directory (def: FALSE).
 #' @param page_size Page size (def: 100).
-#' @param regexes Tibble with regex and function name.
+#' @param regexes Tibble with `regex` and `fun`ction name.
 #'
 #' @return A tibble with type, bname, size, file_id, path, and presigned URL.
+#' \dontrun{
+#' gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
+#' gds_files_list_filter_relevant(gdsdir)
+#' }
 #' @export
-gds_files_list_filter_relevant <- function(gdsdir, token, pattern = NULL, include_url = FALSE, page_size = 100, regexes = DR_FILE_REGEX) {
+gds_files_list_filter_relevant <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                                           pattern = NULL, include_url = FALSE,
+                                           page_size = 100, regexes = DR_FILE_REGEX, ...) {
   pattern <- pattern %||% ".*" # keep all recognisable files by default
   cols_sel <- c("type", "bname", "size", "file_id", "path", "presigned_url")
-  d <- dracarys::gds_files_list(gdsdir, token, include_url = include_url, page_size = page_size) |>
+  d <- dracarys::gds_files_list(
+    gdsdir = gdsdir, token = token, page_size = page_size, include_url = include_url, ...
+  ) |>
     dplyr::rowwise() |>
     dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
     dplyr::ungroup() |>

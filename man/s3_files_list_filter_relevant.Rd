@@ -10,7 +10,8 @@ s3_files_list_filter_relevant(
   page_size = 1000,
   max_items = 1000,
   presign = FALSE,
-  expiry_sec = 43200
+  expiry_sec = 43200,
+  regexes = DR_FILE_REGEX
 )
 }
 \arguments{
@@ -25,9 +26,11 @@ s3_files_list_filter_relevant(
 \item{presign}{Include presigned URLs (def: FALSE).}
 
 \item{expiry_sec}{Number of seconds the presigned URL will be valid for (if generated) (def: 43200 (12hrs)).}
+
+\item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 }
 \value{
-A tibble with path, date, file size, file type, and presigned URL if requested.
+A tibble with file type, basename, file size, date, full path, and presigned URL if requested.
 }
 \description{
 Lists relevant files in an AWS S3 directory.
@@ -35,6 +38,6 @@ Lists relevant files in an AWS S3 directory.
 \examples{
 \dontrun{
 s3dir <- "s3://umccr-primary-data-prod/cancer_report_tables"
-s3_files_list_filter_relevant(s3dir = s3dir, presign = TRUE)
+s3_files_list_filter_relevant(s3dir = s3dir, presign = FALSE)
 }
 }
