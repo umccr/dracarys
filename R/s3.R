@@ -1,11 +1,57 @@
+#' List Objects in AWS S3 Directory
+#'
+#' Returns some or all (up to 1,000) of the objects in an S3 directory.
+#'
+#' @param s3dir S3 directory.
+#' @param max_objects Maximum objects returned.
+#'
+#'
+#' @return A tibble with object basename, size, last modified timestamp, and
+#' full S3 path.
+#' @examples
+#' \dontrun{
+#' p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
+#' p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
+#' s3dir <- file.path(p1, p2, "cancer_report/cancer_report_tables")
+#' s3_list_objects_dir(s3dir, max_objects = 15)
+#' }
+#' @export
+s3_list_objects_dir <- function(s3dir, max_objects = 1000) {
+  assertthat::assert_that(grepl("^s3://", s3dir))
+  bucket <- sub("s3://(.*?)/.*", "\\1", s3dir)
+  prefix <- sub("s3://(.*?)/(.*)", "\\2", s3dir)
+  s3 <- paws.storage::s3()
+  l <- s3$list_objects_v2(Bucket = bucket, Prefix = prefix, MaxKeys = max_objects)
+  assertthat::assert_that(all(c("Contents", "KeyCount") %in% names(l)))
+  cols_sel <- c("bname", "size", "lastmodified", "path")
+  # handle no results
+  if (l[["KeyCount"]] == 0) {
+    return(empty_tbl(cnames = cols_sel, ctypes = "cccc"))
+  }
+  d <- l[["Contents"]] |>
+    purrr::map(\(x) tibble::tibble(
+      Key = x[["Key"]],
+      Size = x[["Size"]],
+      lastmodified = x[["LastModified"]]
+    )) |>
+    dplyr::bind_rows() |>
+    dplyr::mutate(
+      path = glue("s3://{bucket}/{.data$Key}"),
+      bname = basename(.data$path),
+      size = fs::as_fs_bytes(.data$Size)
+    ) |>
+    dplyr::select(dplyr::all_of(cols_sel))
+  return(d)
+}
+
 #' List Relevant Files In AWS S3 Directory
 #'
 #' Lists relevant files in an AWS S3 directory.
 #'
 #' @param s3dir S3 directory.
 #' @param pattern Pattern to further filter the returned file type tibble.
-#' @param page_size The size of each page to get in the AWS service call (def: 1000).
-#' @param max_items The total number of items to return in the command’s output (def: 1000).
+#' @param page_size The size of each page to get in the AWS service call.
+#' @param max_items The total number of items to return in the command’s output.
 #' @param presign Include presigned URLs (def: FALSE).
 #' @param expiry_sec Number of seconds the presigned URL will be valid for (if generated) (def: 43200 (12hrs)).
 #' @param regexes Tibble with `regex` and `fun`ction name.

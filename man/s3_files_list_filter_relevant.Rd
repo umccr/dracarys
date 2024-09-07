@@ -19,9 +19,9 @@ s3_files_list_filter_relevant(
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
-\item{page_size}{The size of each page to get in the AWS service call (def: 1000).}
+\item{page_size}{The size of each page to get in the AWS service call.}
 
-\item{max_items}{The total number of items to return in the command’s output (def: 1000).}
+\item{max_items}{The total number of items to return in the command’s output.}
 
 \item{presign}{Include presigned URLs (def: FALSE).}
 
