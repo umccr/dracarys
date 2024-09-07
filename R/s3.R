@@ -63,46 +63,59 @@ s3_list_objects_dir <- function(s3dir, max_objects = 1000) {
 #' s3_files_list_filter_relevant(s3dir = s3dir, presign = FALSE)
 #' }
 #' @export
-s3_files_list_filter_relevant <- function(s3dir, pattern = NULL, page_size = 1000, max_items = 1000, presign = FALSE, expiry_sec = 43200, regexes = DR_FILE_REGEX) {
-  assertthat::assert_that(grepl("^s3://", s3dir), rlang::is_logical(presign))
+s3_files_list_filter_relevant <- function(s3dir, pattern = NULL, max_objects = 100,
+                                          presign = FALSE, expiry_sec = 43200,
+                                          regexes = DR_FILE_REGEX) {
+  assertthat::assert_that(rlang::is_logical(presign), max_objects <= 1000)
+  d_all <- s3_list_objects_dir(s3dir, max_objects = max_objects)
+  if (nrow(d_all) == 0) {
+    return(d_all)
+  }
   pattern <- pattern %||% ".*" # keep all recognisable files by default
-  b <- sub("s3://(.*?)/.*", "\\1", s3dir)
-  p <- sub("s3://(.*?)/(.*)", "\\2", s3dir)
-  cmd <- glue(
-    "aws --output json s3api list-objects-v2 --bucket {b} --prefix {p} ",
-    "--max-items {max_items} --page-size {page_size}"
-  )
-  l <- system(cmd, intern = TRUE)
-  j <- jsonlite::fromJSON(l)
-  assertthat::assert_that("Contents" %in% names(j))
-  d <- j[["Contents"]] |>
-    tibble::as_tibble() |>
-    dplyr::mutate(
-      path = glue("s3://{b}/{.data$Key}"),
-      date_utc = .data$LastModified,
-      size = fs::as_fs_bytes(.data$Size)
-    ) |>
+  d <- d_all |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      bname = basename(.data$path),
       type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))
     ) |>
     dplyr::ungroup() |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
-    dplyr::select("type", "bname", "size", "date_utc", "path")
+    dplyr::select("type", "bname", "size", "lastmodified", "path")
 
   if (presign) {
+    s3_client <- paws.storage::s3(paws.storage::config(signature_version = "s3v4"))
     d <- d |>
       dplyr::rowwise() |>
-      dplyr::mutate(presigned_url = s3_file_presignedurl(.data$path, expiry_seconds = expiry_sec)) |>
+      dplyr::mutate(presigned_url = s3_file_presignedurl(
+        client = s3_client, s3_path = .data$path, expiry_seconds = expiry_sec
+      )) |>
       dplyr::ungroup()
   }
   d
 }
 
-s3_file_presignedurl <- function(s3path, expiry_seconds = 3600) {
-  p <- system(glue("aws s3 presign {s3path} --expires-in {expiry_seconds}"), intern = TRUE)
-  p
+#' S3 Generate Presigned URL
+#'
+#' @param client S3 client. Make sure you use `signature_version = "s3v4"` (see example).
+#' @param s3path Full path to S3 object.
+#' @param expiry_seconds Number of seconds the presigned URL is valid for (3600 = 1 hour).
+#'
+#' @return An S3 presigned URL.
+#' @examples
+#' \dontrun{
+#' client <- paws.storage::s3(paws.storage::config(signature_version = "s3v4"))
+#' s3path <- "s3://bucket1/path/to/file.tsv"
+#' s3_file_presignedurl(client, s3path)
+#' }
+#'
+#' @export
+s3_file_presignedurl <- function(client, s3path, expiry_seconds = 3600) {
+  bucket <- sub("s3://(.*?)/.*", "\\1", s3path)
+  prefix <- sub("s3://(.*?)/(.*)", "\\2", s3path)
+  client$generate_presigned_url(
+    client_method = "get_object",
+    params = list(Bucket = bucket, Key = prefix),
+    expires_in = expiry_seconds
+  )
 }
 
 #' Search AWS S3 Objects
