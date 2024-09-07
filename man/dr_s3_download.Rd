@@ -37,6 +37,6 @@ s3dir <- file.path(
   "ctTSO/2021-03-17/PTC_SSqCMM05pc_L2100067"
 )
 outdir <- sub("s3:/", "~/s3", s3dir)
-dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 1000, dryrun=F)
+dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 1000, dryrun = F)
 }
 }
