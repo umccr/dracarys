@@ -7,7 +7,7 @@
 dr_s3_download(
   s3dir,
   outdir,
-  page_size = 100,
+  max_objects = 100,
   pattern = NULL,
   regexes = DR_FILE_REGEX,
   dryrun = FALSE
@@ -18,7 +18,7 @@ dr_s3_download(
 
 \item{outdir}{Path to output directory.}
 
-\item{page_size}{Page size (def: 100).}
+\item{max_objects}{Maximum objects returned in file listing.}
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
@@ -31,10 +31,12 @@ download them).}
 Download only S3 files that can be processed by dracarys.
 }
 \examples{
+\dontrun{
 s3dir <- file.path(
   "s3://umccr-primary-data-prod/UMCCR-Validation/SBJ00596",
   "ctTSO/2021-03-17/PTC_SSqCMM05pc_L2100067"
 )
 outdir <- sub("s3:/", "~/s3", s3dir)
-
+dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 1000, dryrun=F)
+}
 }

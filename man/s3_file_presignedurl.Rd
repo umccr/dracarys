@@ -7,11 +7,11 @@
 s3_file_presignedurl(client, s3path, expiry_seconds = 3600)
 }
 \arguments{
+\item{client}{S3 client. Make sure you use \code{signature_version = "s3v4"} (see example).}
+
 \item{s3path}{Full path to S3 object.}
 
 \item{expiry_seconds}{Number of seconds the presigned URL is valid for (3600 = 1 hour).}
-
-\item{svc}{S3 client. Make sure you use \code{signature_version = "s3v4"} (see example).}
 }
 \value{
 An S3 presigned URL.

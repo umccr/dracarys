@@ -9,7 +9,7 @@ s3_files_list_filter_relevant(
   pattern = NULL,
   max_objects = 100,
   presign = FALSE,
-  expiry_sec = 43200,
+  expiry_sec = 3600,
   regexes = DR_FILE_REGEX
 )
 }
@@ -18,15 +18,13 @@ s3_files_list_filter_relevant(
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
+\item{max_objects}{The total number of objects to return.}
+
 \item{presign}{Include presigned URLs (def: FALSE).}
 
-\item{expiry_sec}{Number of seconds the presigned URL will be valid for (if generated) (def: 43200 (12hrs)).}
+\item{expiry_sec}{Number of seconds the presigned URL will be valid for (if generated).}
 
 \item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
-
-\item{page_size}{The size of each page to get in the AWS service call.}
-
-\item{max_items}{The total number of items to return in the command’s output.}
 }
 \value{
 A tibble with file type, basename, file size, date, full path, and presigned URL if requested.
