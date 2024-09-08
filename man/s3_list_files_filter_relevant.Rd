@@ -27,8 +27,8 @@ s3_list_files_filter_relevant(
 \item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 }
 \value{
-A tibble with file type, basename, size, date, full path,
-and presigned URL if requested.
+A tibble with file type, basename, size, last modified timestamp,
+full path, and presigned URL if requested.
 }
 \description{
 Lists relevant files in an AWS S3 directory.

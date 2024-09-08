@@ -6,35 +6,49 @@
 \usage{
 gds_list_files_filter_relevant(
   gdsdir,
-  token = Sys.getenv("ICA_ACCESS_TOKEN"),
   pattern = NULL,
-  include_url = FALSE,
-  page_size = 100,
   regexes = DR_FILE_REGEX,
-  ...
+  token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  page_size = 100,
+  include_url = FALSE,
+  no_recurse = TRUE,
+  page_token = NULL,
+  recursive = NULL
 )
 }
 \arguments{
-\item{gdsdir}{GDS directory.}
-
-\item{token}{ICA access token.}
+\item{gdsdir}{Full path to GDS directory.}
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
-\item{include_url}{Include presigned URLs to all files within the GDS directory (def: FALSE).}
-
-\item{page_size}{Page size (def: 100).}
-
 \item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
+
+\item{token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{page_size}{Page size (def: 10 via ICA API).}
+
+\item{include_url}{Include presigned URLs to all files within the GDS directory (def: FALSE via ICA API).}
+
+\item{no_recurse}{Do not recurse through the file list i.e. just give the first <page_size> items
+without recursing further down the list using <page_token>.}
+
+\item{page_token}{Page token (def: NULL). Used internally for recursion.}
+
+\item{recursive}{Should files be returned recursively \emph{in and under} the specified
+GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
+
+\item{...}{Passed into \code{gds_list_files_dir}.}
 }
 \value{
-A tibble with file type, basename, size, file_id, full path,
+A tibble with file type, basename, size, last modified timestamp, file_id, full path,
 and presigned URL if requested.
+}
+\description{
+Lists relevant files in a GDS directory.
+}
+\examples{
 \dontrun{
 gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
 gds_list_files_filter_relevant(gdsdir)
 }
-}
-\description{
-Lists relevant files in a GDS directory.
 }

@@ -7,9 +7,9 @@
 dr_gds_download(
   gdsdir,
   outdir,
-  token,
-  page_size = 100,
+  token = Sys.getenv("ICA_ACCESS_TOKEN"),
   pattern = NULL,
+  page_size = 100,
   dryrun = FALSE,
   regexes = DR_FILE_REGEX,
   recursive = NULL
@@ -18,22 +18,30 @@ dr_gds_download(
 \arguments{
 \item{gdsdir}{Full path to GDS directory.}
 
-\item{outdir}{Path to output directory.}
+\item{outdir}{Local output directory.}
 
 \item{token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
-\item{page_size}{Page size (def: 100).}
-
 \item{pattern}{Pattern to further filter the returned file type tibble.}
+
+\item{page_size}{Page size (def: 10 via ICA API).}
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}
 
-\item{regexes}{Tibble with regex and function name.}
+\item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 
 \item{recursive}{Should files be returned recursively \emph{in and under} the specified
-GDS directory (TRUE), or \emph{only directly in} the specified GDS directory (FALSE) (def: TRUE).}
+GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
 }
 \description{
 Download only GDS files that can be processed by dracarys.
+}
+\examples{
+\dontrun{
+gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
+outdir <- sub("gds:/", "~/icav1/g", gdsdir)
+dr_gds_download(gdsdir, outdir)
+}
+
 }

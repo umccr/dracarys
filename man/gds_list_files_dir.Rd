@@ -2,11 +2,11 @@
 % Please edit documentation in R/ica.R
 \name{gds_list_files_dir}
 \alias{gds_list_files_dir}
-\title{List files in ICAv1 GDS Directory}
+\title{List Files in ICAv1 GDS Directory}
 \usage{
 gds_list_files_dir(
   gdsdir,
-  token,
+  token = Sys.getenv("ICA_ACCESS_TOKEN"),
   page_size = NULL,
   include_url = FALSE,
   no_recurse = TRUE,
@@ -32,7 +32,8 @@ without recursing further down the list using <page_token>.}
 GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
 }
 \value{
-A tibble with file ID, basename, size, last modified timestamp, full GDS path, presigned URL.
+A tibble with file ID, basename, size, last modified timestamp,
+full GDS path, and presigned URL if requested.
 }
 \description{
 Lists files in a GDS directory.
@@ -45,7 +46,7 @@ gdsdir <- file.path(
 )
 token <- ica_token_validate()
 page_size <- 11
-include_url <- TRUE
+include_url <- F
 page_token <- NULL
 no_recurse <- TRUE
 recursive <- NULL

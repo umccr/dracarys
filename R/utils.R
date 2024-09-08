@@ -1,27 +1,49 @@
+#' List Files in Local Directory
+#'
+#' Lists files in a local directory.
+#'
+#' @param localdir Path to local directory.
+#'
+#' @return A tibble with file basename, size, last modification timestamp
+#' and full path.
+#' @examples
+#' localdir <- system.file("R", package = "dracarys")
+#' x <- local_list_files_dir(localdir)
+#' @testexamples
+#' expect_equal(names(x), c("bname", "size", "lastmodified", "path"))
+#' @export
+local_list_files_dir <- function(localdir) {
+  fs::dir_info(path = localdir, recurse = TRUE, type = "file") |>
+    dplyr::mutate(
+      bname = basename(.data$path),
+      lastmodified = .data$modification_time
+    ) |>
+    dplyr::select("bname", "size", "lastmodified", "path")
+}
+
 #' List Relevant Files In Local Directory
 #'
 #' Lists relevant files in a local directory.
 #'
 #' @param path Path to local directory.
-#' @param regexes Tibble with `regex` and `fun`ction name.
-#'
-#' @return A tibble with type, bname, size, file_id, path, and presigned URL.
+#' @param regexes Tibble with `regex` and `fun`ction name (see example).
+#' @return A tibble with file type, basename, size, last modified timestamp, and
+#' path.
 #'
 #' @examples
-#' \dontrun{
-#' path <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise"
-#' local_files_list_filter_relevant(path, regexes = DR_FILE_REGEX)
-#' }
+#' path <- system.file("extdata/tso", package = "dracarys")
+#' regexes <- tibble::tibble(regex = "multiqc_data\\.json$", fun = "MultiqcFile")
+#' x <- local_list_files_filter_relevant(path, regexes)
+#' @testexamples
+#' expect_equal(nrow(x), 1)
 #' @export
-local_files_list_filter_relevant <- function(path, regexes = DR_FILE_REGEX) {
-  fs::dir_ls(path = path, recurse = TRUE, type = "file") |>
-    tibble::as_tibble_col(column_name = "path") |>
+local_list_files_filter_relevant <- function(path, regexes = DR_FILE_REGEX) {
+  local_list_files_dir(localdir = path) |>
     dplyr::mutate(
-      bname = basename(.data$path),
       type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes = regexes))
     ) |>
     dplyr::filter(!is.na(.data$type)) |>
-    dplyr::select("type", "bname", "path")
+    dplyr::select("type", "bname", "size", "lastmodified", "path")
 }
 
 #' Print current timestamp for logging
@@ -237,7 +259,6 @@ grep_file <- function(path = ".", regexp) {
   }
   return(x)
 }
-
 
 #' @noRd
 dummy1 <- function() {

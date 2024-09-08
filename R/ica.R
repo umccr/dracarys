@@ -1,4 +1,4 @@
-#' List files in ICAv1 GDS Directory
+#' List Files in ICAv1 GDS Directory
 #'
 #' Lists files in a GDS directory.
 #'
@@ -12,7 +12,8 @@
 #' @param recursive Should files be returned recursively _in and under_ the specified
 #' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE via ICA API).
 #'
-#' @return A tibble with file ID, basename, size, last modified timestamp, full GDS path, presigned URL.
+#' @return A tibble with file ID, basename, size, last modified timestamp,
+#' full GDS path, and presigned URL if requested.
 #' @examples
 #' \dontrun{
 #' gdsdir <- file.path(
@@ -21,15 +22,16 @@
 #' )
 #' token <- ica_token_validate()
 #' page_size <- 11
-#' include_url <- TRUE
+#' include_url <- F
 #' page_token <- NULL
 #' no_recurse <- TRUE
 #' recursive <- NULL
 #' gds_list_files_dir(gdsdir, token, page_size, include_url, no_recurse, page_token, recursive)
 #' }
 #' @export
-gds_list_files_dir <- function(gdsdir, token, page_size = NULL, include_url = FALSE,
-                               no_recurse = TRUE, page_token = NULL, recursive = NULL) {
+gds_list_files_dir <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN"), page_size = NULL,
+                               include_url = FALSE, no_recurse = TRUE, page_token = NULL,
+                               recursive = NULL) {
   assertthat::assert_that(is.logical(no_recurse), is.logical(include_url))
   assertthat::assert_that(is.null(recursive) || is.logical(recursive))
   token <- ica_token_validate(token)
@@ -108,27 +110,30 @@ gds_list_files_dir <- function(gdsdir, token, page_size = NULL, include_url = FA
 #'
 #' Lists relevant files in a GDS directory.
 #'
-#' @param gdsdir GDS directory.
-#' @param token ICA access token.
+#' @inheritParams gds_list_files_dir
 #' @param pattern Pattern to further filter the returned file type tibble.
-#' @param include_url Include presigned URLs to all files within the GDS directory (def: FALSE).
-#' @param page_size Page size (def: 100).
 #' @param regexes Tibble with `regex` and `fun`ction name.
+#' @param ... Passed into `gds_list_files_dir`.
 #'
-#' @return A tibble with file type, basename, size, file_id, full path,
+#' @return A tibble with file type, basename, size, last modified timestamp, file_id, full path,
 #' and presigned URL if requested.
+#' @examples
 #' \dontrun{
 #' gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
 #' gds_list_files_filter_relevant(gdsdir)
 #' }
 #' @export
-gds_list_files_filter_relevant <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN"),
-                                           pattern = NULL, include_url = FALSE,
-                                           page_size = 100, regexes = DR_FILE_REGEX, ...) {
+gds_list_files_filter_relevant <- function(gdsdir, pattern = NULL, regexes = DR_FILE_REGEX,
+                                           token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                                           page_size = 100, include_url = FALSE,
+                                           no_recurse = TRUE, page_token = NULL,
+                                           recursive = NULL) {
   pattern <- pattern %||% ".*" # keep all recognisable files by default
-  cols_sel <- c("type", "bname", "size", "file_id", "path", "presigned_url")
+  assertthat::assert_that(all(colnames(regexes) == c("regex", "fun")))
+  cols_sel <- c("type", "bname", "size", "lastmodified", "file_id", "path", "presigned_url")
   d <- dracarys::gds_list_files_dir(
-    gdsdir = gdsdir, token = token, page_size = page_size, include_url = include_url, ...
+    gdsdir = gdsdir, token = token, page_size = page_size, include_url = include_url,
+    no_recurse = no_recurse, page_token = page_token, recursive = recursive
   ) |>
     dplyr::rowwise() |>
     dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
@@ -142,43 +147,49 @@ gds_list_files_filter_relevant <- function(gdsdir, token = Sys.getenv("ICA_ACCES
 #'
 #' Download only GDS files that can be processed by dracarys.
 #'
-#' @param gdsdir Full path to GDS directory.
-#' @param outdir Path to output directory.
-#' @param token ICA access token (def: $ICA_ACCESS_TOKEN env var).
-#' @param page_size Page size (def: 100).
-#' @param pattern Pattern to further filter the returned file type tibble.
+#' @inheritParams gds_list_files_dir
+#' @inheritParams gds_list_files_filter_relevant
+#' @param outdir Local output directory.
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
-#' @param regexes Tibble with regex and function name.
-#' @param recursive Should files be returned recursively _in and under_ the specified
-#' GDS directory (TRUE), or _only directly in_ the specified GDS directory (FALSE) (def: TRUE).
+#' @examples
+#' \dontrun{
+#' gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
+#' outdir <- sub("gds:/", "~/icav1/g", gdsdir)
+#' regexes <- tibble::tibble(regex = "multiqc_data\\.json$", fun = "MultiqcJsonFile")
+#' dr_gds_download(gdsdir = gdsdir, outdir = outdir, regexes = regexes, dryrun = F)
+#' }
 #'
 #' @export
-dr_gds_download <- function(gdsdir, outdir, token, page_size = 100, pattern = NULL,
-                            dryrun = FALSE, regexes = DR_FILE_REGEX, recursive = NULL) {
+dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                            pattern = NULL, page_size = 100, dryrun = FALSE,
+                            regexes = DR_FILE_REGEX, recursive = NULL) {
   e <- emojifont::emoji
   fs::dir_create(outdir)
-  d <- gds_list_files_dir(
-    gdsdir = gdsdir, token = token, page_size = page_size,
-    no_recurse = FALSE, recursive = recursive
-  ) |>
-    dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
-    dplyr::select("file_id", "type", "size", "path", "bname")
+  d <- gds_list_files_filter_relevant(
+    gdsdir = gdsdir, pattern = pattern, regexes = regexes,
+    token = token, page_size = page_size, include_url = FALSE,
+    no_recurse = FALSE, page_token = NULL,
+    recursive = recursive
+  )
 
-  # download recognisable dracarys files to outdir/{bname}
-  pattern <- pattern %||% ".*" # keep all recognisable files
-  d_filt <- d |>
-    dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
-    dplyr::mutate(out = file.path(outdir, .data$bname))
+  d <- d |>
+    dplyr::mutate(
+      localpath = file.path(outdir, .data$bname),
+      gdspath = .data$path
+    ) |>
+    dplyr::select("type", "bname", "size", "lastmodified", "file_id", "localpath", "gdspath")
   if (!dryrun) {
     cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {gdsdir}}")
-    d_filt |>
+    d |>
       dplyr::rowwise() |>
-      dplyr::mutate(out_dl = gds_file_download_api(.data$file_id, .data$out, token))
+      dplyr::mutate(
+        dl = gds_file_download_api(gds_fileid = .data$file_id, out_file = .data$out, token = token)
+      )
   } else {
     cli::cli_alert_info("{date_log()} {e('camera')} Just list relevant files from {.file {gdsdir}}")
-    d_filt |>
-      dplyr::select("path", "type", "size") |>
+    d |>
+      dplyr::select("type", "bname", "size", "gdspath", localpath2be = "localpath") |>
       as.data.frame() |>
       print()
   }

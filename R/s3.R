@@ -55,8 +55,8 @@ s3_list_files_dir <- function(s3dir, max_objects = 1000) {
 #' @param expiry_sec Number of seconds the presigned URL will be valid for (if generated).
 #' @param regexes Tibble with `regex` and `fun`ction name.
 #'
-#' @return A tibble with file type, basename, size, date, full path,
-#' and presigned URL if requested.
+#' @return A tibble with file type, basename, size, last modified timestamp,
+#' full path, and presigned URL if requested.
 #' @examples
 #' \dontrun{
 #' s3dir <- "s3://umccr-primary-data-prod/cancer_report_tables"
@@ -72,6 +72,7 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL, max_objects = 1
     return(d_all)
   }
   pattern <- pattern %||% ".*" # keep all recognisable files by default
+  cols_sel <- c("type", "bname", "size", "lastmodified", "path")
   d <- d_all |>
     dplyr::rowwise() |>
     dplyr::mutate(
@@ -79,7 +80,7 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL, max_objects = 1
     ) |>
     dplyr::ungroup() |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
-    dplyr::select("type", "bname", "size", "lastmodified", "path")
+    dplyr::select(dplyr::all_of(cols_sel))
 
   if (presign) {
     if (nrow(d) == 0) {
@@ -91,7 +92,8 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL, max_objects = 1
       dplyr::mutate(presigned_url = s3_file_presignedurl(
         client = s3_client, s3path = .data$path, expiry_seconds = expiry_sec
       )) |>
-      dplyr::ungroup()
+      dplyr::ungroup() |>
+      dplyr::select(dplyr::all_of(c(cols_sel, "presigned_url")))
   }
   d
 }
@@ -146,7 +148,7 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
   } else {
     cli::cli_alert_info("{date_log()} {e('camera')} Just list relevant files from {.file {s3dir}}")
     d |>
-      dplyr::select("path", "type", "size") |>
+      dplyr::select("type", "bname", "size", "path") |>
       as.data.frame() |>
       print()
   }

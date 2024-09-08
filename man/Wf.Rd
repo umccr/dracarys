@@ -2,38 +2,47 @@
 % Please edit documentation in R/Wf.R
 \name{Wf}
 \alias{Wf}
-\title{Workflow R6 Class}
+\title{Workflow}
 \description{
 Workflow is a base R6 class representing a bioinformatic
 workflow run from a UMCCR workflow manager.
+
+A workflow has:
+\itemize{
+\item an output directory path with all the result output files (either on GDS, S3 or
+local filesystem)
+\item a subset of files that are of interest for ingestion
+\itemize{
+\item tibble with full path and basename columns
+}
+\item a set of parsers that can parse and tidy those files
+\itemize{
+\item each parser takes a path and returns a tidy tibble
+}
+\item a list of tidy tibbles (or a tibble with nested tibbles)
+}
 }
 \examples{
-p1 <- system.file("extdata/portaldb_workflow_top4.rds", package = "rportal") |>
-  readRDS() |>
-  dplyr::filter(type_name == "umccrise") |>
-  dplyr::slice(1)
-w <- Wf$new(
-  prid = p1$portal_run_id, type = p1$type_name, start = p1$start, end = p1$end,
-  status = p1$end_status, input = p1$input, output = p1$output
-)
-w
+\dontrun{
+p1 <- "~/icav1/g/production/analysis_data"
+p <- file.path(p1, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
+um <- Wf$new(p, "umccrise")
+
+}
+
+
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{prid}}{Portal run ID.}
+\item{\code{path}}{(\code{character(1)})\cr
+Output directory path with results.}
 
-\item{\code{type}}{Workflow type.}
+\item{\code{type}}{(\code{character(1)})\cr
+Type of workflow (e.g. umccrise, sash).}
 
-\item{\code{start}}{Workflow start datetime.}
-
-\item{\code{end}}{Workflow end datetime.}
-
-\item{\code{status}}{Workflow end status.}
-
-\item{\code{input}}{Workflow input JSON string.}
-
-\item{\code{output}}{Workflow output JSON string.}
+\item{\code{filesystem}}{(\code{character(1)})\cr
+Filesystem of \code{path}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -42,6 +51,9 @@ w
 \itemize{
 \item \href{#method-Wf-new}{\code{Wf$new()}}
 \item \href{#method-Wf-print}{\code{Wf$print()}}
+\item \href{#method-Wf-list_files}{\code{Wf$list_files()}}
+\item \href{#method-Wf-list_files_filter_relevant}{\code{Wf$list_files_filter_relevant()}}
+\item \href{#method-Wf-download_files}{\code{Wf$download_files()}}
 \item \href{#method-Wf-clone}{\code{Wf$clone()}}
 }
 }
@@ -51,33 +63,15 @@ w
 \subsection{Method \code{new()}}{
 Create a new Workflow object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$new(
-  prid = NULL,
-  type = NULL,
-  start = NULL,
-  end = NULL,
-  status = NULL,
-  input = NULL,
-  output = NULL
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$new(path = NULL, type = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{prid}}{Portal run ID.}
+\item{\code{path}}{Output directory path with results.}
 
-\item{\code{type}}{Workflow type.}
-
-\item{\code{start}}{Workflow start datetime.}
-
-\item{\code{end}}{Workflow end datetime.}
-
-\item{\code{status}}{Workflow end status.}
-
-\item{\code{input}}{Workflow input JSON string.}
-
-\item{\code{output}}{Workflow output JSON string.}
+\item{\code{type}}{Type of workflow.}
 }
 \if{html}{\out{</div>}}
 }
@@ -98,6 +92,56 @@ Print details about the Workflow.
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-list_files"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-list_files}{}}}
+\subsection{Method \code{list_files()}}{
+List all files under given path.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files(max_objects = 1000, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"))}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{max_objects}}{Maximum number of objects to list.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-list_files_filter_relevant"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-list_files_filter_relevant}{}}}
+\subsection{Method \code{list_files_filter_relevant()}}{
+List dracarys files under given path
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files_filter_relevant(
+  regexes = NULL,
+  max_objects = 1000,
+  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{regexes}}{Tibble with \code{regex} and \code{fun}ction name.}
+
+\item{\code{page_size}}{Page size}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-download_files"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-download_files}{}}}
+\subsection{Method \code{download_files()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$download_files(ica_token = Sys.getenv("ICA_ACCESS_TOKEN"))}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf-clone"></a>}}
