@@ -5,7 +5,7 @@
 #'
 #' A workflow has:
 #'
-#' - an output directory path with all the result output files (either on GDS, S3 or
+#' - a directory path with all the raw output files (either on GDS, S3 or
 #' local filesystem)
 #' - a subset of files that are of interest for ingestion
 #'   - tibble with full path and basename columns
@@ -15,9 +15,43 @@
 #'
 #' @examples
 #' \dontrun{
-#' p1 <- "~/icav1/g/production/analysis_data"
-#' p <- file.path(p1, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
-#' um <- Wf$new(p, "umccrise")
+#' regexes <- tibble::tribble(
+#'   ~regex, ~fun,
+#'   "-chord\\.tsv\\.gz$", "UmChordTsvFile",
+#'   "-hrdetect\\.tsv\\.gz$", "UmHrdetectTsvFile",
+#'   "-snv_2015\\.tsv\\.gz$", "UmSigsSnvFile",
+#'   "-snv_2020\\.tsv\\.gz$", "UmSigsSnvFile",
+#'   "-dbs\\.tsv\\.gz$", "UmSigsDbsFile",
+#'   "-indel\\.tsv\\.gz$", "UmSigsIndelFile",
+#'   "-qc_summary\\.tsv\\.gz$", "UmQcSumFile",
+#' )
+#'
+#' #---- LOCAL ----#
+#' p1_local <- "~/icav1/g/production/analysis_data"
+#' p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
+#' um1 <- Wf$new(path = p, wname = "umccrise")
+#' um1$list_files(max_files = 10)
+#' um1$list_files_filter_relevant(regexes = regexes)
+#'
+#' #---- GDS ----#
+#' p1_gds <- "gds://production/analysis_data"
+#' p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
+#' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
+#' um2 <- Wf$new(path = p, wname = "umccrise")
+#' um2$list_files(max_files = 10)
+#' um2$list_files_filter_relevant(regexes = regexes, ica_token = token, max_files = 500)
+#' d <- um2$download_files(outdir = outdir, regexes = regexes, ica_token = token, max_files = 1000, dryrun = F)
+#'
+#' #---- S3 ----#
+#' p1_s3 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05570/sash/202408275fce06c3"
+#' p2_s3 <- "L2401304_L2401303/SBJ05570_MDX240299/cancer_report/cancer_report_tables"
+#' p <- file.path(p1_s3, p2_s3)
+#' outdir <- sub("s3:/", "~/s3", p)
+#' um3 <- Wf$new(path = p, wname = "sash")
+#' um3$list_files(max_files = 10)
+#' um3$list_files_filter_relevant(regexes = regexes, max_files = 50)
+#' d <- um3$download_files(outdir = outdir, regexes = regexes, max_files = 50, dryrun = F)
 #' }
 #'
 #' @export
@@ -74,7 +108,7 @@ Wf <- R6::R6Class(
       invisible(self)
     },
     #' @description List all files under given path.
-    #' @param max_files Maximum number of files to list.
+    #' @param max_files Max number of files to list (for gds/s3 only).
     #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
     #' @param ... Passed on to `gds_list_files_dir` function.
     list_files = function(max_files = 1000, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
@@ -92,7 +126,7 @@ Wf <- R6::R6Class(
     },
     #' @description List dracarys files under given path
     #' @param regexes Tibble with `regex` and `fun`ction name.
-    #' @param max_files Maximum number of files to list.
+    #' @param max_files Max number of files to list (for gds/s3 only).
     #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
     #' @param ... Passed on to the `gds_list_files_filter_relevant` or
     #' the `s3_list_files_filter_relevant` function.
@@ -134,19 +168,26 @@ Wf <- R6::R6Class(
           gdsdir = path, outdir = outdir, regexes = regexes, token = ica_token,
           page_size = max_files, dryrun = dryrun, recursive = recursive
         )
-        self$filesystem <- "local"
-        self$path <- outdir
+        if (!dryrun) {
+          self$filesystem <- "local"
+          self$path <- outdir
+        }
       } else if (self$filesystem == "s3") {
         d <- dr_s3_download(
           s3dir = path, outdir = outdir, regexes = regexes,
           max_objects = max_files, dryrun = dryrun
         )
-        self$filesystem <- "local"
-        self$path <- outdir
+        if (!dryrun) {
+          self$filesystem <- "local"
+          self$path <- outdir
+        }
       } else {
         d <- self$list_files_filter_relevant(regexes = regexes)
       }
       return(d)
+    },
+    tidy_files = function() {
+
     }
   ) # end public
 )

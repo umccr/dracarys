@@ -9,7 +9,7 @@ workflow run from a UMCCR workflow manager.
 
 A workflow has:
 \itemize{
-\item an output directory path with all the result output files (either on GDS, S3 or
+\item a directory path with all the raw output files (either on GDS, S3 or
 local filesystem)
 \item a subset of files that are of interest for ingestion
 \itemize{
@@ -24,9 +24,43 @@ local filesystem)
 }
 \examples{
 \dontrun{
-p1 <- "~/icav1/g/production/analysis_data"
-p <- file.path(p1, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
-um <- Wf$new(p, "umccrise")
+regexes <- tibble::tribble(
+       ~regex, ~fun,
+       "-chord\\\\.tsv\\\\.gz$", "UmChordTsvFile",
+       "-hrdetect\\\\.tsv\\\\.gz$", "UmHrdetectTsvFile",
+       "-snv_2015\\\\.tsv\\\\.gz$", "UmSigsSnvFile",
+       "-snv_2020\\\\.tsv\\\\.gz$", "UmSigsSnvFile",
+       "-dbs\\\\.tsv\\\\.gz$", "UmSigsDbsFile",
+       "-indel\\\\.tsv\\\\.gz$", "UmSigsIndelFile",
+       "-qc_summary\\\\.tsv\\\\.gz$", "UmQcSumFile",
+     )
+
+#---- LOCAL ----#
+p1_local <- "~/icav1/g/production/analysis_data"
+p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
+um1 <- Wf$new(path = p, wname = "umccrise")
+um1$list_files(max_files = 10)
+um1$list_files_filter_relevant(regexes = regexes)
+
+#---- GDS ----#
+p1_gds <- "gds://production/analysis_data"
+p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
+outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+token <- Sys.getenv("ICA_ACCESS_TOKEN")
+um2 <- Wf$new(path = p, wname = "umccrise")
+um2$list_files(max_files = 10)
+um2$list_files_filter_relevant(regexes = regexes, ica_token = token, max_files = 500)
+d <- um2$download_files(outdir = outdir, regexes = regexes, ica_token = token, max_files = 1000, dryrun = F)
+
+#---- S3 ----#
+p1_s3 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05570/sash/202408275fce06c3"
+p2_s3 <- "L2401304_L2401303/SBJ05570_MDX240299/cancer_report/cancer_report_tables"
+p <- file.path(p1_s3, p2_s3)
+outdir <- sub("s3:/", "~/s3", p)
+um3 <- Wf$new(path = p, wname = "sash")
+um3$list_files(max_files = 10)
+um3$list_files_filter_relevant(regexes = regexes, max_files = 50)
+d <- um3$download_files(outdir = outdir, regexes = regexes, max_files = 50, dryrun = F)
 }
 
 }
@@ -52,6 +86,7 @@ Filesystem of \code{path}.}
 \item \href{#method-Wf-list_files}{\code{Wf$list_files()}}
 \item \href{#method-Wf-list_files_filter_relevant}{\code{Wf$list_files_filter_relevant()}}
 \item \href{#method-Wf-download_files}{\code{Wf$download_files()}}
+\item \href{#method-Wf-tidy_files}{\code{Wf$tidy_files()}}
 \item \href{#method-Wf-clone}{\code{Wf$clone()}}
 }
 }
@@ -107,7 +142,7 @@ List all files under given path.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{max_files}}{Maximum number of files to list.}
+\item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
 
 \item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
@@ -135,7 +170,7 @@ List dracarys files under given path
 \describe{
 \item{\code{regexes}}{Tibble with \code{regex} and \code{fun}ction name.}
 
-\item{\code{max_files}}{Maximum number of files to list.}
+\item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
 
 \item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
@@ -180,6 +215,15 @@ GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE
 }
 \if{html}{\out{</div>}}
 }
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-tidy_files"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-tidy_files}{}}}
+\subsection{Method \code{tidy_files()}}{
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$tidy_files()}\if{html}{\out{</div>}}
+}
+
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf-clone"></a>}}
