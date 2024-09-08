@@ -29,9 +29,9 @@
 #' #---- LOCAL ----#
 #' p1_local <- "~/icav1/g/production/analysis_data"
 #' p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
-#' um1 <- Wf$new(path = p, wname = "umccrise")
+#' um1 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
 #' um1$list_files(max_files = 100)
-#' um1$list_files_filter_relevant(regexes = regexes, max_files = 100)
+#' um1$list_files_filter_relevant(max_files = 100)
 #'
 #'
 #' #---- GDS ----#
@@ -39,11 +39,11 @@
 #' p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 #' token <- Sys.getenv("ICA_ACCESS_TOKEN")
-#' um2 <- Wf$new(path = p, wname = "umccrise")
+#' um2 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
 #' um2$list_files(max_files = 10)
-#' um2$list_files_filter_relevant(regexes = regexes, ica_token = token, max_files = 500)
+#' um2$list_files_filter_relevant(ica_token = token, max_files = 500)
 #' d <- um2$download_files(
-#'   outdir = outdir, regexes = regexes, ica_token = token,
+#'   outdir = outdir, ica_token = token,
 #'   max_files = 1000, dryrun = F
 #' )
 #'
@@ -52,9 +52,9 @@
 #' p2_s3 <- "L2401304_L2401303/SBJ05570_MDX240299/cancer_report/cancer_report_tables"
 #' p <- file.path(p1_s3, p2_s3)
 #' outdir <- sub("s3:/", "~/s3", p)
-#' um3 <- Wf$new(path = p, wname = "sash")
+#' um3 <- Wf$new(path = p, wname = "sash", regexes = regexes)
 #' um3$list_files(max_files = 10)
-#' um3$list_files_filter_relevant(regexes = regexes, max_files = 50)
+#' um3$list_files_filter_relevant(max_files = 50)
 #' d <- um3$download_files(outdir = outdir, regexes = regexes, max_files = 50, dryrun = F)
 #' }
 #'
@@ -68,13 +68,17 @@ Wf <- R6::R6Class(
     #' Name of workflow (e.g. umccrise, sash).
     #' @field filesystem (`character(1)`)\cr
     #' Filesystem of `path`.
+    #' @field regexes (`tibble()`)\cr
+    #' Tibble with file `regex` and `fun`ction to parse it.
     path = NULL,
     wname = NULL,
     filesystem = NULL,
+    regexes = NULL,
     #' @description Create a new Workflow object.
     #' @param path Output directory path with results.
     #' @param wname Name of workflow.
-    initialize = function(path = NULL, wname = NULL) {
+    #' @param regexes Tibble with file `regex` and `fun`ction to parse it.
+    initialize = function(path = NULL, wname = NULL, regexes = NULL) {
       wnames <- c(
         "bcl_convert",
         "tso_ctdna_tumor_only",
@@ -98,6 +102,7 @@ Wf <- R6::R6Class(
         grepl("^s3://", path) ~ "s3",
         .default = "local"
       )
+      self$regexes <- regexes
     },
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
@@ -129,14 +134,13 @@ Wf <- R6::R6Class(
       return(d)
     },
     #' @description List dracarys files under given path
-    #' @param regexes Tibble with `regex` and `fun`ction name.
     #' @param max_files Max number of files to list (for gds/s3 only).
     #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
     #' @param ... Passed on to the `gds_list_files_filter_relevant` or
     #' the `s3_list_files_filter_relevant` function.
-    list_files_filter_relevant = function(regexes = NULL,
-                                          max_files = 1000,
+    list_files_filter_relevant = function(max_files = 1000,
                                           ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
+      regexes <- self$regexes
       assertthat::assert_that(!is.null(regexes))
       path <- self$path
       if (self$filesystem == "gds") {
@@ -156,18 +160,17 @@ Wf <- R6::R6Class(
     },
     #' @description Download files from GDS/S3 to local filesystem.
     #' @param outdir Path to output directory.
-    #' @param regexes Tibble with `regex` and `fun`ction name.
     #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
     #' @param max_files Maximum number of files to list.
     #' @param dryrun If TRUE, just list the files that will be downloaded (don't
     #' download them).
     #' @param recursive Should files be returned recursively _in and under_ the specified
     #' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE via ICA API).
-    download_files = function(outdir, regexes = NULL,
-                              ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+    download_files = function(outdir, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
                               max_files = 1000, dryrun = FALSE, recursive = NULL) {
       # TODO: add envvar checker
       path <- self$path
+      regexes <- self$regexes
       assertthat::assert_that(!is.null(regexes))
       if (self$filesystem == "gds") {
         d <- dr_gds_download(

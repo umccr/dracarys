@@ -38,9 +38,9 @@ regexes <- tibble::tribble(
 #---- LOCAL ----#
 p1_local <- "~/icav1/g/production/analysis_data"
 p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
-um1 <- Wf$new(path = p, wname = "umccrise")
+um1 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
 um1$list_files(max_files = 100)
-um1$list_files_filter_relevant(regexes = regexes, max_files = 100)
+um1$list_files_filter_relevant(max_files = 100)
 
 
 #---- GDS ----#
@@ -48,11 +48,11 @@ p1_gds <- "gds://production/analysis_data"
 p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
 outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 token <- Sys.getenv("ICA_ACCESS_TOKEN")
-um2 <- Wf$new(path = p, wname = "umccrise")
+um2 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
 um2$list_files(max_files = 10)
-um2$list_files_filter_relevant(regexes = regexes, ica_token = token, max_files = 500)
+um2$list_files_filter_relevant(ica_token = token, max_files = 500)
 d <- um2$download_files(
-  outdir = outdir, regexes = regexes, ica_token = token,
+  outdir = outdir, ica_token = token,
   max_files = 1000, dryrun = F
 )
 
@@ -61,9 +61,9 @@ p1_s3 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05570/sash/202408275
 p2_s3 <- "L2401304_L2401303/SBJ05570_MDX240299/cancer_report/cancer_report_tables"
 p <- file.path(p1_s3, p2_s3)
 outdir <- sub("s3:/", "~/s3", p)
-um3 <- Wf$new(path = p, wname = "sash")
+um3 <- Wf$new(path = p, wname = "sash", regexes = regexes)
 um3$list_files(max_files = 10)
-um3$list_files_filter_relevant(regexes = regexes, max_files = 50)
+um3$list_files_filter_relevant(max_files = 50)
 d <- um3$download_files(outdir = outdir, regexes = regexes, max_files = 50, dryrun = F)
 }
 
@@ -79,6 +79,9 @@ Name of workflow (e.g. umccrise, sash).}
 
 \item{\code{filesystem}}{(\code{character(1)})\cr
 Filesystem of \code{path}.}
+
+\item{\code{regexes}}{(\code{tibble()})\cr
+Tibble with file \code{regex} and \code{fun}ction to parse it.}
 }
 \if{html}{\out{</div>}}
 }
@@ -100,7 +103,7 @@ Filesystem of \code{path}.}
 \subsection{Method \code{new()}}{
 Create a new Workflow object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$new(path = NULL, wname = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$new(path = NULL, wname = NULL, regexes = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -109,6 +112,8 @@ Create a new Workflow object.
 \item{\code{path}}{Output directory path with results.}
 
 \item{\code{wname}}{Name of workflow.}
+
+\item{\code{regexes}}{Tibble with file \code{regex} and \code{fun}ction to parse it.}
 }
 \if{html}{\out{</div>}}
 }
@@ -162,7 +167,6 @@ List all files under given path.
 List dracarys files under given path
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$list_files_filter_relevant(
-  regexes = NULL,
   max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   ...
@@ -172,8 +176,6 @@ List dracarys files under given path
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{regexes}}{Tibble with \code{regex} and \code{fun}ction name.}
-
 \item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
 
 \item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
@@ -192,7 +194,6 @@ Download files from GDS/S3 to local filesystem.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$download_files(
   outdir,
-  regexes = NULL,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   max_files = 1000,
   dryrun = FALSE,
@@ -204,8 +205,6 @@ Download files from GDS/S3 to local filesystem.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{outdir}}{Path to output directory.}
-
-\item{\code{regexes}}{Tibble with \code{regex} and \code{fun}ction name.}
 
 \item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
