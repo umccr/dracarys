@@ -8,42 +8,38 @@ Reads and writes tidy versions of files from the \code{umccrise} workflow
 }
 \examples{
 \dontrun{
-token <- Sys.getenv("ICA_ACCESS_TOKEN") |> ica_token_validate()
-SubjectID <- "SBJ01155"
-SampleID_tumor <- "PRJ211091"
-gdsdir1 <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043"
-gdsdir <- file.path(gdsdir1, "L2101566__L2101565")
-obj <- Wf_umccrise$new(gdsdir)
-gds_files <- obj$gds_list(
-  gdsdir = gdsdir, token = token, SubjectID = SubjectID, SampleID_tumor
-)
-outdir <- file.path(sub("gds://", "", gdsdir))
-outdir <- file.path(normalizePath("~/icav1/g"), outdir)
-out_files <- obj$gds_download(gds_files = gds_files, outdir = outdir, token = token)
-tidy1 <- obj$tidy(indir = outdir, out_files = out_files)
+#---- LOCAL ----#
+p1_local <- "~/icav1/g/production/analysis_data"
+p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
+um1 <- Wf_umccrise$new(path = p)
+um1$list_files(max_files = 10)
+um1$list_files_filter_relevant(max_files = 100)
 }
 
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
-\describe{
-\item{\code{path}}{Path to the \code{umccrise} directory.}
-
-\item{\code{contents}}{Tibble with file path, basename, and size.}
-}
-\if{html}{\out{</div>}}
+\section{Super class}{
+\code{\link[dracarys:Wf]{dracarys::Wf}} -> \code{Wf_umccrise}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-Wf_umccrise-new}{\code{Wf_umccrise$new()}}
-\item \href{#method-Wf_umccrise-gds_list}{\code{Wf_umccrise$gds_list()}}
-\item \href{#method-Wf_umccrise-gds_download}{\code{Wf_umccrise$gds_download()}}
 \item \href{#method-Wf_umccrise-tidy}{\code{Wf_umccrise$tidy()}}
 \item \href{#method-Wf_umccrise-read_conpairmultiqc}{\code{Wf_umccrise$read_conpairmultiqc()}}
 \item \href{#method-Wf_umccrise-clone}{\code{Wf_umccrise$clone()}}
 }
 }
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="download_files"><a href='../../dracarys/html/Wf.html#method-Wf-download_files'><code>dracarys::Wf$download_files()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files"><a href='../../dracarys/html/Wf.html#method-Wf-list_files'><code>dracarys::Wf$list_files()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files_filter_relevant"><a href='../../dracarys/html/Wf.html#method-Wf-list_files_filter_relevant'><code>dracarys::Wf$list_files_filter_relevant()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="print"><a href='../../dracarys/html/Wf.html#method-Wf-print'><code>dracarys::Wf$print()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="tidy_files"><a href='../../dracarys/html/Wf.html#method-Wf-tidy_files'><code>dracarys::Wf$tidy_files()</code></a></span></li>
+</ul>
+</details>
+}}
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf_umccrise-new"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf_umccrise-new}{}}}
@@ -56,60 +52,9 @@ Create a new Wf_umccrise object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{path}}{Path to the \code{umccrise} directory.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-gds_list"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-gds_list}{}}}
-\subsection{Method \code{gds_list()}}{
-List Relevant Files In umccrise GDS Directory
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$gds_list(
-  gdsdir,
-  SubjectID,
-  SampleID_tumor,
-  token = Sys.getenv("ICA_ACCESS_TOKEN")
-)}\if{html}{\out{</div>}}
-}
+\item{\code{path}}{Output directory path with results.}
 
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{gdsdir}}{Path to the \code{umccrise} directory.}
-
-\item{\code{SubjectID}}{The SubjectID of the sample (used to construct path).}
-
-\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (used to construct path).}
-
-\item{\code{token}}{ICA access token.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-gds_download"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-gds_download}{}}}
-\subsection{Method \code{gds_download()}}{
-GDS File Download via API
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$gds_download(
-  gds_files,
-  outdir,
-  token = Sys.getenv("ICA_ACCESS_TOKEN")
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{gds_files}}{Tibble with bname and file_id for umccrise files.}
-
-\item{\code{outdir}}{Directory to output files (loosely, not in a structured manner).}
-
-\item{\code{token}}{ICA access token.}
+\item{\code{wname}}{Name of workflow.}
 }
 \if{html}{\out{</div>}}
 }
@@ -145,8 +90,7 @@ Read multiqc_conpair.txt file.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{(\code{character(1)})\cr
-Path to multiqc_conpair.txt file.}
+\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }
