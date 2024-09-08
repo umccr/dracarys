@@ -4,12 +4,18 @@
 \alias{local_list_files_filter_relevant}
 \title{List Relevant Files In Local Directory}
 \usage{
-local_list_files_filter_relevant(localdir, regexes = DR_FILE_REGEX)
+local_list_files_filter_relevant(
+  localdir,
+  regexes = DR_FILE_REGEX,
+  max_files = NULL
+)
 }
 \arguments{
 \item{localdir}{Path to local directory.}
 
 \item{regexes}{Tibble with \code{regex} and \code{fun}ction name (see example).}
+
+\item{max_files}{Max files returned.}
 }
 \value{
 A tibble with file type, basename, size, last modified timestamp, and

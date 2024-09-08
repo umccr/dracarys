@@ -25,22 +25,23 @@ local filesystem)
 \examples{
 \dontrun{
 regexes <- tibble::tribble(
-       ~regex, ~fun,
-       "-chord\\\\.tsv\\\\.gz$", "UmChordTsvFile",
-       "-hrdetect\\\\.tsv\\\\.gz$", "UmHrdetectTsvFile",
-       "-snv_2015\\\\.tsv\\\\.gz$", "UmSigsSnvFile",
-       "-snv_2020\\\\.tsv\\\\.gz$", "UmSigsSnvFile",
-       "-dbs\\\\.tsv\\\\.gz$", "UmSigsDbsFile",
-       "-indel\\\\.tsv\\\\.gz$", "UmSigsIndelFile",
-       "-qc_summary\\\\.tsv\\\\.gz$", "UmQcSumFile",
-     )
+  ~regex, ~fun,
+  "-chord\\\\.tsv\\\\.gz$", "UmChordTsvFile",
+  "-hrdetect\\\\.tsv\\\\.gz$", "UmHrdetectTsvFile",
+  "-snv_2015\\\\.tsv\\\\.gz$", "UmSigsSnvFile",
+  "-snv_2020\\\\.tsv\\\\.gz$", "UmSigsSnvFile",
+  "-dbs\\\\.tsv\\\\.gz$", "UmSigsDbsFile",
+  "-indel\\\\.tsv\\\\.gz$", "UmSigsIndelFile",
+  "-qc_summary\\\\.tsv\\\\.gz$", "UmQcSumFile",
+)
 
 #---- LOCAL ----#
 p1_local <- "~/icav1/g/production/analysis_data"
 p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
 um1 <- Wf$new(path = p, wname = "umccrise")
-um1$list_files(max_files = 10)
-um1$list_files_filter_relevant(regexes = regexes)
+um1$list_files(max_files = 100)
+um1$list_files_filter_relevant(regexes = regexes, max_files = 100)
+
 
 #---- GDS ----#
 p1_gds <- "gds://production/analysis_data"
@@ -50,7 +51,10 @@ token <- Sys.getenv("ICA_ACCESS_TOKEN")
 um2 <- Wf$new(path = p, wname = "umccrise")
 um2$list_files(max_files = 10)
 um2$list_files_filter_relevant(regexes = regexes, ica_token = token, max_files = 500)
-d <- um2$download_files(outdir = outdir, regexes = regexes, ica_token = token, max_files = 1000, dryrun = F)
+d <- um2$download_files(
+  outdir = outdir, regexes = regexes, ica_token = token,
+  max_files = 1000, dryrun = F
+)
 
 #---- S3 ----#
 p1_s3 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05570/sash/202408275fce06c3"
@@ -220,10 +224,18 @@ GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE
 \if{html}{\out{<a id="method-Wf-tidy_files"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf-tidy_files}{}}}
 \subsection{Method \code{tidy_files()}}{
+Tidy given files.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$tidy_files()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$tidy_files(x)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Tibble with \code{fun}ction to parse the file and \code{localpath} to the file.}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf-clone"></a>}}

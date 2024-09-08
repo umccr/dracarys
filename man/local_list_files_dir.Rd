@@ -4,10 +4,12 @@
 \alias{local_list_files_dir}
 \title{List Files in Local Directory}
 \usage{
-local_list_files_dir(localdir)
+local_list_files_dir(localdir, max_files = NULL)
 }
 \arguments{
 \item{localdir}{Path to local directory.}
+
+\item{max_files}{Max files returned.}
 }
 \value{
 A tibble with file basename, size, last modification timestamp
