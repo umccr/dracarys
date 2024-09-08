@@ -27,9 +27,7 @@ local filesystem)
 p1 <- "~/icav1/g/production/analysis_data"
 p <- file.path(p1, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
 um <- Wf$new(p, "umccrise")
-
 }
-
 
 }
 \section{Public fields}{

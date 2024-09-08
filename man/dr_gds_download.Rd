@@ -41,7 +41,8 @@ Download only GDS files that can be processed by dracarys.
 \dontrun{
 gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
 outdir <- sub("gds:/", "~/icav1/g", gdsdir)
-dr_gds_download(gdsdir, outdir)
+regexes <- tibble::tibble(regex = "multiqc_data\\\\.json$", fun = "MultiqcJsonFile")
+dr_gds_download(gdsdir = gdsdir, outdir = outdir, regexes = regexes, dryrun = F)
 }
 
 }

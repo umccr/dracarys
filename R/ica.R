@@ -113,12 +113,11 @@ gds_list_files_dir <- function(gdsdir, token = Sys.getenv("ICA_ACCESS_TOKEN"), p
 #' @inheritParams gds_list_files_dir
 #' @param pattern Pattern to further filter the returned file type tibble.
 #' @param regexes Tibble with `regex` and `fun`ction name.
-#' @param ... Passed into `gds_list_files_dir`.
-#'
 #' @return A tibble with file type, basename, size, last modified timestamp, file_id, full path,
 #' and presigned URL if requested.
 #' @examples
 #' \dontrun{
+#' regexes <- tibble::tibble(regex = "multiqc_data\\.json$", fun = "MultiqcJsonFile")
 #' gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
 #' gds_list_files_filter_relevant(gdsdir)
 #' }
@@ -172,29 +171,33 @@ dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN
     no_recurse = FALSE, page_token = NULL,
     recursive = recursive
   )
-
   d <- d |>
     dplyr::mutate(
       localpath = file.path(outdir, .data$bname),
       gdspath = .data$path
     ) |>
     dplyr::select("type", "bname", "size", "lastmodified", "file_id", "localpath", "gdspath")
+  # download recognisable dracarys files to outdir/{bname}
   if (!dryrun) {
     cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {gdsdir}}")
-    d |>
+    res <- d |>
       dplyr::rowwise() |>
       dplyr::mutate(
-        dl = gds_file_download_api(gds_fileid = .data$file_id, out_file = .data$out, token = token)
-      )
+        dl = gds_file_download_api(
+          gds_fileid = .data$file_id, out_file = .data$localpath, token = token
+        ),
+        localpath = normalizePath(.data$localpath)
+      ) |>
+      dplyr::select("type", "bname", "size", "lastmodified", "localpath", "gdspath", "file_id")
+    return(res)
   } else {
     cli::cli_alert_info("{date_log()} {e('camera')} Just list relevant files from {.file {gdsdir}}")
     d |>
-      dplyr::select("type", "bname", "size", "gdspath", localpath2be = "localpath") |>
+      dplyr::select("type", "bname", "size", "lastmodified", "gdspath", "file_id", localpath2be = "localpath") |>
       as.data.frame() |>
       print()
   }
 }
-
 
 #' GDS File Presigned URL
 #'
@@ -278,7 +281,7 @@ gds_file_download_api <- function(gds_fileid, out_file, token) {
   # keep quiet instead of logging presigned urls
   status_code <- utils::download.file(url = presigned_url, destfile = out_file, quiet = TRUE)
   assertthat::assert_that(status_code == 0)
-  out_file
+  normalizePath(out_file)
 }
 
 #' GDS File Download via CLI

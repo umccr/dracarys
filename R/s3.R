@@ -48,24 +48,26 @@ s3_list_files_dir <- function(s3dir, max_objects = 1000) {
 #'
 #' Lists relevant files in an AWS S3 directory.
 #'
-#' @param s3dir S3 directory.
+#' @inheritParams s3_list_files_dir
 #' @param pattern Pattern to further filter the returned file type tibble.
-#' @param max_objects The total number of objects to return.
+#' @param regexes Tibble with `regex` and `fun`ction name.
 #' @param presign Include presigned URLs (def: FALSE).
 #' @param expiry_sec Number of seconds the presigned URL will be valid for (if generated).
-#' @param regexes Tibble with `regex` and `fun`ction name.
 #'
 #' @return A tibble with file type, basename, size, last modified timestamp,
 #' full path, and presigned URL if requested.
 #' @examples
 #' \dontrun{
-#' s3dir <- "s3://umccr-primary-data-prod/cancer_report_tables"
-#' s3_list_files_filter_relevant(s3dir = s3dir, presign = FALSE)
+#' p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
+#' p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
+#' s3dir <- file.path(p1, p2)
+#' regexes <- tibble::tibble(regex = "multiqc_data\\.json$", fun = "MultiqcJsonFile")
+#' s3_list_files_filter_relevant(s3dir = s3dir, regexes = regexes, max_objects = 300)
 #' }
 #' @export
-s3_list_files_filter_relevant <- function(s3dir, pattern = NULL, max_objects = 100,
-                                          presign = FALSE, expiry_sec = 3600,
-                                          regexes = DR_FILE_REGEX) {
+s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
+                                          regexes = DR_FILE_REGEX, max_objects = 100,
+                                          presign = FALSE, expiry_sec = 3600) {
   assertthat::assert_that(rlang::is_logical(presign), max_objects <= 1000)
   d_all <- s3_list_files_dir(s3dir = s3dir, max_objects = max_objects)
   if (nrow(d_all) == 0) {
@@ -102,21 +104,19 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL, max_objects = 1
 #'
 #' Download only S3 files that can be processed by dracarys.
 #'
-#' @param s3dir Full path to S3 directory.
+#' @inheritParams s3_list_files_dir
+#' @inheritParams s3_list_files_filter_relevant
 #' @param outdir Path to output directory.
-#' @param max_objects Maximum objects returned in file listing.
-#' @param pattern Pattern to further filter the returned file type tibble.
-#' @param regexes Tibble with regex and function name.
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
 #' @examples
 #' \dontrun{
-#' s3dir <- file.path(
-#'   "s3://umccr-primary-data-prod/UMCCR-Validation/SBJ00596",
-#'   "ctTSO/2021-03-17/PTC_SSqCMM05pc_L2100067"
-#' )
+#' p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
+#' p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
+#' s3dir <- file.path(p1, p2)
+#' regexes <- tibble::tibble(regex = "multiqc_data\\.json$", fun = "MultiqcJsonFile")
 #' outdir <- sub("s3:/", "~/s3", s3dir)
-#' dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 1000, dryrun = F)
+#' dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 300, regexes = regexes, dryrun = F)
 #' }
 #' @export
 dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
@@ -125,30 +125,35 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
   e <- emojifont::emoji
   fs::dir_create(outdir)
   d <- s3_list_files_filter_relevant(
-    s3dir = s3dir, pattern = NULL, max_objects = max_objects, presign = FALSE, regexes = regexes
+    s3dir = s3dir, pattern = NULL, regexes = regexes,
+    max_objects = max_objects, presign = FALSE
   )
   d <- d |>
-    dplyr::select("type", "size", "path", "bname") |>
-    dplyr::mutate(out = file.path(outdir, .data$bname))
-
+    dplyr::mutate(
+      localpath = file.path(outdir, .data$bname),
+      s3path = .data$path
+    ) |>
+    dplyr::select("type", "bname", "size", "lastmodified", "localpath", "s3path")
   # download recognisable dracarys files to outdir/{bname}
   if (!dryrun) {
     cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {s3dir}}")
     d |>
       dplyr::rowwise() |>
       dplyr::mutate(
-        s3bucket = sub("s3://(.*?)/.*", "\\1", .data$path),
-        s3key = sub("s3://(.*?)/(.*)", "\\2", .data$path),
+        s3bucket = sub("s3://(.*?)/.*", "\\1", .data$s3path),
+        s3key = sub("s3://(.*?)/(.*)", "\\2", .data$s3path),
         dl = list(
           s3$download_file(
-            Bucket = .data$s3bucket, Key = .data$s3key, Filename = .data$out
+            Bucket = .data$s3bucket, Key = .data$s3key, Filename = .data$localpath
           )
-        )
-      )
+        ),
+        localpath = normalizePath(.data$localpath)
+      ) |>
+      dplyr::select("type", "bname", "size", "lastmodified", "localpath", "s3path")
   } else {
     cli::cli_alert_info("{date_log()} {e('camera')} Just list relevant files from {.file {s3dir}}")
     d |>
-      dplyr::select("type", "bname", "size", "path") |>
+      dplyr::select("type", "bname", "size", "lastmodified", "s3path", localpath2be = "localpath") |>
       as.data.frame() |>
       print()
   }

@@ -14,15 +14,15 @@ dr_s3_download(
 )
 }
 \arguments{
-\item{s3dir}{Full path to S3 directory.}
+\item{s3dir}{S3 directory.}
 
 \item{outdir}{Path to output directory.}
 
-\item{max_objects}{Maximum objects returned in file listing.}
+\item{max_objects}{Maximum objects returned.}
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
-\item{regexes}{Tibble with regex and function name.}
+\item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}
@@ -32,11 +32,11 @@ Download only S3 files that can be processed by dracarys.
 }
 \examples{
 \dontrun{
-s3dir <- file.path(
-  "s3://umccr-primary-data-prod/UMCCR-Validation/SBJ00596",
-  "ctTSO/2021-03-17/PTC_SSqCMM05pc_L2100067"
-)
+p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
+p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
+s3dir <- file.path(p1, p2)
+regexes <- tibble::tibble(regex = "multiqc_data\\\\.json$", fun = "MultiqcJsonFile")
 outdir <- sub("s3:/", "~/s3", s3dir)
-dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 1000, dryrun = F)
+dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 300, regexes = regexes, dryrun = F)
 }
 }

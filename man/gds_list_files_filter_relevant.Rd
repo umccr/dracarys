@@ -36,8 +36,6 @@ without recursing further down the list using <page_token>.}
 
 \item{recursive}{Should files be returned recursively \emph{in and under} the specified
 GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
-
-\item{...}{Passed into \code{gds_list_files_dir}.}
 }
 \value{
 A tibble with file type, basename, size, last modified timestamp, file_id, full path,
@@ -48,6 +46,7 @@ Lists relevant files in a GDS directory.
 }
 \examples{
 \dontrun{
+regexes <- tibble::tibble(regex = "multiqc_data\\\\.json$", fun = "MultiqcJsonFile")
 gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
 gds_list_files_filter_relevant(gdsdir)
 }

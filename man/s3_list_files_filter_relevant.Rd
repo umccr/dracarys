@@ -7,10 +7,10 @@
 s3_list_files_filter_relevant(
   s3dir,
   pattern = NULL,
+  regexes = DR_FILE_REGEX,
   max_objects = 100,
   presign = FALSE,
-  expiry_sec = 3600,
-  regexes = DR_FILE_REGEX
+  expiry_sec = 3600
 )
 }
 \arguments{
@@ -18,13 +18,13 @@ s3_list_files_filter_relevant(
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
-\item{max_objects}{The total number of objects to return.}
+\item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
+
+\item{max_objects}{Maximum objects returned.}
 
 \item{presign}{Include presigned URLs (def: FALSE).}
 
 \item{expiry_sec}{Number of seconds the presigned URL will be valid for (if generated).}
-
-\item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 }
 \value{
 A tibble with file type, basename, size, last modified timestamp,
@@ -35,7 +35,10 @@ Lists relevant files in an AWS S3 directory.
 }
 \examples{
 \dontrun{
-s3dir <- "s3://umccr-primary-data-prod/cancer_report_tables"
-s3_list_files_filter_relevant(s3dir = s3dir, presign = FALSE)
+p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
+p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
+s3dir <- file.path(p1, p2)
+regexes <- tibble::tibble(regex = "multiqc_data\\\\.json$", fun = "MultiqcJsonFile")
+s3_list_files_filter_relevant(s3dir = s3dir, regexes = regexes, max_objects = 300)
 }
 }
