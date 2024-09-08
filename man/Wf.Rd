@@ -34,10 +34,10 @@ um <- Wf$new(p, "umccrise")
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{path}}{(\code{character(1)})\cr
-Output directory path with results.}
+Path to directory with raw workflow results (from GDS, S3, or local filesystem).}
 
-\item{\code{type}}{(\code{character(1)})\cr
-Type of workflow (e.g. umccrise, sash).}
+\item{\code{wname}}{(\code{character(1)})\cr
+Name of workflow (e.g. umccrise, sash).}
 
 \item{\code{filesystem}}{(\code{character(1)})\cr
 Filesystem of \code{path}.}
@@ -61,7 +61,7 @@ Filesystem of \code{path}.}
 \subsection{Method \code{new()}}{
 Create a new Workflow object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$new(path = NULL, type = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$new(path = NULL, wname = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -69,7 +69,7 @@ Create a new Workflow object.
 \describe{
 \item{\code{path}}{Output directory path with results.}
 
-\item{\code{type}}{Type of workflow.}
+\item{\code{wname}}{Name of workflow.}
 }
 \if{html}{\out{</div>}}
 }
@@ -97,13 +97,21 @@ Print details about the Workflow.
 \subsection{Method \code{list_files()}}{
 List all files under given path.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files(max_objects = 1000, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files(
+  max_files = 1000,
+  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  ...
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{max_objects}}{Maximum number of objects to list.}
+\item{\code{max_files}}{Maximum number of files to list.}
+
+\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{\code{...}}{Passed on to \code{gds_list_files_dir} function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -116,7 +124,7 @@ List dracarys files under given path
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$list_files_filter_relevant(
   regexes = NULL,
-  max_objects = 1000,
+  max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   ...
 )}\if{html}{\out{</div>}}
@@ -127,7 +135,12 @@ List dracarys files under given path
 \describe{
 \item{\code{regexes}}{Tibble with \code{regex} and \code{fun}ction name.}
 
-\item{\code{page_size}}{Page size}
+\item{\code{max_files}}{Maximum number of files to list.}
+
+\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{\code{...}}{Passed on to the \code{gds_list_files_filter_relevant} or
+the \code{s3_list_files_filter_relevant} function.}
 }
 \if{html}{\out{</div>}}
 }
@@ -136,10 +149,37 @@ List dracarys files under given path
 \if{html}{\out{<a id="method-Wf-download_files"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf-download_files}{}}}
 \subsection{Method \code{download_files()}}{
+Download files from GDS/S3 to local filesystem.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$download_files(ica_token = Sys.getenv("ICA_ACCESS_TOKEN"))}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$download_files(
+  outdir,
+  regexes = NULL,
+  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  max_files = 1000,
+  dryrun = FALSE,
+  recursive = NULL
+)}\if{html}{\out{</div>}}
 }
 
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{outdir}}{Path to output directory.}
+
+\item{\code{regexes}}{Tibble with \code{regex} and \code{fun}ction name.}
+
+\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{\code{max_files}}{Maximum number of files to list.}
+
+\item{\code{dryrun}}{If TRUE, just list the files that will be downloaded (don't
+download them).}
+
+\item{\code{recursive}}{Should files be returned recursively \emph{in and under} the specified
+GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
+}
+\if{html}{\out{</div>}}
+}
 }
 \if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf-clone"></a>}}

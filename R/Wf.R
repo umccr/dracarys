@@ -25,19 +25,19 @@ Wf <- R6::R6Class(
   "Wf",
   public = list(
     #' @field path (`character(1)`)\cr
-    #' Output directory path with results.
-    #' @field type (`character(1)`)\cr
-    #' Type of workflow (e.g. umccrise, sash).
+    #' Path to directory with raw workflow results (from GDS, S3, or local filesystem).
+    #' @field wname (`character(1)`)\cr
+    #' Name of workflow (e.g. umccrise, sash).
     #' @field filesystem (`character(1)`)\cr
     #' Filesystem of `path`.
     path = NULL,
-    type = NULL,
+    wname = NULL,
     filesystem = NULL,
     #' @description Create a new Workflow object.
     #' @param path Output directory path with results.
-    #' @param type Type of workflow.
-    initialize = function(path = NULL, type = NULL) {
-      types <- c(
+    #' @param wname Name of workflow.
+    initialize = function(path = NULL, wname = NULL) {
+      wnames <- c(
         "bcl_convert",
         "tso_ctdna_tumor_only",
         "wgs_alignment_qc",
@@ -52,9 +52,9 @@ Wf <- R6::R6Class(
         "oncoanalyser_wgts_existing_both",
         "sash"
       )
-      assertthat::assert_that(type %in% types)
+      assertthat::assert_that(wname %in% wnames)
       self$path <- path
-      self$type <- type
+      self$wname <- wname
       self$filesystem <- dplyr::case_when(
         grepl("^gds://", path) ~ "gds",
         grepl("^s3://", path) ~ "s3",
@@ -67,52 +67,86 @@ Wf <- R6::R6Class(
       res <- tibble::tribble(
         ~var, ~value,
         "path", self$path,
-        "type", self$type,
+        "wname", self$wname,
         "filesystem", self$filesystem
       )
       print(res)
       invisible(self)
     },
     #' @description List all files under given path.
-    #' @param max_objects Maximum number of objects to list.
-    list_files = function(max_objects = 1000, ica_token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+    #' @param max_files Maximum number of files to list.
+    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+    #' @param ... Passed on to `gds_list_files_dir` function.
+    list_files = function(max_files = 1000, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
       path <- self$path
       if (self$filesystem == "gds") {
-        d <- gds_list_files_dir(gdsdir = path, page_size = max_objects, token = ica_token)
+        d <- gds_list_files_dir(
+          gdsdir = path, token = ica_token, page_size = max_files, ...
+        )
       } else if (self$filesystem == "s3") {
-        d <- s3_list_files_dir(s3dir = path, max_objects = max_objects)
+        d <- s3_list_files_dir(s3dir = path, max_objects = max_files)
       } else {
         d <- local_list_files_dir(localdir = path)
       }
       return(d)
     },
     #' @description List dracarys files under given path
-    #' @param page_size Page size
     #' @param regexes Tibble with `regex` and `fun`ction name.
-    list_files_filter_relevant = function(regexes = NULL, max_objects = 1000, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
+    #' @param max_files Maximum number of files to list.
+    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+    #' @param ... Passed on to the `gds_list_files_filter_relevant` or
+    #' the `s3_list_files_filter_relevant` function.
+    list_files_filter_relevant = function(regexes = NULL,
+                                          max_files = 1000,
+                                          ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
       assertthat::assert_that(!is.null(regexes))
       path <- self$path
       if (self$filesystem == "gds") {
-        d <- gds_list_files_filter_relevant(gdsdir = path, token = ica_token, page_size = max_objects, regexes = regexes, ...)
+        d <- gds_list_files_filter_relevant(
+          gdsdir = path, regexes = regexes, token = ica_token, page_size = max_files, ...
+        )
       } else if (self$filesystem == "s3") {
-        # "type", "bname", "size", "date_utc", "path"
-        d <- s3_list_files_filter_relevant(s3dir = path, max_objects = max_objects, regexes = regexes, ...)
+        d <- s3_list_files_filter_relevant(
+          s3dir = path, regexes = regexes, max_objects = max_files, ...
+        )
       } else {
-        # "type", "bname", "path"
-        d <- local_list_files_filter_relevant(path = path, regexes = regexes)
+        d <- local_list_files_filter_relevant(localdir = path, regexes = regexes)
       }
       d
     },
-    download_files = function(ica_token = Sys.getenv("ICA_ACCESS_TOKEN")) {
+    #' @description Download files from GDS/S3 to local filesystem.
+    #' @param outdir Path to output directory.
+    #' @param regexes Tibble with `regex` and `fun`ction name.
+    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+    #' @param max_files Maximum number of files to list.
+    #' @param dryrun If TRUE, just list the files that will be downloaded (don't
+    #' download them).
+    #' @param recursive Should files be returned recursively _in and under_ the specified
+    #' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE via ICA API).
+    download_files = function(outdir, regexes = NULL,
+                              ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                              max_files = 1000, dryrun = FALSE, recursive = NULL) {
       # TODO: add envvar checker
       path <- self$path
+      assertthat::assert_that(!is.null(regexes))
       if (self$filesystem == "gds") {
-        d <- dr_gds_download(gdsdir = path, token = ica_token)
+        d <- dr_gds_download(
+          gdsdir = path, outdir = outdir, regexes = regexes, token = ica_token,
+          page_size = max_files, dryrun = dryrun, recursive = recursive
+        )
+        self$filesystem <- "local"
+        self$path <- outdir
       } else if (self$filesystem == "s3") {
-        d <- s3_download_files(s3dir = path)
+        d <- dr_s3_download(
+          s3dir = path, outdir = outdir, regexes = regexes,
+          max_objects = max_files, dryrun = dryrun
+        )
+        self$filesystem <- "local"
+        self$path <- outdir
       } else {
-        d <- local_download_files(localdir = path)
+        d <- self$list_files_filter_relevant(regexes = regexes)
       }
+      return(d)
     }
   ) # end public
 )
