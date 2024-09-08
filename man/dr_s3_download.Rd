@@ -10,7 +10,8 @@ dr_s3_download(
   max_objects = 100,
   pattern = NULL,
   regexes = DR_FILE_REGEX,
-  dryrun = FALSE
+  dryrun = FALSE,
+  list_filter_fun = s3_list_files_filter_relevant
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ dr_s3_download(
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}
+
+\item{list_filter_fun}{Function to filter relevant S3 files.}
 }
 \description{
 Download only S3 files that can be processed by dracarys.
@@ -37,6 +40,6 @@ p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
 s3dir <- file.path(p1, p2)
 regexes <- tibble::tibble(regex = "multiqc_data\\\\.json$", fun = "MultiqcJsonFile")
 outdir <- sub("s3:/", "~/s3", s3dir)
-dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 300, regexes = regexes, dryrun = F)
+dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 300, regexes = regexes, dryrun = T)
 }
 }

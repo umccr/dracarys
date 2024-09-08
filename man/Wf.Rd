@@ -39,9 +39,8 @@ regexes <- tibble::tribble(
 p1_local <- "~/icav1/g/production/analysis_data"
 p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
 um1 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
-um1$list_files(max_files = 100)
-um1$list_files_filter_relevant(max_files = 100)
-
+um1$list_files(max_files = 10)
+um1$list_files_filter_relevant(max_files = 10)
 
 #---- GDS ----#
 p1_gds <- "gds://production/analysis_data"
@@ -53,7 +52,7 @@ um2$list_files(max_files = 10)
 um2$list_files_filter_relevant(ica_token = token, max_files = 500)
 d <- um2$download_files(
   outdir = outdir, ica_token = token,
-  max_files = 1000, dryrun = F
+  max_files = 1000, dryrun = T
 )
 
 #---- S3 ----#
@@ -71,17 +70,14 @@ d <- um3$download_files(outdir = outdir, regexes = regexes, max_files = 50, dryr
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{path}}{(\code{character(1)})\cr
-Path to directory with raw workflow results (from GDS, S3, or local filesystem).}
+\item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
+local filesystem).}
 
-\item{\code{wname}}{(\code{character(1)})\cr
-Name of workflow (e.g. umccrise, sash).}
+\item{\code{wname}}{Name of workflow (e.g. umccrise, sash).}
 
-\item{\code{filesystem}}{(\code{character(1)})\cr
-Filesystem of \code{path}.}
+\item{\code{filesystem}}{Filesystem of \code{path} (gds/s3/local).}
 
-\item{\code{regexes}}{(\code{tibble()})\cr
-Tibble with file \code{regex} and \code{fun}ction to parse it.}
+\item{\code{regexes}}{Tibble with file \code{regex} and \code{fun}ction to parse it.}
 }
 \if{html}{\out{</div>}}
 }
@@ -109,7 +105,7 @@ Create a new Workflow object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{path}}{Output directory path with results.}
+\item{\code{path}}{Path to directory with raw workflow results.}
 
 \item{\code{wname}}{Name of workflow.}
 
@@ -142,6 +138,7 @@ Print details about the Workflow.
 List all files under given path.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$list_files(
+  path = self$path,
   max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   ...
@@ -151,6 +148,8 @@ List all files under given path.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{path}}{Path with raw results.}
+
 \item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
 
 \item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
@@ -167,6 +166,7 @@ List all files under given path.
 List dracarys files under given path
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$list_files_filter_relevant(
+  path = self$path,
   max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   ...
@@ -176,6 +176,8 @@ List dracarys files under given path
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{path}}{Path with raw results.}
+
 \item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
 
 \item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
@@ -193,28 +195,34 @@ the \code{s3_list_files_filter_relevant} function.}
 Download files from GDS/S3 to local filesystem.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$download_files(
+  path = self$path,
   outdir,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   max_files = 1000,
   dryrun = FALSE,
-  recursive = NULL
+  recursive = NULL,
+  list_filter_fun = NULL
 )}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
+\item{\code{path}}{Path with raw results.}
+
 \item{\code{outdir}}{Path to output directory.}
 
 \item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
-\item{\code{max_files}}{Maximum number of files to list.}
+\item{\code{max_files}}{Max number of files to list.}
 
 \item{\code{dryrun}}{If TRUE, just list the files that will be downloaded (don't
 download them).}
 
 \item{\code{recursive}}{Should files be returned recursively \emph{in and under} the specified
 GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
+
+\item{\code{list_filter_fun}}{Function to filter relevant files.}
 }
 \if{html}{\out{</div>}}
 }
@@ -231,7 +239,7 @@ Tidy given files.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{Tibble with \code{fun}ction to parse the file and \code{localpath} to the file.}
+\item{\code{x}}{Tibble with \code{localpath} to file and the function \code{type} to parse it.}
 }
 \if{html}{\out{</div>}}
 }

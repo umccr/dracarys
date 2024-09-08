@@ -1,3 +1,30 @@
+#' Tidy Files
+#'
+#' @param x Tibble with `localpath` to file and the function `type` to parse it.
+#' @param envir the environment in which to evaluate the function e.g. use `self`
+#' when using inside R6 classes.
+#'
+#' @return Tibble with parsed data in a `data` list-column.
+#' @examples
+#' \dontrun{
+#' p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
+#' p2 <- "L2101566__L2101565/SBJ01155__PRJ211091-qc_summary.tsv.gz"
+#' p <- file.path(p1, p2)
+#' x <- tibble::tibble(type = "readr::read_tsv", localpath = p)
+#' tidy_files(x)
+#' }
+#'
+#' @export
+tidy_files <- function(x, envir = parent.frame()) {
+  assertthat::assert_that(is.data.frame(x))
+  assertthat::assert_that(all(c("type", "localpath") %in% colnames(x)))
+  x |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      data = list(dr_func_eval(f = .data$type, v = .data$type, envir = envir)(.data$localpath))
+    )
+}
+
 #' Tidy UMCCR Results
 #'
 #' Tidies UMCCR workflow results into a list of tibbles and writes individual

@@ -83,6 +83,8 @@ FILES_DOWNLOAD_BUT_IGNORE <- c(
 #' @param f Name of function to evaluate.
 #' @param v Character vector of strings evaluating to functions. By default,
 #' this points to the functions in the DR_FILE_REGEX dracarys tibble.
+#' @param envir the environment in which to evaluate the function e.g. use `self`
+#' when using inside R6 classes.
 #'
 #' @return Evaluated function.
 #' @examples
@@ -94,13 +96,13 @@ FILES_DOWNLOAD_BUT_IGNORE <- c(
 #' expect_equal(mean_1_to_10, base::mean(1:10))
 #' expect_null(dr_func_eval("foo"))
 #' @export
-dr_func_eval <- function(f, v = NULL) {
+dr_func_eval <- function(f, v = NULL, envir = parent.frame()) {
   v <- v %||% DR_FILE_REGEX[["fun"]]
   if (!f %in% v) {
     return(NULL)
   }
   # evaluate string
-  eval(parse(text = f))
+  eval(parse(text = f), envir = envir)
 }
 
 #' Get dracarys `DR_FILE_REGEX`

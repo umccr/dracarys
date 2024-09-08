@@ -30,9 +30,8 @@
 #' p1_local <- "~/icav1/g/production/analysis_data"
 #' p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
 #' um1 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
-#' um1$list_files(max_files = 100)
-#' um1$list_files_filter_relevant(max_files = 100)
-#'
+#' um1$list_files(max_files = 10)
+#' um1$list_files_filter_relevant(max_files = 10)
 #'
 #' #---- GDS ----#
 #' p1_gds <- "gds://production/analysis_data"
@@ -44,7 +43,7 @@
 #' um2$list_files_filter_relevant(ica_token = token, max_files = 500)
 #' d <- um2$download_files(
 #'   outdir = outdir, ica_token = token,
-#'   max_files = 1000, dryrun = F
+#'   max_files = 1000, dryrun = T
 #' )
 #'
 #' #---- S3 ----#
@@ -62,20 +61,17 @@
 Wf <- R6::R6Class(
   "Wf",
   public = list(
-    #' @field path (`character(1)`)\cr
-    #' Path to directory with raw workflow results (from GDS, S3, or local filesystem).
-    #' @field wname (`character(1)`)\cr
-    #' Name of workflow (e.g. umccrise, sash).
-    #' @field filesystem (`character(1)`)\cr
-    #' Filesystem of `path`.
-    #' @field regexes (`tibble()`)\cr
-    #' Tibble with file `regex` and `fun`ction to parse it.
+    #' @field path Path to directory with raw workflow results (from GDS, S3, or
+    #' local filesystem).
+    #' @field wname Name of workflow (e.g. umccrise, sash).
+    #' @field filesystem  Filesystem of `path` (gds/s3/local).
+    #' @field regexes Tibble with file `regex` and `fun`ction to parse it.
     path = NULL,
     wname = NULL,
     filesystem = NULL,
     regexes = NULL,
     #' @description Create a new Workflow object.
-    #' @param path Output directory path with results.
+    #' @param path Path to directory with raw workflow results.
     #' @param wname Name of workflow.
     #' @param regexes Tibble with file `regex` and `fun`ction to parse it.
     initialize = function(path = NULL, wname = NULL, regexes = NULL) {
@@ -117,11 +113,12 @@ Wf <- R6::R6Class(
       invisible(self)
     },
     #' @description List all files under given path.
+    #' @param path Path with raw results.
     #' @param max_files Max number of files to list (for gds/s3 only).
     #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
     #' @param ... Passed on to `gds_list_files_dir` function.
-    list_files = function(max_files = 1000, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
-      path <- self$path
+    list_files = function(path = self$path, max_files = 1000,
+                          ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
       if (self$filesystem == "gds") {
         d <- gds_list_files_dir(
           gdsdir = path, token = ica_token, page_size = max_files, ...
@@ -134,15 +131,15 @@ Wf <- R6::R6Class(
       return(d)
     },
     #' @description List dracarys files under given path
+    #' @param path Path with raw results.
     #' @param max_files Max number of files to list (for gds/s3 only).
     #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
     #' @param ... Passed on to the `gds_list_files_filter_relevant` or
     #' the `s3_list_files_filter_relevant` function.
-    list_files_filter_relevant = function(max_files = 1000,
+    list_files_filter_relevant = function(path = self$path, max_files = 1000,
                                           ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
       regexes <- self$regexes
       assertthat::assert_that(!is.null(regexes))
-      path <- self$path
       if (self$filesystem == "gds") {
         d <- gds_list_files_filter_relevant(
           gdsdir = path, regexes = regexes, token = ica_token, page_size = max_files, ...
@@ -159,23 +156,26 @@ Wf <- R6::R6Class(
       d
     },
     #' @description Download files from GDS/S3 to local filesystem.
+    #' @param path Path with raw results.
     #' @param outdir Path to output directory.
     #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
-    #' @param max_files Maximum number of files to list.
+    #' @param max_files Max number of files to list.
     #' @param dryrun If TRUE, just list the files that will be downloaded (don't
     #' download them).
     #' @param recursive Should files be returned recursively _in and under_ the specified
     #' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE via ICA API).
-    download_files = function(outdir, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
-                              max_files = 1000, dryrun = FALSE, recursive = NULL) {
+    #' @param list_filter_fun Function to filter relevant files.
+    download_files = function(path = self$path, outdir, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                              max_files = 1000, dryrun = FALSE, recursive = NULL,
+                              list_filter_fun = NULL) {
       # TODO: add envvar checker
-      path <- self$path
       regexes <- self$regexes
-      assertthat::assert_that(!is.null(regexes))
+      assertthat::assert_that(!is.null(regexes), !is.null(list_filter_fun))
       if (self$filesystem == "gds") {
         d <- dr_gds_download(
           gdsdir = path, outdir = outdir, regexes = regexes, token = ica_token,
-          page_size = max_files, dryrun = dryrun, recursive = recursive
+          page_size = max_files, dryrun = dryrun, recursive = recursive,
+          list_filter_fun = list_filter_fun
         )
         if (!dryrun) {
           self$filesystem <- "local"
@@ -184,7 +184,8 @@ Wf <- R6::R6Class(
       } else if (self$filesystem == "s3") {
         d <- dr_s3_download(
           s3dir = path, outdir = outdir, regexes = regexes,
-          max_objects = max_files, dryrun = dryrun
+          max_objects = max_files, dryrun = dryrun,
+          list_filter_fun = list_filter_fun
         )
         if (!dryrun) {
           self$filesystem <- "local"
@@ -196,9 +197,10 @@ Wf <- R6::R6Class(
       return(d)
     },
     #' @description Tidy given files.
-    #' @param x Tibble with `fun`ction to parse the file and `localpath` to the file.
+    #' @param x Tibble with `localpath` to file and the function `type` to parse it.
     tidy_files = function(x) {
-      tidy_files(x)
+      # awesomeness
+      tidy_files(x, envir = self)
     }
   ) # end public
 )

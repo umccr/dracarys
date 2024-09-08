@@ -4,10 +4,13 @@
 \alias{tidy_files}
 \title{Tidy Files}
 \usage{
-tidy_files(x)
+tidy_files(x, envir = parent.frame())
 }
 \arguments{
-\item{x}{Tibble with \code{fun}ction to parse the file and \code{localpath} to the file.}
+\item{x}{Tibble with \code{localpath} to file and the function \code{type} to parse it.}
+
+\item{envir}{the environment in which to evaluate the function e.g. use \code{self}
+when using inside R6 classes.}
 }
 \value{
 Tibble with parsed data in a \code{data} list-column.
@@ -20,7 +23,8 @@ Tidy Files
 p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
 p2 <- "L2101566__L2101565/SBJ01155__PRJ211091-qc_summary.tsv.gz"
 p <- file.path(p1, p2)
-x <- tibble::tibble(fun = "readr::read_tsv", localpath = p)
+x <- tibble::tibble(type = "readr::read_tsv", localpath = p)
+tidy_files(x)
 )
 }
 

@@ -12,7 +12,8 @@ dr_gds_download(
   page_size = 100,
   dryrun = FALSE,
   regexes = DR_FILE_REGEX,
-  recursive = NULL
+  recursive = NULL,
+  list_filter_fun = gds_list_files_filter_relevant
 )
 }
 \arguments{
@@ -33,6 +34,8 @@ download them).}
 
 \item{recursive}{Should files be returned recursively \emph{in and under} the specified
 GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
+
+\item{list_filter_fun}{Function to filter relevant GDS files.}
 }
 \description{
 Download only GDS files that can be processed by dracarys.
@@ -42,7 +45,7 @@ Download only GDS files that can be processed by dracarys.
 gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
 outdir <- sub("gds:/", "~/icav1/g", gdsdir)
 regexes <- tibble::tibble(regex = "multiqc_data\\\\.json$", fun = "MultiqcJsonFile")
-dr_gds_download(gdsdir = gdsdir, outdir = outdir, regexes = regexes, dryrun = F)
+dr_gds_download(gdsdir = gdsdir, outdir = outdir, regexes = regexes, dryrun = T)
 }
 
 }

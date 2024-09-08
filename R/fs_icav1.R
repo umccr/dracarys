@@ -155,21 +155,23 @@ gds_list_files_filter_relevant <- function(gdsdir, pattern = NULL, regexes = DR_
 #' @param outdir Local output directory.
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
+#' @param list_filter_fun Function to filter relevant GDS files.
 #' @examples
 #' \dontrun{
 #' gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
 #' outdir <- sub("gds:/", "~/icav1/g", gdsdir)
 #' regexes <- tibble::tibble(regex = "multiqc_data\\.json$", fun = "MultiqcJsonFile")
-#' dr_gds_download(gdsdir = gdsdir, outdir = outdir, regexes = regexes, dryrun = F)
+#' dr_gds_download(gdsdir = gdsdir, outdir = outdir, regexes = regexes, dryrun = T)
 #' }
 #'
 #' @export
 dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN"),
                             pattern = NULL, page_size = 100, dryrun = FALSE,
-                            regexes = DR_FILE_REGEX, recursive = NULL) {
+                            regexes = DR_FILE_REGEX, recursive = NULL,
+                            list_filter_fun = gds_list_files_filter_relevant) {
   e <- emojifont::emoji
   fs::dir_create(outdir)
-  d <- gds_list_files_filter_relevant(
+  d <- list_filter_fun(
     gdsdir = gdsdir, pattern = pattern, regexes = regexes,
     token = token, page_size = page_size, include_url = FALSE,
     no_recurse = FALSE, page_token = NULL,

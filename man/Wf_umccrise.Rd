@@ -8,23 +8,57 @@ Reads and writes tidy versions of files from the \code{umccrise} workflow
 }
 \examples{
 \dontrun{
+
 #---- LOCAL ----#
+SubjectID <- "SBJ01155"
+SampleID_tumor <- "PRJ211091"
 p1_local <- "~/icav1/g/production/analysis_data"
 p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
-um1 <- Wf_umccrise$new(path = p)
-um1$list_files(max_files = 10)
-um1$list_files_filter_relevant(max_files = 100)
+um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+um1$list_files(max_files = 100)
+
+#---- GDS ----#
+SubjectID <- "SBJ03043"
+SampleID_tumor <- "PRJ230004"
+p1_gds <- "gds://production/analysis_data"
+p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
+outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+token <- Sys.getenv("ICA_ACCESS_TOKEN")
+um2 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+um2$list_files(max_files = 8)
+um2$list_files_filter_relevant(ica_token = token, max_files = 500)
+d <- um2$download_files(
+  outdir = outdir, ica_token = token,
+  max_files = 1000, dryrun = F
+)
+
 }
 
 }
 \section{Super class}{
 \code{\link[dracarys:Wf]{dracarys::Wf}} -> \code{Wf_umccrise}
 }
+\section{Public fields}{
+\if{html}{\out{<div class="r6-fields">}}
+\describe{
+\item{\code{SubjectID}}{The SubjectID of the sample (needed for path lookup).}
+
+\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (needed for path lookup).}
+}
+\if{html}{\out{</div>}}
+}
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
 \item \href{#method-Wf_umccrise-new}{\code{Wf_umccrise$new()}}
-\item \href{#method-Wf_umccrise-tidy}{\code{Wf_umccrise$tidy()}}
+\item \href{#method-Wf_umccrise-print}{\code{Wf_umccrise$print()}}
+\item \href{#method-Wf_umccrise-list_files_filter_relevant}{\code{Wf_umccrise$list_files_filter_relevant()}}
+\item \href{#method-Wf_umccrise-download_files}{\code{Wf_umccrise$download_files()}}
+\item \href{#method-Wf_umccrise-read_pcgrjson}{\code{Wf_umccrise$read_pcgrjson()}}
+\item \href{#method-Wf_umccrise-read_chordtsv}{\code{Wf_umccrise$read_chordtsv()}}
+\item \href{#method-Wf_umccrise-read_hrdetecttsv}{\code{Wf_umccrise$read_hrdetecttsv()}}
+\item \href{#method-Wf_umccrise-read_sigstsv}{\code{Wf_umccrise$read_sigstsv()}}
+\item \href{#method-Wf_umccrise-read_qcsummarytsv}{\code{Wf_umccrise$read_qcsummarytsv()}}
 \item \href{#method-Wf_umccrise-read_conpairmultiqc}{\code{Wf_umccrise$read_conpairmultiqc()}}
 \item \href{#method-Wf_umccrise-clone}{\code{Wf_umccrise$clone()}}
 }
@@ -32,10 +66,7 @@ um1$list_files_filter_relevant(max_files = 100)
 \if{html}{\out{
 <details open><summary>Inherited methods</summary>
 <ul>
-<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="download_files"><a href='../../dracarys/html/Wf.html#method-Wf-download_files'><code>dracarys::Wf$download_files()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files"><a href='../../dracarys/html/Wf.html#method-Wf-list_files'><code>dracarys::Wf$list_files()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files_filter_relevant"><a href='../../dracarys/html/Wf.html#method-Wf-list_files_filter_relevant'><code>dracarys::Wf$list_files_filter_relevant()</code></a></span></li>
-<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="print"><a href='../../dracarys/html/Wf.html#method-Wf-print'><code>dracarys::Wf$print()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="tidy_files"><a href='../../dracarys/html/Wf.html#method-Wf-tidy_files'><code>dracarys::Wf$tidy_files()</code></a></span></li>
 </ul>
 </details>
@@ -46,7 +77,7 @@ um1$list_files_filter_relevant(max_files = 100)
 \subsection{Method \code{new()}}{
 Create a new Wf_umccrise object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$new(path = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$new(path = NULL, SubjectID = NULL, SampleID_tumor = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -54,26 +85,172 @@ Create a new Wf_umccrise object.
 \describe{
 \item{\code{path}}{Output directory path with results.}
 
-\item{\code{wname}}{Name of workflow.}
+\item{\code{SubjectID}}{The SubjectID of the sample (needed for path lookup).}
+
+\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (needed for path lookup).}
 }
 \if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-tidy"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-tidy}{}}}
-\subsection{Method \code{tidy()}}{
-Tidy up the output files from umccrise
+\if{html}{\out{<a id="method-Wf_umccrise-print"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-print}{}}}
+\subsection{Method \code{print()}}{
+Print details about the Workflow.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$tidy(indir, out_files)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$print(...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{indir}}{Path to the \code{umccrise} directory.}
+\item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-list_files_filter_relevant"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-list_files_filter_relevant}{}}}
+\subsection{Method \code{list_files_filter_relevant()}}{
+List dracarys files under given path
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$list_files_filter_relevant(
+  max_files = 1000,
+  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  ...
+)}\if{html}{\out{</div>}}
+}
 
-\item{\code{out_files}}{Tibble with file path, basename, and size.}
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
+
+\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{\code{...}}{Passed on to the \code{gds_list_files_filter_relevant} or
+the \code{s3_list_files_filter_relevant} function.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-download_files"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-download_files}{}}}
+\subsection{Method \code{download_files()}}{
+Download files from GDS/S3 to local filesystem.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$download_files(
+  outdir,
+  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  max_files = 1000,
+  dryrun = FALSE,
+  recursive = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{outdir}}{Path to output directory.}
+
+\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{\code{max_files}}{Max number of files to list.}
+
+\item{\code{dryrun}}{If TRUE, just list the files that will be downloaded (don't
+download them).}
+
+\item{\code{recursive}}{Should files be returned recursively \emph{in and under} the specified
+GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
+
+\item{\code{list_filter_fun}}{Function to filter relevant files.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_pcgrjson"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_pcgrjson}{}}}
+\subsection{Method \code{read_pcgrjson()}}{
+Read \code{pcgr.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_pcgrjson(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_chordtsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_chordtsv}{}}}
+\subsection{Method \code{read_chordtsv()}}{
+Read \code{chord.tsv.gz} cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_chordtsv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_hrdetecttsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_hrdetecttsv}{}}}
+\subsection{Method \code{read_hrdetecttsv()}}{
+Read \code{hrdetect.tsv.gz} cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_hrdetecttsv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigstsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigstsv}{}}}
+\subsection{Method \code{read_sigstsv()}}{
+Read \code{snv_20XX.tsv.gz} cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigstsv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_qcsummarytsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_qcsummarytsv}{}}}
+\subsection{Method \code{read_qcsummarytsv()}}{
+Read \code{qc_summary.tsv.gz} cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_qcsummarytsv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }

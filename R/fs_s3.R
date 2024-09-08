@@ -109,6 +109,7 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
 #' @param outdir Path to output directory.
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
+#' @param list_filter_fun Function to filter relevant S3 files.
 #' @examples
 #' \dontrun{
 #' p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
@@ -116,15 +117,16 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
 #' s3dir <- file.path(p1, p2)
 #' regexes <- tibble::tibble(regex = "multiqc_data\\.json$", fun = "MultiqcJsonFile")
 #' outdir <- sub("s3:/", "~/s3", s3dir)
-#' dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 300, regexes = regexes, dryrun = F)
+#' dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 300, regexes = regexes, dryrun = T)
 #' }
 #' @export
 dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
-                           regexes = DR_FILE_REGEX, dryrun = FALSE) {
+                           regexes = DR_FILE_REGEX, dryrun = FALSE,
+                           list_filter_fun = s3_list_files_filter_relevant) {
   s3 <- paws.storage::s3()
   e <- emojifont::emoji
   fs::dir_create(outdir)
-  d <- s3_list_files_filter_relevant(
+  d <- list_filter_fun(
     s3dir = s3dir, pattern = NULL, regexes = regexes,
     max_objects = max_objects, presign = FALSE
   )
