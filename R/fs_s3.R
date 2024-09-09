@@ -115,9 +115,13 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
 #' p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
 #' p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
 #' s3dir <- file.path(p1, p2)
-#' regexes <- tibble::tibble(regex = "multiqc_data\\.json$", fun = "MultiqcJsonFile")
+#' regexes <- tibble::tribble(
+#'   ~regex, ~fun,
+#'   "multiqc_data\\.json$", "MultiqcJsonFile",
+#'   "pcgr.*\\.json\\.gz$", "pcgrjson"
+#' )
 #' outdir <- sub("s3:/", "~/s3", s3dir)
-#' dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 300, regexes = regexes, dryrun = T)
+#' dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 500, regexes = regexes, dryrun = F)
 #' }
 #' @export
 dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
@@ -132,11 +136,15 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
   )
   d <- d |>
     dplyr::mutate(
-      localpath = file.path(outdir, .data$bname),
+      s3path_minus_s3dir = sub(glue("{s3dir}/"), "", .data$path),
+      s3path_minus_s3dir_outdir = fs::dir_create(
+        file.path(outdir, dirname(s3path_minus_s3dir))
+      ),
+      localpath = file.path(.data$s3path_minus_s3dir_outdir, .data$bname),
       s3path = .data$path
     ) |>
     dplyr::select("type", "bname", "size", "lastmodified", "localpath", "s3path")
-  # download recognisable dracarys files to outdir/{bname}
+  # download recognisable dracarys files to outdir/<mirrored-cloud-path>/{bname}
   if (!dryrun) {
     cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {s3dir}}")
     d |>

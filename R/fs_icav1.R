@@ -160,7 +160,11 @@ gds_list_files_filter_relevant <- function(gdsdir, pattern = NULL, regexes = DR_
 #' \dontrun{
 #' gdsdir <- "gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
 #' outdir <- sub("gds:/", "~/icav1/g", gdsdir)
-#' regexes <- tibble::tibble(regex = "multiqc_data\\.json$", fun = "MultiqcJsonFile")
+#' regexes <- tibble::tribble(
+#'   ~regex, ~fun,
+#'   "multiqc_data\\.json$", "MultiqcJsonFile",
+#'   "-somatic\\.pcgr\\.json\\.gz$", "pcgrjson"
+#' )
 #' dr_gds_download(gdsdir = gdsdir, outdir = outdir, regexes = regexes, dryrun = T)
 #' }
 #'
@@ -179,11 +183,15 @@ dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN
   )
   d <- d |>
     dplyr::mutate(
-      localpath = file.path(outdir, .data$bname),
+      gdspath_minus_gdsdir = sub(glue("{gdsdir}/"), "", .data$path),
+      gdspath_minus_gdsdir_outdir = fs::dir_create(
+        file.path(outdir, dirname(gdspath_minus_gdsdir))
+      ),
+      localpath = file.path(.data$gdspath_minus_gdsdir_outdir, .data$bname),
       gdspath = .data$path
     ) |>
     dplyr::select("type", "bname", "size", "lastmodified", "file_id", "localpath", "gdspath")
-  # download recognisable dracarys files to outdir/{bname}
+  # download recognisable dracarys files to outdir/<mirrored-cloud-path>/{bname}
   if (!dryrun) {
     cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {gdsdir}}")
     res <- d |>
