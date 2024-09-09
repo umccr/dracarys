@@ -91,6 +91,7 @@ local filesystem).}
 \item \href{#method-Wf-list_files_filter_relevant}{\code{Wf$list_files_filter_relevant()}}
 \item \href{#method-Wf-download_files}{\code{Wf$download_files()}}
 \item \href{#method-Wf-tidy_files}{\code{Wf$tidy_files()}}
+\item \href{#method-Wf-write}{\code{Wf$write()}}
 \item \href{#method-Wf-clone}{\code{Wf$clone()}}
 }
 }
@@ -241,6 +242,31 @@ Tidy given files.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{x}}{Tibble with \code{localpath} to file and the function \code{type} to parse it.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-write"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-write}{}}}
+\subsection{Method \code{write()}}{
+Write tidy data.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$write(x, outdir = NULL, prefix = NULL, format = "tsv", drid = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Tibble with tidy \code{data} and file \code{type}.}
+
+\item{\code{outdir}}{Directory path to output tidy files.}
+
+\item{\code{prefix}}{Prefix of output files.}
+
+\item{\code{format}}{Format of output files.}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }
 \if{html}{\out{</div>}}
 }

@@ -202,6 +202,29 @@ Wf <- R6::R6Class(
     tidy_files = function(x) {
       # awesomeness
       tidy_files(x, envir = self)
+    },
+    #' @description Write tidy data.
+    #' @param x Tibble with tidy `data` and file `type`.
+    #' @param outdir Directory path to output tidy files.
+    #' @param prefix Prefix of output files.
+    #' @param format Format of output files.
+    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    write = function(x, outdir = NULL, prefix = NULL, format = "tsv", drid = NULL) {
+      assertthat::assert_that(!is.null(prefix))
+      if (!is.null(outdir)) {
+        prefix <- file.path(outdir, prefix)
+      }
+      d_write <- x |>
+        dplyr::rowwise() |>
+        dplyr::mutate(
+          section = sub("read_", "", .data$type),
+          p = glue("{prefix}_{.data$section}"),
+          out = list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid))
+        ) |>
+        dplyr::ungroup() |>
+        dplyr::select("section", "data") |>
+        tibble::deframe()
+      invisible(d_write)
     }
   ) # end public
 )

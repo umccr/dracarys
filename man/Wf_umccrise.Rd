@@ -10,13 +10,21 @@ Reads and writes tidy versions of files from the \code{umccrise} workflow
 \dontrun{
 
 #---- LOCAL ----#
-SubjectID <- "SBJ01155"
-SampleID_tumor <- "PRJ211091"
+SubjectID <- "SBJ03043"
+SampleID_tumor <- "PRJ230004"
 p1_local <- "~/icav1/g/production/analysis_data"
-p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
+p <- file.path(p1_local, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
 um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
 um1$list_files(max_files = 10)
 um1$list_files_filter_relevant()
+d <- um1$download_files(max_files = 1000, dryrun = F)
+d_tidy <- um1$tidy_files(d)
+d_write <- um1$write(
+  d_tidy,
+  outdir = file.path(p, "dracarys_tidy"),
+  prefix = glue("{SubjectID}__{SampleID_tumor}"),
+  format = "tsv"
+)
 
 #---- GDS ----#
 SubjectID <- "SBJ03043"
@@ -73,6 +81,7 @@ d_tidy <- um2$tidy_files(d)
 <ul>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files"><a href='../../dracarys/html/Wf.html#method-Wf-list_files'><code>dracarys::Wf$list_files()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="tidy_files"><a href='../../dracarys/html/Wf.html#method-Wf-tidy_files'><code>dracarys::Wf$tidy_files()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="write"><a href='../../dracarys/html/Wf.html#method-Wf-write'><code>dracarys::Wf$write()</code></a></span></li>
 </ul>
 </details>
 }}

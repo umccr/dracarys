@@ -14,8 +14,14 @@
 #' um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
 #' um1$list_files(max_files = 10)
 #' um1$list_files_filter_relevant()
-#' d <- um1$download_files(max_files = 1000, dryrun = T)
+#' d <- um1$download_files(max_files = 1000, dryrun = F)
 #' d_tidy <- um1$tidy_files(d)
+#' d_write <- um1$write(
+#'   d_tidy,
+#'   outdir = file.path(p, "dracarys_tidy"),
+#'   prefix = glue("{SubjectID}__{SampleID_tumor}"),
+#'   format = "tsv"
+#' )
 #'
 #' #---- GDS ----#
 #' SubjectID <- "SBJ03043"
