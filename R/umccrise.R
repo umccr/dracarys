@@ -7,12 +7,15 @@
 #' \dontrun{
 #'
 #' #---- LOCAL ----#
-#' SubjectID <- "SBJ01155"
-#' SampleID_tumor <- "PRJ211091"
+#' SubjectID <- "SBJ03043"
+#' SampleID_tumor <- "PRJ230004"
 #' p1_local <- "~/icav1/g/production/analysis_data"
-#' p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
+#' p <- file.path(p1_local, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
 #' um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
-#' um1$list_files(max_files = 100)
+#' um1$list_files(max_files = 10)
+#' um1$list_files_filter_relevant()
+#' d <- um1$download_files(max_files = 1000, dryrun = T)
+#' d_tidy <- um1$tidy_files(d)
 #'
 #' #---- GDS ----#
 #' SubjectID <- "SBJ03043"
@@ -28,6 +31,7 @@
 #'   outdir = outdir, ica_token = token,
 #'   max_files = 1000, dryrun = F
 #' )
+#' d_tidy <- um2$tidy_files(d)
 #' }
 #'
 #' @export
@@ -49,10 +53,10 @@ Wf_umccrise <- R6::R6Class(
         ~regex, ~fun,
         "-chord\\.tsv\\.gz$", "chordtsv",
         "-hrdetect\\.tsv\\.gz$", "hrdetecttsv",
-        "-snv_2015\\.tsv\\.gz$", "sigstsv",
-        "-snv_2020\\.tsv\\.gz$", "sigstsv",
-        "-dbs\\.tsv\\.gz$", "sigstsv",
-        "-indel\\.tsv\\.gz$", "sigstsv",
+        "-snv_2015\\.tsv\\.gz$", "sigssnv2015tsv",
+        "-snv_2020\\.tsv\\.gz$", "sigssnv2020tsv",
+        "-dbs\\.tsv\\.gz$", "sigsdbstsv",
+        "-indel\\.tsv\\.gz$", "sigsindeltsv",
         "-qc_summary\\.tsv\\.gz$", "qcsummarytsv",
         "multiqc_conpair.txt", "conpairmultiqc",
         "-somatic\\.pcgr\\.json\\.gz$", "pcgrjson"
@@ -152,7 +156,7 @@ Wf_umccrise <- R6::R6Class(
       read_tsvgz(x, col_types = ct) |>
         dplyr::select(-c("sample"))
     },
-    #' @description Read `snv_20XX.tsv.gz` cancer report file.
+    #' @description Read signature cancer report file.
     #' @param x Path to file.
     read_sigstsv = function(x) {
       ct <- readr::cols(
@@ -160,6 +164,26 @@ Wf_umccrise <- R6::R6Class(
         Signature = "c"
       )
       read_tsvgz(x, col_types = ct)
+    },
+    #' @description Read `snv_2015.tsv.gz` sigs cancer report file.
+    #' @param x Path to file.
+    read_sigssnv2015tsv = function(x) {
+      self$read_sigstsv(x)
+    },
+    #' @description Read `snv_2020.tsv.gz` sigs cancer report file.
+    #' @param x Path to file.
+    read_sigssnv2020tsv = function(x) {
+      self$read_sigstsv(x)
+    },
+    #' @description Read `dbs.tsv.gz` sigs cancer report file.
+    #' @param x Path to file.
+    read_sigsdbstsv = function(x) {
+      self$read_sigstsv(x)
+    },
+    #' @description Read `indel.tsv.gz` sigs cancer report file.
+    #' @param x Path to file.
+    read_sigsindeltsv = function(x) {
+      self$read_sigstsv(x)
     },
     #' @description Read `qc_summary.tsv.gz` cancer report file.
     #' @param x Path to file.

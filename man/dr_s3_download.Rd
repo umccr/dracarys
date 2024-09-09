@@ -38,8 +38,12 @@ Download only S3 files that can be processed by dracarys.
 p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
 p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
 s3dir <- file.path(p1, p2)
-regexes <- tibble::tibble(regex = "multiqc_data\\\\.json$", fun = "MultiqcJsonFile")
+regexes <- tibble::tribble(
+  ~regex, ~fun,
+  "multiqc_data\\\\.json$", "MultiqcJsonFile",
+  "pcgr.*\\\\.json\\\\.gz$", "pcgrjson"
+)
 outdir <- sub("s3:/", "~/s3", s3dir)
-dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 300, regexes = regexes, dryrun = T)
+dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 500, regexes = regexes, dryrun = F)
 }
 }

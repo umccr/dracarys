@@ -45,6 +45,7 @@
 #'   outdir = outdir, ica_token = token,
 #'   max_files = 1000, dryrun = T
 #' )
+#' d_tidy <- um2$tidy_files(d)
 #'
 #' #---- S3 ----#
 #' p1_s3 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05570/sash/202408275fce06c3"

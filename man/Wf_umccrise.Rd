@@ -15,7 +15,8 @@ SampleID_tumor <- "PRJ211091"
 p1_local <- "~/icav1/g/production/analysis_data"
 p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
 um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
-um1$list_files(max_files = 100)
+um1$list_files(max_files = 10)
+um1$list_files_filter_relevant()
 
 #---- GDS ----#
 SubjectID <- "SBJ03043"
@@ -31,7 +32,7 @@ d <- um2$download_files(
   outdir = outdir, ica_token = token,
   max_files = 1000, dryrun = F
 )
-
+d_tidy <- um2$tidy_files(d)
 }
 
 }
@@ -58,6 +59,10 @@ d <- um2$download_files(
 \item \href{#method-Wf_umccrise-read_chordtsv}{\code{Wf_umccrise$read_chordtsv()}}
 \item \href{#method-Wf_umccrise-read_hrdetecttsv}{\code{Wf_umccrise$read_hrdetecttsv()}}
 \item \href{#method-Wf_umccrise-read_sigstsv}{\code{Wf_umccrise$read_sigstsv()}}
+\item \href{#method-Wf_umccrise-read_sigssnv2015tsv}{\code{Wf_umccrise$read_sigssnv2015tsv()}}
+\item \href{#method-Wf_umccrise-read_sigssnv2020tsv}{\code{Wf_umccrise$read_sigssnv2020tsv()}}
+\item \href{#method-Wf_umccrise-read_sigsdbstsv}{\code{Wf_umccrise$read_sigsdbstsv()}}
+\item \href{#method-Wf_umccrise-read_sigsindeltsv}{\code{Wf_umccrise$read_sigsindeltsv()}}
 \item \href{#method-Wf_umccrise-read_qcsummarytsv}{\code{Wf_umccrise$read_qcsummarytsv()}}
 \item \href{#method-Wf_umccrise-read_conpairmultiqc}{\code{Wf_umccrise$read_conpairmultiqc()}}
 \item \href{#method-Wf_umccrise-clone}{\code{Wf_umccrise$clone()}}
@@ -225,9 +230,77 @@ Read \code{hrdetect.tsv.gz} cancer report file.
 \if{html}{\out{<a id="method-Wf_umccrise-read_sigstsv"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigstsv}{}}}
 \subsection{Method \code{read_sigstsv()}}{
-Read \code{snv_20XX.tsv.gz} cancer report file.
+Read signature cancer report file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigstsv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigssnv2015tsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigssnv2015tsv}{}}}
+\subsection{Method \code{read_sigssnv2015tsv()}}{
+Read \code{snv_2015.tsv.gz} sigs cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigssnv2015tsv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigssnv2020tsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigssnv2020tsv}{}}}
+\subsection{Method \code{read_sigssnv2020tsv()}}{
+Read \code{snv_2020.tsv.gz} sigs cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigssnv2020tsv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigsdbstsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigsdbstsv}{}}}
+\subsection{Method \code{read_sigsdbstsv()}}{
+Read \code{dbs.tsv.gz} sigs cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigsdbstsv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigsindeltsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigsindeltsv}{}}}
+\subsection{Method \code{read_sigsindeltsv()}}{
+Read \code{indel.tsv.gz} sigs cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigsindeltsv(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

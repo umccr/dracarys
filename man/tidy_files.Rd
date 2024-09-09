@@ -25,7 +25,6 @@ p2 <- "L2101566__L2101565/SBJ01155__PRJ211091-qc_summary.tsv.gz"
 p <- file.path(p1, p2)
 x <- tibble::tibble(type = "readr::read_tsv", localpath = p)
 tidy_files(x)
-)
 }
 
 }
