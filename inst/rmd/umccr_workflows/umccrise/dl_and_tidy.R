@@ -44,7 +44,7 @@ lims <- lims_raw |>
     subject_id, library_id, sample_id, sample_name,
     external_subject_id, external_sample_id,
     project_name, project_owner,
-    source, quality
+    source, quality, workflow
   ) |>
   distinct()
 table(lims$library_id %in% meta$LibraryID_tumor) # double-check
@@ -55,7 +55,7 @@ meta_lims <- meta |>
   select(
     rownum, wfr_id, version, end_status, start, end, portal_run_id, SubjectID, LibraryID_tumor, LibraryID_normal,
     SampleID_tumor, SampleID_normal, gds_outdir_umccrise, gds_indir_dragen_somatic, external_subject_id, external_sample_id,
-    project_owner, project_name, source, quality
+    project_owner, project_name, source, quality, workflow
   )
 meta_lims |>
   saveRDS(here(glue("inst/rmd/umccr_workflows/umccrise/nogit/meta/{start_date}_{end_date}.rds")))
