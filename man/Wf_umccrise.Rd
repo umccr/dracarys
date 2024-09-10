@@ -12,6 +12,7 @@ Reads and writes tidy versions of files from the \code{umccrise} workflow
 #---- LOCAL ----#
 SubjectID <- "SBJ03043"
 SampleID_tumor <- "PRJ230004"
+prefix <- glue("{SubjectID}__{SampleID_tumor}")
 p1_local <- "~/icav1/g/production/analysis_data"
 p <- file.path(p1_local, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
 um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
@@ -29,6 +30,7 @@ d_write <- um1$write(
 #---- GDS ----#
 SubjectID <- "SBJ03043"
 SampleID_tumor <- "PRJ230004"
+prefix <- glue("{SubjectID}__{SampleID_tumor}")
 p1_gds <- "gds://production/analysis_data"
 p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
 outdir <- file.path(sub("gds:/", "~/icav1/g", p))
@@ -41,6 +43,12 @@ d <- um2$download_files(
   max_files = 1000, dryrun = F
 )
 d_tidy <- um2$tidy_files(d)
+d_write <- um2$write(
+  d_tidy,
+  outdir = file.path(outdir, "dracarys_tidy"),
+  prefix = glue("{SubjectID}__{SampleID_tumor}"),
+  format = "tsv"
+)
 }
 
 }
@@ -97,7 +105,8 @@ Create a new Wf_umccrise object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{path}}{Output directory path with results.}
+\item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
+local filesystem).}
 
 \item{\code{SubjectID}}{The SubjectID of the sample (needed for path lookup).}
 

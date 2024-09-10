@@ -9,6 +9,7 @@
 #' #---- LOCAL ----#
 #' SubjectID <- "SBJ03043"
 #' SampleID_tumor <- "PRJ230004"
+#' prefix <- glue("{SubjectID}__{SampleID_tumor}")
 #' p1_local <- "~/icav1/g/production/analysis_data"
 #' p <- file.path(p1_local, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
 #' um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
@@ -26,6 +27,7 @@
 #' #---- GDS ----#
 #' SubjectID <- "SBJ03043"
 #' SampleID_tumor <- "PRJ230004"
+#' prefix <- glue("{SubjectID}__{SampleID_tumor}")
 #' p1_gds <- "gds://production/analysis_data"
 #' p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
@@ -38,6 +40,12 @@
 #'   max_files = 1000, dryrun = F
 #' )
 #' d_tidy <- um2$tidy_files(d)
+#' d_write <- um2$write(
+#'   d_tidy,
+#'   outdir = file.path(outdir, "dracarys_tidy"),
+#'   prefix = glue("{SubjectID}__{SampleID_tumor}"),
+#'   format = "tsv"
+#' )
 #' }
 #'
 #' @export
@@ -50,7 +58,8 @@ Wf_umccrise <- R6::R6Class(
     SubjectID = NULL,
     SampleID_tumor = NULL,
     #' @description Create a new Wf_umccrise object.
-    #' @param path Output directory path with results.
+    #' @param path Path to directory with raw workflow results (from GDS, S3, or
+    #' local filesystem).
     #' @param SubjectID The SubjectID of the sample (needed for path lookup).
     #' @param SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
     initialize = function(path = NULL, SubjectID = NULL, SampleID_tumor = NULL) {
@@ -64,7 +73,7 @@ Wf_umccrise <- R6::R6Class(
         "-dbs\\.tsv\\.gz$", "sigsdbstsv",
         "-indel\\.tsv\\.gz$", "sigsindeltsv",
         "-qc_summary\\.tsv\\.gz$", "qcsummarytsv",
-        "multiqc_conpair.txt", "conpairmultiqc",
+        "multiqc_conpair\\.txt$", "conpairmultiqc",
         "-somatic\\.pcgr\\.json\\.gz$", "pcgrjson"
       ) |>
         dplyr::mutate(fun = paste0("read_", .data$fun))
@@ -260,16 +269,56 @@ Wf_umccrise <- R6::R6Class(
   ) # end public
 )
 
-#    read = function() {
-#      x <- self$path
-#      # now return all as list elements
-#      list(
-#        chord = grep_file(x, "-chord\\.tsv\\.gz$") |> self$read_chordtsv(),
-#        hrdetect = grep_file(x, "-hrdetect\\.tsv\\.gz$") |> self$read_hrdetecttsv(),
-#        sigs2015 = grep_file(x, "-snv_2015\\.tsv\\.gz$") |> self$read_sigs(),
-#        sigs2020 = grep_file(x, "-snv_2020\\.tsv\\.gz$") |> self$read_sigs(),
-#        sigsdbs = grep_file(x, "-dbs\\.tsv\\.gz$") |> self$read_sigs(),
-#        sigsindel = grep_file(x, "-indel\\.tsv\\.gz$") |> self$read_sigs(),
-#        qcsum = grep_file(x, "-qc_summary\\.tsv\\.gz$") |> self$read_qcsummarytsv()
-#      )
-#    }
+#' umccrise Download Tidy and Write
+#'
+#' Downloads files from the `umccrise` workflow and writes them in a tidy format.
+#'
+#' @param path Path to directory with raw workflow results (from GDS, S3, or
+#' local filesystem).
+#' @param SubjectID The SubjectID of the sample (needed for path lookup).
+#' @param SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
+#' @param outdir Path to output directory.
+#' @param max_files Max number of files to list.
+#' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+#' @param dryrun If TRUE, just list the files that will be downloaded (don't
+#' download them).
+#' @return List where each element is a tidy tibble of a umccrise file.
+#'
+#' @examples
+#' \dontrun{
+#' SubjectID <- "SBJ03043"
+#' SampleID_tumor <- "PRJ230004"
+#' p1_gds <- glue("gds://production/analysis_data/{SubjectID}/umccrise")
+#' p <- file.path(p1_gds, "20240830ec648f40/L2300064__L2300063")
+#' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
+#' d <- Wf_umccrise_download_tidy_write(
+#'   path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor,
+#'   outdir = outdir,
+#'   dryrun = F
+#' )
+#' }
+#' @export
+Wf_umccrise_download_tidy_write <- function(path, SubjectID, SampleID_tumor,
+                                            outdir, max_files = 1000,
+                                            ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                                            dryrun = FALSE) {
+  um <- Wf_umccrise$new(
+    path = path, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor
+  )
+  d_dl <- um$download_files(
+    outdir = outdir, ica_token = ica_token,
+    max_files = max_files, dryrun = dryrun
+  )
+  if (!dryrun) {
+    d_tidy <- um$tidy_files(d_dl)
+    d_write <- um$write(
+      d_tidy,
+      outdir = file.path(outdir, "dracarys_tidy"),
+      prefix = glue("{SubjectID}__{SampleID_tumor}"),
+      format = "tsv"
+    )
+    return(d_write)
+  }
+  return(d_dl)
+}

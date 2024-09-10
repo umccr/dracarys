@@ -185,7 +185,7 @@ dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN
     dplyr::mutate(
       gdspath_minus_gdsdir = sub(glue("{gdsdir}/"), "", .data$path),
       gdspath_minus_gdsdir_outdir = fs::dir_create(
-        file.path(outdir, dirname(gdspath_minus_gdsdir))
+        file.path(outdir, dirname(.data$gdspath_minus_gdsdir))
       ),
       localpath = file.path(.data$gdspath_minus_gdsdir_outdir, .data$bname),
       gdspath = .data$path
