@@ -1,0 +1,224 @@
+---
+title: "{{< meta params.title >}}"
+subtitle: "Period: `r paste(params$date_start, ' to ', params$date_end)`"
+author: "UMCCR - Genomics Platform Group"
+date: now
+date-format: "YYYY-MM-DD HH:mm Z"
+execute:
+  echo: false
+format:
+  html:
+    toc: true
+    toc-expand: 1
+    toc-title: Contents
+    toc-location: body
+    highlight-style: github
+    number-sections: false
+    link-external-icon: true
+    link-external-newwindow: true
+    embed-resources: true
+    code-copy: true
+    code-link: true
+    code-fold: true
+    code-block-border-left: true
+    smooth-scroll: true
+    grid:
+      body-width: 1300px
+params:
+  title: "UMCCR umccrise Workflow Summary"
+  date_start: "XXXX-XX-XX"
+  date_end: "XXXX-XX-XX"
+---
+
+```{r}
+#| label: pkg_load
+#| message: false
+{
+  require(dplyr) # import all dplyr funcs
+  require(readr, include.only = c("read_rds"))
+  require(purrr, include.only = c("map"))
+  require(tidyr, include.only = c("unnest_wider"))
+  require(dracarys, include.only = c("session_info_kable"))
+  require(glue, include.only = "glue")
+  require(here, include.only = "here")
+  require(knitr, include.only = "kable")
+  require(reactable, include.only = "reactable")
+  require(ggplot2, include.only = c("ggplot", "aes"))
+  require(lubridate, include.only = c("as_datetime"))
+  require(plotly, include.only = c("ggplotly"))
+}
+set.seed(42)
+```
+
+```{r}
+#| label: load_data
+date_start <- "2024-08-29"
+date_end <- "2024-09-01"
+d_raw <- readr::read_rds(here(glue("inst/rmd/umccr_workflows/umccrise/nogit/results_{date_start}_{date_end}.rds")))
+```
+
+## Results
+
+```{r}
+#| label: process
+# one row per file type - not all samples have sigsdbstsv
+d <- d_raw |>
+  tidyr::unnest_longer(res, indices_to = "filetype")
+# main_cols <- c("rownum", "portal_run_id", "SubjectID", "LibraryID_tumor")
+main_cols <- c("portal_run_id")
+qcsum <- d |>
+  filter(filetype == "qcsummarytsv") |>
+  unnest_wider(res) |>
+  select(all_of(main_cols), qc_status_hmf:bpi_enabled)
+hrd_chord <- d |>
+  filter(filetype == "chordtsv") |>
+  unnest_wider(res) |>
+  select(all_of(main_cols),
+    chord_p_hrd = "p_hrd",
+    chord_hr_status = "hr_status",
+    chord_hrd_type = "hrd_type",
+    chord_p_BRCA1 = "p_BRCA1",
+    chord_p_BRCA2 = "p_BRCA2"
+  )
+hrd_hrdetect <- d |>
+  filter(filetype == "hrdetecttsv") |>
+  unnest_wider(res) |>
+  select(all_of(main_cols), hrdetect_prob = "Probability")
+sigs_snv2015 <- d |>
+  filter(filetype == "sigssnv2015tsv") |>
+  select(all_of(main_cols), res) |>
+  tidyr::unnest_wider(res) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
+sigs_snv2020 <- d |>
+  filter(filetype == "sigssnv2020tsv") |>
+  select(all_of(main_cols), res) |>
+  tidyr::unnest_wider(res) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
+sigs_dbs <- d |>
+  filter(filetype == "sigsdbstsv") |>
+  select(all_of(main_cols), res) |>
+  tidyr::unnest_wider(res) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
+sigs_indel <- d |>
+  filter(filetype == "sigsindeltsv") |>
+  select(all_of(main_cols), res) |>
+  tidyr::unnest_wider(res) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
+
+# signatures
+dsig <- bind_rows(
+  list(
+    snv2015 = sigs_snv2015, snv2020 = sigs_snv2020, dbs = sigs_dbs, indel = sigs_indel
+  ),
+  .id = "Sig_group"
+)
+
+# keep top two ranked sigs
+dsig_filt <- dsig |>
+  group_by(Sig_group, portal_run_id) |>
+  mutate(tot_sig_vars = sum(Contribution)) |>
+  arrange(Rank) |>
+  slice_head(n = 2) |>
+  # some sigs have same Rank so use explicit sig_rank
+  mutate(sig_rank = row_number()) |>
+  ungroup() |>
+  mutate(
+    sig_summary = glue("{Signature} ({RelFreq} = {Contribution} / {tot_sig_vars})")
+  ) |>
+  select(Sig_group, portal_run_id, sig_rank, sig_summary) |>
+  tidyr::pivot_wider(names_from = sig_rank, values_from = sig_summary, names_prefix = "rank") |>
+  mutate(sig_top2 = paste(rank1, rank2, sep = ", ")) |>
+  select(portal_run_id, sig_top2)
+
+dall <- d_raw |>
+  select(
+    date_analysed = "start", portal_run_id,
+    SubjectID, LibraryID_tumor, SampleID_tumor,
+    external_subject_id, external_sample_id,
+    project_owner, project_name, source, quality
+  ) |>
+  left_join(qcsum, by = "portal_run_id") |>
+  left_join(hrd_chord, by = "portal_run_id") |>
+  left_join(hrd_hrdetect, by = "portal_run_id")
+```
+
+```{r}
+#| label: hrd_plot
+#| fig-width: 15
+#| fig-height: 15
+p1 <- dall |>
+  mutate(sbj = glue("{SubjectID}_{LibraryID_tumor}")) |>
+  select(date_analysed, sbj, chord = hrd_chord, hrdetect = hrd_hrdetect) |>
+  tidyr::pivot_longer(chord:hrdetect, names_to = "method", values_to = "probability") |>
+  ggplot2::ggplot(aes(x = date_analysed, y = probability, label = sbj)) +
+  ggplot2::geom_point(aes(colour = method)) +
+  ggplot2::geom_line(aes(group = sbj), linewidth = 0.05) +
+  ggplot2::theme_bw() +
+  ggplot2::ggtitle("CHORD vs. HRDetect per SubjectID")
+
+plotly::ggplotly(p1)
+```
+
+### Signature Results
+
+```{r}
+#| label: sig_results
+#| fig-width: 15
+#| fig-height: 65
+
+sig_order2015 <- paste0("Sig", 1:30)
+sig_order2020 <- paste0(
+  "SBS",
+  c(
+    1:6,
+    paste0(7, c("a", "b", "c", "d")),
+    8:9,
+    paste0(10, c("a", "b", "c", "d")),
+    11:16,
+    paste0(17, c("a", "b")),
+    18:60,
+    84:94
+  )
+)
+
+p2_prep <- dsig |>
+  filter(
+    Sig_group == "snv2015",
+    Rank %in% c(1:3)
+  ) |>
+  left_join(dall |> select(portal_run_id, date_analysed, SubjectID, LibraryID_tumor), by = "portal_run_id") |>
+  mutate(sbj = as.character(glue("{SubjectID}_{LibraryID_tumor}"))) |>
+  select(date_analysed, sbj, Sig_group, Rank, Signature, Contribution, RelFreq) |>
+  mutate(Signature = factor(Signature, levels = c(sig_order2015, sig_order2020)))
+p2 <- p2_prep |>
+  ggplot2::ggplot(aes(x = Contribution, y = sbj, fill = Signature, text = sbj)) +
+  ggplot2::geom_bar(position = "fill", stat = "identity") +
+  ggplot2::theme_bw(base_size = 7)
+# ggplot2::facet_wrap(~Sig_group, ncol = 1)
+
+plotly::ggplotly(p2, tooltip = c("x", "text", "fill"))
+```
+
+## Metadata Summary
+
+::: {.panel-tabset .nav-pills}
+
+### Project Name/Owner
+
+```{r}
+#| label: project_owner_name
+dall |>
+  count(project_name, project_owner) |>
+  knitr::kable()
+```
+
+### Source / Quality
+
+```{r}
+#| label: source_quality
+count(dall, source, quality) |> knitr::kable()
+```
+
+:::
+
+</div>

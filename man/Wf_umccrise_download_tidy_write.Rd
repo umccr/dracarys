@@ -9,6 +9,7 @@ Wf_umccrise_download_tidy_write(
   SubjectID,
   SampleID_tumor,
   outdir,
+  format = "rds",
   max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   dryrun = FALSE
@@ -23,6 +24,8 @@ local filesystem).}
 \item{SampleID_tumor}{The SampleID of the tumor sample (needed for path lookup).}
 
 \item{outdir}{Path to output directory.}
+
+\item{format}{Format of output files.}
 
 \item{max_files}{Max number of files to list.}
 
