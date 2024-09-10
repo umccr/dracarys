@@ -282,6 +282,7 @@ Wf_umccrise <- R6::R6Class(
 #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
+#' @param format Format of output files.
 #' @return List where each element is a tidy tibble of a umccrise file.
 #'
 #' @examples
@@ -300,7 +301,7 @@ Wf_umccrise <- R6::R6Class(
 #' }
 #' @export
 Wf_umccrise_download_tidy_write <- function(path, SubjectID, SampleID_tumor,
-                                            outdir, max_files = 1000,
+                                            outdir, format = "rds", max_files = 1000,
                                             ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
                                             dryrun = FALSE) {
   um <- Wf_umccrise$new(
@@ -316,7 +317,7 @@ Wf_umccrise_download_tidy_write <- function(path, SubjectID, SampleID_tumor,
       d_tidy,
       outdir = file.path(outdir, "dracarys_tidy"),
       prefix = glue("{SubjectID}__{SampleID_tumor}"),
-      format = "tsv"
+      format = format
     )
     return(d_write)
   }
