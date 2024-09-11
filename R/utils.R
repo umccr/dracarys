@@ -117,6 +117,34 @@ write_dracarys <- function(obj, prefix, out_format, drid = NULL) {
   return(invisible(obj))
 }
 
+#' Write List of Tidy Tibbles
+#'
+#' @param list_of_tbls List of tidy tibbles.
+#' @param out_dir Output directory.
+#' @param prefix Prefix of output file(s).
+#' @param out_format Format of output file(s).
+#' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+#'
+#' @return Tibble with nested objects that have been written to the output directory.
+#' @export
+write_dracarys_list_of_tbls <- function(list_of_tbls, out_dir = NULL, prefix = NULL, out_format = "tsv", drid = NULL) {
+  assertthat::assert_that(!is.null(prefix))
+  if (!is.null(out_dir)) {
+    prefix <- file.path(out_dir, prefix)
+  }
+  d_write <- list_of_tbls |>
+    tibble::enframe(name = "section") |>
+    dplyr::rowwise() |>
+    dplyr::mutate(
+      section_low = tolower(.data$section),
+      p = glue("{prefix}_{.data$section_low}"),
+      out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::select("section", "value") |>
+    tibble::deframe()
+  invisible(d_write)
+}
 
 #' Create Empty Tibble Given Column Names
 #'
@@ -165,7 +193,24 @@ read_jsongz_rjsonio <- function(x, ...) {
   RJSONIO::fromJSON(x, ...)
 }
 
-
+#' Grep File Pattern
+#'
+#' @param path Path to look for file.
+#' @param regexp A regular expression (e.g. [.]csv$) passed on to `grep()` to filter paths.
+#'
+#' @return The path to the file or an empty string if no match is found.
+#' @export
+grep_file <- function(path = ".", regexp) {
+  x <- fs::dir_ls(path, recurse = TRUE, type = "file", regexp = regexp)
+  if (length(x) > 1) {
+    fnames <- paste(x, collapse = ", ")
+    cli::cli_abort("More than 1 match found for {regexp} ({fnames}). Aborting.")
+  }
+  if (length(x) == 0) {
+    return("") # file.exists("") returns FALSE
+  }
+  return(x)
+}
 
 #' @noRd
 dummy1 <- function() {

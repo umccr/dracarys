@@ -2,38 +2,83 @@
 % Please edit documentation in R/Wf.R
 \name{Wf}
 \alias{Wf}
-\title{Workflow R6 Class}
+\title{Workflow}
 \description{
 Workflow is a base R6 class representing a bioinformatic
 workflow run from a UMCCR workflow manager.
+
+A workflow has:
+\itemize{
+\item a directory path with all the raw output files (either on GDS, S3 or
+local filesystem)
+\item a subset of files that are of interest for ingestion
+\itemize{
+\item tibble with full path and basename columns
+}
+\item a set of parsers that can parse and tidy those files
+\itemize{
+\item each parser takes a path and returns a tidy tibble
+}
+\item a list of tidy tibbles (or a tibble with nested tibbles)
+}
 }
 \examples{
-p1 <- system.file("extdata/portaldb_workflow_top4.rds", package = "rportal") |>
-  readRDS() |>
-  dplyr::filter(type_name == "umccrise") |>
-  dplyr::slice(1)
-w <- Wf$new(
-  prid = p1$portal_run_id, type = p1$type_name, start = p1$start, end = p1$end,
-  status = p1$end_status, input = p1$input, output = p1$output
+\dontrun{
+regexes <- tibble::tribble(
+  ~regex, ~fun,
+  "-chord\\\\.tsv\\\\.gz$", "UmChordTsvFile",
+  "-hrdetect\\\\.tsv\\\\.gz$", "UmHrdetectTsvFile",
+  "-snv_2015\\\\.tsv\\\\.gz$", "UmSigsSnvFile",
+  "-snv_2020\\\\.tsv\\\\.gz$", "UmSigsSnvFile",
+  "-dbs\\\\.tsv\\\\.gz$", "UmSigsDbsFile",
+  "-indel\\\\.tsv\\\\.gz$", "UmSigsIndelFile",
+  "-qc_summary\\\\.tsv\\\\.gz$", "UmQcSumFile",
 )
-w
+
+#---- LOCAL ----#
+p1_local <- "~/icav1/g/production/analysis_data"
+p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565")
+um1 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
+um1$list_files(max_files = 10)
+um1$list_files_filter_relevant(max_files = 10)
+
+#---- GDS ----#
+p1_gds <- "gds://production/analysis_data"
+p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
+outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+token <- Sys.getenv("ICA_ACCESS_TOKEN")
+um2 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
+um2$list_files(max_files = 10)
+um2$list_files_filter_relevant(ica_token = token, max_files = 500)
+d <- um2$download_files(
+  outdir = outdir, ica_token = token,
+  max_files = 1000, dryrun = T
+)
+d_tidy <- um2$tidy_files(d)
+
+#---- S3 ----#
+p1_s3 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05570/sash/202408275fce06c3"
+p2_s3 <- "L2401304_L2401303/SBJ05570_MDX240299/cancer_report/cancer_report_tables"
+p <- file.path(p1_s3, p2_s3)
+outdir <- sub("s3:/", "~/s3", p)
+um3 <- Wf$new(path = p, wname = "sash", regexes = regexes)
+um3$list_files(max_files = 10)
+um3$list_files_filter_relevant(max_files = 50)
+d <- um3$download_files(outdir = outdir, regexes = regexes, max_files = 50, dryrun = F)
+}
+
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{prid}}{Portal run ID.}
+\item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
+local filesystem).}
 
-\item{\code{type}}{Workflow type.}
+\item{\code{wname}}{Name of workflow (e.g. umccrise, sash).}
 
-\item{\code{start}}{Workflow start datetime.}
+\item{\code{filesystem}}{Filesystem of \code{path} (gds/s3/local).}
 
-\item{\code{end}}{Workflow end datetime.}
-
-\item{\code{status}}{Workflow end status.}
-
-\item{\code{input}}{Workflow input JSON string.}
-
-\item{\code{output}}{Workflow output JSON string.}
+\item{\code{regexes}}{Tibble with file \code{regex} and \code{fun}ction to parse it.}
 }
 \if{html}{\out{</div>}}
 }
@@ -42,6 +87,11 @@ w
 \itemize{
 \item \href{#method-Wf-new}{\code{Wf$new()}}
 \item \href{#method-Wf-print}{\code{Wf$print()}}
+\item \href{#method-Wf-list_files}{\code{Wf$list_files()}}
+\item \href{#method-Wf-list_files_filter_relevant}{\code{Wf$list_files_filter_relevant()}}
+\item \href{#method-Wf-download_files}{\code{Wf$download_files()}}
+\item \href{#method-Wf-tidy_files}{\code{Wf$tidy_files()}}
+\item \href{#method-Wf-write}{\code{Wf$write()}}
 \item \href{#method-Wf-clone}{\code{Wf$clone()}}
 }
 }
@@ -51,33 +101,17 @@ w
 \subsection{Method \code{new()}}{
 Create a new Workflow object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$new(
-  prid = NULL,
-  type = NULL,
-  start = NULL,
-  end = NULL,
-  status = NULL,
-  input = NULL,
-  output = NULL
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$new(path = NULL, wname = NULL, regexes = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{prid}}{Portal run ID.}
+\item{\code{path}}{Path to directory with raw workflow results.}
 
-\item{\code{type}}{Workflow type.}
+\item{\code{wname}}{Name of workflow.}
 
-\item{\code{start}}{Workflow start datetime.}
-
-\item{\code{end}}{Workflow end datetime.}
-
-\item{\code{status}}{Workflow end status.}
-
-\item{\code{input}}{Workflow input JSON string.}
-
-\item{\code{output}}{Workflow output JSON string.}
+\item{\code{regexes}}{Tibble with file \code{regex} and \code{fun}ction to parse it.}
 }
 \if{html}{\out{</div>}}
 }
@@ -95,6 +129,144 @@ Print details about the Workflow.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-list_files"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-list_files}{}}}
+\subsection{Method \code{list_files()}}{
+List all files under given path.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files(
+  path = self$path,
+  max_files = 1000,
+  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{path}}{Path with raw results.}
+
+\item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
+
+\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{\code{...}}{Passed on to \code{gds_list_files_dir} function.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-list_files_filter_relevant"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-list_files_filter_relevant}{}}}
+\subsection{Method \code{list_files_filter_relevant()}}{
+List dracarys files under given path
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files_filter_relevant(
+  path = self$path,
+  max_files = 1000,
+  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  ...
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{path}}{Path with raw results.}
+
+\item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
+
+\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{\code{...}}{Passed on to the \code{gds_list_files_filter_relevant} or
+the \code{s3_list_files_filter_relevant} function.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-download_files"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-download_files}{}}}
+\subsection{Method \code{download_files()}}{
+Download files from GDS/S3 to local filesystem.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$download_files(
+  path = self$path,
+  outdir,
+  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  max_files = 1000,
+  dryrun = FALSE,
+  recursive = NULL,
+  list_filter_fun = NULL
+)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{path}}{Path with raw results.}
+
+\item{\code{outdir}}{Path to output directory.}
+
+\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{\code{max_files}}{Max number of files to list.}
+
+\item{\code{dryrun}}{If TRUE, just list the files that will be downloaded (don't
+download them).}
+
+\item{\code{recursive}}{Should files be returned recursively \emph{in and under} the specified
+GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
+
+\item{\code{list_filter_fun}}{Function to filter relevant files.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-tidy_files"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-tidy_files}{}}}
+\subsection{Method \code{tidy_files()}}{
+Tidy given files.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$tidy_files(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Tibble with \code{localpath} to file and the function \code{type} to parse it.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-write"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-write}{}}}
+\subsection{Method \code{write()}}{
+Write tidy data.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$write(x, outdir = NULL, prefix = NULL, format = "tsv", drid = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Tibble with tidy \code{data} and file \code{type}.}
+
+\item{\code{outdir}}{Directory path to output tidy files.}
+
+\item{\code{prefix}}{Prefix of output files.}
+
+\item{\code{format}}{Format of output files.}
+
+\item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
 }
 \if{html}{\out{</div>}}
 }

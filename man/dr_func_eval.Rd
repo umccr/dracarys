@@ -4,13 +4,16 @@
 \alias{dr_func_eval}
 \title{Evaluate dracarys Function}
 \usage{
-dr_func_eval(f, v = NULL)
+dr_func_eval(f, v = NULL, envir = parent.frame())
 }
 \arguments{
 \item{f}{Name of function to evaluate.}
 
 \item{v}{Character vector of strings evaluating to functions. By default,
 this points to the functions in the DR_FILE_REGEX dracarys tibble.}
+
+\item{envir}{the environment in which to evaluate the function e.g. use \code{self}
+when using inside R6 classes.}
 }
 \value{
 Evaluated function.

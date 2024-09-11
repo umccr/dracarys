@@ -1,80 +1,156 @@
-#' UmccriseCanRepTables R6 Class
+#' Wf_umccrise R6 Class
 #'
 #' @description
-#' Reads and writes tidy versions of files within the `cancer_report_tables` directory
-#' output from the `umccrise` workflow.
+#' Reads and writes tidy versions of files from the `umccrise` workflow
 #'
 #' @examples
 #' \dontrun{
-#' p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
-#' p2 <- "L2101566__L2101565/SBJ01155__PRJ211091/cancer_report_tables"
-#' p <- file.path(p1, p2)
-#' obj <- UmccriseCanRepTables$new(p)
-#' obj$path
-#' obj$contents
-#' d <- obj$read()
-#' obj$write(d, out_dir = tempdir(), prefix = "sampleA", out_format = "tsv")
+#'
+#' #---- LOCAL ----#
+#' SubjectID <- "SBJ03043"
+#' SampleID_tumor <- "PRJ230004"
+#' prefix <- glue("{SubjectID}__{SampleID_tumor}")
+#' p1_local <- "~/icav1/g/production/analysis_data"
+#' p <- file.path(p1_local, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
+#' um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+#' um1$list_files(max_files = 10)
+#' um1$list_files_filter_relevant()
+#' d <- um1$download_files(max_files = 1000, dryrun = F)
+#' d_tidy <- um1$tidy_files(d)
+#' d_write <- um1$write(
+#'   d_tidy,
+#'   outdir = file.path(p, "dracarys_tidy"),
+#'   prefix = glue("{SubjectID}__{SampleID_tumor}"),
+#'   format = "tsv"
+#' )
+#'
+#' #---- GDS ----#
+#' SubjectID <- "SBJ03043"
+#' SampleID_tumor <- "PRJ230004"
+#' prefix <- glue("{SubjectID}__{SampleID_tumor}")
+#' p1_gds <- "gds://production/analysis_data"
+#' p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
+#' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
+#' um2 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+#' um2$list_files(max_files = 8)
+#' um2$list_files_filter_relevant(ica_token = token, max_files = 500)
+#' d <- um2$download_files(
+#'   outdir = outdir, ica_token = token,
+#'   max_files = 1000, dryrun = F
+#' )
+#' d_tidy <- um2$tidy_files(d)
+#' d_write <- um2$write(
+#'   d_tidy,
+#'   outdir = file.path(outdir, "dracarys_tidy"),
+#'   prefix = glue("{SubjectID}__{SampleID_tumor}"),
+#'   format = "tsv"
+#' )
 #' }
 #'
 #' @export
-UmccriseCanRepTables <- R6::R6Class(
-  "UmccriseCanRepTables",
+Wf_umccrise <- R6::R6Class(
+  "Wf_umccrise",
+  inherit = Wf,
   public = list(
-    #' @field path Path to the `cancer_report_tables` directory.
-    #' @field contents Tibble with file path, basename, and size.
-    path = NULL,
-    contents = NULL,
-    #' @description Create a new UmccriseCanRepTables object.
-    #' @param path Path to the `cancer_report_tables` directory.
-    initialize = function(path = NULL) {
-      stopifnot(is.character(path), length(path) == 1)
-      self$path <- normalizePath(path)
-      self$contents <- fs::dir_info(path, type = "file", recurse = TRUE) |>
-        dplyr::mutate(
-          bname = basename(.data$path),
-          size = as.character(trimws(.data$size))
-        ) |>
-        dplyr::select("path", "bname", "size")
+    #' @field SubjectID The SubjectID of the sample (needed for path lookup).
+    #' @field SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
+    SubjectID = NULL,
+    SampleID_tumor = NULL,
+    #' @description Create a new Wf_umccrise object.
+    #' @param path Path to directory with raw workflow results (from GDS, S3, or
+    #' local filesystem).
+    #' @param SubjectID The SubjectID of the sample (needed for path lookup).
+    #' @param SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
+    initialize = function(path = NULL, SubjectID = NULL, SampleID_tumor = NULL) {
+      wname <- "umccrise"
+      regexes <- tibble::tribble(
+        ~regex, ~fun,
+        "-chord\\.tsv\\.gz$", "chordtsv",
+        "-hrdetect\\.tsv\\.gz$", "hrdetecttsv",
+        "-snv_2015\\.tsv\\.gz$", "sigssnv2015tsv",
+        "-snv_2020\\.tsv\\.gz$", "sigssnv2020tsv",
+        "-dbs\\.tsv\\.gz$", "sigsdbstsv",
+        "-indel\\.tsv\\.gz$", "sigsindeltsv",
+        "-qc_summary\\.tsv\\.gz$", "qcsummarytsv",
+        "multiqc_conpair\\.txt$", "conpairmultiqc",
+        "-somatic\\.pcgr\\.json\\.gz$", "pcgrjson"
+      ) |>
+        dplyr::mutate(fun = paste0("read_", .data$fun))
+
+      super$initialize(path = path, wname = wname, regexes = regexes)
+      self$SubjectID <- SubjectID
+      self$SampleID_tumor <- SampleID_tumor
     },
-    #' @description Print details about the cancer_report_tables directory.
+    #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
-      bnames <- self$contents |>
-        dplyr::mutate(
-          low = tolower(.data$bname),
-        ) |>
-        dplyr::arrange(.data$low) |>
-        dplyr::mutate(
-          n = dplyr::row_number(),
-          bn = glue("{.data$n}. {.data$bname} ({.data$size})")
-        ) |>
-        dplyr::pull("bn")
-      cat("#--- UmccriseCanRepTables ---#\n")
-      cat(glue("Path: {self$path}"), "\n")
-      cat("Contents:\n")
-      cat(bnames, sep = "\n")
+      res <- tibble::tribble(
+        ~var, ~value,
+        "path", self$path,
+        "wname", self$wname,
+        "filesystem", self$filesystem,
+        "SubjectID", self$SubjectID,
+        "SampleID_tumor", self$SampleID_tumor
+      )
+      print(res)
       invisible(self)
     },
-    #' @description Returns file with given pattern from the cancer_report_tables directory.
-    #' @param pat File pattern to look for.
-    grep_file = function(pat) {
-      x <- self$contents |>
-        dplyr::filter(grepl(pat, .data$path)) |>
-        dplyr::pull(.data$path)
-      if (length(x) > 1) {
-        fnames <- paste(x, collapse = ", ")
-        cli::cli_abort("More than 1 match found for {pat} ({fnames}). Aborting.")
-      }
-      if (length(x) == 0) {
-        return("") # file.exists("") returns FALSE
-      }
-      return(x)
+    #' @description List dracarys files under given path
+    #' @param max_files Max number of files to list (for gds/s3 only).
+    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+    #' @param ... Passed on to the `gds_list_files_filter_relevant` or
+    #' the `s3_list_files_filter_relevant` function.
+    list_files_filter_relevant = function(max_files = 1000,
+                                          ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
+      path <- self$path
+      dir_final <- file.path(path, glue("{self$SubjectID}__{self$SampleID_tumor}"))
+      dir_work <- file.path(path, "work", glue("{self$SubjectID}__{self$SampleID_tumor}"))
+      dir_work_pcgr <- file.path(dir_work, "pcgr") # for pcgr json
+      f1 <- super$list_files_filter_relevant(path = dir_final, max_files = 300, ica_token = ica_token)
+      f2 <- super$list_files_filter_relevant(path = dir_work_pcgr, max_files = 50, ica_token = ica_token)
+      f_all <- dplyr::bind_rows(f1, f2)
+      return(f_all)
     },
-
-    #' @description Read `chord.tsv.gz` file output from umccrise.
-    #'
-    #' @param x (`character(1)`)\cr
-    #'   Path to `chord.tsv.gz` file.
+    #' @description Download files from GDS/S3 to local filesystem.
+    #' @param outdir Path to output directory.
+    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+    #' @param max_files Max number of files to list.
+    #' @param dryrun If TRUE, just list the files that will be downloaded (don't
+    #' download them).
+    #' @param recursive Should files be returned recursively _in and under_ the specified
+    #' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE via ICA API).
+    #' @param list_filter_fun Function to filter relevant files.
+    download_files = function(outdir, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                              max_files = 1000, dryrun = FALSE, recursive = NULL) {
+      super$download_files(
+        outdir = outdir, ica_token = ica_token, max_files = max_files,
+        dryrun = dryrun, recursive = recursive,
+        list_filter_fun = self$list_files_filter_relevant
+      )
+    },
+    #' @description Read `pcgr.json.gz` file.
+    #' @param x Path to file.
+    read_pcgrjson = function(x) {
+      j <- read_jsongz_jsonlite(x)
+      tmb <-
+        j[["content"]][["tmb"]][["variant_statistic"]] %||%
+        j[["content"]][["tmb"]][["v_stat"]] %||%
+        list(tmb_estimate = NA, n_tmb = NA)
+      tmb <- purrr::flatten(tmb) |>
+        tibble::as_tibble_row() |>
+        dplyr::select("tmb_estimate", "n_tmb")
+      msi <- j[["content"]][["msi"]][["prediction"]][["msi_stats"]]
+      # handle nulls
+      msi <- msi %||% list(fracIndels = NA, predicted_class = NA)
+      msi <- purrr::flatten(msi) |>
+        tibble::as_tibble_row() |>
+        dplyr::select("fracIndels", "predicted_class")
+      metrics <- dplyr::bind_cols(msi, tmb)
+      return(metrics)
+    },
+    #' @description Read `chord.tsv.gz` cancer report file.
+    #' @param x Path to file.
     read_chordtsv = function(x) {
       ct <- readr::cols_only(
         p_hrd = "d",
@@ -85,10 +161,8 @@ UmccriseCanRepTables <- R6::R6Class(
       )
       read_tsvgz(x, col_types = ct)
     },
-    #' @description Read `hrdetect.tsv.gz` file output from umccrise.
-    #'
-    #' @param x (`character(1)`)\cr
-    #'   Path to `hrdetect.tsv.gz` file.
+    #' @description Read `hrdetect.tsv.gz` cancer report file.
+    #' @param x Path to file.
     read_hrdetecttsv = function(x) {
       ct <- readr::cols(
         .default = "d",
@@ -97,24 +171,37 @@ UmccriseCanRepTables <- R6::R6Class(
       read_tsvgz(x, col_types = ct) |>
         dplyr::select(-c("sample"))
     },
-
-
-    #' @description Read `snv_20XX.tsv.gz` file output from umccrise.
-    #'
-    #' @param x (`character(1)`)\cr
-    #'   Path to `snv_20XX.tsv.gz` file.
-    read_sigs = function(x) {
+    #' @description Read signature cancer report file.
+    #' @param x Path to file.
+    read_sigstsv = function(x) {
       ct <- readr::cols(
         .default = "d",
         Signature = "c"
       )
       read_tsvgz(x, col_types = ct)
     },
-
-    #' @description Read `qc_summary.tsv.gz` file output from umccrise.
-    #'
-    #' @param x (`character(1)`)\cr
-    #'   Path to `qc_summary.tsv.gz` file.
+    #' @description Read `snv_2015.tsv.gz` sigs cancer report file.
+    #' @param x Path to file.
+    read_sigssnv2015tsv = function(x) {
+      self$read_sigstsv(x)
+    },
+    #' @description Read `snv_2020.tsv.gz` sigs cancer report file.
+    #' @param x Path to file.
+    read_sigssnv2020tsv = function(x) {
+      self$read_sigstsv(x)
+    },
+    #' @description Read `dbs.tsv.gz` sigs cancer report file.
+    #' @param x Path to file.
+    read_sigsdbstsv = function(x) {
+      self$read_sigstsv(x)
+    },
+    #' @description Read `indel.tsv.gz` sigs cancer report file.
+    #' @param x Path to file.
+    read_sigsindeltsv = function(x) {
+      self$read_sigstsv(x)
+    },
+    #' @description Read `qc_summary.tsv.gz` cancer report file.
+    #' @param x Path to file.
     read_qcsummarytsv = function(x) {
       d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
       d |>
@@ -147,48 +234,92 @@ UmccriseCanRepTables <- R6::R6Class(
           "hypermutated", "bpi_enabled"
         )
     },
-    #' @description
-    #' Reads contents of `cancer_report_tables` directory output by umccrise.
-    #'
-    #' @return A list of tibbles.
-    #' @export
-    read = function() {
-      # now return all as list elements
-      list(
-        chord = self$grep_file("-chord\\.tsv\\.gz$") |> self$read_chordtsv(),
-        hrdetect = self$grep_file("-hrdetect\\.tsv\\.gz$") |> self$read_hrdetecttsv(),
-        sigs2015 = self$grep_file("-snv_2015\\.tsv\\.gz$") |> self$read_sigs(),
-        sigs2020 = self$grep_file("-snv_2020\\.tsv\\.gz$") |> self$read_sigs(),
-        sigsdbs = self$grep_file("-dbs\\.tsv\\.gz$") |> self$read_sigs(),
-        sigsindel = self$grep_file("-indel\\.tsv\\.gz$") |> self$read_sigs(),
-        qcsum = self$grep_file("-qc_summary\\.tsv\\.gz$") |> self$read_qcsummarytsv()
+    #' @description Read multiqc_conpair.txt file.
+    #' @param x Path to file.
+    read_conpairmultiqc = function(x) {
+      um_ref_samples <- c("Alice", "Bob", "Chen", "Elon", "Dakota")
+      um_ref_samples <- paste0(um_ref_samples, rep(c("_T", "_B", ""), each = length(um_ref_samples)))
+      cnames <- list(
+        old = c(
+          "Sample", "concordance_concordance", "concordance_used_markers",
+          "concordance_total_markers", "concordance_marker_threshold",
+          "concordance_min_mapping_quality", "concordance_min_base_quality",
+          "contamination"
+        ),
+        new = c(
+          "sampleid", "contamination", "concordance", "markers_used",
+          "markers_total", "marker_threshold",
+          "mapq_min", "baseq_min"
+        )
       )
-    },
-
-    #' @description
-    #' Writes tidied contents of `cancer_report_tables` directory output by umccrise.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
+      ctypes <- list(
+        old = c("cddddddd"),
+        new = c("cddddddd")
+      )
+      if (!file.exists(x)) {
+        return(empty_tbl(cnames$new, ctypes$new))
       }
-      d_write <- d |>
-        tibble::enframe(name = "section") |>
-        dplyr::rowwise() |>
-        dplyr::mutate(
-          section_low = tolower(.data$section),
-          p = glue("{prefix}_{.data$section_low}"),
-          out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
-        ) |>
-        dplyr::ungroup() |>
-        dplyr::select("section", "value") |>
-        tibble::deframe()
-      invisible(d_write)
+      d1 <- readr::read_tsv(x, col_types = readr::cols(.default = "d", Sample = "c"))
+      assertthat::assert_that(all(colnames(d1) == cnames$old))
+      d1 |>
+        dplyr::filter(!.data$Sample %in% um_ref_samples) |>
+        dplyr::relocate("contamination", .after = "Sample") |>
+        rlang::set_names(cnames$new)
     }
-  )
+  ) # end public
 )
+
+#' umccrise Download Tidy and Write
+#'
+#' Downloads files from the `umccrise` workflow and writes them in a tidy format.
+#'
+#' @param path Path to directory with raw workflow results (from GDS, S3, or
+#' local filesystem).
+#' @param SubjectID The SubjectID of the sample (needed for path lookup).
+#' @param SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
+#' @param outdir Path to output directory.
+#' @param max_files Max number of files to list.
+#' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
+#' @param dryrun If TRUE, just list the files that will be downloaded (don't
+#' download them).
+#' @param format Format of output files.
+#' @return List where each element is a tidy tibble of a umccrise file.
+#'
+#' @examples
+#' \dontrun{
+#' SubjectID <- "SBJ03043"
+#' SampleID_tumor <- "PRJ230004"
+#' p1_gds <- glue("gds://production/analysis_data/{SubjectID}/umccrise")
+#' p <- file.path(p1_gds, "20240830ec648f40/L2300064__L2300063")
+#' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
+#' d <- Wf_umccrise_download_tidy_write(
+#'   path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor,
+#'   outdir = outdir,
+#'   dryrun = F
+#' )
+#' }
+#' @export
+Wf_umccrise_download_tidy_write <- function(path, SubjectID, SampleID_tumor,
+                                            outdir, format = "rds", max_files = 1000,
+                                            ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+                                            dryrun = FALSE) {
+  um <- Wf_umccrise$new(
+    path = path, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor
+  )
+  d_dl <- um$download_files(
+    outdir = outdir, ica_token = ica_token,
+    max_files = max_files, dryrun = dryrun
+  )
+  if (!dryrun) {
+    d_tidy <- um$tidy_files(d_dl)
+    d_write <- um$write(
+      d_tidy,
+      outdir = file.path(outdir, "dracarys_tidy"),
+      prefix = glue("{SubjectID}__{SampleID_tumor}"),
+      format = format
+    )
+    return(d_write)
+  }
+  return(d_dl)
+}
