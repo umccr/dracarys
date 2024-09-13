@@ -187,8 +187,6 @@ download them).}
 
 \item{\code{recursive}}{Should files be returned recursively \emph{in and under} the specified
 GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
-
-\item{\code{list_filter_fun}}{Function to filter relevant files.}
 }
 \if{html}{\out{</div>}}
 }

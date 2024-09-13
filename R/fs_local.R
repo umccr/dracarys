@@ -47,7 +47,7 @@ local_list_files_dir <- function(localdir, max_files = NULL) {
 local_list_files_filter_relevant <- function(localdir, regexes = DR_FILE_REGEX, max_files = NULL) {
   local_list_files_dir(localdir = localdir, max_files = max_files) |>
     dplyr::mutate(
-      type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes = regexes))
+      type = purrr::map_chr(.data$path, \(x) match_regex(x, regexes = regexes))
     ) |>
     dplyr::filter(!is.na(.data$type)) |>
     dplyr::select("type", "bname", "size", "lastmodified", localpath = "path")
