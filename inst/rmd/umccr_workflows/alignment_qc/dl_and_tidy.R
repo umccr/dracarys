@@ -28,7 +28,7 @@ query_limsrow_libids <- function(libids) {
 }
 
 # first read in the workflows table, extract metadata, then join with lims
-start_date <- "2024-08-03"
+start_date <- "2024-09-09"
 p_raw <- query_workflow_alignqc(start_date)
 
 wgs <- p_raw |>
@@ -36,14 +36,27 @@ wgs <- p_raw |>
 wts <- p_raw |>
   rportal::meta_wts_alignment_qc(status = "Succeeded")
 p <- bind_rows(wgs, wts)
-lims <- query_limsrow_libids(p$LibraryID)
+lims_raw <- query_limsrow_libids(p$LibraryID)
+
+lims <- lims_raw |>
+  tidyr::separate_wider_delim(
+    library_id,
+    delim = "_", names = c("library_id", "topup_or_rerun"), too_few = "align_start"
+  ) |>
+  select(
+    subject_id, library_id, sample_id, sample_name,
+    external_subject_id, external_sample_id,
+    project_name, project_owner, phenotype, type,
+    source, assay, quality, workflow
+  ) |>
+  distinct()
 
 d <- p |>
   left_join(lims, by = c("SubjectID" = "subject_id", "LibraryID" = "library_id")) |>
   select(
     "SubjectID", "LibraryID", "SampleID", "lane", "phenotype", "type", "source",
-    "assay", "external_subject_id", "project_name", "project_owner",
-    "start", "end", "portal_run_id", "gds_outdir_dragen"
+    "assay", "workflow", "external_subject_id", "project_name", "project_owner",
+    "start", "end", "portal_run_id", "gds_outdir_dragen", "fq1", "fq2"
   ) |>
   mutate(rownum = row_number())
 
