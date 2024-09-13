@@ -78,7 +78,7 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
   d <- d_all |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))
+      type = purrr::map_chr(.data$path, \(x) match_regex(x, regexes))
     ) |>
     dplyr::ungroup() |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>

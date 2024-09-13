@@ -139,7 +139,7 @@ gds_list_files_filter_relevant <- function(gdsdir, pattern = NULL, regexes = DR_
     no_recurse = no_recurse, page_token = page_token, recursive = recursive
   ) |>
     dplyr::rowwise() |>
-    dplyr::mutate(type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes))) |>
+    dplyr::mutate(type = purrr::map_chr(.data$path, \(x) match_regex(x, regexes))) |>
     dplyr::ungroup() |>
     dplyr::filter(!is.na(.data$type), grepl(pattern, .data$type)) |>
     dplyr::select(dplyr::any_of(cols_sel))
