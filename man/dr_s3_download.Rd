@@ -10,8 +10,7 @@ dr_s3_download(
   max_objects = 100,
   pattern = NULL,
   regexes = DR_FILE_REGEX,
-  dryrun = FALSE,
-  list_filter_fun = s3_list_files_filter_relevant
+  dryrun = FALSE
 )
 }
 \arguments{
@@ -27,8 +26,6 @@ dr_s3_download(
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}
-
-\item{list_filter_fun}{Function to filter relevant S3 files.}
 }
 \description{
 Download only S3 files that can be processed by dracarys.

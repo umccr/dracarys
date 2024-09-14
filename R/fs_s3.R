@@ -109,7 +109,6 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
 #' @param outdir Path to output directory.
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
-#' @param list_filter_fun Function to filter relevant S3 files.
 #' @examples
 #' \dontrun{
 #' p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
@@ -125,12 +124,11 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
 #' }
 #' @export
 dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
-                           regexes = DR_FILE_REGEX, dryrun = FALSE,
-                           list_filter_fun = s3_list_files_filter_relevant) {
+                           regexes = DR_FILE_REGEX, dryrun = FALSE) {
   s3 <- paws.storage::s3()
   e <- emojifont::emoji
   fs::dir_create(outdir)
-  d <- list_filter_fun(
+  d <- s3_list_files_filter_relevant(
     s3dir = s3dir, pattern = NULL, regexes = regexes,
     max_objects = max_objects, presign = FALSE
   )
