@@ -62,17 +62,19 @@ Wf_sash <- R6::R6Class(
     #' @param SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
     initialize = function(path = NULL, SubjectID = NULL, SampleID_tumor = NULL) {
       wname <- "sash"
+      pref <- glue("{SubjectID}_{SampleID_tumor}")
+      crep <- "cancer_report/cancer_report_tables"
       regexes <- tibble::tribble(
         ~regex, ~fun,
-        "cancer_report/cancer_report_tables/hrd/.*-chord\\.tsv\\.gz$", "hrdchordtsv",
-        "cancer_report/cancer_report_tables/hrd/.*-hrdetect\\.tsv\\.gz$", "hrdetecttsv",
-        "cancer_report/cancer_report_tables/hrd/.*-dragen\\.tsv\\.gz$", "hrddragentsv",
-        "cancer_report/cancer_report_tables/sigs/.*-snv_2015\\.tsv\\.gz$", "sigssnv2015tsv",
-        "cancer_report/cancer_report_tables/sigs/.*-snv_2020\\.tsv\\.gz$", "sigssnv2020tsv",
-        "cancer_report/cancer_report_tables/sigs/.*-dbs\\.tsv\\.gz$", "sigsdbstsv",
-        "cancer_report/cancer_report_tables/sigs/.*-indel\\.tsv\\.gz$", "sigsindeltsv",
-        "cancer_report/cancer_report_tables/.*-qc_summary\\.tsv\\.gz$", "qcsummarytsv",
-        "smlv_somatic/report/pcgr/.*\\.pcgr_acmg\\.grch38\\.json\\.gz$", "pcgrjson"
+        glue("{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "hrd_chord",
+        glue("{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "hrd_hrdetect",
+        glue("{pref}/{crep}/hrd/{pref}-dragen\\.tsv\\.gz$"), "hrd_dragen",
+        glue("{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "sigs_snv2015",
+        glue("{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "sigs_snv2020",
+        glue("{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "sigs_dbs",
+        glue("{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "sigs_indel",
+        glue("{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "qcsum",
+        glue("{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$"), "pcgr_json"
       ) |>
         dplyr::mutate(fun = paste0("read_", .data$fun))
 
@@ -94,37 +96,9 @@ Wf_sash <- R6::R6Class(
       print(res)
       invisible(self)
     },
-    #' @description List dracarys files under given path
-    #' @param max_files Max number of files to list (for gds/s3 only).
-    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
-    #' @param ... Passed on to the `gds_list_files_filter_relevant` or
-    #' the `s3_list_files_filter_relevant` function.
-    list_files_filter_relevant = function(max_files = 1000,
-                                          ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
-      path <- self$path
-      dir1 <- file.path(path, glue("{self$SubjectID}_{self$SampleID_tumor}"))
-      f1 <- super$list_files_filter_relevant(path = dir1, max_files = 500)
-      return(f1)
-    },
-    #' @description Download files from GDS/S3 to local filesystem.
-    #' @param outdir Path to output directory.
-    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
-    #' @param max_files Max number of files to list.
-    #' @param dryrun If TRUE, just list the files that will be downloaded (don't
-    #' download them).
-    #' @param recursive Should files be returned recursively _in and under_ the specified
-    #' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE via ICA API).
-    download_files = function(outdir, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
-                              max_files = 1000, dryrun = FALSE, recursive = NULL) {
-      super$download_files(
-        outdir = outdir, ica_token = ica_token, max_files = max_files,
-        dryrun = dryrun, recursive = recursive,
-        list_filter_fun = self$list_files_filter_relevant
-      )
-    },
     #' @description Read `pcgr.json.gz` file.
     #' @param x Path to file.
-    read_pcgrjson = function(x) {
+    read_pcgr_json = function(x) {
       j <- read_jsongz_jsonlite(x)
       tmb <-
         j[["content"]][["tmb"]][["variant_statistic"]] %||%
@@ -144,13 +118,13 @@ Wf_sash <- R6::R6Class(
     },
     #' @description Read `dragen.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
-    read_hrddragentsv = function(x) {
+    read_hrd_dragen = function(x) {
       ct <- readr::cols(.default = "d", Sample = "c")
       read_tsvgz(x, col_types = ct)
     },
     #' @description Read `chord.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
-    read_hrdchordtsv = function(x) {
+    read_hrd_chord = function(x) {
       ct <- readr::cols_only(
         p_hrd = "d",
         hr_status = "c",
@@ -162,7 +136,7 @@ Wf_sash <- R6::R6Class(
     },
     #' @description Read `hrdetect.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
-    read_hrdetecttsv = function(x) {
+    read_hrd_hrdetect = function(x) {
       ct <- readr::cols(
         .default = "d",
         sample = "c"
@@ -181,27 +155,27 @@ Wf_sash <- R6::R6Class(
     },
     #' @description Read `snv_2015.tsv.gz` sigs cancer report file.
     #' @param x Path to file.
-    read_sigssnv2015tsv = function(x) {
+    read_sigs_snv2015 = function(x) {
       self$read_sigstsv(x)
     },
     #' @description Read `snv_2020.tsv.gz` sigs cancer report file.
     #' @param x Path to file.
-    read_sigssnv2020tsv = function(x) {
+    read_sigs_snv2020 = function(x) {
       self$read_sigstsv(x)
     },
     #' @description Read `dbs.tsv.gz` sigs cancer report file.
     #' @param x Path to file.
-    read_sigsdbstsv = function(x) {
+    read_sigs_dbs = function(x) {
       self$read_sigstsv(x)
     },
     #' @description Read `indel.tsv.gz` sigs cancer report file.
     #' @param x Path to file.
-    read_sigsindeltsv = function(x) {
+    read_sigs_indel = function(x) {
       self$read_sigstsv(x)
     },
     #' @description Read `qc_summary.tsv.gz` cancer report file.
     #' @param x Path to file.
-    read_qcsummarytsv = function(x) {
+    read_qcsum = function(x) {
       d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
       d |>
         dplyr::select("variable", "value") |>
