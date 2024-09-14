@@ -69,17 +69,15 @@ d_write <- um2$write(
 \itemize{
 \item \href{#method-Wf_umccrise-new}{\code{Wf_umccrise$new()}}
 \item \href{#method-Wf_umccrise-print}{\code{Wf_umccrise$print()}}
-\item \href{#method-Wf_umccrise-list_files_filter_relevant}{\code{Wf_umccrise$list_files_filter_relevant()}}
-\item \href{#method-Wf_umccrise-download_files}{\code{Wf_umccrise$download_files()}}
-\item \href{#method-Wf_umccrise-read_pcgrjson}{\code{Wf_umccrise$read_pcgrjson()}}
-\item \href{#method-Wf_umccrise-read_chordtsv}{\code{Wf_umccrise$read_chordtsv()}}
-\item \href{#method-Wf_umccrise-read_hrdetecttsv}{\code{Wf_umccrise$read_hrdetecttsv()}}
+\item \href{#method-Wf_umccrise-read_pcgr_json}{\code{Wf_umccrise$read_pcgr_json()}}
+\item \href{#method-Wf_umccrise-read_hrd_chord}{\code{Wf_umccrise$read_hrd_chord()}}
+\item \href{#method-Wf_umccrise-read_hrd_hrdetect}{\code{Wf_umccrise$read_hrd_hrdetect()}}
 \item \href{#method-Wf_umccrise-read_sigstsv}{\code{Wf_umccrise$read_sigstsv()}}
-\item \href{#method-Wf_umccrise-read_sigssnv2015tsv}{\code{Wf_umccrise$read_sigssnv2015tsv()}}
-\item \href{#method-Wf_umccrise-read_sigssnv2020tsv}{\code{Wf_umccrise$read_sigssnv2020tsv()}}
-\item \href{#method-Wf_umccrise-read_sigsdbstsv}{\code{Wf_umccrise$read_sigsdbstsv()}}
-\item \href{#method-Wf_umccrise-read_sigsindeltsv}{\code{Wf_umccrise$read_sigsindeltsv()}}
-\item \href{#method-Wf_umccrise-read_qcsummarytsv}{\code{Wf_umccrise$read_qcsummarytsv()}}
+\item \href{#method-Wf_umccrise-read_sigs_snv2015}{\code{Wf_umccrise$read_sigs_snv2015()}}
+\item \href{#method-Wf_umccrise-read_sigs_snv2020}{\code{Wf_umccrise$read_sigs_snv2020()}}
+\item \href{#method-Wf_umccrise-read_sigs_dbs}{\code{Wf_umccrise$read_sigs_dbs()}}
+\item \href{#method-Wf_umccrise-read_sigs_indel}{\code{Wf_umccrise$read_sigs_indel()}}
+\item \href{#method-Wf_umccrise-read_qcsum}{\code{Wf_umccrise$read_qcsum()}}
 \item \href{#method-Wf_umccrise-read_conpairmultiqc}{\code{Wf_umccrise$read_conpairmultiqc()}}
 \item \href{#method-Wf_umccrise-clone}{\code{Wf_umccrise$clone()}}
 }
@@ -87,7 +85,9 @@ d_write <- um2$write(
 \if{html}{\out{
 <details open><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="download_files"><a href='../../dracarys/html/Wf.html#method-Wf-download_files'><code>dracarys::Wf$download_files()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files"><a href='../../dracarys/html/Wf.html#method-Wf-list_files'><code>dracarys::Wf$list_files()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files_filter_relevant"><a href='../../dracarys/html/Wf.html#method-Wf-list_files_filter_relevant'><code>dracarys::Wf$list_files_filter_relevant()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="tidy_files"><a href='../../dracarys/html/Wf.html#method-Wf-tidy_files'><code>dracarys::Wf$tidy_files()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="write"><a href='../../dracarys/html/Wf.html#method-Wf-write'><code>dracarys::Wf$write()</code></a></span></li>
 </ul>
@@ -133,71 +133,12 @@ Print details about the Workflow.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-list_files_filter_relevant"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-list_files_filter_relevant}{}}}
-\subsection{Method \code{list_files_filter_relevant()}}{
-List dracarys files under given path
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$list_files_filter_relevant(
-  max_files = 1000,
-  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
-  ...
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
-
-\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
-
-\item{\code{...}}{Passed on to the \code{gds_list_files_filter_relevant} or
-the \code{s3_list_files_filter_relevant} function.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-download_files"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-download_files}{}}}
-\subsection{Method \code{download_files()}}{
-Download files from GDS/S3 to local filesystem.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$download_files(
-  outdir,
-  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
-  max_files = 1000,
-  dryrun = FALSE,
-  recursive = NULL
-)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{outdir}}{Path to output directory.}
-
-\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
-
-\item{\code{max_files}}{Max number of files to list.}
-
-\item{\code{dryrun}}{If TRUE, just list the files that will be downloaded (don't
-download them).}
-
-\item{\code{recursive}}{Should files be returned recursively \emph{in and under} the specified
-GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_pcgrjson"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_pcgrjson}{}}}
-\subsection{Method \code{read_pcgrjson()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_pcgr_json"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_pcgr_json}{}}}
+\subsection{Method \code{read_pcgr_json()}}{
 Read \code{pcgr.json.gz} file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_pcgrjson(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_pcgr_json(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -209,12 +150,12 @@ Read \code{pcgr.json.gz} file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_chordtsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_chordtsv}{}}}
-\subsection{Method \code{read_chordtsv()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_hrd_chord"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_hrd_chord}{}}}
+\subsection{Method \code{read_hrd_chord()}}{
 Read \code{chord.tsv.gz} cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_chordtsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_hrd_chord(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -226,12 +167,12 @@ Read \code{chord.tsv.gz} cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_hrdetecttsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_hrdetecttsv}{}}}
-\subsection{Method \code{read_hrdetecttsv()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_hrd_hrdetect"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_hrd_hrdetect}{}}}
+\subsection{Method \code{read_hrd_hrdetect()}}{
 Read \code{hrdetect.tsv.gz} cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_hrdetecttsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_hrd_hrdetect(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -260,12 +201,12 @@ Read signature cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_sigssnv2015tsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigssnv2015tsv}{}}}
-\subsection{Method \code{read_sigssnv2015tsv()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigs_snv2015"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigs_snv2015}{}}}
+\subsection{Method \code{read_sigs_snv2015()}}{
 Read \code{snv_2015.tsv.gz} sigs cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigssnv2015tsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigs_snv2015(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -277,12 +218,12 @@ Read \code{snv_2015.tsv.gz} sigs cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_sigssnv2020tsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigssnv2020tsv}{}}}
-\subsection{Method \code{read_sigssnv2020tsv()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigs_snv2020"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigs_snv2020}{}}}
+\subsection{Method \code{read_sigs_snv2020()}}{
 Read \code{snv_2020.tsv.gz} sigs cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigssnv2020tsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigs_snv2020(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -294,12 +235,12 @@ Read \code{snv_2020.tsv.gz} sigs cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_sigsdbstsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigsdbstsv}{}}}
-\subsection{Method \code{read_sigsdbstsv()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigs_dbs"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigs_dbs}{}}}
+\subsection{Method \code{read_sigs_dbs()}}{
 Read \code{dbs.tsv.gz} sigs cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigsdbstsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigs_dbs(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -311,12 +252,12 @@ Read \code{dbs.tsv.gz} sigs cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_sigsindeltsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigsindeltsv}{}}}
-\subsection{Method \code{read_sigsindeltsv()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigs_indel"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigs_indel}{}}}
+\subsection{Method \code{read_sigs_indel()}}{
 Read \code{indel.tsv.gz} sigs cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigsindeltsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigs_indel(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -328,12 +269,12 @@ Read \code{indel.tsv.gz} sigs cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_qcsummarytsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_qcsummarytsv}{}}}
-\subsection{Method \code{read_qcsummarytsv()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_qcsum"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_qcsum}{}}}
+\subsection{Method \code{read_qcsum()}}{
 Read \code{qc_summary.tsv.gz} cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_qcsummarytsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_qcsum(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
