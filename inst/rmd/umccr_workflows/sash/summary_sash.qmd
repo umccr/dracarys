@@ -26,8 +26,8 @@ format:
       body-width: 1300px
 params:
   title: "UMCCR sash Workflow Summary"
-  date_start: "XXXX-XX-XX"
-  date_end: "XXXX-XX-XX"
+  date_start: "2024-08-29"
+  date_end: "2024-09-07"
 ---
 
 ```{r}
@@ -56,19 +56,20 @@ set.seed(42)
 date_start <- params$date_start
 date_end <- params$date_end
 nogit <- "inst/rmd/umccr_workflows/sash/nogit"
+myriad <- paste0("SBJ0", c("0695", "0847", "0920", "2397", "2456", "2743", "3186", "3242", "4187", "4221"))
 d_raw <- here(glue("{nogit}/results_{date_start}_{date_end}.rds")) |>
   readr::read_rds() |>
   arrange(desc(SubjectID), desc(LibraryID_tumor)) |>
-  mutate(rownum = row_number()) |>
-  relocate(rownum)
-myriad <- paste0("SBJ0", c("0695", "0847", "0920", "2397", "2456", "2743", "3186", "3242", "4187", "4221"))
+  mutate(
+    rownum = row_number(),
+    is_myriad = SubjectID %in% myriad
+  ) |>
+  relocate(rownum) |>
+  relocate(is_myriad, .after = rownum)
 ```
 
 ```{r}
 #| label: funcs
-
-# pal <- colorRamp(c("white", "lightgreen"))
-# rgb(pal(0.5), maxColorValue = 255)
 
 tab_view <- function(x, id, ...) {
   htmltools::browsable(
@@ -82,7 +83,7 @@ tab_view <- function(x, id, ...) {
           bordered = TRUE,
           compact = TRUE,
           filterable = TRUE,
-          fullWidth = TRUE,
+          # fullWidth = TRUE,
           height = 800,
           highlight = TRUE,
           pagination = TRUE,
@@ -96,6 +97,18 @@ tab_view <- function(x, id, ...) {
           striped = TRUE,
           wrap = FALSE,
           elementId = id,
+          columns = list(
+            SubjectID = reactable::colDef(
+              sticky = "left",
+              # Add a right border style to visually distinguish the sticky column
+              style = list(borderRight = "1px solid #eee"),
+              headerStyle = list(borderRight = "1px solid #eee")
+            )
+          ),
+          defaultColDef = reactable::colDef(
+            minWidth = 170,
+            headerStyle = list(background = "#f7f7f8")
+          ),
           theme = reactable::reactableTheme(
             borderColor = "#dfe2e5",
             stripedColor = "#f6f8fa",
@@ -117,7 +130,7 @@ tab_view <- function(x, id, ...) {
 #| label: metadata
 meta <- d_raw |>
   select(
-    rownum, portal_run_id, SubjectID, LibraryID_tumor, SampleID_tumor, external_subject_id, external_sample_id,
+    rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor, SampleID_tumor, external_subject_id, external_sample_id,
     project_owner, project_name, source, quality, workflow
   )
 tab_view(meta, id = "metadata")
@@ -232,6 +245,7 @@ dsig_filt <- dsig |>
 dall <- d_raw |>
   select(
     rownum,
+    is_myriad,
     date_analysed = "start", portal_run_id,
     SubjectID, LibraryID_tumor, SampleID_tumor,
     external_subject_id, external_sample_id,
@@ -251,46 +265,46 @@ tab_view(dall, "summary_metrics")
 
 ### HRD Plot
 
+Showing 2-way relationships between DRAGEN, CHORD and HRDetect.
+
 ```{r}
 #| label: hrd_plot
 #| fig-width: 15
-#| fig-height: 15
+#| fig-height: 22
 
 pdat <- dall |>
   mutate(sbj = glue("{SubjectID}_{LibraryID_tumor}")) |>
   select(sbj, dragen = hrd_dragen, chord = hrd_chord, hrdetect = hrd_hrdetect)
 p1 <- pdat |>
-  ggplot2::ggplot(aes(x = chord, y = hrdetect)) +
+  ggplot2::ggplot(aes(x = chord, y = hrdetect, label = sbj)) +
   ggplot2::geom_point(colour = "#00bfc4") +
   ggplot2::theme_bw()
 psub1 <- plotly::ggplotly(p1)
 p2 <- pdat |>
-  ggplot2::ggplot(aes(x = chord, y = dragen)) +
+  ggplot2::ggplot(aes(x = chord, y = dragen, label = sbj)) +
   ggplot2::geom_point(colour = "#f8766d") +
   ggplot2::theme_bw()
 psub2 <- plotly::ggplotly(p2)
 p3 <- pdat |>
-  ggplot2::ggplot(aes(x = hrdetect, y = dragen)) +
+  ggplot2::ggplot(aes(x = hrdetect, y = dragen, label = sbj)) +
   ggplot2::geom_point(colour = "#7cae00") +
   ggplot2::theme_bw()
 psub3 <- plotly::ggplotly(p3)
 # p_all <- p1 + p2 + p3 + plot_layout(ncol = 1)
-plotly::subplot(psub1, psub2, psub3, nrows = 3, titleX = TRUE, titleY = TRUE)
+plotly::subplot(psub1, psub2, psub3, nrows = 3, titleX = TRUE, titleY = TRUE, margin = c(0.02, 0.02, 0.04, 0.04))
 ```
 
 ### Signatures
 
 #### All (SNV, Indel, DBS)
 
-Don't show.
-
-```{r eval=FALSE}
+```{r}
 #| label: sig_results_all
 dsig |>
-  left_join(meta |> select(rownum, portal_run_id, SubjectID, LibraryID_tumor),
+  left_join(meta |> select(rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor),
     by = "portal_run_id"
   ) |>
-  select(rownum, portal_run_id, SubjectID, LibraryID_tumor, everything()) |>
+  select(rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor, everything()) |>
   tab_view("sig_results_all")
 ```
 
@@ -299,10 +313,10 @@ dsig |>
 ```{r}
 #| label: sig_results_top2
 dsig_filt |>
-  left_join(meta |> select(rownum, portal_run_id, SubjectID, LibraryID_tumor),
+  left_join(meta |> select(rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor),
     by = "portal_run_id"
   ) |>
-  select(rownum, portal_run_id, SubjectID, LibraryID_tumor, everything()) |>
+  select(rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor, everything()) |>
   arrange(rownum) |>
   tab_view("sig_results_top2")
 ```
