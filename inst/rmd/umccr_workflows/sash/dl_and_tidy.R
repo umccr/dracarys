@@ -63,13 +63,14 @@ meta_lims |>
 d <- meta_lims |>
   rowwise() |>
   mutate(
-    indir = .data$s3_outdir_sash,
+    # indir = .data$s3_outdir_sash,
     outdir = file.path(sub("s3://", "", .data$indir)),
     outdir = file.path(normalizePath("~/s3"), .data$outdir),
+    indir = outdir, # for when debugging locally
     res = list(
       dracarys::Wf_sash_download_tidy_write(
         path = .data$indir, SubjectID = .data$SubjectID, SampleID_tumor = .data$SampleID_tumor,
-        outdir = .data$outdir, max_files = 300, dryrun = FALSE
+        outdir = .data$outdir, max_files = 1000, dryrun = FALSE
       )
     )
   ) |>
