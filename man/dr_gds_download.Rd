@@ -12,8 +12,7 @@ dr_gds_download(
   page_size = 100,
   dryrun = FALSE,
   regexes = DR_FILE_REGEX,
-  recursive = NULL,
-  list_filter_fun = gds_list_files_filter_relevant
+  recursive = NULL
 )
 }
 \arguments{
@@ -34,8 +33,6 @@ download them).}
 
 \item{recursive}{Should files be returned recursively \emph{in and under} the specified
 GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
-
-\item{list_filter_fun}{Function to filter relevant GDS files.}
 }
 \description{
 Download only GDS files that can be processed by dracarys.

@@ -1,0 +1,392 @@
+---
+title: "{{< meta params.title >}}"
+subtitle: "Period: `r paste(params$date_start, ' to ', params$date_end)`"
+author: "UMCCR - Genomics Platform Group"
+date: now
+date-format: "YYYY-MM-DD HH:mm Z"
+execute:
+  echo: false
+format:
+  html:
+    toc: true
+    toc-expand: 1
+    toc-title: Contents
+    toc-location: body
+    highlight-style: github
+    number-sections: false
+    link-external-icon: true
+    link-external-newwindow: true
+    embed-resources: true
+    code-copy: true
+    code-link: true
+    code-fold: true
+    code-block-border-left: true
+    smooth-scroll: true
+    grid:
+      body-width: 1300px
+params:
+  title: "UMCCR sash Workflow Summary"
+  date_start: "2024-08-29"
+  date_end: "2024-09-07"
+---
+
+```{r}
+#| label: pkg_load
+#| message: false
+{
+  require(dplyr) # import all dplyr funcs
+  require(readr, include.only = c("read_rds"))
+  require(purrr, include.only = c("map"))
+  require(tidyr, include.only = c("unnest_wider"))
+  require(dracarys, include.only = c("session_info_kable"))
+  require(glue, include.only = "glue")
+  require(here, include.only = "here")
+  require(knitr, include.only = "kable")
+  require(reactable, include.only = "reactable")
+  require(ggplot2, include.only = c("ggplot", "aes"))
+  require(lubridate, include.only = c("as_datetime"))
+  require(plotly, include.only = c("ggplotly"))
+  require(patchwork, include.only = c("plot_layout"))
+}
+set.seed(42)
+```
+
+```{r}
+#| label: load_data
+date_start <- params$date_start
+date_end <- params$date_end
+nogit <- "inst/rmd/umccr_workflows/sash/nogit"
+myriad <- paste0("SBJ0", c("0695", "0847", "0920", "2397", "2456", "2743", "3186", "3242", "4187", "4221"))
+d_raw <- here(glue("{nogit}/results_{date_start}_{date_end}.rds")) |>
+  readr::read_rds() |>
+  arrange(desc(SubjectID), desc(LibraryID_tumor)) |>
+  mutate(
+    rownum = row_number(),
+    is_myriad = SubjectID %in% myriad
+  ) |>
+  relocate(rownum) |>
+  relocate(is_myriad, .after = rownum)
+```
+
+```{r}
+#| label: funcs
+
+tab_view <- function(x, id, ...) {
+  htmltools::browsable(
+    htmltools::tagList(
+      htmltools::tags$button(
+        htmltools::tagList(fontawesome::fa("download"), "CSV"),
+        onclick = glue("Reactable.downloadDataCSV('{id}', '{id}.csv')")
+      ),
+      x |>
+        reactable::reactable(
+          bordered = TRUE,
+          compact = TRUE,
+          filterable = TRUE,
+          # fullWidth = TRUE,
+          height = 800,
+          highlight = TRUE,
+          pagination = TRUE,
+          showPagination = TRUE,
+          defaultPageSize = nrow(x),
+          showPageSizeOptions = TRUE,
+          pageSizeOptions = c(20, 50, nrow(x)),
+          resizable = TRUE,
+          searchable = TRUE,
+          sortable = TRUE,
+          striped = TRUE,
+          wrap = FALSE,
+          elementId = id,
+          columns = list(
+            SubjectID = reactable::colDef(
+              sticky = "left",
+              # Add a right border style to visually distinguish the sticky column
+              style = list(borderRight = "1px solid #eee"),
+              headerStyle = list(borderRight = "1px solid #eee")
+            )
+          ),
+          defaultColDef = reactable::colDef(
+            minWidth = 170,
+            headerStyle = list(background = "#f7f7f8")
+          ),
+          theme = reactable::reactableTheme(
+            borderColor = "#dfe2e5",
+            stripedColor = "#f6f8fa",
+            highlightColor = "#f0f5f9",
+            style = list(
+              fontFamily = "Monaco"
+            )
+          ),
+          ...
+        )
+    )
+  )
+}
+```
+
+## Metadata
+
+```{r}
+#| label: metadata
+meta <- d_raw |>
+  select(
+    rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor, SampleID_tumor, external_subject_id, external_sample_id,
+    project_owner, project_name, source, quality, workflow
+  )
+tab_view(meta, id = "metadata")
+```
+
+## Results
+
+```{r}
+#| label: process
+# one row per file type - not all samples have sigsdbstsv
+d <- d_raw |>
+  tidyr::unnest_longer(res, indices_to = "filetype")
+# main_cols <- c("rownum", "portal_run_id", "SubjectID", "LibraryID_tumor")
+main_cols <- c("portal_run_id")
+```
+
+```{r}
+#| label: qcsum
+qcsum <- d |>
+  filter(filetype == "qcsum") |>
+  select(all_of(main_cols), res) |>
+  unnest_wider(res)
+```
+
+```{r}
+#| label: pcgr
+pcgr <- d |>
+  filter(filetype == "pcgr_json") |>
+  select(all_of(main_cols), res) |>
+  unnest_wider(res) |>
+  rename(
+    msi_fraction_indels_pcgr = "fracIndels",
+    msi_pcgr = "predicted_class",
+    tmb_pcgr = "tmb_estimate",
+    n_tmb_pcgr = "n_tmb"
+  ) |>
+  mutate(msi_pcgr = sub(" \\(.*\\)", "", msi_pcgr))
+```
+
+```{r}
+#| label: hrd
+hrd_chord <- d |>
+  filter(filetype == "hrd_chord") |>
+  unnest_wider(res) |>
+  select(all_of(main_cols), hrd_chord = "p_hrd")
+hrd_hrdetect <- d |>
+  filter(filetype == "hrd_hrdetect") |>
+  unnest_wider(res) |>
+  select(all_of(main_cols), hrd_hrdetect = "Probability")
+hrd_dragen <- d |>
+  filter(filetype == "hrd_dragen") |>
+  select(all_of(main_cols), res) |>
+  unnest_wider(res) |>
+  select(all_of(main_cols), hrd_dragen = "HRD")
+hrd_all <- hrd_dragen |>
+  left_join(hrd_chord, by = "portal_run_id") |>
+  left_join(hrd_hrdetect, by = "portal_run_id") |>
+  select(portal_run_id, hrd_dragen, hrd_chord, hrd_hrdetect)
+```
+
+```{r}
+#| label: sigs
+sigs_snv2015 <- d |>
+  filter(filetype == "sigs_snv2015") |>
+  select(all_of(main_cols), res) |>
+  tidyr::unnest_wider(res) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
+sigs_snv2020 <- d |>
+  filter(filetype == "sigs_snv2020") |>
+  select(all_of(main_cols), res) |>
+  tidyr::unnest_wider(res) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
+sigs_dbs <- d |>
+  filter(filetype == "sigs_dbs") |>
+  select(all_of(main_cols), res) |>
+  tidyr::unnest_wider(res) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
+sigs_indel <- d |>
+  filter(filetype == "sigs_indel") |>
+  select(all_of(main_cols), res) |>
+  tidyr::unnest_wider(res) |>
+  tidyr::unnest_longer(col = c(Rank, Signature, Contribution, RelFreq))
+dsig <- bind_rows(
+  list(
+    snv2015 = sigs_snv2015, snv2020 = sigs_snv2020, dbs = sigs_dbs, indel = sigs_indel
+  ),
+  .id = "Sig_group"
+)
+
+# keep top two ranked sigs
+dsig_filt <- dsig |>
+  group_by(Sig_group, portal_run_id) |>
+  mutate(tot_sig_vars = sum(Contribution)) |>
+  arrange(Rank) |>
+  slice_head(n = 2) |>
+  # some sigs have same Rank so use explicit sig_rank
+  mutate(sig_rank = row_number()) |>
+  ungroup() |>
+  mutate(
+    sig_summary = glue("{Signature} ({RelFreq} = {Contribution} / {tot_sig_vars})")
+  ) |>
+  select(Sig_group, portal_run_id, sig_rank, sig_summary) |>
+  tidyr::pivot_wider(names_from = sig_rank, values_from = sig_summary, names_prefix = "rank") |>
+  mutate(sig_top2 = paste(rank1, rank2, sep = ", ")) |>
+  select(Sig_group, portal_run_id, sig_top2) |>
+  tidyr::pivot_wider(names_from = Sig_group, values_from = sig_top2) |>
+  select(portal_run_id, snv2015, snv2020, dbs, indel)
+```
+
+```{r}
+#| label: qc_all
+dall <- d_raw |>
+  select(
+    rownum,
+    is_myriad,
+    date_analysed = "start", portal_run_id,
+    SubjectID, LibraryID_tumor, SampleID_tumor,
+    external_subject_id, external_sample_id,
+    project_owner, project_name, source, quality, workflow
+  ) |>
+  left_join(hrd_all, by = "portal_run_id") |>
+  left_join(qcsum, by = "portal_run_id") |>
+  left_join(pcgr, by = "portal_run_id")
+```
+
+### Summary Metrics
+
+```{r}
+#| label: summary_metrics
+tab_view(dall, "summary_metrics")
+```
+
+### HRD Plot
+
+Showing 2-way relationships between DRAGEN, CHORD and HRDetect.
+
+```{r}
+#| label: hrd_plot
+#| fig-width: 15
+#| fig-height: 22
+
+pdat <- dall |>
+  mutate(sbj = glue("{SubjectID}_{LibraryID_tumor}")) |>
+  select(sbj, dragen = hrd_dragen, chord = hrd_chord, hrdetect = hrd_hrdetect)
+p1 <- pdat |>
+  ggplot2::ggplot(aes(x = chord, y = hrdetect, label = sbj)) +
+  ggplot2::geom_point(colour = "#00bfc4") +
+  ggplot2::theme_bw()
+psub1 <- plotly::ggplotly(p1)
+p2 <- pdat |>
+  ggplot2::ggplot(aes(x = chord, y = dragen, label = sbj)) +
+  ggplot2::geom_point(colour = "#f8766d") +
+  ggplot2::theme_bw()
+psub2 <- plotly::ggplotly(p2)
+p3 <- pdat |>
+  ggplot2::ggplot(aes(x = hrdetect, y = dragen, label = sbj)) +
+  ggplot2::geom_point(colour = "#7cae00") +
+  ggplot2::theme_bw()
+psub3 <- plotly::ggplotly(p3)
+# p_all <- p1 + p2 + p3 + plot_layout(ncol = 1)
+plotly::subplot(psub1, psub2, psub3, nrows = 3, titleX = TRUE, titleY = TRUE, margin = c(0.02, 0.02, 0.04, 0.04))
+```
+
+### Signatures
+
+#### All (SNV, Indel, DBS)
+
+```{r}
+#| label: sig_results_all
+dsig |>
+  left_join(meta |> select(rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor),
+    by = "portal_run_id"
+  ) |>
+  select(rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor, everything()) |>
+  tab_view("sig_results_all")
+```
+
+#### Top 2
+
+```{r}
+#| label: sig_results_top2
+dsig_filt |>
+  left_join(meta |> select(rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor),
+    by = "portal_run_id"
+  ) |>
+  select(rownum, is_myriad, portal_run_id, SubjectID, LibraryID_tumor, everything()) |>
+  arrange(rownum) |>
+  tab_view("sig_results_top2")
+```
+
+#### Top 3 SNV2015
+
+```{r}
+#| label: sig_results
+#| fig-width: 15
+#| fig-height: 65
+
+sig_order2015 <- paste0("Sig", 1:30)
+# sig_order2020 <- paste0(
+#  "SBS",
+#  c(
+#    1:6,
+#    paste0(7, c("a", "b", "c", "d")),
+#    8:9,
+#    paste0(10, c("a", "b", "c", "d")),
+#    11:16,
+#    paste0(17, c("a", "b")),
+#    18:60,
+#    84:94
+#  )
+# )
+
+p2_prep <- dsig |>
+  filter(
+    Sig_group == "snv2015",
+    Rank %in% c(1:3)
+  ) |>
+  left_join(dall |> select(portal_run_id, date_analysed, SubjectID, LibraryID_tumor), by = "portal_run_id") |>
+  mutate(sbj = as.character(glue("{SubjectID}_{LibraryID_tumor}"))) |>
+  select(date_analysed, sbj, Sig_group, Rank, Signature, Contribution, RelFreq) |>
+  mutate(Signature = factor(Signature, levels = sig_order2015))
+p2 <- p2_prep |>
+  ggplot2::ggplot(aes(x = Contribution, y = sbj, fill = Signature, text = sbj)) +
+  ggplot2::geom_bar(position = "fill", stat = "identity") +
+  ggplot2::theme_bw(base_size = 7)
+
+plotly::ggplotly(p2, tooltip = c("x", "text", "fill"))
+```
+
+## Metadata Summary
+
+::: {.panel-tabset .nav-pills}
+
+### Project Name/Owner
+
+```{r}
+#| label: project_owner_name
+dall |>
+  count(project_name, project_owner) |>
+  knitr::kable()
+```
+
+### Source / Quality
+
+```{r}
+#| label: source_quality
+count(dall, source, quality) |> knitr::kable()
+```
+
+### Workflow
+
+```{r}
+#| label: workflow_summary
+count(dall, workflow) |> knitr::kable()
+```
+
+:::
+
+</div>

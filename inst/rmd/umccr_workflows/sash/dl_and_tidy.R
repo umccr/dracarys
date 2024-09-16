@@ -3,16 +3,16 @@
 {
   require(dplyr)
   require(assertthat, include.only = "assert_that")
-  require(dracarys, include.only = "Wf_umccrise_download_tidy_write")
+  require(dracarys, include.only = "Wf_sash_download_tidy_write")
   require(glue, include.only = "glue")
   require(here, include.only = "here")
   require(rportal, include.only = c("portaldb_query_workflow"))
   require(tidyr, include.only = "separate_wider_delim")
 }
 
-query_workflow_umccrise <- function(start_date, end_date) {
+query_workflow_sash <- function(start_date, end_date) {
   q1 <- glue(
-    "WHERE \"type_name\" = 'umccrise' ",
+    "WHERE \"type_name\" = 'sash' ",
     "AND \"start\" >= date(\'{start_date}\') ",
     "AND \"end\" <= date(\'{end_date}\') ",
     "ORDER BY \"start\" DESC;"
@@ -30,10 +30,10 @@ query_limsrow_libids <- function(libids) {
 
 # first read in the workflows table, extract metadata, then join with lims
 start_date <- "2024-08-29"
-end_date <- "2024-09-01"
-meta_raw <- query_workflow_umccrise(start_date, end_date)
+end_date <- "2024-09-07"
+meta_raw <- query_workflow_sash(start_date, end_date)
 meta <- meta_raw |>
-  rportal::meta_umccrise()
+  rportal::meta_sash()
 lims_raw <- query_limsrow_libids(meta$LibraryID_tumor)
 lims <- lims_raw |>
   tidyr::separate_wider_delim(
@@ -54,20 +54,21 @@ meta_lims <- meta |>
   mutate(rownum = row_number()) |>
   select(
     rownum, wfr_id, version, end_status, start, end, portal_run_id, SubjectID, LibraryID_tumor, LibraryID_normal,
-    SampleID_tumor, SampleID_normal, gds_outdir_umccrise, gds_indir_dragen_somatic, external_subject_id, external_sample_id,
+    SampleID_tumor, SampleID_normal, s3_outdir_sash, external_subject_id, external_sample_id,
     project_owner, project_name, source, quality, workflow
   )
 meta_lims |>
-  saveRDS(here(glue("inst/rmd/umccr_workflows/umccrise/nogit/meta/{start_date}_{end_date}.rds")))
+  saveRDS(here(glue("inst/rmd/umccr_workflows/sash/nogit/meta/{start_date}_{end_date}.rds")))
 
 d <- meta_lims |>
   rowwise() |>
   mutate(
-    indir = .data$gds_outdir_umccrise,
-    outdir = file.path(sub("gds://", "", .data$indir)),
-    outdir = file.path(normalizePath("~/icav1/g"), .data$outdir),
+    # indir = .data$s3_outdir_sash,
+    outdir = file.path(sub("s3://", "", .data$indir)),
+    outdir = file.path(normalizePath("~/s3"), .data$outdir),
+    indir = outdir, # for when debugging locally
     res = list(
-      dracarys::Wf_umccrise_download_tidy_write(
+      dracarys::Wf_sash_download_tidy_write(
         path = .data$indir, SubjectID = .data$SubjectID, SampleID_tumor = .data$SampleID_tumor,
         outdir = .data$outdir, max_files = 1000, dryrun = FALSE
       )
@@ -76,4 +77,4 @@ d <- meta_lims |>
   ungroup()
 
 d |>
-  saveRDS(here(glue("inst/rmd/umccr_workflows/umccrise/nogit/results_{start_date}_{end_date}.rds")))
+  saveRDS(here(glue("inst/rmd/umccr_workflows/sash/nogit/results_{start_date}_{end_date}.rds")))

@@ -165,18 +165,15 @@ Wf <- R6::R6Class(
     #' download them).
     #' @param recursive Should files be returned recursively _in and under_ the specified
     #' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE via ICA API).
-    #' @param list_filter_fun Function to filter relevant files.
     download_files = function(path = self$path, outdir, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
-                              max_files = 1000, dryrun = FALSE, recursive = NULL,
-                              list_filter_fun = NULL) {
+                              max_files = 1000, dryrun = FALSE, recursive = NULL) {
       # TODO: add envvar checker
       regexes <- self$regexes
-      assertthat::assert_that(!is.null(regexes), !is.null(list_filter_fun))
+      assertthat::assert_that(!is.null(regexes))
       if (self$filesystem == "gds") {
         d <- dr_gds_download(
           gdsdir = path, outdir = outdir, regexes = regexes, token = ica_token,
-          page_size = max_files, dryrun = dryrun, recursive = recursive,
-          list_filter_fun = list_filter_fun
+          page_size = max_files, dryrun = dryrun, recursive = recursive
         )
         if (!dryrun) {
           self$filesystem <- "local"
@@ -185,8 +182,7 @@ Wf <- R6::R6Class(
       } else if (self$filesystem == "s3") {
         d <- dr_s3_download(
           s3dir = path, outdir = outdir, regexes = regexes,
-          max_objects = max_files, dryrun = dryrun,
-          list_filter_fun = list_filter_fun
+          max_objects = max_files, dryrun = dryrun
         )
         if (!dryrun) {
           self$filesystem <- "local"
