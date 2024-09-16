@@ -1,28 +1,72 @@
-#' tso_ctdna_tumor_only Wf R6 Class
+#' Wf_tso_ctdna_tumor_only R6 Class
 #'
 #' @description
-#' Contains methods for reading and processing files output from the UMCCR
-#' `tso_ctdna_tumor_only` workflow.
+#' Reads and writes tidy versions of files from the `tso_ctdna_tumor_only` workflow.
 #'
 #' @examples
 #' \dontrun{
+#'
+#' #---- Local ----#
 #' x <- file.path(
 #'   "~/icav1/g/production/analysis_data/SBJ00596/tso_ctdna_tumor_only",
-#'   "2024050555972acf/L2400482/Results/PTC_ctTSO240429_L2400482/dracarys_gds_sync"
+#'   "2024050555972acf/L2400482/Results"
 #' )
-#' sample_id <- "PTC_ctTSO240429"
-#' library_id <- "L2400482"
-#' d <- TsoCombinedVariantOutputFile$new(x)
-#' d$read()
+#' SampleID <- "PTC_ctTSO240429"
+#' LibraryID <- "L2400482"
 #' }
 #' @export
 Wf_tso_ctdna_tumor_only <- R6::R6Class(
   "Wf_tso_ctdna_tumor_only",
+  inherit = Wf,
   public = list(
-    #' @field sid SampleID.
-    #' @field lid LibraryID.
-    sid = NULL,
-    lid = NULL
+    #' @field SampleID The SampleID of the tumor sample (needed for path lookup).
+    #' @field LibraryID The LibraryID of the tumor sample (needed for path lookup).
+    SampleID = NULL,
+    LibraryID = NULL,
+    #' @description Create a new Wf_tso_ctdna_tumor_only object.
+    #' @param path Path to directory with raw workflow results (from GDS, S3, or
+    #' local filesystem).
+    #' @param SampleID The SampleID of the tumor sample (needed for path lookup).
+    #' @param LibraryID The LibraryID of the sample (needed for path lookup).
+    initialize = function(path = NULL, SampleID = NULL, LibraryID = NULL) {
+      wname <- "tso_ctdna_tumor_only"
+      pref <- glue("{SampleID}_{LibraryID}")
+      regexes <- tibble::tribble(
+        ~regex, ~fun,
+        glue("{pref}/{pref}.AlignCollapseFusionCaller_metrics\\.json\\.gz$"), "TsoAlignCollapseFusionCallerMetricsFile",
+        glue("{pref}/{pref}.TargetRegionCoverage\\.json\\.gz$"), "TsoTargetRegionCoverageFile",
+        glue("{pref}/{pref}.fragment_length_hist\\.json\\.gz$"), "TsoFragmentLengthHistFile",
+        glue("{pref}/{pref}.msi\\.json\\.gz$"), "TsoMsiFile",
+        glue("{pref}/{pref}.tmb\\.json\\.gz$"), "TsoTmbFile",
+        glue("{pref}/{pref}.TMB_Trace\\.tsv$"), "TsoTmbTraceTsvFile",
+        glue("{pref}/{pref}._Fusions\\.csv$"), "TsoFusionsCsvFile",
+        glue("{pref}/{pref}.SampleAnalysisResults\\.json\\.gz$"), "TsoSampleAnalysisResultsFile",
+        glue("{pref}/{pref}.MergedSmallVariants\\.vcf\\.gz$"), "TsoMergedSmallVariantsVcfFile",
+        glue("{pref}/{pref}.MergedSmallVariants\\.vcf\\.gz\\.tbi$"), "TsoMergedSmallVariantsVcfIndexFile",
+        glue("CopyNumberVariants\\.vcf\\.gz$"), "TsoCopyNumberVariantsVcfFile",
+        glue("CopyNumberVariants\\.vcf\\.gz\\.tbi$"), "TsoCopyNumberVariantsVcfIndexFile",
+        glue("CombinedVariantOutput\\.tsv$"), "TsoCombinedVariantOutputFile",
+      ) |>
+        dplyr::mutate(fun = paste0("read_", .data$fun))
+
+      super$initialize(path = path, wname = wname, regexes = regexes)
+      self$SampleID <- SampleID
+      self$LibraryID <- LibraryID
+    },
+    #' @description Print details about the Workflow.
+    #' @param ... (ignored).
+    print = function(...) {
+      res <- tibble::tribble(
+        ~var, ~value,
+        "path", self$path,
+        "wname", self$wname,
+        "filesystem", self$filesystem,
+        "SampleID", self$SampleID,
+        "LibraryID", self$LibraryID
+      )
+      print(res)
+      invisible(self)
+    },
   )
 )
 
