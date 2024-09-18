@@ -7,12 +7,39 @@
 #' \dontrun{
 #'
 #' #---- Local ----#
-#' x <- file.path(
-#'   "~/icav1/g/production/analysis_data/SBJ00596/tso_ctdna_tumor_only",
-#'   "2024050555972acf/L2400482/Results"
+#' p <- file.path(
+#'   "~/icav1/g/production/analysis_data/SBJ04651/tso_ctdna_tumor_only",
+#'   "20240223d1951163/L2400183/Results"
 #' )
-#' SampleID <- "PTC_ctTSO240429"
-#' LibraryID <- "L2400482"
+#' SampleID <- "PRJ230876"
+#' LibraryID <- "L2400183"
+#' prefix <- glue("{SampleID}__{LibraryID}")
+#' t1 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
+#' t1$list_files(max_files = 20)
+#' t1$list_files_filter_relevant(max_files = 300)
+#'
+#' #---- GDS ----#
+#' p <- file.path(
+#'   "gds://production/analysis_data/SBJ04651/tso_ctdna_tumor_only",
+#'   "20240223d1951163/L2400183/Results"
+#' )
+#'
+#' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
+#' t2 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
+#' t2$list_files(max_files = 100)
+#' t2$list_files_filter_relevant(max_files = 100)
+#' d <- t2$download_files(
+#'   outdir = outdir, ica_token = token,
+#'   max_files = 100, dryrun = F
+#' )
+#' d_tidy <- t2$tidy_files(d)
+#' d_write <- t2$write(
+#'   d_tidy,
+#'   outdir = file.path(p, "dracarys_tidy"),
+#'   prefix = prefix,
+#'   format = "tsv"
+#' )
 #' }
 #' @export
 Wf_tso_ctdna_tumor_only <- R6::R6Class(
@@ -33,21 +60,26 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
       pref <- glue("{SampleID}_{LibraryID}")
       regexes <- tibble::tribble(
         ~regex, ~fun,
-        glue("{pref}/{pref}.AlignCollapseFusionCaller_metrics\\.json\\.gz$"), "TsoAlignCollapseFusionCallerMetricsFile",
-        glue("{pref}/{pref}.TargetRegionCoverage\\.json\\.gz$"), "TsoTargetRegionCoverageFile",
-        glue("{pref}/{pref}.fragment_length_hist\\.json\\.gz$"), "TsoFragmentLengthHistFile",
-        glue("{pref}/{pref}.msi\\.json\\.gz$"), "TsoMsiFile",
-        glue("{pref}/{pref}.tmb\\.json\\.gz$"), "TsoTmbFile",
-        glue("{pref}/{pref}.TMB_Trace\\.tsv$"), "TsoTmbTraceTsvFile",
-        glue("{pref}/{pref}._Fusions\\.csv$"), "TsoFusionsCsvFile",
-        glue("{pref}/{pref}.SampleAnalysisResults\\.json\\.gz$"), "TsoSampleAnalysisResultsFile",
-        glue("{pref}/{pref}.MergedSmallVariants\\.vcf\\.gz$"), "TsoMergedSmallVariantsVcfFile",
-        glue("{pref}/{pref}.MergedSmallVariants\\.vcf\\.gz\\.tbi$"), "TsoMergedSmallVariantsVcfIndexFile",
-        glue("CopyNumberVariants\\.vcf\\.gz$"), "TsoCopyNumberVariantsVcfFile",
-        glue("CopyNumberVariants\\.vcf\\.gz\\.tbi$"), "TsoCopyNumberVariantsVcfIndexFile",
-        glue("CombinedVariantOutput\\.tsv$"), "TsoCombinedVariantOutputFile",
+        glue("{pref}/{pref}.SampleAnalysisResults\\.json\\.gz$"), "sar",
+        glue("{pref}/{pref}_TMB_Trace\\.tsv$"), "tmbt",
+        glue("{pref}/{pref}.AlignCollapseFusionCaller_metrics\\.json\\.gz$"), "acfc",
+        glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz$"), "msv",
+        glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
+        glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{pref}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
+        glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz$"), "cnv",
+        glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{pref}/{pref}.fragment_length_hist\\.json\\.gz$"), "flh",
+        glue("{pref}/{pref}.TargetRegionCoverage\\.json\\.gz$"), "trc",
+        glue("{pref}/{pref}.tmb\\.json\\.gz$"), "tmb",
+        glue("{pref}/{pref}.msi\\.json\\.gz$"), "msi",
+        glue("{pref}/{pref}_Fusions\\.csv$"), "fus"
       ) |>
-        dplyr::mutate(fun = paste0("read_", .data$fun))
+        dplyr::mutate(
+          fun = paste0("read_", .data$fun),
+          fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
+        )
 
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$SampleID <- SampleID
@@ -67,7 +99,67 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
       print(res)
       invisible(self)
     },
-  )
+    #' @description Read `SampleAnalysisResults.json.gz` file.
+    #' @param x Path to file.
+    read_sar = function(x) {
+      TsoSampleAnalysisResultsFile$new(x)$read()
+    },
+    #' @description Read `TMB_Trace.tsv` file.
+    #' @param x Path to file.
+    read_tmbt = function(x) {
+      TsoTmbTraceTsvFile$new(x)$read()
+    },
+    #' @description Read `AlignCollapseFusionCaller_metrics.json.gz` file.
+    #' @param x Path to file.
+    read_acfc = function(x) {
+      TsoAlignCollapseFusionCallerMetricsFile$new(x)$read()
+    },
+    #' @description Read `MergedSmallVariants.vcf.gz` file.
+    #' @param x Path to file.
+    read_msv = function(x) {
+      TsoMergedSmallVariantsVcfFile$new(x)$read()
+    },
+    #' @description Read `MergedSmallVariants.genome.vcf.gz` file.
+    #' @param x Path to file.
+    read_msvg = function(x) {
+      TsoMergedSmallVariantsGenomeVcfFile$new(x)$read()
+    },
+    #' @description Read `CombinedVariantOutput.tsv` file.
+    #' @param x Path to file.
+    read_cvo = function(x) {
+      TsoCombinedVariantOutputFile$new(x)$read()
+    },
+    #' @description Read `CopyNumberVariants.vcf.gz` file.
+    #' @param x Path to file.
+    read_cnv = function(x) {
+      TsoCopyNumberVariantsVcfFile$new(x)$read()
+    },
+    #' @description Read `fragment_length_hist.json.gz` file.
+    #' @param x Path to file.
+    read_flh = function(x) {
+      TsoFragmentLengthHistFile$new(x)$read()
+    },
+    #' @description Read `TargetRegionCoverage.json.gz` file.
+    #' @param x Path to file.
+    read_trc = function(x) {
+      TsoTargetRegionCoverageFile$new(x)$read()
+    },
+    #' @description Read `tmb.json.gz` file.
+    #' @param x Path to file.
+    read_tmb = function(x) {
+      TsoTmbFile$new(x)$read()
+    },
+    #' @description Read `msi.json.gz` file.
+    #' @param x Path to file.
+    read_msi = function(x) {
+      TsoMsiFile$new(x)$read()
+    },
+    #' @description Read `Fusions.csv` file.
+    #' @param x Path to file.
+    read_fus = function(x) {
+      TsoFusionsCsvFile$new(x)$read()
+    }
+  ) # end public
 )
 
 #' TsoCombinedVariantOutputFile R6 Class

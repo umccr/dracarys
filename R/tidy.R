@@ -19,6 +19,7 @@ tidy_files <- function(x, envir = parent.frame()) {
   assertthat::assert_that(is.data.frame(x))
   assertthat::assert_that(all(c("type", "localpath") %in% colnames(x)))
   x |>
+    dplyr::filter(.data$type != "DOWNLOAD_ONLY") |>
     dplyr::rowwise() |>
     dplyr::mutate(
       data = list(dr_func_eval(f = .data$type, v = .data$type, envir = envir)(.data$localpath))
