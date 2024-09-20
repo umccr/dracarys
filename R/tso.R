@@ -17,6 +17,8 @@
 #' t1 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
 #' t1$list_files(max_files = 20)
 #' t1$list_files_filter_relevant(max_files = 300)
+#' d <- t1$download_files(max_files = 100, dryrun = F)
+#' d_tidy <- t1$tidy_files(d)
 #'
 #' #---- GDS ----#
 #' p <- file.path(
@@ -65,8 +67,8 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
         glue("{pref}/{pref}.AlignCollapseFusionCaller_metrics\\.json\\.gz$"), "acfc",
         glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz$"), "msv",
         glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
-        glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        # glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
+        # glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
         glue("{pref}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
         glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz$"), "cnv",
         glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
@@ -99,65 +101,91 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
       print(res)
       invisible(self)
     },
+    #' @description Tidy given files.
+    #' @param x Tibble with `localpath` to file and the function `type` to parse it.
+    tidy_files = function(x) {
+      assertthat::assert_that(is.data.frame(x))
+      assertthat::assert_that(all(c("type", "localpath") %in% colnames(x)))
+      d1 <- x |>
+        dplyr::filter(.data$type != "DOWNLOAD_ONLY") |>
+        dplyr::rowwise() |>
+        dplyr::mutate(
+          data = list(dr_func_eval(f = .data$type, v = .data$type, envir = self)(.data$localpath))
+        ) |>
+        dplyr::ungroup()
+      d1
+    },
     #' @description Read `SampleAnalysisResults.json.gz` file.
     #' @param x Path to file.
     read_sar = function(x) {
-      TsoSampleAnalysisResultsFile$new(x)$read()
+      TsoSampleAnalysisResultsFile$new(x)$read() |>
+        tibble::enframe(name = "name", value = "data")
     },
     #' @description Read `TMB_Trace.tsv` file.
     #' @param x Path to file.
     read_tmbt = function(x) {
-      TsoTmbTraceTsvFile$new(x)$read()
+      dat <- TsoTmbTraceTsvFile$new(x)$read()
+      tibble::tibble(name = "tmb_trace", data = list(dat))
     },
     #' @description Read `AlignCollapseFusionCaller_metrics.json.gz` file.
     #' @param x Path to file.
     read_acfc = function(x) {
-      TsoAlignCollapseFusionCallerMetricsFile$new(x)$read()
+      TsoAlignCollapseFusionCallerMetricsFile$new(x)$read() |>
+        tibble::enframe(name = "name", value = "data")
     },
     #' @description Read `MergedSmallVariants.vcf.gz` file.
     #' @param x Path to file.
     read_msv = function(x) {
-      TsoMergedSmallVariantsVcfFile$new(x)$read()
+      dat <- TsoMergedSmallVariantsVcfFile$new(x)$read()
+      tibble::tibble(name = "merged_smallv", data = list(dat))
     },
     #' @description Read `MergedSmallVariants.genome.vcf.gz` file.
     #' @param x Path to file.
     read_msvg = function(x) {
-      TsoMergedSmallVariantsGenomeVcfFile$new(x)$read()
+      dat <- TsoMergedSmallVariantsGenomeVcfFile$new(x)$read()
+      tibble::tibble(name = "merged_smallvg", data = list(dat))
     },
     #' @description Read `CombinedVariantOutput.tsv` file.
     #' @param x Path to file.
     read_cvo = function(x) {
-      TsoCombinedVariantOutputFile$new(x)$read()
+      dat <- TsoCombinedVariantOutputFile$new(x)$read()
+      tibble::tibble(name = "combined_var", data = list(dat))
     },
     #' @description Read `CopyNumberVariants.vcf.gz` file.
     #' @param x Path to file.
     read_cnv = function(x) {
-      TsoCopyNumberVariantsVcfFile$new(x)$read()
+      dat <- TsoCopyNumberVariantsVcfFile$new(x)$read()
+      tibble::tibble(name = "cnv", data = list(dat))
     },
     #' @description Read `fragment_length_hist.json.gz` file.
     #' @param x Path to file.
     read_flh = function(x) {
-      TsoFragmentLengthHistFile$new(x)$read()
+      dat <- TsoFragmentLengthHistFile$new(x)$read()
+      tibble::tibble(name = "fraglenhist", data = list(dat))
     },
     #' @description Read `TargetRegionCoverage.json.gz` file.
     #' @param x Path to file.
     read_trc = function(x) {
-      TsoTargetRegionCoverageFile$new(x)$read()
+      dat <- TsoTargetRegionCoverageFile$new(x)$read()
+      tibble::tibble(name = "targetcvg", data = list(dat))
     },
     #' @description Read `tmb.json.gz` file.
     #' @param x Path to file.
     read_tmb = function(x) {
-      TsoTmbFile$new(x)$read()
+      dat <- TsoTmbFile$new(x)$read()
+      tibble::tibble(name = "tmb", data = list(dat))
     },
     #' @description Read `msi.json.gz` file.
     #' @param x Path to file.
     read_msi = function(x) {
-      TsoMsiFile$new(x)$read()
+      dat <- TsoMsiFile$new(x)$read()
+      tibble::tibble(name = "msi", data = list(dat))
     },
     #' @description Read `Fusions.csv` file.
     #' @param x Path to file.
     read_fus = function(x) {
-      TsoFusionsCsvFile$new(x)$read()
+      dat <- TsoFusionsCsvFile$new(x)$read()
+      tibble::tibble(name = "fusions", data = list(dat))
     }
   ) # end public
 )
