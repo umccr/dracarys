@@ -7,7 +7,9 @@
 tidy_files(x, envir = parent.frame())
 }
 \arguments{
-\item{x}{Tibble with \code{localpath} to file and the function \code{type} to parse it.}
+\item{x}{Tibble with \code{localpath} to file and the function \code{type} to parse it.
+The function must return a tibble with a \code{name} column and the tidied \code{data}
+as a list-column (see example).}
 
 \item{envir}{the environment in which to evaluate the function e.g. use \code{self}
 when using inside R6 classes.}
@@ -16,14 +18,18 @@ when using inside R6 classes.}
 Tibble with parsed data in a \code{data} list-column.
 }
 \description{
-Tidy Files
+Tidies files into a tibble with parsed data.
 }
 \examples{
 \dontrun{
 p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
-p2 <- "L2101566__L2101565/SBJ01155__PRJ211091-qc_summary.tsv.gz"
-p <- file.path(p1, p2)
-x <- tibble::tibble(type = "readr::read_tsv", localpath = p)
+p2 <- "L2101566__L2101565/SBJ01155__PRJ211091/cancer_report_tables"
+p <- file.path(p1, p2, "SBJ01155__PRJ211091-qc_summary.tsv.gz")
+fun <- function(x) {
+  d <- readr::read_tsv(x)
+  tibble::tibble(name = "table1", data = list(d[]))
+}
+x <- tibble::tibble(type = "fun", localpath = p)
 tidy_files(x)
 }
 

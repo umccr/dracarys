@@ -13,7 +13,7 @@ x <- system.file("extdata/tso/sample705.AlignCollapseFusionCaller_metrics.json.g
 )
 m <- TsoAlignCollapseFusionCallerMetricsFile$new(x)
 d_parsed <- m$read() # or read(m)
-m$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = c("tsv", "rds"))
+#m$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = c("tsv", "rds"))
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoAlignCollapseFusionCallerMetricsFile}

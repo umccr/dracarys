@@ -2,36 +2,335 @@
 % Please edit documentation in R/tso.R
 \name{Wf_tso_ctdna_tumor_only}
 \alias{Wf_tso_ctdna_tumor_only}
-\title{tso_ctdna_tumor_only Wf R6 Class}
+\title{Wf_tso_ctdna_tumor_only R6 Class}
 \description{
-Contains methods for reading and processing files output from the UMCCR
-\code{tso_ctdna_tumor_only} workflow.
+Reads and writes tidy versions of files from the \code{tso_ctdna_tumor_only} workflow.
 }
 \examples{
 \dontrun{
-x <- file.path(
-  "~/icav1/g/production/analysis_data/SBJ00596/tso_ctdna_tumor_only",
-  "2024050555972acf/L2400482/Results/PTC_ctTSO240429_L2400482/dracarys_gds_sync"
+
+#---- Local ----#
+p <- file.path(
+  "~/icav1/g/production/analysis_data/SBJ04651/tso_ctdna_tumor_only",
+  "20240223d1951163/L2400183/Results"
 )
-sample_id <- "PTC_ctTSO240429"
-library_id <- "L2400482"
-d <- TsoCombinedVariantOutputFile$new(x)
-d$read()
+SampleID <- "PRJ230876"
+LibraryID <- "L2400183"
+prefix <- glue("{SampleID}__{LibraryID}")
+t1 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
+t1$list_files(max_files = 20)
+t1$list_files_filter_relevant(max_files = 300)
+d <- t1$download_files(max_files = 100, dryrun = F)
+d_tidy <- t1$tidy_files(d)
+
+#---- GDS ----#
+p <- file.path(
+  "gds://production/analysis_data/SBJ04651/tso_ctdna_tumor_only",
+  "20240223d1951163/L2400183/Results"
+)
+
+outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+token <- Sys.getenv("ICA_ACCESS_TOKEN")
+t2 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
+t2$list_files(max_files = 100)
+t2$list_files_filter_relevant(max_files = 100)
+d <- t2$download_files(
+  outdir = outdir, ica_token = token,
+  max_files = 100, dryrun = F
+)
+d_tidy <- t2$tidy_files(d)
+d_write <- t2$write(
+  d_tidy,
+  outdir = file.path(p, "dracarys_tidy"),
+  prefix = prefix,
+  format = "tsv"
+)
 }
+}
+\section{Super class}{
+\code{\link[dracarys:Wf]{dracarys::Wf}} -> \code{Wf_tso_ctdna_tumor_only}
 }
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{sid}}{SampleID.}
+\item{\code{SampleID}}{The SampleID of the tumor sample (needed for path lookup).}
 
-\item{\code{lid}}{LibraryID.}
+\item{\code{LibraryID}}{The LibraryID of the tumor sample (needed for path lookup).}
 }
 \if{html}{\out{</div>}}
 }
 \section{Methods}{
 \subsection{Public methods}{
 \itemize{
+\item \href{#method-Wf_tso_ctdna_tumor_only-new}{\code{Wf_tso_ctdna_tumor_only$new()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-print}{\code{Wf_tso_ctdna_tumor_only$print()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_sar}{\code{Wf_tso_ctdna_tumor_only$read_sar()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_tmbt}{\code{Wf_tso_ctdna_tumor_only$read_tmbt()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_acfc}{\code{Wf_tso_ctdna_tumor_only$read_acfc()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_msv}{\code{Wf_tso_ctdna_tumor_only$read_msv()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_msvg}{\code{Wf_tso_ctdna_tumor_only$read_msvg()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_cvo}{\code{Wf_tso_ctdna_tumor_only$read_cvo()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_cnv}{\code{Wf_tso_ctdna_tumor_only$read_cnv()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_flh}{\code{Wf_tso_ctdna_tumor_only$read_flh()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_trc}{\code{Wf_tso_ctdna_tumor_only$read_trc()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_tmb}{\code{Wf_tso_ctdna_tumor_only$read_tmb()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_msi}{\code{Wf_tso_ctdna_tumor_only$read_msi()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only-read_fus}{\code{Wf_tso_ctdna_tumor_only$read_fus()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only-clone}{\code{Wf_tso_ctdna_tumor_only$clone()}}
+}
+}
+\if{html}{\out{
+<details open><summary>Inherited methods</summary>
+<ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="download_files"><a href='../../dracarys/html/Wf.html#method-Wf-download_files'><code>dracarys::Wf$download_files()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files"><a href='../../dracarys/html/Wf.html#method-Wf-list_files'><code>dracarys::Wf$list_files()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files_filter_relevant"><a href='../../dracarys/html/Wf.html#method-Wf-list_files_filter_relevant'><code>dracarys::Wf$list_files_filter_relevant()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="tidy_files"><a href='../../dracarys/html/Wf.html#method-Wf-tidy_files'><code>dracarys::Wf$tidy_files()</code></a></span></li>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="write"><a href='../../dracarys/html/Wf.html#method-Wf-write'><code>dracarys::Wf$write()</code></a></span></li>
+</ul>
+</details>
+}}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-new"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-new}{}}}
+\subsection{Method \code{new()}}{
+Create a new Wf_tso_ctdna_tumor_only object.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$new(path = NULL, SampleID = NULL, LibraryID = NULL)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
+local filesystem).}
+
+\item{\code{SampleID}}{The SampleID of the tumor sample (needed for path lookup).}
+
+\item{\code{LibraryID}}{The LibraryID of the sample (needed for path lookup).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-print"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-print}{}}}
+\subsection{Method \code{print()}}{
+Print details about the Workflow.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$print(...)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_sar"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_sar}{}}}
+\subsection{Method \code{read_sar()}}{
+Read \code{SampleAnalysisResults.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_sar(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_tmbt"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_tmbt}{}}}
+\subsection{Method \code{read_tmbt()}}{
+Read \code{TMB_Trace.tsv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_tmbt(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_acfc"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_acfc}{}}}
+\subsection{Method \code{read_acfc()}}{
+Read \code{AlignCollapseFusionCaller_metrics.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_acfc(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_msv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_msv}{}}}
+\subsection{Method \code{read_msv()}}{
+Read \code{MergedSmallVariants.vcf.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_msv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_msvg"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_msvg}{}}}
+\subsection{Method \code{read_msvg()}}{
+Read \code{MergedSmallVariants.genome.vcf.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_msvg(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_cvo"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_cvo}{}}}
+\subsection{Method \code{read_cvo()}}{
+Read \code{CombinedVariantOutput.tsv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_cvo(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_cnv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_cnv}{}}}
+\subsection{Method \code{read_cnv()}}{
+Read \code{CopyNumberVariants.vcf.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_cnv(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_flh"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_flh}{}}}
+\subsection{Method \code{read_flh()}}{
+Read \code{fragment_length_hist.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_flh(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_trc"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_trc}{}}}
+\subsection{Method \code{read_trc()}}{
+Read \code{TargetRegionCoverage.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_trc(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_tmb"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_tmb}{}}}
+\subsection{Method \code{read_tmb()}}{
+Read \code{tmb.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_tmb(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_msi"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_msi}{}}}
+\subsection{Method \code{read_msi()}}{
+Read \code{msi.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_msi(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only-read_fus"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only-read_fus}{}}}
+\subsection{Method \code{read_fus()}}{
+Read \code{Fusions.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$read_fus(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
 }
 }
 \if{html}{\out{<hr>}}

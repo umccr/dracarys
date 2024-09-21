@@ -157,7 +157,8 @@ write_dracarys_list_of_tbls <- function(list_of_tbls, out_dir = NULL, prefix = N
 #' @return A tibble with 0 rows and the given column names.
 #' @export
 empty_tbl <- function(cnames, ctypes = readr::cols(.default = "c")) {
-  readr::read_csv("\n", col_names = cnames, col_types = ctypes)
+  d <- readr::read_csv("\n", col_names = cnames, col_types = ctypes)
+  d[]
 }
 
 read_tsvgz <- function(x, ...) {

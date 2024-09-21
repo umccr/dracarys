@@ -1,29 +1,185 @@
-#' tso_ctdna_tumor_only Wf R6 Class
+#' Wf_tso_ctdna_tumor_only R6 Class
 #'
 #' @description
-#' Contains methods for reading and processing files output from the UMCCR
-#' `tso_ctdna_tumor_only` workflow.
+#' Reads and writes tidy versions of files from the `tso_ctdna_tumor_only` workflow.
 #'
 #' @examples
 #' \dontrun{
-#' x <- file.path(
-#'   "~/icav1/g/production/analysis_data/SBJ00596/tso_ctdna_tumor_only",
-#'   "2024050555972acf/L2400482/Results/PTC_ctTSO240429_L2400482/dracarys_gds_sync"
+#'
+#' #---- Local ----#
+#' p <- file.path(
+#'   "~/icav1/g/production/analysis_data/SBJ04651/tso_ctdna_tumor_only",
+#'   "20240223d1951163/L2400183/Results"
 #' )
-#' sample_id <- "PTC_ctTSO240429"
-#' library_id <- "L2400482"
-#' d <- TsoCombinedVariantOutputFile$new(x)
-#' d$read()
+#' SampleID <- "PRJ230876"
+#' LibraryID <- "L2400183"
+#' prefix <- glue("{SampleID}__{LibraryID}")
+#' t1 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
+#' t1$list_files(max_files = 20)
+#' t1$list_files_filter_relevant(max_files = 300)
+#' d <- t1$download_files(max_files = 100, dryrun = F)
+#' d_tidy <- t1$tidy_files(d)
+#' d_write <- t1$write(
+#'   d_tidy,
+#'   outdir = file.path(p, "dracarys_tidy"),
+#'   prefix = prefix,
+#'   format = "tsv"
+#' )
+#'
+#' #---- GDS ----#
+#' p <- file.path(
+#'   "gds://production/analysis_data/SBJ05563/tso_ctdna_tumor_only",
+#'   "20240914d41300cd/L2401388/Results"
+#' )
+#' SampleID <- "PRJ241446"
+#' LibraryID <- "L2401388"
+#' prefix <- glue("{SampleID}__{LibraryID}")
+#' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
+#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
+#' t2 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
+#' t2$list_files(max_files = 100)
+#' t2$list_files_filter_relevant(max_files = 100)
+#' d <- t2$download_files(
+#'   outdir = outdir, ica_token = token,
+#'   max_files = 100, dryrun = F
+#' )
+#' d_tidy <- t2$tidy_files(d)
+#' d_write <- t2$write(
+#'   d_tidy,
+#'   outdir = file.path(outdir, "dracarys_tidy"),
+#'   prefix = prefix,
+#'   format = "tsv"
+#' )
 #' }
 #' @export
 Wf_tso_ctdna_tumor_only <- R6::R6Class(
   "Wf_tso_ctdna_tumor_only",
+  inherit = Wf,
   public = list(
-    #' @field sid SampleID.
-    #' @field lid LibraryID.
-    sid = NULL,
-    lid = NULL
-  )
+    #' @field SampleID The SampleID of the tumor sample (needed for path lookup).
+    #' @field LibraryID The LibraryID of the tumor sample (needed for path lookup).
+    SampleID = NULL,
+    LibraryID = NULL,
+    #' @description Create a new Wf_tso_ctdna_tumor_only object.
+    #' @param path Path to directory with raw workflow results (from GDS, S3, or
+    #' local filesystem).
+    #' @param SampleID The SampleID of the tumor sample (needed for path lookup).
+    #' @param LibraryID The LibraryID of the sample (needed for path lookup).
+    initialize = function(path = NULL, SampleID = NULL, LibraryID = NULL) {
+      wname <- "tso_ctdna_tumor_only"
+      pref <- glue("{SampleID}_{LibraryID}")
+      regexes <- tibble::tribble(
+        ~regex, ~fun,
+        glue("{pref}/{pref}.SampleAnalysisResults\\.json\\.gz$"), "sar",
+        glue("{pref}/{pref}_TMB_Trace\\.tsv$"), "tmbt",
+        glue("{pref}/{pref}.AlignCollapseFusionCaller_metrics\\.json\\.gz$"), "acfc",
+        glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz$"), "msv",
+        glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        # glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
+        # glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{pref}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
+        glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz$"), "cnv",
+        glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{pref}/{pref}.fragment_length_hist\\.json\\.gz$"), "flh",
+        glue("{pref}/{pref}.TargetRegionCoverage\\.json\\.gz$"), "trc",
+        glue("{pref}/{pref}.tmb\\.json\\.gz$"), "tmb",
+        glue("{pref}/{pref}.msi\\.json\\.gz$"), "msi",
+        glue("{pref}/{pref}_Fusions\\.csv$"), "fus"
+      ) |>
+        dplyr::mutate(
+          fun = paste0("read_", .data$fun),
+          fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
+        )
+
+      super$initialize(path = path, wname = wname, regexes = regexes)
+      self$SampleID <- SampleID
+      self$LibraryID <- LibraryID
+    },
+    #' @description Print details about the Workflow.
+    #' @param ... (ignored).
+    print = function(...) {
+      res <- tibble::tribble(
+        ~var, ~value,
+        "path", self$path,
+        "wname", self$wname,
+        "filesystem", self$filesystem,
+        "SampleID", self$SampleID,
+        "LibraryID", self$LibraryID
+      )
+      print(res)
+      invisible(self)
+    },
+    #' @description Read `SampleAnalysisResults.json.gz` file.
+    #' @param x Path to file.
+    read_sar = function(x) {
+      TsoSampleAnalysisResultsFile$new(x)$read()
+    },
+    #' @description Read `TMB_Trace.tsv` file.
+    #' @param x Path to file.
+    read_tmbt = function(x) {
+      dat <- TsoTmbTraceTsvFile$new(x)$read()
+      tibble::tibble(name = "tmbtrace", data = list(dat))
+    },
+    #' @description Read `AlignCollapseFusionCaller_metrics.json.gz` file.
+    #' @param x Path to file.
+    read_acfc = function(x) {
+      TsoAlignCollapseFusionCallerMetricsFile$new(x)$read()
+    },
+    #' @description Read `MergedSmallVariants.vcf.gz` file.
+    #' @param x Path to file.
+    read_msv = function(x) {
+      dat <- TsoMergedSmallVariantsVcfFile$new(x)$read()
+      tibble::tibble(name = "mergedsmallv", data = list(dat))
+    },
+    #' @description Read `MergedSmallVariants.genome.vcf.gz` file.
+    #' @param x Path to file.
+    read_msvg = function(x) {
+      dat <- TsoMergedSmallVariantsGenomeVcfFile$new(x)$read()
+      tibble::tibble(name = "mergedsmallvg", data = list(dat))
+    },
+    #' @description Read `CombinedVariantOutput.tsv` file.
+    #' @param x Path to file.
+    read_cvo = function(x) {
+      dat <- TsoCombinedVariantOutputFile$new(x)$read()
+      tibble::tibble(name = "combinedvaro", data = list(dat))
+    },
+    #' @description Read `CopyNumberVariants.vcf.gz` file.
+    #' @param x Path to file.
+    read_cnv = function(x) {
+      dat <- TsoCopyNumberVariantsVcfFile$new(x)$read()
+      tibble::tibble(name = "cnv", data = list(dat))
+    },
+    #' @description Read `fragment_length_hist.json.gz` file.
+    #' @param x Path to file.
+    read_flh = function(x) {
+      dat <- TsoFragmentLengthHistFile$new(x)$read()
+      tibble::tibble(name = "fraglenhist", data = list(dat))
+    },
+    #' @description Read `TargetRegionCoverage.json.gz` file.
+    #' @param x Path to file.
+    read_trc = function(x) {
+      dat <- TsoTargetRegionCoverageFile$new(x)$read()
+      tibble::tibble(name = "targetcvg", data = list(dat))
+    },
+    #' @description Read `tmb.json.gz` file.
+    #' @param x Path to file.
+    read_tmb = function(x) {
+      dat <- TsoTmbFile$new(x)$read()
+      tibble::tibble(name = "tmb", data = list(dat))
+    },
+    #' @description Read `msi.json.gz` file.
+    #' @param x Path to file.
+    read_msi = function(x) {
+      dat <- TsoMsiFile$new(x)$read()
+      tibble::tibble(name = "msi", data = list(dat))
+    },
+    #' @description Read `Fusions.csv` file.
+    #' @param x Path to file.
+    read_fus = function(x) {
+      dat <- TsoFusionsCsvFile$new(x)$read()
+      tibble::tibble(name = "fusions", data = list(dat))
+    }
+  ) # end public
 )
 
 #' TsoCombinedVariantOutputFile R6 Class
@@ -64,7 +220,7 @@ TsoCombinedVariantOutputFile <- R6::R6Class(
       if (length(smallv) == 0 || ln[(smallv + 2)] == "NA\t\t") {
         return(empty_tbl(names(nm_map)))
       }
-      ln[(smallv + 1):length(ln)] |>
+      d <- ln[(smallv + 1):length(ln)] |>
         I() |> # read parsed data as-is
         readr::read_tsv(
           col_names = TRUE, col_types = readr::cols(
@@ -75,6 +231,7 @@ TsoCombinedVariantOutputFile <- R6::R6Class(
           )
         ) |>
         dplyr::rename(dplyr::any_of(nm_map))
+      d[]
     },
     #' @description
     #' Writes a tidy version of the `CombinedVariantOutput.tsv` (only Small Variants)
@@ -265,7 +422,8 @@ TsoTmbTraceTsvFile <- R6::R6Class(
         GermlineFilterDatabase = "l", GermlineFilterProxi = "l",
         CodingVariant = "l", Nonsynonymous = "l", IncludedInTMBNumerator = "l"
       )
-      readr::read_tsv(x, col_types = ct)
+      d <- readr::read_tsv(x, col_types = ct)
+      d[]
     },
 
     #' @description
@@ -567,7 +725,7 @@ TsoFusionsCsvFile <- R6::R6Class(
       if (nrow(res) == 0) {
         return(empty_tbl(cnames = names(ct)))
       }
-      return(res)
+      return(res[])
     },
 
     #' @description
