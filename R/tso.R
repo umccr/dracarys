@@ -228,7 +228,7 @@ TsoCombinedVariantOutputFile <- R6::R6Class(
       if (length(smallv) == 0 || ln[(smallv + 2)] == "NA\t\t") {
         return(empty_tbl(names(nm_map)))
       }
-      ln[(smallv + 1):length(ln)] |>
+      d <- ln[(smallv + 1):length(ln)] |>
         I() |> # read parsed data as-is
         readr::read_tsv(
           col_names = TRUE, col_types = readr::cols(
@@ -239,6 +239,7 @@ TsoCombinedVariantOutputFile <- R6::R6Class(
           )
         ) |>
         dplyr::rename(dplyr::any_of(nm_map))
+      d[]
     },
     #' @description
     #' Writes a tidy version of the `CombinedVariantOutput.tsv` (only Small Variants)
@@ -429,7 +430,8 @@ TsoTmbTraceTsvFile <- R6::R6Class(
         GermlineFilterDatabase = "l", GermlineFilterProxi = "l",
         CodingVariant = "l", Nonsynonymous = "l", IncludedInTMBNumerator = "l"
       )
-      readr::read_tsv(x, col_types = ct)
+      d <- readr::read_tsv(x, col_types = ct)
+      d[]
     },
 
     #' @description
@@ -731,7 +733,7 @@ TsoFusionsCsvFile <- R6::R6Class(
       if (nrow(res) == 0) {
         return(empty_tbl(cnames = names(ct)))
       }
-      return(res)
+      return(res[])
     },
 
     #' @description
