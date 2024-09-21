@@ -19,13 +19,21 @@
 #' t1$list_files_filter_relevant(max_files = 300)
 #' d <- t1$download_files(max_files = 100, dryrun = F)
 #' d_tidy <- t1$tidy_files(d)
+#' d_write <- t1$write(
+#'   d_tidy,
+#'   outdir = file.path(p, "dracarys_tidy"),
+#'   prefix = prefix,
+#'   format = "tsv"
+#' )
 #'
 #' #---- GDS ----#
 #' p <- file.path(
-#'   "gds://production/analysis_data/SBJ04651/tso_ctdna_tumor_only",
-#'   "20240223d1951163/L2400183/Results"
+#'   "gds://production/analysis_data/SBJ05563/tso_ctdna_tumor_only",
+#'   "20240914d41300cd/L2401388/Results"
 #' )
-#'
+#' SampleID <- "PRJ241446"
+#' LibraryID <- "L2401388"
+#' prefix <- glue("{SampleID}__{LibraryID}")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 #' token <- Sys.getenv("ICA_ACCESS_TOKEN")
 #' t2 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
@@ -38,7 +46,7 @@
 #' d_tidy <- t2$tidy_files(d)
 #' d_write <- t2$write(
 #'   d_tidy,
-#'   outdir = file.path(p, "dracarys_tidy"),
+#'   outdir = file.path(outdir, "dracarys_tidy"),
 #'   prefix = prefix,
 #'   format = "tsv"
 #' )

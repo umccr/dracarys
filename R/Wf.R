@@ -213,12 +213,11 @@ Wf <- R6::R6Class(
       d_write <- x |>
         dplyr::rowwise() |>
         dplyr::mutate(
-          section = sub("read_", "", .data$type),
-          p = glue("{prefix}_{.data$section}"),
+          p = glue("{prefix}_{.data$name}"),
           out = list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid))
         ) |>
         dplyr::ungroup() |>
-        dplyr::select("section", "data") |>
+        dplyr::select("name", "data") |>
         tibble::deframe()
       invisible(d_write)
     }
