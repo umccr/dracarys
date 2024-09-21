@@ -101,22 +101,6 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
       print(res)
       invisible(self)
     },
-    #' @description Tidy given files.
-    #' @param x Tibble with `localpath` to file and the function `type` to parse it.
-    tidy_files = function(x) {
-      assertthat::assert_that(is.data.frame(x))
-      assertthat::assert_that(all(c("type", "localpath") %in% colnames(x)))
-      d1 <- x |>
-        dplyr::filter(.data$type != "DOWNLOAD_ONLY") |>
-        dplyr::rowwise() |>
-        dplyr::mutate(
-          data = list(dr_func_eval(f = .data$type, v = .data$type, envir = self)(.data$localpath))
-        ) |>
-        dplyr::ungroup()
-      d1 |>
-        dplyr::select("data") |>
-        tidyr::unnest("data")
-    },
     #' @description Read `SampleAnalysisResults.json.gz` file.
     #' @param x Path to file.
     read_sar = function(x) {

@@ -8,7 +8,7 @@
 #' x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
 #' res <- TsoSampleAnalysisResultsFile$new(x)
 #' d_parsed <- res$read() # or read(res)
-#' res$write(d_parsed, tempfile(), "tsv")
+#' # res$write(d_parsed, tempfile(), "tsv")
 #' @export
 TsoSampleAnalysisResultsFile <- R6::R6Class(
   "TsoSampleAnalysisResultsFile",

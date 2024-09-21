@@ -255,7 +255,7 @@ Write tidy data.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{x}}{Tibble with tidy \code{data} and file \code{type}.}
+\item{\code{x}}{Tibble with tidy \code{data} list-column.}
 
 \item{\code{outdir}}{Directory path to output tidy files.}
 

@@ -20,6 +20,8 @@ prefix <- glue("{SampleID}__{LibraryID}")
 t1 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
 t1$list_files(max_files = 20)
 t1$list_files_filter_relevant(max_files = 300)
+d <- t1$download_files(max_files = 100, dryrun = F)
+d_tidy <- t1$tidy_files(d)
 
 #---- GDS ----#
 p <- file.path(

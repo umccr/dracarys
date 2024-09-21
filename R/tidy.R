@@ -1,6 +1,10 @@
 #' Tidy Files
 #'
+#' Tidies files into a tibble with parsed data.
+#'
 #' @param x Tibble with `localpath` to file and the function `type` to parse it.
+#' The function must return a tibble with a `name` column and the tidied `data`
+#' as a list-column (see example).
 #' @param envir the environment in which to evaluate the function e.g. use `self`
 #' when using inside R6 classes.
 #'
@@ -8,9 +12,13 @@
 #' @examples
 #' \dontrun{
 #' p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
-#' p2 <- "L2101566__L2101565/SBJ01155__PRJ211091-qc_summary.tsv.gz"
-#' p <- file.path(p1, p2)
-#' x <- tibble::tibble(type = "readr::read_tsv", localpath = p)
+#' p2 <- "L2101566__L2101565/SBJ01155__PRJ211091/cancer_report_tables"
+#' p <- file.path(p1, p2, "SBJ01155__PRJ211091-qc_summary.tsv.gz")
+#' fun <- function(x) {
+#'   d <- readr::read_tsv(x)
+#'   tibble::tibble(name = "table1", data = list(d[]))
+#' }
+#' x <- tibble::tibble(type = "fun", localpath = p)
 #' tidy_files(x)
 #' }
 #'
@@ -23,7 +31,10 @@ tidy_files <- function(x, envir = parent.frame()) {
     dplyr::rowwise() |>
     dplyr::mutate(
       data = list(dr_func_eval(f = .data$type, v = .data$type, envir = envir)(.data$localpath))
-    )
+    ) |>
+    dplyr::ungroup() |>
+    dplyr::select("data") |>
+    tidyr::unnest("data")
 }
 
 #' Tidy UMCCR Results

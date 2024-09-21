@@ -200,7 +200,7 @@ Wf <- R6::R6Class(
       tidy_files(x, envir = self)
     },
     #' @description Write tidy data.
-    #' @param x Tibble with tidy `data` and file `type`.
+    #' @param x Tibble with tidy `data` list-column.
     #' @param outdir Directory path to output tidy files.
     #' @param prefix Prefix of output files.
     #' @param format Format of output files.

@@ -11,7 +11,7 @@ Contains methods for reading and displaying contents of the
 x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
 res <- TsoSampleAnalysisResultsFile$new(x)
 d_parsed <- res$read() # or read(res)
-res$write(d_parsed, tempfile(), "tsv")
+#res$write(d_parsed, tempfile(), "tsv")
 }
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{TsoSampleAnalysisResultsFile}
