@@ -113,43 +113,43 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
           data = list(dr_func_eval(f = .data$type, v = .data$type, envir = self)(.data$localpath))
         ) |>
         dplyr::ungroup()
-      d1
+      d1 |>
+        dplyr::select("data") |>
+        tidyr::unnest("data")
     },
     #' @description Read `SampleAnalysisResults.json.gz` file.
     #' @param x Path to file.
     read_sar = function(x) {
-      TsoSampleAnalysisResultsFile$new(x)$read() |>
-        tibble::enframe(name = "name", value = "data")
+      TsoSampleAnalysisResultsFile$new(x)$read()
     },
     #' @description Read `TMB_Trace.tsv` file.
     #' @param x Path to file.
     read_tmbt = function(x) {
       dat <- TsoTmbTraceTsvFile$new(x)$read()
-      tibble::tibble(name = "tmb_trace", data = list(dat))
+      tibble::tibble(name = "tmbtrace", data = list(dat))
     },
     #' @description Read `AlignCollapseFusionCaller_metrics.json.gz` file.
     #' @param x Path to file.
     read_acfc = function(x) {
-      TsoAlignCollapseFusionCallerMetricsFile$new(x)$read() |>
-        tibble::enframe(name = "name", value = "data")
+      TsoAlignCollapseFusionCallerMetricsFile$new(x)$read()
     },
     #' @description Read `MergedSmallVariants.vcf.gz` file.
     #' @param x Path to file.
     read_msv = function(x) {
       dat <- TsoMergedSmallVariantsVcfFile$new(x)$read()
-      tibble::tibble(name = "merged_smallv", data = list(dat))
+      tibble::tibble(name = "mergedsmallv", data = list(dat))
     },
     #' @description Read `MergedSmallVariants.genome.vcf.gz` file.
     #' @param x Path to file.
     read_msvg = function(x) {
       dat <- TsoMergedSmallVariantsGenomeVcfFile$new(x)$read()
-      tibble::tibble(name = "merged_smallvg", data = list(dat))
+      tibble::tibble(name = "mergedsmallvg", data = list(dat))
     },
     #' @description Read `CombinedVariantOutput.tsv` file.
     #' @param x Path to file.
     read_cvo = function(x) {
       dat <- TsoCombinedVariantOutputFile$new(x)$read()
-      tibble::tibble(name = "combined_var", data = list(dat))
+      tibble::tibble(name = "combinedvaro", data = list(dat))
     },
     #' @description Read `CopyNumberVariants.vcf.gz` file.
     #' @param x Path to file.

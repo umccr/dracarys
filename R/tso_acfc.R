@@ -44,6 +44,12 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         s1 = c("MappingAligningPerRg", "MappingAligningSummary", "TrimmerStatistics", "CoverageSummary"),
         s2 = c("UmiStatistics", "SvSummary", "RunTime")
       )
+      s1_new <- c(
+        "MappingAligningPerRg" = "acfc_maprg",
+        "MappingAligningSummary" = "acfc_map",
+        "TrimmerStatistics" = "acfc_trim",
+        "CoverageSummary" = "acfc_cvg"
+      )
       secs2 <- unlist(secs, use.names = FALSE)
       secs_in_list <- secs2[secs2 %in% names(j)]
       # just extract the following elements if they exist
@@ -54,9 +60,10 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
       # Pivot all metrics for easier ingestion,
       # and utilise the multiqc parser to rename dirty columns.
       # Keeping each list section separate for flexibility.
-      for (sec in secs$s1) {
+      for (sec in secs[["s1"]]) {
         if (sec %in% names(d)) {
-          d[[sec]] <- d[[sec]] |>
+          new_nm <- s1_new[sec]
+          d[[new_nm]] <- d[[sec]] |>
             tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
             dplyr::filter(!is.na(.data$value1)) |>
             dplyr::mutate(
@@ -68,11 +75,12 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
             dplyr::mutate(umccr_workflow = "dragen_ctdna") |>
             multiqc_rename_cols() |>
             dplyr::select(-"umccr_workflow")
+          d[[sec]] <- NULL
         }
       }
       if ("UmiStatistics" %in% names(d)) {
         # handle non-hist data
-        d[["UmiStatisticsMain"]] <- d[["UmiStatistics"]] |>
+        d[["acfc_umistats"]] <- d[["UmiStatistics"]] |>
           dplyr::filter(!grepl("Hist", .data$name)) |>
           tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
           dplyr::filter(!is.na(.data$value1)) |>
@@ -86,7 +94,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           multiqc_rename_cols() |>
           dplyr::select(-"umccr_workflow")
         # handle hist data
-        d[["UmiStatisticsHist"]] <- d[["UmiStatistics"]] |>
+        d[["acfc_umistatshist"]] <- d[["UmiStatistics"]] |>
           dplyr::filter(grepl("Hist", .data$name)) |>
           dplyr::mutate(
             name = sub("Histogram of ", "", .data$name),
@@ -101,26 +109,27 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
         d[["UmiStatistics"]] <- NULL
       }
       if ("SvSummary" %in% names(d)) {
-        d[["SvSummary"]] <- d[["SvSummary"]] |>
+        d[["acfc_svsum"]] <- d[["SvSummary"]] |>
           dplyr::mutate(
             name = sub("Number of (.*) \\(PASS\\)", "\\1", .data$name),
             name = sub("breakend pairs", "bnd_pairs", .data$name),
             value = as.numeric(.data$value)
           ) |>
           tidyr::pivot_wider(names_from = "name", values_from = "value")
+        d[["SvSummary"]] <- NULL
       }
       if ("RunTime" %in% names(d)) {
         # just keep the 'percent' column (number of seconds)
-        d[["RunTime"]] <- d[["RunTime"]] |>
+        d[["acfc_runtime"]] <- d[["RunTime"]] |>
           dplyr::mutate(
             seconds = as.numeric(.data$percent),
             name = tools::toTitleCase(sub("Time ", "", .data$name))
           ) |>
           dplyr::select("name", "seconds") |>
           tidyr::pivot_wider(names_from = "name", values_from = "seconds")
+        d[["RunTime"]] <- NULL
       }
-      # keep as list
-      d
+      tibble::enframe(d, name = "name", value = "data")
     },
 
     #' @description
@@ -167,7 +176,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
     #' @param max_num Maximum number to display in both plots.
     #' @return Both histogram plot objects.
     plot = function(d, max_num = 15) {
-      if (is.null(d[["UmiStatisticsHist"]])) {
+      if (is.null(d[["acfc_umistatshist"]])) {
         return(
           list(
             p_num_supporting_fragments = NULL,
@@ -175,7 +184,7 @@ TsoAlignCollapseFusionCallerMetricsFile <- R6::R6Class(
           )
         )
       }
-      h <- d[["UmiStatisticsHist"]]
+      h <- d[["acfc_umistatshist"]]
       # 15 seems like a good cutoff for both plots
       p1 <- h |>
         dplyr::filter(

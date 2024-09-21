@@ -123,15 +123,15 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
           empty_tbl2()
       }
 
-      res <- list(
-        sampleinfo = sampleinfo,
-        qc = qc,
-        swconfds = sw[["data_sources"]],
-        swconfother = sw[["other"]],
-        snv = snvs,
-        cnv = cnvs
-      )
-      res
+      list(
+        sar_sampleinfo = sampleinfo,
+        sar_qc = qc,
+        sar_swconfds = sw[["data_sources"]],
+        sar_swconfother = sw[["other"]],
+        sar_snv = snvs,
+        sar_cnv = cnvs
+      ) |>
+        tibble::enframe(name = "name", value = "data")
     },
     #' @description
     #' Writes a tidy version of the `SampleAnalysisResults.json.gz` file output
