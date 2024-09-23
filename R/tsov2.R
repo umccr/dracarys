@@ -28,17 +28,16 @@
 #' #---- S3 ----#
 #' p <- file.path(
 #'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20240922ced7560e",
-#'   "Results"
+#'   "analysis/cttsov2/20240915ff0295ed"
 #' )
-#' LibraryID <- "L2401321"
+#' LibraryID <- "L2401290"
 #' outdir <- sub("s3:/", "~/s3", p)
 #' t2 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, LibraryID = LibraryID)
-#' t2$list_files(max_files = 100)
-#' t2$list_files_filter_relevant(max_files = 100)
+#' t2$list_files(max_files = 500)
+#' t2$list_files_filter_relevant(max_files = 500)
 #' d <- t2$download_files(
 #'   outdir = outdir,
-#'   max_files = 100,
+#'   max_files = 500,
 #'   dryrun = F
 #' )
 #' d_tidy <- t2$tidy_files(d)
@@ -63,17 +62,36 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     initialize = function(path = NULL, LibraryID = NULL) {
       wname <- "tso_ctdna_tumor_only_v2"
       pref <- LibraryID
-      regexes <- tibble::tribble(
+      res <- glue("Results/{pref}")
+      li <- "Logs_Intermediates"
+      reg1 <- tibble::tribble(
         ~regex, ~fun,
-        glue("{pref}\\.cnv\\.vcf$"), "cnv",
-        glue("{pref}\\.exon_cov_report\\.tsv$"), "cvgrepe",
-        glue("{pref}\\.gene_cov_report\\.tsv$"), "cvgrepg",
-        glue("{pref}\\.hard-filtered\\.vcf$"), "hardfilt",
-        glue("{pref}\\.microsat_output\\.json$"), "msi",
-        glue("{pref}\\.tmb.trace\\.tsv$"), "tmbt",
-        glue("{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
-        glue("{pref}_Fusions\\.csv$"), "fus"
-      ) |>
+        glue("{li}/AdditionalSarjMetrics/Metrics_{pref}\\.json"), "DOWNLOAD_ONLY",
+        glue("{li}/Contamination/{pref}/{pref}.contamination\\.json"), "DOWNLOAD_ONLY",
+        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json"), "DOWNLOAD_ONLY",
+        glue("{li}/Tmb/{pref}/{pref}-replay\\.json"), "DOWNLOAD_ONLY",
+        glue("{li}/Tmb/{pref}/{pref}\\.hard-filtered\\.vcf$"), "DOWNLOAD_ONLY",
+        glue("{li}/Tmb/{pref}/{pref}\\.time_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{li}/Tmb/{pref}/{pref}\\.tmb\\.metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{li}/Tmb/{pref}/{pref}\\.tmb\\.msaf\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{li}/Tmb/{pref}/{pref}\\.tmb\\.trace\\.tsv$"), "DOWNLOAD_ONLY"
+      )
+      reg2 <- tibble::tribble(
+        ~regex, ~fun,
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"), "cnv",
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{res}/{pref}\\.exon_cov_report\\.tsv$"), "cvgrepe",
+        glue("{res}/{pref}\\.gene_cov_report\\.tsv$"), "cvgrepg",
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$"), "hardfilt",
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{res}/{pref}\\.microsat_output\\.json$"), "msi",
+        glue("{res}/{pref}\\.tmb.trace\\.tsv$"), "tmbt",
+        glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
+        glue("{res}/{pref}_Fusions\\.csv$"), "fus",
+        glue("{res}/{pref}_MetricsOutput\\.tsv$"), "DOWNLOAD_ONLY",
+        glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY"
+      )
+      regexes <- dplyr::bind_rows(reg1, reg2) |>
         dplyr::mutate(
           fun = paste0("read_", .data$fun),
           fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
@@ -94,29 +112,6 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
       )
       print(res)
       invisible(self)
-    },
-    #' @description Read `TMB_Trace.tsv` file.
-    #' @param x Path to file.
-    read_tmbt = function(x) {
-      ctypes <- list(
-        Chromosome = "c", Position = "d", RefCall = "c", AltCall = "c",
-        VAF = "d", Depth = "d", CytoBand = "c", GeneName = "c",
-        VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
-        ClinVarIDs = "c", ClinVarSignificance = "c", AlleleCountsGnomadExome = "d",
-        AlleleCountsGnomadGenome = "d", AlleleCounts1000Genomes = "d",
-        MaxDatabaseAlleleCounts = "d", GermlineFilterDatabase = "c",
-        GermlineFilterProxi = "c", Nonsynonymous = "c", withinValidTmbRegion = "c",
-        IncludedInTMBNumerator = "c", Status = "c", ProteinChange = "c",
-        CDSChange = "c", Exons = "c", Consequence = "c"
-      )
-      dat <- readr::read_tsv(x, col_types = ctypes)[]
-      tibble::tibble(name = "tmbtrace", data = list(dat))
-    },
-    #' @description Read `CombinedVariantOutput.tsv` file.
-    #' @param x Path to file.
-    read_cvo = function(x) {
-      dat <- TsoCombinedVariantOutputFile$new(x)$read()
-      tibble::tibble(name = "combinedvaro", data = list(dat))
     },
     #' @description Read `cnv.vcf` file.
     #' @param x Path to file.
@@ -147,6 +142,54 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
         readr::read_tsv(col_types = ctypes)
       tibble::tibble(name = "cvgrepg", data = list(dat[]))
     },
+    #' @description Read `hard-filtered.vcf` file.
+    #' @param x Path to file.
+    read_hardfilt = function(x) {
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
+      tibble::tibble(name = "hardfilt", data = list(dat))
+    },
+    #' @description Read `microsat_output.json` file.
+    #' @param x Path to file.
+    read_msi = function(x) {
+      dat <- TsoMsiFile$new(x)$read()
+      tibble::tibble(name = "msi", data = list(dat))
+    },
+    #' @description Read `TMB_Trace.tsv` file.
+    #' @param x Path to file.
+    read_tmbt = function(x) {
+      ctypes <- list(
+        Chromosome = "c", Position = "d", RefCall = "c", AltCall = "c",
+        VAF = "d", Depth = "d", CytoBand = "c", GeneName = "c",
+        VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
+        ClinVarIDs = "c", ClinVarSignificance = "c", AlleleCountsGnomadExome = "d",
+        AlleleCountsGnomadGenome = "d", AlleleCounts1000Genomes = "d",
+        MaxDatabaseAlleleCounts = "d", GermlineFilterDatabase = "c",
+        GermlineFilterProxi = "c", Nonsynonymous = "c", withinValidTmbRegion = "c",
+        IncludedInTMBNumerator = "c", Status = "c", ProteinChange = "c",
+        CDSChange = "c", Exons = "c", Consequence = "c"
+      )
+      dat <- readr::read_tsv(x, col_types = ctypes)[]
+      tibble::tibble(name = "tmbtrace", data = list(dat))
+    },
+    #' @description Read `CombinedVariantOutput.tsv` file.
+    #' @param x Path to file.
+    read_cvo = function(x) {
+      dat <- TsoCombinedVariantOutputFile$new(x)$read()
+      tibble::tibble(name = "combinedvaro", data = list(dat))
+    },
+    #' @description Read `Fusions.csv` file.
+    #' @param x Path to file.
+    read_fus = function(x) {
+      ct <- readr::cols(
+        Sample = "c", Name = "c", Chr1 = "c", Pos1 = "d", Chr2 = "c",
+        Pos2 = "d", Direction = "c", Alt_Depth = "d", BP1_Depth = "d",
+        BP2_Depth = "d", Total_Depth = "d", VAF = "d", Gene1 = "c", Gene2 = "c",
+        Contig = "c", Filter = "c", Is_Cosmic_GenePair = "l",
+        "Fusion Directionality Known" = "c"
+      )
+      dat <- readr::read_csv(x, col_types = ct, comment = "#")
+      tibble::tibble(name = "fusions", data = list(dat[]))
+    },
     #' @description Read `fragment_length_hist.json.gz` file.
     #' @param x Path to file.
     read_flh = function(x) {
@@ -164,31 +207,6 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     read_tmb = function(x) {
       dat <- TsoTmbFile$new(x)$read()
       tibble::tibble(name = "tmb", data = list(dat))
-    },
-    #' @description Read `msi.json.gz` file.
-    #' @param x Path to file.
-    read_msi = function(x) {
-      dat <- TsoMsiFile$new(x)$read()
-      tibble::tibble(name = "msi", data = list(dat))
-    },
-    #' @description Read `Fusions.csv` file.
-    #' @param x Path to file.
-    read_fus = function(x) {
-      ct <- readr::cols(
-        Sample = "c", Name = "c", Chr1 = "c", Pos1 = "d", Chr2 = "c",
-        Pos2 = "d", Direction = "c", Alt_Depth = "d", BP1_Depth = "d",
-        BP2_Depth = "d", Total_Depth = "d", VAF = "d", Gene1 = "c", Gene2 = "c",
-        Contig = "c", Filter = "c", Is_Cosmic_GenePair = "l",
-        "Fusion Directionality Known" = "c"
-      )
-      dat <- readr::read_csv(x, col_types = ct, comment = "#")
-      tibble::tibble(name = "fusions", data = list(dat))
-    },
-    #' @description Read `hard-filtered.vcf` file.
-    #' @param x Path to file.
-    read_hardfilt = function(x) {
-      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
-      tibble::tibble(name = "hardfilt", data = list(dat))
     }
   ) # end public
 )

@@ -31,17 +31,16 @@ d_write <- t1$write(
 #---- S3 ----#
 p <- file.path(
   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-  "analysis/cttsov2/20240922ced7560e",
-  "Results"
+  "analysis/cttsov2/20240915ff0295ed"
 )
-LibraryID <- "L2401321"
+LibraryID <- "L2401290"
 outdir <- sub("s3:/", "~/s3", p)
 t2 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, LibraryID = LibraryID)
-t2$list_files(max_files = 100)
-t2$list_files_filter_relevant(max_files = 100)
+t2$list_files(max_files = 500)
+t2$list_files_filter_relevant(max_files = 500)
 d <- t2$download_files(
   outdir = outdir,
-  max_files = 100,
+  max_files = 500,
   dryrun = F
 )
 d_tidy <- t2$tidy_files(d)
@@ -68,17 +67,17 @@ d_write <- t2$write(
 \itemize{
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-new}{\code{Wf_tso_ctdna_tumor_only_v2$new()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-print}{\code{Wf_tso_ctdna_tumor_only_v2$print()}}
-\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_tmbt}{\code{Wf_tso_ctdna_tumor_only_v2$read_tmbt()}}
-\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_cvo}{\code{Wf_tso_ctdna_tumor_only_v2$read_cvo()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_cnv}{\code{Wf_tso_ctdna_tumor_only_v2$read_cnv()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_cvgrepe}{\code{Wf_tso_ctdna_tumor_only_v2$read_cvgrepe()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_cvgrepg}{\code{Wf_tso_ctdna_tumor_only_v2$read_cvgrepg()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_hardfilt}{\code{Wf_tso_ctdna_tumor_only_v2$read_hardfilt()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_msi}{\code{Wf_tso_ctdna_tumor_only_v2$read_msi()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_tmbt}{\code{Wf_tso_ctdna_tumor_only_v2$read_tmbt()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_cvo}{\code{Wf_tso_ctdna_tumor_only_v2$read_cvo()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_fus}{\code{Wf_tso_ctdna_tumor_only_v2$read_fus()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_flh}{\code{Wf_tso_ctdna_tumor_only_v2$read_flh()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_trc}{\code{Wf_tso_ctdna_tumor_only_v2$read_trc()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_tmb}{\code{Wf_tso_ctdna_tumor_only_v2$read_tmb()}}
-\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_msi}{\code{Wf_tso_ctdna_tumor_only_v2$read_msi()}}
-\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_fus}{\code{Wf_tso_ctdna_tumor_only_v2$read_fus()}}
-\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_hardfilt}{\code{Wf_tso_ctdna_tumor_only_v2$read_hardfilt()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-clone}{\code{Wf_tso_ctdna_tumor_only_v2$clone()}}
 }
 }
@@ -126,40 +125,6 @@ Print details about the Workflow.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_tmbt"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_tmbt}{}}}
-\subsection{Method \code{read_tmbt()}}{
-Read \code{TMB_Trace.tsv} file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_tmbt(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_cvo"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_cvo}{}}}
-\subsection{Method \code{read_cvo()}}{
-Read \code{CombinedVariantOutput.tsv} file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_cvo(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }
@@ -216,6 +181,91 @@ Read \code{gene_cov_report.tsv} file.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_hardfilt"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_hardfilt}{}}}
+\subsection{Method \code{read_hardfilt()}}{
+Read \code{hard-filtered.vcf} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_hardfilt(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_msi"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_msi}{}}}
+\subsection{Method \code{read_msi()}}{
+Read \code{microsat_output.json} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_msi(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_tmbt"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_tmbt}{}}}
+\subsection{Method \code{read_tmbt()}}{
+Read \code{TMB_Trace.tsv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_tmbt(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_cvo"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_cvo}{}}}
+\subsection{Method \code{read_cvo()}}{
+Read \code{CombinedVariantOutput.tsv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_cvo(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_fus"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_fus}{}}}
+\subsection{Method \code{read_fus()}}{
+Read \code{Fusions.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_fus(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_flh"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_flh}{}}}
 \subsection{Method \code{read_flh()}}{
@@ -256,57 +306,6 @@ Read \code{TargetRegionCoverage.json.gz} file.
 Read \code{tmb.json.gz} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_tmb(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_msi"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_msi}{}}}
-\subsection{Method \code{read_msi()}}{
-Read \code{msi.json.gz} file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_msi(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_fus"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_fus}{}}}
-\subsection{Method \code{read_fus()}}{
-Read \code{Fusions.csv} file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_fus(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_hardfilt"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_hardfilt}{}}}
-\subsection{Method \code{read_hardfilt()}}{
-Read \code{hard-filtered.vcf} file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_hardfilt(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
