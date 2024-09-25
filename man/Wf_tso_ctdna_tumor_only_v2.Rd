@@ -12,10 +12,10 @@ Reads and writes tidy versions of files from the \code{tso_ctdna_tumor_only_v2} 
 #---- Local ----#
 p <- file.path(
   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-  "analysis/cttsov2/20240922ced7560e",
+  "analysis/cttsov2/20240915ff0295ed",
   "Results"
 )
-LibraryID <- "L2401321"
+LibraryID <- "L2401290"
 t1 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, LibraryID = LibraryID)
 t1$list_files(max_files = 20)
 t1$list_files_filter_relevant(max_files = 300)
@@ -67,6 +67,7 @@ d_write <- t2$write(
 \itemize{
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-new}{\code{Wf_tso_ctdna_tumor_only_v2$new()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-print}{\code{Wf_tso_ctdna_tumor_only_v2$print()}}
+\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_sar}{\code{Wf_tso_ctdna_tumor_only_v2$read_sar()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_cnv}{\code{Wf_tso_ctdna_tumor_only_v2$read_cnv()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_cvgrepe}{\code{Wf_tso_ctdna_tumor_only_v2$read_cvgrepe()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_cvgrepg}{\code{Wf_tso_ctdna_tumor_only_v2$read_cvgrepg()}}
@@ -125,6 +126,23 @@ Print details about the Workflow.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_sar"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_sar}{}}}
+\subsection{Method \code{read_sar()}}{
+Read \code{SampleAnalysisResults.json.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_sar(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }

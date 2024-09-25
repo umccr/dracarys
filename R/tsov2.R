@@ -9,10 +9,10 @@
 #' #---- Local ----#
 #' p <- file.path(
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20240922ced7560e",
+#'   "analysis/cttsov2/20240915ff0295ed",
 #'   "Results"
 #' )
-#' LibraryID <- "L2401321"
+#' LibraryID <- "L2401290"
 #' t1 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, LibraryID = LibraryID)
 #' t1$list_files(max_files = 20)
 #' t1$list_files_filter_relevant(max_files = 300)
@@ -64,19 +64,57 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
       pref <- LibraryID
       res <- glue("Results/{pref}")
       li <- "Logs_Intermediates"
+      dc <- glue("{li}/DragenCaller/{pref}")
       reg1 <- tibble::tribble(
         ~regex, ~fun,
-        glue("{li}/AdditionalSarjMetrics/Metrics_{pref}\\.json"), "DOWNLOAD_ONLY",
-        glue("{li}/Contamination/{pref}/{pref}.contamination\\.json"), "DOWNLOAD_ONLY",
-        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json"), "DOWNLOAD_ONLY",
-        glue("{li}/Tmb/{pref}/{pref}-replay\\.json"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\-replay\\.json$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.cnv_metrics.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.exon_contig_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.exon_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.exon_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.exon_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.exon_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.fastqc_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.fragment_length_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.gc_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.gvcf_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.mapping_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.microsat_diffs\\.txt$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.microsat_output\\.json$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.sv_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.target_bed_contig_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.target_bed_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.target_bed_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.target_bed_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.target_bed_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.time_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.tmb_contig_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.tmb_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.tmb_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.tmb_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.tmb_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.trimmer_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.umi_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.vc_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.wgs_contig_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.wgs_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.wgs_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.wgs_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.wgs_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+      )
+      reg2 <- tibble::tribble(
+        ~regex, ~fun,
+        glue("{li}/AdditionalSarjMetrics/Metrics_{pref}\\.json$"), "DOWNLOAD_ONLY",
+        glue("{li}/Contamination/{pref}/{pref}.contamination\\.json$"), "DOWNLOAD_ONLY",
+        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"), "sar",
+        glue("{li}/Tmb/{pref}/{pref}-replay\\.json$"), "DOWNLOAD_ONLY",
         glue("{li}/Tmb/{pref}/{pref}\\.hard-filtered\\.vcf$"), "DOWNLOAD_ONLY",
         glue("{li}/Tmb/{pref}/{pref}\\.time_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{li}/Tmb/{pref}/{pref}\\.tmb\\.metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{li}/Tmb/{pref}/{pref}\\.tmb\\.msaf\\.csv$"), "DOWNLOAD_ONLY",
         glue("{li}/Tmb/{pref}/{pref}\\.tmb\\.trace\\.tsv$"), "DOWNLOAD_ONLY"
       )
-      reg2 <- tibble::tribble(
+      reg3 <- tibble::tribble(
         ~regex, ~fun,
         glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"), "cnv",
         glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
@@ -91,7 +129,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
         glue("{res}/{pref}_MetricsOutput\\.tsv$"), "DOWNLOAD_ONLY",
         glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY"
       )
-      regexes <- dplyr::bind_rows(reg1, reg2) |>
+      regexes <- dplyr::bind_rows(reg1, reg2, reg3) |>
         dplyr::mutate(
           fun = paste0("read_", .data$fun),
           fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
@@ -112,6 +150,11 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
       )
       print(res)
       invisible(self)
+    },
+    #' @description Read `SampleAnalysisResults.json.gz` file.
+    #' @param x Path to file.
+    read_sar = function(x) {
+      TsoSampleAnalysisResultsFile$new(x)$read()
     },
     #' @description Read `cnv.vcf` file.
     #' @param x Path to file.
