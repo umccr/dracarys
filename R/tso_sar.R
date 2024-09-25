@@ -102,7 +102,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
         qc <- dplyr::bind_cols(qc, biom_tbl)
       }
 
-      snvs <- tso_snv(dat[["variants"]][["smallVariants"]])
+      snvs <- tso_sar_snv(dat[["variants"]][["smallVariants"]])
       if (nrow(snvs) == 0) {
         snvs <- c(
           "chrom", "pos", "ref", "alt", "af", "qual", "dp_tot", "dp_alt",
@@ -113,8 +113,9 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
         ) |>
           empty_tbl2()
       }
-
-      cnvs <- tso_cnv(dat[["variants"]][["copyNumberVariants"]])
+      cnvs <- dat[["variants"]][["copyNumberVariants"]] |>
+        purrr::map(tibble::as_tibble) |>
+        dplyr::bind_rows()
       if (nrow(cnvs) == 0) {
         cnvs <- c(
           "foldChange", "qual", "copyNumberType", "gene", "chromosome",
@@ -162,7 +163,7 @@ TsoSampleAnalysisResultsFile <- R6::R6Class(
   )
 )
 
-tso_snv <- function(snvs) {
+tso_sar_snv <- function(snvs) {
   # snvs is an array of snv elements
   snv_info <- function(snv) {
     main <- tibble::tibble(
@@ -187,16 +188,13 @@ tso_snv <- function(snvs) {
     }
     if (length(txs) > 0) {
       tx_info <- txs |>
-        purrr::map_dfr(get_tx_info) |>
+        purrr::map(get_tx_info) |>
         dplyr::bind_rows()
     } else {
       tx_info <- NULL
     }
     dplyr::bind_cols(main, tx_info)
   }
-  purrr::map_dfr(snvs, snv_info)
-}
-
-tso_cnv <- function(cnvs) {
-  purrr::map_dfr(cnvs, tibble::as_tibble)
+  purrr::map(snvs, snv_info) |>
+    dplyr::bind_rows()
 }
