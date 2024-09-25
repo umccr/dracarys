@@ -4,11 +4,22 @@
 #' Contains methods for reading and displaying contents of the
 #' `SampleAnalysisResults.json.gz` file output from TSO.
 #'
+#' For TMB:
+#' - tmb_per_mb
+#' - tmb_coding_region_sizemb
+#' - tmb_somatic_coding_variants_count
+#'
 #' @examples
 #' x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")
 #' res <- TsoSampleAnalysisResultsFile$new(x)
 #' d_parsed <- res$read() # or read(res)
-#' # res$write(d_parsed, tempfile(), "tsv")
+#' options(pillar.max_dec_width = 99) # for scientific notation switchoff
+#' d_parsed |>
+#'   dplyr::filter(name == "sar_qc") |>
+#'   dplyr::select(data) |>
+#'   tidyr::unnest(data) |>
+#'   tidyr::pivot_longer(dplyr::everything())
+#'
 #' @export
 TsoSampleAnalysisResultsFile <- R6::R6Class(
   "TsoSampleAnalysisResultsFile",

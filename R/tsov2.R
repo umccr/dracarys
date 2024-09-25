@@ -65,7 +65,25 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
       res <- glue("Results/{pref}")
       li <- "Logs_Intermediates"
       dc <- glue("{li}/DragenCaller/{pref}")
+      # Results
       reg1 <- tibble::tribble(
+        ~regex, ~fun,
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"), "cnv",
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{res}/{pref}\\.exon_cov_report\\.tsv$"), "cvgrepe",
+        glue("{res}/{pref}\\.gene_cov_report\\.tsv$"), "cvgrepg",
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$"), "hardfilt",
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{res}/{pref}\\.microsat_output\\.json$"), "msi",
+        glue("{res}/{pref}\\.tmb.trace\\.tsv$"), "tmbt",
+        glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
+        glue("{res}/{pref}_Fusions\\.csv$"), "fus",
+        glue("{res}/{pref}_MetricsOutput\\.tsv$"), "DOWNLOAD_ONLY",
+        glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY",
+        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"), "sar"
+      )
+      # DragenCaller
+      reg2 <- tibble::tribble(
         ~regex, ~fun,
         glue("{dc}/{pref}\\-replay\\.json$"), "DOWNLOAD_ONLY",
         glue("{dc}/{pref}\\.cnv_metrics.csv$"), "DOWNLOAD_ONLY",
@@ -100,36 +118,9 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
         glue("{dc}/{pref}\\.wgs_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{dc}/{pref}\\.wgs_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
         glue("{dc}/{pref}\\.wgs_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.wgs_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{dc}/{pref}\\.wgs_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY"
       )
-      reg2 <- tibble::tribble(
-        ~regex, ~fun,
-        glue("{li}/AdditionalSarjMetrics/Metrics_{pref}\\.json$"), "DOWNLOAD_ONLY",
-        glue("{li}/Contamination/{pref}/{pref}.contamination\\.json$"), "DOWNLOAD_ONLY",
-        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"), "sar",
-        glue("{li}/Tmb/{pref}/{pref}-replay\\.json$"), "DOWNLOAD_ONLY",
-        glue("{li}/Tmb/{pref}/{pref}\\.hard-filtered\\.vcf$"), "DOWNLOAD_ONLY",
-        glue("{li}/Tmb/{pref}/{pref}\\.time_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{li}/Tmb/{pref}/{pref}\\.tmb\\.metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{li}/Tmb/{pref}/{pref}\\.tmb\\.msaf\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{li}/Tmb/{pref}/{pref}\\.tmb\\.trace\\.tsv$"), "DOWNLOAD_ONLY"
-      )
-      reg3 <- tibble::tribble(
-        ~regex, ~fun,
-        glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"), "cnv",
-        glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{res}/{pref}\\.exon_cov_report\\.tsv$"), "cvgrepe",
-        glue("{res}/{pref}\\.gene_cov_report\\.tsv$"), "cvgrepg",
-        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$"), "hardfilt",
-        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{res}/{pref}\\.microsat_output\\.json$"), "msi",
-        glue("{res}/{pref}\\.tmb.trace\\.tsv$"), "tmbt",
-        glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
-        glue("{res}/{pref}_Fusions\\.csv$"), "fus",
-        glue("{res}/{pref}_MetricsOutput\\.tsv$"), "DOWNLOAD_ONLY",
-        glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY"
-      )
-      regexes <- dplyr::bind_rows(reg1, reg2, reg3) |>
+      regexes <- dplyr::bind_rows(reg1, reg2) |>
         dplyr::mutate(
           fun = paste0("read_", .data$fun),
           fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
