@@ -7,7 +7,7 @@
 tso_tmbt_read(x)
 }
 \description{
-Reads the \code{TMB_Trace.tsv} file output from TSO.
+Reads the \code{TMB_Trace.tsv} file output from TSO workflow.
 }
 \examples{
 x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")

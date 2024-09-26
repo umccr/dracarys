@@ -152,7 +152,18 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Read `fragment_length_hist.json.gz` file.
     #' @param x Path to file.
     read_flh = function(x) {
-      dat <- TsoFragmentLengthHistFile$new(x)$read()
+      j <- read_jsongz_jsonlite(x)
+      cnames <- c("FragmentLength", "Count")
+      # handle SBJ00006...
+      if (length(j) == 0) {
+        return(empty_tbl(cnames = cnames))
+      }
+      assertthat::assert_that(
+        all(names(j[[1]] %in% cnames))
+      )
+      dat <- j |>
+        purrr::map(tibble::as_tibble) |>
+        dplyr::bind_rows()
       tibble::tibble(name = "fraglenhist", data = list(dat))
     },
     #' @description Read `TargetRegionCoverage.json.gz` file.
@@ -184,8 +195,8 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
 
 #' Read TSO CombinedVariantOutput File
 #'
-#' Reads the `CombinedVariantOutput.tsv` file output from TSO and extracts
-#' the Small Variants section (due to inconsistencies with other sections).
+#' Reads `CombinedVariantOutput.tsv` output from the TSO workflow and extracts
+#' only the Small Variants section (due to inconsistencies with other sections).
 #'
 #' @param x Path to file.
 #'
@@ -222,7 +233,7 @@ tso_combinedvaro_smallv_read <- function(x) {
 
 #' Read TSO TMB_Trace File
 #'
-#' Reads the `TMB_Trace.tsv` file output from TSO.
+#' Reads the `TMB_Trace.tsv` file output from TSO workflow.
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
@@ -259,89 +270,34 @@ tso_tmbt_read <- function(x) {
   d[]
 }
 
-#' TsoFragmentLengthHistFile R6 Class
+#' Plot Fragment Length Hist
 #'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `fragment_length_hist.json.gz` file output from TSO.
+#' Plots the fragment length distributions as given in the
+#' `fragment_length_hist` file.
 #'
-#' @examples
-#' x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
-#' fl <- TsoFragmentLengthHistFile$new(x)
-#' d_parsed <- fl$read() # or read(fl)
-#' fl$plot(d_parsed, 5)
-#' fl$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
-#' @export
-TsoFragmentLengthHistFile <- R6::R6Class(
-  "TsoFragmentLengthHistFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `fragment_length_hist.json.gz` file output from TSO.
-    #'
-    #' @return tibble with the following columns:
-    #' * FragmentLength
-    #' * Count
-    read = function() {
-      x <- self$path
-      j <- read_jsongz_jsonlite(x)
-      cnames <- c("FragmentLength", "Count")
-      # handle SBJ00006...
-      if (length(j) == 0) {
-        return(empty_tbl(cnames = cnames))
-      }
-      assertthat::assert_that(
-        all(names(j[[1]] %in% cnames))
-      )
-      j |>
-        purrr::map(tibble::as_tibble) |>
-        dplyr::bind_rows()
-    },
-
-    #' @description
-    #' Writes a tidy version of the `fragment_length_hist.json.gz` file output
-    #' from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}fragment_length_hist")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    },
-
-    #' @description Plots the fragment length distributions as given in the
-    #' `fragment_length_hist.json.gz` file.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param min_count Minimum read count to be plotted (def: 10).
-    #' @return A ggplot2 plot containing fragment lengths on X axis and read counts
-    #'   on Y axis for each sample.
-    plot = function(d, min_count = 10) {
-      assertthat::assert_that(is.numeric(min_count), min_count >= 0)
-      d |>
-        dplyr::filter(.data$Count >= min_count) |>
-        ggplot2::ggplot(ggplot2::aes(x = .data$FragmentLength, y = .data$Count)) +
-        ggplot2::geom_line() +
-        ggplot2::labs(title = "Fragment Length Distribution") +
-        ggplot2::xlab("Fragment Length (bp)") +
-        ggplot2::ylab(glue("Read Count (min: {min_count})")) +
-        ggplot2::theme_minimal() +
-        ggplot2::theme(
-          legend.position = c(0.9, 0.9),
-          legend.justification = c(1, 1),
-          panel.grid.minor = ggplot2::element_blank(),
-          panel.grid.major = ggplot2::element_blank(),
-          plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
-        )
-    }
-  )
-)
+#' @param d Parsed tibble.
+#' @param min_count Minimum read count to be plotted (def: 10).
+#'
+#' @return A ggplot2 plot containing fragment lengths on X axis and read counts
+#' on Y axis for each sample.
+tso_fraglenhist_plot <- function(d, min_count = 10) {
+  assertthat::assert_that(is.numeric(min_count), min_count >= 0)
+  d |>
+    dplyr::filter(.data$Count >= min_count) |>
+    ggplot2::ggplot(ggplot2::aes(x = .data$FragmentLength, y = .data$Count)) +
+    ggplot2::geom_line() +
+    ggplot2::labs(title = "Fragment Length Distribution") +
+    ggplot2::xlab("Fragment Length (bp)") +
+    ggplot2::ylab(glue("Read Count (min: {min_count})")) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = c(0.9, 0.9),
+      legend.justification = c(1, 1),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
+    )
+}
 
 #' TsoTargetRegionCoverageFile R6 Class
 #'
