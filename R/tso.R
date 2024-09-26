@@ -182,74 +182,43 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
   ) # end public
 )
 
-#' TsoCombinedVariantOutputFile R6 Class
+#' Read TSO CombinedVariantOutput Small Variants
 #'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `CombinedVariantOutput.tsv` file output from TSO.
+#' Reads the `CombinedVariantOutput.tsv` file output from TSO and extracts
+#' the Small Variants section (due to inconsistencies with other sections).
 #'
-#' @examples
-#' \dontrun{
-#' x <- "/path/to/CombinedVariantOutput.tsv"
-#' d <- TsoCombinedVariantOutputFile$new(x)
-#' d$read()
-#' }
+#' @param x Path to file.
+#'
 #' @export
-TsoCombinedVariantOutputFile <- R6::R6Class(
-  "TsoCombinedVariantOutputFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `CombinedVariantOutput.tsv` file output from TSO and extracts
-    #' only the Small Variants section (due to inconsistencies with other sections).
-    #' @return tibble with variants.
-    read = function() {
-      x <- self$path
-      nm_map <- c(
-        gene = "Gene", chrom = "Chromosome", pos = "Genomic Position",
-        ref = "Reference Call", alt = "Alternative Call",
-        vaf = "Allele Frequency", dp = "Depth",
-        pdot = "P-Dot Notation", cdot = "C-Dot Notation",
-        csq = "Consequence(s)", exons = "Affected Exon(s)"
-      )
-      # read full file
-      ln <- readr::read_lines(x, skip_empty_rows = TRUE)
-      # now construct a tibble of small variants
-      smallv <- grep("\\[Small Variants\\]", ln)
-      # handle 0 variants
-      if (length(smallv) == 0 || ln[(smallv + 2)] == "NA\t\t") {
-        return(empty_tbl(names(nm_map)))
-      }
-      d <- ln[(smallv + 1):length(ln)] |>
-        I() |> # read parsed data as-is
-        readr::read_tsv(
-          col_names = TRUE, col_types = readr::cols(
-            .default = "c",
-            "Genomic Position" = "i",
-            "Allele Frequency" = "d",
-            "Depth" = "d"
-          )
-        ) |>
-        dplyr::rename(dplyr::any_of(nm_map))
-      d[]
-    },
-    #' @description
-    #' Writes a tidy version of the `CombinedVariantOutput.tsv` (only Small Variants)
-    #' file output from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
+tso_combinedvaro_smallv_read <- function(x) {
+  nm_map <- c(
+    gene = "Gene", chrom = "Chromosome", pos = "Genomic Position",
+    ref = "Reference Call", alt = "Alternative Call",
+    vaf = "Allele Frequency", dp = "Depth",
+    pdot = "P-Dot Notation", cdot = "C-Dot Notation",
+    csq = "Consequence(s)", exons = "Affected Exon(s)"
   )
-)
+  # read full file
+  ln <- readr::read_lines(x, skip_empty_rows = TRUE)
+  # now construct a tibble of small variants
+  smallv <- grep("\\[Small Variants\\]", ln)
+  # handle 0 variants
+  if (length(smallv) == 0 || ln[(smallv + 2)] == "NA\t\t") {
+    return(empty_tbl(names(nm_map)))
+  }
+  d <- ln[(smallv + 1):length(ln)] |>
+    I() |> # read parsed data as-is
+    readr::read_tsv(
+      col_names = TRUE, col_types = readr::cols(
+        .default = "c",
+        "Genomic Position" = "i",
+        "Allele Frequency" = "d",
+        "Depth" = "d"
+      )
+    ) |>
+    dplyr::rename(dplyr::any_of(nm_map))
+  d[]
+}
 
 #' TsoCopyNumberVariantsVcfFile R6 Class
 #'
