@@ -299,98 +299,69 @@ tso_fraglenhist_plot <- function(d, min_count = 10) {
     )
 }
 
-#' TsoTargetRegionCoverageFile R6 Class
+#' Read TSO TargetRegionCoverage File
 #'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `TargetRegionCoverage.json.gz` file output from TSO.
+#' Reads the `TargetRegionCoverage.json.gz` file output from the TSO workflow.
+#'
+#' @return tibble with the following columns:
+#'
+#' - ConsensusReadDepth
+#' - BasePair
+#' - Percentage
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package = "dracarys")
-#' trc <- TsoTargetRegionCoverageFile$new(x)
-#' d_parsed <- trc$read() # or read(trc)
-#' trc$plot(d_parsed, 0) # or plot(trc, d_parsed, 90)
-#' trc$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+#' d <- tso_targetregcvg_read(x)
+#' tso_targetregcvg_plot(d, min_pct = 0)
 #' @export
-TsoTargetRegionCoverageFile <- R6::R6Class(
-  "TsoTargetRegionCoverageFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `TargetRegionCoverage.json.gz` file output from TSO.
-    #'
-    #' @return tibble with the following columns:
-    #' * ConsensusReadDepth
-    #' * BasePair
-    #' * Percentage
-    read = function() {
-      x <- self$path
-      l2tib <- function(l) {
-        tibble::as_tibble(l) |>
-          dplyr::mutate(dplyr::across(dplyr::everything(), ~ as.character(.)))
-      }
-      j <- read_jsongz_jsonlite(x)
-      assertthat::assert_that(
-        all(names(j[[1]] %in% c("ConsensusReadDepth", "BasePair", "Percentage")))
-      )
-      j |>
-        purrr::map(l2tib) |>
-        dplyr::bind_rows() |>
-        dplyr::mutate(Percentage = as.numeric(sub("%", "", .data$Percentage)))
-    },
-
-    #' @description
-    #' Writes a tidy version of the `TargetRegionCoverage.json.gz` file output
-    #' from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}target_region_coverage")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    },
-
-    #' @description Plots the `TargetRegionCoverage.json.gz` file.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param min_pct Minimum percentage to be plotted (def: 2).
-    #' @importFrom ggplot2 ggplot
-    #' @importFrom ggrepel geom_text_repel
-    #' @return A ggplot2 plot containing read depth on X axis and percentage
-    #'   covered on Y axis.
-    plot = function(d, min_pct = 2) {
-      assertthat::assert_that(is.numeric(min_pct), min_pct >= 0)
-      d <- d |>
-        dplyr::filter(
-          !.data$ConsensusReadDepth == "TargetRegion",
-          .data$Percentage >= min_pct
-        ) |>
-        dplyr::select(dp = "ConsensusReadDepth", pct = "Percentage") |>
-        dplyr::mutate(dp = as.numeric(sub("X", "", .data$dp)))
-      d |>
-        ggplot2::ggplot(ggplot2::aes(x = dp, y = pct, label = dp)) +
-        ggplot2::geom_point() +
-        ggplot2::geom_line() +
-        ggrepel::geom_text_repel() +
-        ggplot2::labs(title = "Percentage of Target Region Covered by Given Read Depth") +
-        ggplot2::xlab("Depth") +
-        ggplot2::ylab("Percentage") +
-        ggplot2::theme_minimal() +
-        ggplot2::theme(
-          legend.position = c(0.9, 0.9),
-          legend.justification = c(1, 1),
-          panel.grid.minor = ggplot2::element_blank(),
-          plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
-        )
-    }
+tso_targetregcvg_read <- function(x) {
+  l2tib <- function(l) {
+    tibble::as_tibble(l) |>
+      dplyr::mutate(dplyr::across(dplyr::everything(), ~ as.character(.)))
+  }
+  j <- read_jsongz_jsonlite(x)
+  assertthat::assert_that(
+    all(names(j[[1]] %in% c("ConsensusReadDepth", "BasePair", "Percentage")))
   )
-)
+  j |>
+    purrr::map(l2tib) |>
+    dplyr::bind_rows() |>
+    dplyr::mutate(Percentage = as.numeric(sub("%", "", .data$Percentage)))
+}
+
+#' Plot TargetRegionCoverage
+#'
+#' Plots stuff from the `TargetRegionCoverage.json.gz` file output from the TSO workflow.
+#'
+#' @param d Parsed tibble.
+#' @param min_pct Minimum percentage to be plotted (def: 2).
+#' @return A ggplot2 plot containing read depth on X axis and percentage
+#'   covered on Y axis.
+tso_targetregcvg_plot <- function(d, min_pct = 2) {
+  assertthat::assert_that(is.numeric(min_pct), min_pct >= 0)
+  d <- d |>
+    dplyr::filter(
+      !.data$ConsensusReadDepth == "TargetRegion",
+      .data$Percentage >= min_pct
+    ) |>
+    dplyr::select(dp = "ConsensusReadDepth", pct = "Percentage") |>
+    dplyr::mutate(dp = as.numeric(sub("X", "", .data$dp)))
+  d |>
+    ggplot2::ggplot(ggplot2::aes(x = dp, y = pct, label = dp)) +
+    ggplot2::geom_point() +
+    ggplot2::geom_line() +
+    ggrepel::geom_text_repel() +
+    ggplot2::labs(title = "Percentage of Target Region Covered by Given Read Depth") +
+    ggplot2::xlab("Depth") +
+    ggplot2::ylab("Percentage") +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = c(0.9, 0.9),
+      legend.justification = c(1, 1),
+      panel.grid.minor = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
+    )
+}
 
 #' TsoTmbFile R6 Class
 #'
