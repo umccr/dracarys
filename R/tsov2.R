@@ -144,7 +144,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     #' @description Read `SampleAnalysisResults.json.gz` file.
     #' @param x Path to file.
     read_sar = function(x) {
-      TsoSampleAnalysisResultsFile$new(x)$read()
+      tso_sar_read(x)
     },
     #' @description Read `cnv.vcf` file.
     #' @param x Path to file.
@@ -184,7 +184,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     #' @description Read `microsat_output.json` file.
     #' @param x Path to file.
     read_msi = function(x) {
-      dat <- TsoMsiFile$new(x)$read()
+      dat <- tso_msi_read(x)
       tibble::tibble(name = "msi", data = list(dat))
     },
     #' @description Read `TMB_Trace.tsv` file.
@@ -196,39 +196,14 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     #' @description Read `CombinedVariantOutput.tsv` file.
     #' @param x Path to file.
     read_cvo = function(x) {
-      dat <- TsoCombinedVariantOutputFile$new(x)$read()
+      dat <- tso_combinedvaro_smallv_read(x)
       tibble::tibble(name = "combinedvaro", data = list(dat))
     },
     #' @description Read `Fusions.csv` file.
     #' @param x Path to file.
     read_fus = function(x) {
-      ct <- readr::cols(
-        Sample = "c", Name = "c", Chr1 = "c", Pos1 = "d", Chr2 = "c",
-        Pos2 = "d", Direction = "c", Alt_Depth = "d", BP1_Depth = "d",
-        BP2_Depth = "d", Total_Depth = "d", VAF = "d", Gene1 = "c", Gene2 = "c",
-        Contig = "c", Filter = "c", Is_Cosmic_GenePair = "l",
-        "Fusion Directionality Known" = "c"
-      )
-      dat <- readr::read_csv(x, col_types = ct, comment = "#")
-      tibble::tibble(name = "fusions", data = list(dat[]))
-    },
-    #' @description Read `fragment_length_hist.json.gz` file.
-    #' @param x Path to file.
-    read_flh = function(x) {
-      dat <- TsoFragmentLengthHistFile$new(x)$read()
-      tibble::tibble(name = "fraglenhist", data = list(dat))
-    },
-    #' @description Read `TargetRegionCoverage.json.gz` file.
-    #' @param x Path to file.
-    read_trc = function(x) {
-      dat <- TsoTargetRegionCoverageFile$new(x)$read()
-      tibble::tibble(name = "targetcvg", data = list(dat))
-    },
-    #' @description Read `tmb.json.gz` file.
-    #' @param x Path to file.
-    read_tmb = function(x) {
-      dat <- TsoTmbFile$new(x)$read()
-      tibble::tibble(name = "tmb", data = list(dat))
+      dat <- tso_fusions_read(x)
+      tibble::tibble(name = "fusions", data = list(dat))
     }
   ) # end public
 )

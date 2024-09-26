@@ -75,9 +75,6 @@ d_write <- t2$write(
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_tmbt}{\code{Wf_tso_ctdna_tumor_only_v2$read_tmbt()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_cvo}{\code{Wf_tso_ctdna_tumor_only_v2$read_cvo()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_fus}{\code{Wf_tso_ctdna_tumor_only_v2$read_fus()}}
-\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_flh}{\code{Wf_tso_ctdna_tumor_only_v2$read_flh()}}
-\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_trc}{\code{Wf_tso_ctdna_tumor_only_v2$read_trc()}}
-\item \href{#method-Wf_tso_ctdna_tumor_only_v2-read_tmb}{\code{Wf_tso_ctdna_tumor_only_v2$read_tmb()}}
 \item \href{#method-Wf_tso_ctdna_tumor_only_v2-clone}{\code{Wf_tso_ctdna_tumor_only_v2$clone()}}
 }
 }
@@ -272,57 +269,6 @@ Read \code{CombinedVariantOutput.tsv} file.
 Read \code{Fusions.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_fus(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_flh"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_flh}{}}}
-\subsection{Method \code{read_flh()}}{
-Read \code{fragment_length_hist.json.gz} file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_flh(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_trc"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_trc}{}}}
-\subsection{Method \code{read_trc()}}{
-Read \code{TargetRegionCoverage.json.gz} file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_trc(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_tso_ctdna_tumor_only_v2-read_tmb"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_tso_ctdna_tumor_only_v2-read_tmb}{}}}
-\subsection{Method \code{read_tmb()}}{
-Read \code{tmb.json.gz} file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only_v2$read_tmb(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
