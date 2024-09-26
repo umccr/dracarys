@@ -13,8 +13,7 @@ tso_sar_read(x)
 list of tibbles
 }
 \description{
-Contains methods for reading and displaying contents of the
-\code{SampleAnalysisResults.json.gz} file output from TSO.
+Reads the \code{SampleAnalysisResults.json.gz} file output from the TSO500 workflow.
 }
 \examples{
 x <- system.file("extdata/tso/sample705_SampleAnalysisResults.json.gz", package = "dracarys")

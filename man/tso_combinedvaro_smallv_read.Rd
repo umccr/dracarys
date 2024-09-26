@@ -2,7 +2,7 @@
 % Please edit documentation in R/tso.R
 \name{tso_combinedvaro_smallv_read}
 \alias{tso_combinedvaro_smallv_read}
-\title{Read TSO CombinedVariantOutput Small Variants}
+\title{Read TSO CombinedVariantOutput File}
 \usage{
 tso_combinedvaro_smallv_read(x)
 }

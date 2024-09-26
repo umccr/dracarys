@@ -1,7 +1,6 @@
 #' Read TSO SampleAnalysisResults JSON File
 #'
-#' Contains methods for reading and displaying contents of the
-#' `SampleAnalysisResults.json.gz` file output from TSO.
+#' Reads the `SampleAnalysisResults.json.gz` file output from the TSO500 workflow.
 #'
 #' @param x Path to file.
 #'

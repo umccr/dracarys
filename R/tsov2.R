@@ -9,12 +9,11 @@
 #' #---- Local ----#
 #' p <- file.path(
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20240915ff0295ed",
-#'   "Results"
+#'   "analysis/cttsov2/20240915ff0295ed"
 #' )
 #' LibraryID <- "L2401290"
 #' t1 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, LibraryID = LibraryID)
-#' t1$list_files(max_files = 20)
+#' t1$list_files(max_files = 100)
 #' t1$list_files_filter_relevant(max_files = 300)
 #' d <- t1$download_files(max_files = 100, dryrun = F)
 #' d_tidy <- t1$tidy_files(d)
@@ -150,7 +149,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     #' @description Read `cnv.vcf` file.
     #' @param x Path to file.
     read_cnv = function(x) {
-      dat <- TsoCopyNumberVariantsVcfFile$new(x)$read(only_pass = FALSE, alias = FALSE)
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
       tibble::tibble(name = "cnv", data = list(dat))
     },
     #' @description Read `exon_cov_report.tsv` file.
@@ -191,18 +190,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     #' @description Read `TMB_Trace.tsv` file.
     #' @param x Path to file.
     read_tmbt = function(x) {
-      ctypes <- list(
-        Chromosome = "c", Position = "d", RefCall = "c", AltCall = "c",
-        VAF = "d", Depth = "d", CytoBand = "c", GeneName = "c",
-        VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
-        ClinVarIDs = "c", ClinVarSignificance = "c", AlleleCountsGnomadExome = "d",
-        AlleleCountsGnomadGenome = "d", AlleleCounts1000Genomes = "d",
-        MaxDatabaseAlleleCounts = "d", GermlineFilterDatabase = "c",
-        GermlineFilterProxi = "c", Nonsynonymous = "c", withinValidTmbRegion = "c",
-        IncludedInTMBNumerator = "c", Status = "c", ProteinChange = "c",
-        CDSChange = "c", Exons = "c", Consequence = "c"
-      )
-      dat <- readr::read_tsv(x, col_types = ctypes)[]
+      dat <- tso_tmbt_read(x)
       tibble::tibble(name = "tmbtrace", data = list(dat))
     },
     #' @description Read `CombinedVariantOutput.tsv` file.

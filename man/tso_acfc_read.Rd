@@ -2,13 +2,13 @@
 % Please edit documentation in R/tso_acfc.R
 \name{tso_acfc_read}
 \alias{tso_acfc_read}
-\title{TsoAlignCollapseFusionCallerMetricsFile R6 Class}
+\title{Read TSO AlignCollapseFusionCaller_metrics File}
 \usage{
 tso_acfc_read(x)
 }
 \description{
-Contains methods for reading and displaying contents of the
-\code{AlignCollapseFusionCaller_metrics.json.gz} file output from TSO.
+Reads the \code{AlignCollapseFusionCaller_metrics.json.gz} file output from the
+TSO500 (post-processing) workflow.
 }
 \examples{
 x <- system.file("extdata/tso/sample705.AlignCollapseFusionCaller_metrics.json.gz",

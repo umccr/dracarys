@@ -182,7 +182,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
   ) # end public
 )
 
-#' Read TSO CombinedVariantOutput Small Variants
+#' Read TSO CombinedVariantOutput File
 #'
 #' Reads the `CombinedVariantOutput.tsv` file output from TSO and extracts
 #' the Small Variants section (due to inconsistencies with other sections).
@@ -220,198 +220,44 @@ tso_combinedvaro_smallv_read <- function(x) {
   d[]
 }
 
-#' TsoCopyNumberVariantsVcfFile R6 Class
+#' Read TSO TMB_Trace File
 #'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `CopyNumberVariants.vcf.gz` file output from TSO.
-#'
-#' @examples
-#' \dontrun{
-#' x <- normalizePath("CopyNumberVariants.vcf.gz")
-#' d <- TsoCopyNumberVariantsVcfFile$new(x)
-#' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
-#' d$write(d_parsed, prefix = "FOO", out_format = "delta", drid = "wfr.123")
-#' }
-#' @export
-TsoCopyNumberVariantsVcfFile <- R6::R6Class(
-  "TsoCopyNumberVariantsVcfFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `CopyNumberVariants.vcf.gz` file output from TSO.
-    #' @param only_pass Only include PASS variants (def: TRUE).
-    #' @param alias Substitute sample names with S1/S2/... alias (def: TRUE).
-    #'
-    #' @return tibble with variants.
-    read = function(only_pass = TRUE, alias = TRUE) {
-      x <- self$path
-      bcftools_parse_vcf(x, only_pass = only_pass, alias = alias)
-    },
-    #' @description
-    #' Writes a tidy version of the `CopyNumberVariants.vcf.gz` file output from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}copynumber_variants")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' TsoMergedSmallVariantsVcfFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `MergedSmallVariants.vcf.gz` file output from TSO.
-#'
-#' @examples
-#' \dontrun{
-#' x <- "MergedSmallVariants.vcf.gz"
-#' d <- TsoMergedSmallVariantsVcfFile$new(x)
-#' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
-#' d$write(d_parsed, prefix = "FOO", out_format = "delta", drid = "wfr.123")
-#' }
-#' @export
-TsoMergedSmallVariantsVcfFile <- R6::R6Class(
-  "TsoMergedSmallVariantsVcfFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `MergedSmallVariants.vcf.gz` file output from TSO.
-    #' @param only_pass Only include PASS variants (def: TRUE).
-    #' @param alias Substitute sample names with S1/S2/... alias (def: TRUE).
-    #'
-    #' @return tibble with variants.
-    read = function(only_pass = TRUE, alias = TRUE) {
-      x <- self$path
-      bcftools_parse_vcf(x, only_pass = only_pass, alias = alias)
-    },
-    #' @description
-    #' Writes a tidy version of the `MergedSmallVariants.vcf.gz` file output from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}merged_small_variants")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' TsoMergedSmallVariantsGenomeVcfFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `MergedSmallVariants.genome.vcf.gz` file output from TSO.
-#'
-#' @examples
-#' \dontrun{
-#' x <- "MergedSmallVariants.genome.vcf.gz"
-#' d <- TsoMergedSmallVariantsGenomeVcfFile$new(x)
-#' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
-#' }
-#' @export
-TsoMergedSmallVariantsGenomeVcfFile <- R6::R6Class(
-  "TsoMergedSmallVariantsGenomeVcfFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `MergedSmallVariants.genome.vcf.gz` file output from TSO.
-    #' @param only_pass Only include PASS variants (def: TRUE).
-    #' @param alias Substitute sample names with S1/S2/... alias (def: TRUE).
-    #'
-    #' @return tibble with variants.
-    read = function(only_pass = TRUE, alias = TRUE) {
-      x <- self$path
-      bcftools_parse_vcf(x, only_pass = only_pass, alias = alias)
-    },
-    #' @description
-    #' Writes a tidy version of the `MergedSmallVariants.genome.vcf.gz` file output from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}merged_small_variants")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' TsoTmbTraceTsvFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `TMB_Trace.tsv` file output from TSO.
+#' Reads the `TMB_Trace.tsv` file output from TSO.
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
-#' d <- TsoTmbTraceTsvFile$new(x)
-#' d_parsed <- d$read() # or read(d)
-#' d$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+#' tso_tmbt_read(x)
 #' @export
-TsoTmbTraceTsvFile <- R6::R6Class(
-  "TsoTmbTraceTsvFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `TMB_Trace.tsv` file output from TSO.
-    #'
-    #' @return tibble with variants.
-    read = function() {
-      x <- self$path
-      ct <- readr::cols(
-        Chromosome = "c", Position = "i", RefCall = "c", AltCall = "c",
-        VAF = "d", Depth = "d", CytoBand = "c", GeneName = "c",
-        VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
-        AlleleCountsGnomadExome = "d", AlleleCountsGnomadGenome = "d",
-        AlleleCounts1000Genomes = "d", MaxDatabaseAlleleCounts = "d",
-        GermlineFilterDatabase = "l", GermlineFilterProxi = "l",
-        CodingVariant = "l", Nonsynonymous = "l", IncludedInTMBNumerator = "l"
-      )
-      d <- readr::read_tsv(x, col_types = ct)
-      d[]
-    },
-
-    #' @description
-    #' Writes a tidy version of the `TMB_Trace.tsv` file output from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}tmb_trace")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
+tso_tmbt_read <- function(x) {
+  ct <- list(
+    Chromosome = "c", Position = "d", RefCall = "c", AltCall = "c",
+    VAF = "d", Depth = "d", CytoBand = "c", GeneName = "c",
+    VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
+    AlleleCountsGnomadExome = "d", AlleleCountsGnomadGenome = "d",
+    AlleleCounts1000Genomes = "d", MaxDatabaseAlleleCounts = "d",
+    GermlineFilterDatabase = "l", GermlineFilterProxi = "l",
+    CodingVariant = "l", Nonsynonymous = "l", IncludedInTMBNumerator = "l"
   )
-)
+  # cttso v2 has introduced a few extra columns
+  ct2 <- list(
+    Chromosome = "c", Position = "d", RefCall = "c", AltCall = "c",
+    VAF = "d", Depth = "d", CytoBand = "c", GeneName = "c",
+    VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
+    ClinVarIDs = "c", ClinVarSignificance = "c",
+    AlleleCountsGnomadExome = "d", AlleleCountsGnomadGenome = "d",
+    AlleleCounts1000Genomes = "d", MaxDatabaseAlleleCounts = "d",
+    GermlineFilterDatabase = "c", GermlineFilterProxi = "c",
+    Nonsynonymous = "c", withinValidTmbRegion = "c",
+    IncludedInTMBNumerator = "c", Status = "c", ProteinChange = "c",
+    CDSChange = "c", Exons = "c", Consequence = "c"
+  )
+  hdr <- readr::read_tsv(x, n_max = 0, show_col_types = FALSE)
+  if (all(names(ct2) %in% colnames(hdr))) {
+    ct <- ct2
+  }
+  d <- readr::read_tsv(x, col_types = ct)
+  d[]
+}
 
 #' TsoFragmentLengthHistFile R6 Class
 #'

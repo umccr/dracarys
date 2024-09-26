@@ -1,7 +1,7 @@
-#' TsoAlignCollapseFusionCallerMetricsFile R6 Class
+#' Read TSO AlignCollapseFusionCaller_metrics File
 #'
-#' Contains methods for reading and displaying contents of the
-#' `AlignCollapseFusionCaller_metrics.json.gz` file output from TSO.
+#' Reads the `AlignCollapseFusionCaller_metrics.json.gz` file output from the
+#' TSO500 (post-processing) workflow.
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705.AlignCollapseFusionCaller_metrics.json.gz",
