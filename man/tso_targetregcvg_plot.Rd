@@ -16,5 +16,6 @@ A ggplot2 plot containing read depth on X axis and percentage
 covered on Y axis.
 }
 \description{
-Plots stuff from the \code{TargetRegionCoverage.json.gz} file output from the TSO workflow.
+Plots stuff from the \code{TargetRegionCoverage.json.gz} file output from the
+TSO500 workflow.
 }

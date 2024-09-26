@@ -15,7 +15,7 @@ tibble with the following columns:
 }
 }
 \description{
-Reads the \code{TargetRegionCoverage.json.gz} file output from the TSO workflow.
+Reads the \code{TargetRegionCoverage.json.gz} file output from the TSO500 workflow.
 }
 \examples{
 x <- system.file("extdata/tso/sample705.TargetRegionCoverage.json.gz", package = "dracarys")

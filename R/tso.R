@@ -175,7 +175,13 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Read `tmb.json.gz` file.
     #' @param x Path to file.
     read_tmb = function(x) {
-      dat <- TsoTmbFile$new(x)$read()
+      j <- read_jsongz_rjsonio(x) # turns NaN to NULL
+      # not interested in Settings element
+      j[["Settings"]] <- NULL
+      # handle silly NULLs
+      j <- lapply(j, function(x) ifelse(is.null(x), NA_real_, x))
+      dat <- tibble::as_tibble_row(j) |>
+        dplyr::mutate(dplyr::across(dplyr::everything(), as.numeric))
       tibble::tibble(name = "tmb", data = list(dat))
     },
     #' @description Read `msi.json.gz` file.
@@ -187,7 +193,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Read `Fusions.csv` file.
     #' @param x Path to file.
     read_fus = function(x) {
-      dat <- TsoFusionsCsvFile$new(x)$read()
+      dat <- tso_fusions_read(x)
       tibble::tibble(name = "fusions", data = list(dat))
     }
   ) # end public
@@ -195,7 +201,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
 
 #' Read TSO CombinedVariantOutput File
 #'
-#' Reads `CombinedVariantOutput.tsv` output from the TSO workflow and extracts
+#' Reads `CombinedVariantOutput.tsv` output from the TSO500 workflow and extracts
 #' only the Small Variants section (due to inconsistencies with other sections).
 #'
 #' @param x Path to file.
@@ -233,7 +239,7 @@ tso_combinedvaro_smallv_read <- function(x) {
 
 #' Read TSO TMB_Trace File
 #'
-#' Reads the `TMB_Trace.tsv` file output from TSO workflow.
+#' Reads the `TMB_Trace.tsv` file output from the TSO500 workflow.
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
@@ -301,7 +307,7 @@ tso_fraglenhist_plot <- function(d, min_count = 10) {
 
 #' Read TSO TargetRegionCoverage File
 #'
-#' Reads the `TargetRegionCoverage.json.gz` file output from the TSO workflow.
+#' Reads the `TargetRegionCoverage.json.gz` file output from the TSO500 workflow.
 #'
 #' @return tibble with the following columns:
 #'
@@ -331,7 +337,8 @@ tso_targetregcvg_read <- function(x) {
 
 #' Plot TargetRegionCoverage
 #'
-#' Plots stuff from the `TargetRegionCoverage.json.gz` file output from the TSO workflow.
+#' Plots stuff from the `TargetRegionCoverage.json.gz` file output from the
+#' TSO500 workflow.
 #'
 #' @param d Parsed tibble.
 #' @param min_pct Minimum percentage to be plotted (def: 2).
@@ -363,63 +370,6 @@ tso_targetregcvg_plot <- function(d, min_pct = 2) {
     )
 }
 
-#' TsoTmbFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `tmb.json.gz` file output from TSO.
-#'
-#' @examples
-#' x <- system.file("extdata/tso/sample705.tmb.json.gz", package = "dracarys")
-#' tmb <- TsoTmbFile$new(x)
-#' d_parsed <- tmb$read() # or read(tmb)
-#' tmb$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
-#' @export
-TsoTmbFile <- R6::R6Class(
-  "TsoTmbFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `tmb.json.gz` file output from TSO.
-    #'
-    #' @return tibble with the following columns:
-    #' * TmbPerMb
-    #' * AdjustedTmbPerMb
-    #' * NonsynonymousTmbPerMb
-    #' * AdjustedNonsynonymousTmbPerMb
-    #' * SomaticCodingVariantsCount
-    #' * NonsynonymousSomaticCodingVariantsCount
-    #' * TotalRegionSizeMb
-    #' * CodingRegionSizeMb
-    read = function() {
-      x <- self$path
-      j <- read_jsongz_rjsonio(x) # turns NaN to NULL
-      # not interested in Settings element
-      j[["Settings"]] <- NULL
-      # handle silly NULLs
-      j <- lapply(j, function(x) ifelse(is.null(x), NA, x))
-      tibble::as_tibble_row(j) |>
-        dplyr::mutate(dplyr::across(dplyr::everything(), as.numeric))
-    },
-
-    #' @description
-    #' Writes a tidy version of the `tmb.json.gz` file output from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}tmb")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
 #' TsoFusionsCsvFile R6 Class
 #'
 #' @description
@@ -443,99 +393,44 @@ TsoTmbFile <- R6::R6Class(
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705_Fusions.csv", package = "dracarys")
-#' fus <- TsoFusionsCsvFile$new(x)
-#' d_parsed <- fus$read() # or read(fus)
-#' fus$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+#' tso_fusions_read(x)
 #' @export
-TsoFusionsCsvFile <- R6::R6Class(
-  "TsoFusionsCsvFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `Fusions.csv` file output from TSO.
-    #'
-    #' @return tibble with several columns.
-    read = function() {
-      x <- self$path
-      ct <- readr::cols(
-        Sample = "c", Name = "c", Chr1 = "c", Pos1 = "d", Chr2 = "c",
-        Pos2 = "d", Direction = "c", Alt_Depth = "d", BP1_Depth = "d",
-        BP2_Depth = "d", Total_Depth = "d", VAF = "d", Gene1 = "c", Gene2 = "c",
-        Contig = "c", Filter = "c", Is_Cosmic_GenePair = "l"
-      )
-      res <- readr::read_csv(x, col_types = ct, comment = "#")
-      if (nrow(res) == 0) {
-        return(empty_tbl(cnames = names(ct)))
-      }
-      return(res[])
-    },
-
-    #' @description
-    #' Writes a tidy version of the `Fusions.csv` file output from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}fusions")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
+tso_fusions_read <- function(x) {
+  # extra column (at the end) in v2
+  ct <- list(
+    Sample = "c", Name = "c", Chr1 = "c", Pos1 = "d", Chr2 = "c",
+    Pos2 = "d", Direction = "c", Alt_Depth = "d", BP1_Depth = "d",
+    BP2_Depth = "d", Total_Depth = "d", VAF = "d", Gene1 = "c", Gene2 = "c",
+    Contig = "c", Filter = "c", Is_Cosmic_GenePair = "l"
   )
-)
+  ct2 <- list("Fusion Directionality Known" = "c")
+  hdr <- readr::read_csv(x, n_max = 0, comment = "#", show_col_types = FALSE)
+  if (all(names(ct2) %in% colnames(hdr))) {
+    ct <- c(ct, ct2)
+  }
+  res <- readr::read_csv(x, col_types = ct, comment = "#")
+  if (nrow(res) == 0) {
+    return(empty_tbl(cnames = names(ct), ctypes = ct))
+  }
+  return(res[])
+}
 
-#' TsoMsiFile R6 Class
+#' Read TSO MSI JSON File
 #'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `msi.json.gz` file output from TSO.
+#' Reads `msi.json.gz` file output from the TSO500 workflow.
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
-#' msi <- TsoMsiFile$new(x)
-#' d_parsed <- msi$read() # or read(msi)
-#' msi$write(d_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+#' tso_msi_read(x)
 #' @export
-TsoMsiFile <- R6::R6Class(
-  "TsoMsiFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `msi.json.gz` file output from TSO.
-    #'
-    #' @return tibble with the following columns:
-    #'   - label:
-    read = function() {
-      x <- self$path
-      j <- read_jsongz_jsonlite(x)
-      # not interested in Settings element
-      j[["Settings"]] <- NULL
-      j[["ResultMessage"]] <- j[["ResultMessage"]] %||% NA_character_
-      if (j[["PercentageUnstableSites"]] == "NaN") {
-        j[["PercentageUnstableSites"]] <- NA_real_
-      }
-      tibble::as_tibble_row(j) |>
-        dplyr::mutate(ResultIsValid = as.character(.data$ResultIsValid))
-    },
-
-    #' @description
-    #' Writes a tidy version of the `msi.json.gz` file output from TSO.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      # prefix2 <- glue("{prefix}msi")
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
+tso_msi_read <- function(x) {
+  j <- read_jsongz_jsonlite(x)
+  # not interested in Settings element
+  j[["Settings"]] <- NULL
+  j[["ResultMessage"]] <- j[["ResultMessage"]] %||% NA_character_
+  if (j[["PercentageUnstableSites"]] == "NaN") {
+    j[["PercentageUnstableSites"]] <- NA_real_
+  }
+  tibble::as_tibble_row(j) |>
+    dplyr::mutate(ResultIsValid = as.character(.data$ResultIsValid))
+}

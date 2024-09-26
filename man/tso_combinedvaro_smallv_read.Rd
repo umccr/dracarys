@@ -10,6 +10,6 @@ tso_combinedvaro_smallv_read(x)
 \item{x}{Path to file.}
 }
 \description{
-Reads \code{CombinedVariantOutput.tsv} output from the TSO workflow and extracts
+Reads \code{CombinedVariantOutput.tsv} output from the TSO500 workflow and extracts
 only the Small Variants section (due to inconsistencies with other sections).
 }
