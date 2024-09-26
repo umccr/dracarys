@@ -6,6 +6,9 @@
 \usage{
 tso_targetregcvg_read(x)
 }
+\arguments{
+\item{x}{Path to file.}
+}
 \value{
 tibble with the following columns:
 \itemize{

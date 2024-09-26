@@ -6,6 +6,9 @@
 \usage{
 tso_msi_read(x)
 }
+\arguments{
+\item{x}{Path to file.}
+}
 \description{
 Reads \code{msi.json.gz} file output from the TSO500 workflow.
 }

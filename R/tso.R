@@ -112,41 +112,41 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Read `SampleAnalysisResults.json.gz` file.
     #' @param x Path to file.
     read_sar = function(x) {
-      TsoSampleAnalysisResultsFile$new(x)$read()
+      tso_sar_read(x)
     },
     #' @description Read `TMB_Trace.tsv` file.
     #' @param x Path to file.
     read_tmbt = function(x) {
-      dat <- TsoTmbTraceTsvFile$new(x)$read()
+      dat <- tso_tmbt_read(x)
       tibble::tibble(name = "tmbtrace", data = list(dat))
     },
     #' @description Read `AlignCollapseFusionCaller_metrics.json.gz` file.
     #' @param x Path to file.
     read_acfc = function(x) {
-      TsoAlignCollapseFusionCallerMetricsFile$new(x)$read()
+      tso_acfc_read(x)
     },
     #' @description Read `MergedSmallVariants.vcf.gz` file.
     #' @param x Path to file.
     read_msv = function(x) {
-      dat <- TsoMergedSmallVariantsVcfFile$new(x)$read(only_pass = FALSE, alias = FALSE)
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
       tibble::tibble(name = "mergedsmallv", data = list(dat))
     },
     #' @description Read `MergedSmallVariants.genome.vcf.gz` file.
     #' @param x Path to file.
     read_msvg = function(x) {
-      dat <- TsoMergedSmallVariantsGenomeVcfFile$new(x)$read(only_pass = FALSE, alias = FALSE)
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
       tibble::tibble(name = "mergedsmallvg", data = list(dat))
     },
     #' @description Read `CombinedVariantOutput.tsv` file.
     #' @param x Path to file.
     read_cvo = function(x) {
-      dat <- TsoCombinedVariantOutputFile$new(x)$read()
+      dat <- tso_combinedvaro_smallv_read(x)
       tibble::tibble(name = "combinedvaro", data = list(dat))
     },
     #' @description Read `CopyNumberVariants.vcf.gz` file.
     #' @param x Path to file.
     read_cnv = function(x) {
-      dat <- TsoCopyNumberVariantsVcfFile$new(x)$read(only_pass = FALSE, alias = FALSE)
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
       tibble::tibble(name = "cnv", data = list(dat))
     },
     #' @description Read `fragment_length_hist.json.gz` file.
@@ -169,7 +169,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Read `TargetRegionCoverage.json.gz` file.
     #' @param x Path to file.
     read_trc = function(x) {
-      dat <- TsoTargetRegionCoverageFile$new(x)$read()
+      dat <- tso_targetregcvg_read(x)
       tibble::tibble(name = "targetcvg", data = list(dat))
     },
     #' @description Read `tmb.json.gz` file.
@@ -187,7 +187,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Read `msi.json.gz` file.
     #' @param x Path to file.
     read_msi = function(x) {
-      dat <- TsoMsiFile$new(x)$read()
+      dat <- tso_msi_read(x)
       tibble::tibble(name = "msi", data = list(dat))
     },
     #' @description Read `Fusions.csv` file.
@@ -240,6 +240,8 @@ tso_combinedvaro_smallv_read <- function(x) {
 #' Read TSO TMB_Trace File
 #'
 #' Reads the `TMB_Trace.tsv` file output from the TSO500 workflow.
+#'
+#' @param x Path to file.
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705_TMB_Trace.tsv", package = "dracarys")
@@ -309,6 +311,8 @@ tso_fraglenhist_plot <- function(d, min_count = 10) {
 #'
 #' Reads the `TargetRegionCoverage.json.gz` file output from the TSO500 workflow.
 #'
+#' @param x Path to file.
+#'
 #' @return tibble with the following columns:
 #'
 #' - ConsensusReadDepth
@@ -342,8 +346,10 @@ tso_targetregcvg_read <- function(x) {
 #'
 #' @param d Parsed tibble.
 #' @param min_pct Minimum percentage to be plotted (def: 2).
+#'
 #' @return A ggplot2 plot containing read depth on X axis and percentage
-#'   covered on Y axis.
+#' covered on Y axis.
+#' @export
 tso_targetregcvg_plot <- function(d, min_pct = 2) {
   assertthat::assert_that(is.numeric(min_pct), min_pct >= 0)
   d <- d |>
@@ -354,7 +360,7 @@ tso_targetregcvg_plot <- function(d, min_pct = 2) {
     dplyr::select(dp = "ConsensusReadDepth", pct = "Percentage") |>
     dplyr::mutate(dp = as.numeric(sub("X", "", .data$dp)))
   d |>
-    ggplot2::ggplot(ggplot2::aes(x = dp, y = pct, label = dp)) +
+    ggplot2::ggplot(ggplot2::aes(x = .data$dp, y = .data$pct, label = .data$dp)) +
     ggplot2::geom_point() +
     ggplot2::geom_line() +
     ggrepel::geom_text_repel() +
@@ -370,26 +376,11 @@ tso_targetregcvg_plot <- function(d, min_pct = 2) {
     )
 }
 
-#' TsoFusionsCsvFile R6 Class
+#' Read TSO Fusions File
 #'
-#' @description
-#' Contains methods for reading and displaying contents of the
-#' `Fusions.csv` file output from TSO.
-#' Returns a tibble where the columns are (based on the input file header metadata):
+#' Reads the `Fusions.csv` file output from the TSO500 workflow.
 #'
-#' - Sample: input sample ID.
-#' - Name: Fusion name as reported by manta.
-#' - Chr1/Chr2: The chromosome of the 1st/2nd breakend.
-#' - Pos1/Pos2: The position of the 1st/2nd breakend.
-#' - Direction: The direction of how the breakends are joined together.
-#' - Alt_Depth: The number of read-pairs supporting the fusion call.
-#' - BP1_Depth/BP2_Depth: Number of read-pairs aligned to the 1st/2nd breakend.
-#' - Total_Depth: Max number of read-pairs aligned to a fusion breakend.
-#' - VAF: Variant allele frequency.
-#' - Gene1/Gene2: Genes that overlap the 1st/2nd breakend.
-#' - Contig: The fusion contig.
-#' - Filter: Indicates whether the fusion has passed all of the fusion filters.
-#' - Is_Cosmic_GenePair: Indicates whether the gene pair has been reported by Cosmic(True/False).
+#' @param x Path to file.
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705_Fusions.csv", package = "dracarys")
@@ -418,6 +409,8 @@ tso_fusions_read <- function(x) {
 #' Read TSO MSI JSON File
 #'
 #' Reads `msi.json.gz` file output from the TSO500 workflow.
+#'
+#' @param x Path to file.
 #'
 #' @examples
 #' x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")

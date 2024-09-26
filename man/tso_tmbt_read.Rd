@@ -6,6 +6,9 @@
 \usage{
 tso_tmbt_read(x)
 }
+\arguments{
+\item{x}{Path to file.}
+}
 \description{
 Reads the \code{TMB_Trace.tsv} file output from the TSO500 workflow.
 }

@@ -3,6 +3,8 @@
 #' Reads the `AlignCollapseFusionCaller_metrics.json.gz` file output from the
 #' TSO500 (post-processing) workflow.
 #'
+#' @param x Path to file.
+#'
 #' @examples
 #' x <- system.file("extdata/tso/sample705.AlignCollapseFusionCaller_metrics.json.gz",
 #'   package = "dracarys"
@@ -86,7 +88,7 @@ tso_acfc_read <- function(x) {
         name = gsub(" ", "_", .data$name),
         value = as.numeric(.data$value)
       ) |>
-      dplyr::group_by(name) |>
+      dplyr::group_by(.data$name) |>
       dplyr::mutate(num = dplyr::row_number()) |>
       dplyr::ungroup() |>
       dplyr::select(c("name", "num", "value"))
@@ -130,6 +132,7 @@ tso_acfc_read <- function(x) {
 #' @param max_num Maximum number to display in both plots.
 #'
 #' @return Both histogram plot objects.
+#' @export
 tso_acfc_plot <- function(d, max_num = 15) {
   h <- d |>
     dplyr::filter(.data$name == "acfc_umistatshist") |>
@@ -149,7 +152,7 @@ tso_acfc_plot <- function(d, max_num = 15) {
       .data$name == "num_supporting_fragments",
       .data$num <= max_num
     ) |>
-    ggplot2::ggplot(ggplot2::aes(x = num, y = value)) +
+    ggplot2::ggplot(ggplot2::aes(x = .data$num, y = .data$value)) +
     ggplot2::geom_line() +
     ggplot2::scale_y_continuous(
       breaks = scales::pretty_breaks(n = 10),
@@ -161,10 +164,10 @@ tso_acfc_plot <- function(d, max_num = 15) {
     ggplot2::ylab("Reads")
   p2 <- h |>
     dplyr::filter(
-      name == "unique_UMIs_per_fragment_position",
+      .data$name == "unique_UMIs_per_fragment_position",
       .data$num <= max_num
     ) |>
-    ggplot2::ggplot(ggplot2::aes(x = num, y = value)) +
+    ggplot2::ggplot(ggplot2::aes(x = .data$num, y = .data$value)) +
     ggplot2::geom_line() +
     ggplot2::scale_y_continuous(
       breaks = scales::pretty_breaks(n = 10),

@@ -6,6 +6,9 @@
 \usage{
 tso_acfc_read(x)
 }
+\arguments{
+\item{x}{Path to file.}
+}
 \description{
 Reads the \code{AlignCollapseFusionCaller_metrics.json.gz} file output from the
 TSO500 (post-processing) workflow.

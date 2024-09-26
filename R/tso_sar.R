@@ -69,7 +69,7 @@ tso_sar_read <- function(x) {
   biom_tbl <- tibble::as_tibble_row(biom_list)
   empty_tbl2 <- function(cnames) {
     cnames |>
-      purrr::map_dfc(setNames, object = list(logical()))
+      purrr::map_dfc(stats::setNames, object = list(logical()))
   }
   ## sampleMetrics
   qc2tib <- function(el) {
