@@ -12,12 +12,10 @@ Reads and writes tidy versions of files from the \code{tso_ctdna_tumor_only} wor
 #---- Local ----#
 p <- file.path(
   "~/icav1/g/production/analysis_data/SBJ04651/tso_ctdna_tumor_only",
-  "20240223d1951163/L2400183/Results"
+  "20240223d1951163/L2400183"
 )
-SampleID <- "PRJ230876"
-LibraryID <- "L2400183"
-prefix <- glue("{SampleID}__{LibraryID}")
-t1 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
+prefix <- "PRJ230876_L2400183"
+t1 <- Wf_tso_ctdna_tumor_only$new(path = p, prefix = prefix)
 t1$list_files(max_files = 20)
 t1$list_files_filter_relevant(max_files = 300)
 d <- t1$download_files(max_files = 100, dryrun = F)
@@ -34,14 +32,12 @@ p <- file.path(
   "gds://production/analysis_data/SBJ05563/tso_ctdna_tumor_only",
   "20240914d41300cd/L2401388/Results"
 )
-SampleID <- "PRJ241446"
-LibraryID <- "L2401388"
-prefix <- glue("{SampleID}__{LibraryID}")
+prefix <- "PRJ241446_L2401388"
 outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 token <- Sys.getenv("ICA_ACCESS_TOKEN")
-t2 <- Wf_tso_ctdna_tumor_only$new(path = p, SampleID = SampleID, LibraryID = LibraryID)
-t2$list_files(max_files = 100)
-t2$list_files_filter_relevant(max_files = 100)
+t2 <- Wf_tso_ctdna_tumor_only$new(path = p, prefix = prefix)
+t2$list_files(max_files = 100, ica_token = token)
+t2$list_files_filter_relevant(max_files = 100, ica_token = token)
 d <- t2$download_files(
   outdir = outdir, ica_token = token,
   max_files = 100, dryrun = F
@@ -61,9 +57,7 @@ d_write <- t2$write(
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{SampleID}}{The SampleID of the tumor sample (needed for path lookup).}
-
-\item{\code{LibraryID}}{The LibraryID of the tumor sample (needed for path lookup).}
+\item{\code{prefix}}{The SampleID_LibraryID prefix of the tumor sample (needed for path lookup).}
 }
 \if{html}{\out{</div>}}
 }
@@ -104,7 +98,7 @@ d_write <- t2$write(
 \subsection{Method \code{new()}}{
 Create a new Wf_tso_ctdna_tumor_only object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$new(path = NULL, SampleID = NULL, LibraryID = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_tso_ctdna_tumor_only$new(path = NULL, prefix = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -113,9 +107,7 @@ Create a new Wf_tso_ctdna_tumor_only object.
 \item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
 local filesystem).}
 
-\item{\code{SampleID}}{The SampleID of the tumor sample (needed for path lookup).}
-
-\item{\code{LibraryID}}{The LibraryID of the sample (needed for path lookup).}
+\item{\code{prefix}}{The SampleID_LibraryID prefix of the tumor sample (needed for path lookup).}
 }
 \if{html}{\out{</div>}}
 }
