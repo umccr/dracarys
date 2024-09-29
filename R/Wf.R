@@ -218,8 +218,7 @@ Wf <- R6::R6Class(
           out = list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid))
         ) |>
         dplyr::ungroup() |>
-        dplyr::select("name", "data") |>
-        tibble::deframe()
+        dplyr::select("name", "data")
       invisible(d_write)
     }
   ) # end public

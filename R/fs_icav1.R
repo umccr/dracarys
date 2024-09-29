@@ -195,9 +195,7 @@ dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN
     dplyr::pull(tot_size)
   if (!dryrun) {
     txt <- paste0(
-      "{date_log()} {e('arrow_heading_down')} Downloading ",
-      "{nrow(d)} files ({tot_size}) from {.file {gdsdir}} to ",
-      "{.file {outdir}}"
+      "{e('arrow_heading_down')} {nrow(d)} files ({tot_size}): {.file {gdsdir}}\n"
     )
     cli::cli_alert_info(txt)
     res <- d |>
