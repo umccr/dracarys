@@ -11,8 +11,8 @@
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
 #'   "analysis/cttsov2/20240915ff0295ed"
 #' )
-#' LibraryID <- "L2401290"
-#' t1 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, LibraryID = LibraryID)
+#' prefix <- "L2401290"
+#' t1 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, prefix = prefix)
 #' t1$list_files(max_files = 100)
 #' t1$list_files_filter_relevant(max_files = 300)
 #' d <- t1$download_files(max_files = 100, dryrun = F)
@@ -20,7 +20,7 @@
 #' d_write <- t1$write(
 #'   d_tidy,
 #'   outdir = file.path(p, "dracarys_tidy"),
-#'   prefix = LibraryID,
+#'   prefix = prefix,
 #'   format = "tsv"
 #' )
 #'
@@ -29,9 +29,9 @@
 #'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
 #'   "analysis/cttsov2/20240915ff0295ed"
 #' )
-#' LibraryID <- "L2401290"
+#' prefix <- "L2401290"
 #' outdir <- sub("s3:/", "~/s3", p)
-#' t2 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, LibraryID = LibraryID)
+#' t2 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, prefix = prefix)
 #' t2$list_files(max_files = 500)
 #' t2$list_files_filter_relevant(max_files = 500)
 #' d <- t2$download_files(
@@ -43,7 +43,7 @@
 #' d_write <- t2$write(
 #'   d_tidy,
 #'   outdir = file.path(outdir, "dracarys_tidy"),
-#'   prefix = LibraryID,
+#'   prefix = prefix,
 #'   format = "tsv"
 #' )
 #' }
@@ -52,15 +52,15 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
   "Wf_tso_ctdna_tumor_only_v2",
   inherit = Wf,
   public = list(
-    #' @field LibraryID The LibraryID of the tumor sample (needed for path lookup).
-    LibraryID = NULL,
+    #' @field prefix The LibraryID prefix of the tumor sample (needed for path lookup).
+    prefix = NULL,
     #' @description Create a new Wf_tso_ctdna_tumor_only_v2 object.
     #' @param path Path to directory with raw workflow results (from S3 or
     #' local filesystem).
-    #' @param LibraryID The LibraryID of the sample (needed for path lookup).
-    initialize = function(path = NULL, LibraryID = NULL) {
+    #' @param prefix The LibraryID prefix of the tumor sample (needed for path lookup).
+    initialize = function(path = NULL, prefix = NULL) {
       wname <- "tso_ctdna_tumor_only_v2"
-      pref <- LibraryID
+      pref <- prefix
       res <- glue("Results/{pref}")
       li <- "Logs_Intermediates"
       dc <- glue("{li}/DragenCaller/{pref}")
@@ -126,7 +126,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
         )
 
       super$initialize(path = path, wname = wname, regexes = regexes)
-      self$LibraryID <- LibraryID
+      self$prefix <- prefix
     },
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
@@ -136,7 +136,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
         "path", self$path,
         "wname", self$wname,
         "filesystem", self$filesystem,
-        "LibraryID", self$LibraryID
+        "prefix", self$prefix
       )
       print(res)
       invisible(self)
@@ -145,6 +145,18 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     #' @param x Path to file.
     read_sar = function(x) {
       tso_sar_read(x)
+    },
+    #' @description Read `TMB_Trace.tsv` file.
+    #' @param x Path to file.
+    read_tmbt = function(x) {
+      dat <- tso_tmbt_read(x)
+      tibble::tibble(name = "tmbtrace", data = list(dat))
+    },
+    #' @description Read `CombinedVariantOutput.tsv` file.
+    #' @param x Path to file.
+    read_cvo = function(x) {
+      dat <- tso_combinedvaro_smallv_read(x)
+      tibble::tibble(name = "combinedvaro", data = list(dat))
     },
     #' @description Read `cnv.vcf` file.
     #' @param x Path to file.
@@ -187,18 +199,6 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
       dat <- tso_msi_read(x)
       tibble::tibble(name = "msi", data = list(dat))
     },
-    #' @description Read `TMB_Trace.tsv` file.
-    #' @param x Path to file.
-    read_tmbt = function(x) {
-      dat <- tso_tmbt_read(x)
-      tibble::tibble(name = "tmbtrace", data = list(dat))
-    },
-    #' @description Read `CombinedVariantOutput.tsv` file.
-    #' @param x Path to file.
-    read_cvo = function(x) {
-      dat <- tso_combinedvaro_smallv_read(x)
-      tibble::tibble(name = "combinedvaro", data = list(dat))
-    },
     #' @description Read `Fusions.csv` file.
     #' @param x Path to file.
     read_fus = function(x) {
@@ -207,3 +207,55 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     }
   ) # end public
 )
+
+#' Wf_tso_ctdna_tumor_only_v2 Download Tidy and Write
+#'
+#' Downloads files from the `tso_ctdna_tumor_only_v2` workflow and writes them in a tidy format.
+#'
+#' @param path Path to directory with raw workflow results (S3 or
+#' local filesystem).
+#' @param prefix The LibraryID prefix of the sample (needed for path lookup).
+#' @param outdir Path to output directory with raw files.
+#' @param outdir_tidy Path to output directory with tidy files.
+#' @param format Format of output files.
+#' @param max_files Max number of files to list.
+#' @param dryrun If TRUE, just list the files that will be downloaded (don't
+#' download them).
+#' @return Tibble of tidy tibbles.
+#'
+#' @examples
+#' \dontrun{
+#' p <- file.path(
+#'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
+#'   "analysis/cttsov2/20240915ff0295ed"
+#' )
+#' prefix <- "L2401290"
+#' outdir <- sub("s3:/", "~/s3", p)
+#' d <- dtw_Wf_tso_ctdna_tumor_only_v2(
+#'   path = p, prefix = prefix, outdir = outdir,
+#'   format = "tsv",
+#'   dryrun = F
+#' )
+#' }
+#' @export
+dtw_Wf_tso_ctdna_tumor_only_v2 <- function(path, prefix, outdir,
+                                           outdir_tidy = file.path(outdir, "dracarys_tidy"),
+                                           format = "rds",
+                                           max_files = 1000,
+                                           dryrun = FALSE) {
+  obj <- Wf_tso_ctdna_tumor_only_v2$new(path = path, prefix = prefix)
+  d_dl <- obj$download_files(
+    outdir = outdir, max_files = max_files, dryrun = dryrun
+  )
+  if (!dryrun) {
+    d_tidy <- obj$tidy_files(d_dl)
+    d_write <- obj$write(
+      d_tidy,
+      outdir = outdir_tidy,
+      prefix = prefix,
+      format = format
+    )
+    return(d_write)
+  }
+  return(d_dl)
+}
