@@ -9,7 +9,8 @@
 #' x <- "/path/to/multiqc_data.json"
 #' mqc <- MultiqcFile$new(x)
 #' mqc_parsed <- mqc$read() # or read(mqc)
-#' mqc$write(mqc_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+#' outdir <- "nogit"
+#' mqc$write(mqc_parsed, out_dir = outdir, prefix = "SBJ02862_PRJ222112", out_format = "tsv")
 #' mqc_plots_parsed <- mqc$read(plot = TRUE, plot_names = "everything")
 #' mqc$write(mqc_plots_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "rds")
 #' }
@@ -72,7 +73,7 @@ multiqc_tidy_json <- function(j) {
   cdate <- multiqc_date_fmt(cdate)
   workflow <- .multiqc_guess_workflow(p)
   d <- dracarys::multiqc_parse_gen(p)
-  if (workflow %in% c("dragen_umccrise", "dragen_somatic")) {
+  if (workflow %in% c("dragen_umccrise", "dragen_somatic", "dragen_sash")) {
     # replace the "NA" strings with NA, else we get a column class error
     # due to trying to bind string ('NA') with numeric.
     # https://stackoverflow.com/questions/35292757/replace-values-in-list
@@ -120,7 +121,7 @@ multiqc_rename_cols <- function(d) {
   umccr_workflows <- c(
     "dragen_alignment", "dragen_somatic",
     "dragen_transcriptome", "dragen_umccrise",
-    "dragen_ctdna",
+    "dragen_ctdna", "dragen_sash",
     "bcbio_umccrise", "bcbio_wgs", "bcbio_wts"
   )
 
@@ -184,11 +185,22 @@ multiqc_rename_cols <- function(d) {
       return(paste0("dragen_", w))
     } else if (grepl("^UMCCR MultiQC ctDNA", config_title)) {
       return("dragen_ctdna")
+    } else if (
+      all(
+        c(
+          "PURPLE", "DRAGEN-FastQC",
+          "Bcftools stats (somatic)", "Bcftools stats (germline)"
+        ) %in% ds
+      )
+    ) {
+      return("dragen_sash")
     } else {
-      warning(glue(
-        "config_title: '{config_title}'.\n",
-        "Unknown which DRAGEN workflow this MultiQC JSON was generated from",
-      ))
+      warning(
+        glue(
+          "config_title: '{config_title}'.\n",
+          "Unknown which DRAGEN workflow this MultiQC JSON was generated from"
+        )
+      )
       return("dragen_unknown")
     }
   }

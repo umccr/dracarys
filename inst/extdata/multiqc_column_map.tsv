@@ -1763,3 +1763,237 @@ bcbio_wgs	predicted_parents_ped_check	predicted_parents_ped_check_peddy
 bcbio_wgs	parent_error_ped_check	parent_error_ped_check_peddy
 bcbio_wgs	sample_duplication_error_ped_check	sample_duplication_error_ped_check_peddy
 bcbio_wgs	rel_difference_ped_check	rel_difference_ped_check_peddy
+dragen_sash	umccr_id	umccr_id
+dragen_sash	umccr_workflow	umccr_workflow
+dragen_sash	config_creation_date	date_multiqc
+dragen_sash	Total input reads	reads_tot_input_dragen
+dragen_sash	Total input reads pct	reads_tot_input_pct_dragen
+dragen_sash	Number of duplicate marked reads	reads_num_dupmarked_dragen
+dragen_sash	Number of duplicate marked reads pct	reads_num_dupmarked_pct_dragen
+dragen_sash	Number of unique reads (excl. duplicate marked reads) pct	reads_num_uniq_pct_dragen
+dragen_sash	Reads with mate sequenced	reads_w_mate_seq_dragen
+dragen_sash	Reads with mate sequenced pct	reads_w_mate_seq_pct_dragen
+dragen_sash	Reads without mate sequenced	reads_wo_mate_seq_dragen
+dragen_sash	Reads without mate sequenced pct	reads_wo_mate_seq_pct_dragen
+dragen_sash	QC-failed reads	reads_qcfail_dragen
+dragen_sash	QC-failed reads pct	reads_qcfail_pct_dragen
+dragen_sash	Mapped reads	reads_mapped_dragen
+dragen_sash	Mapped reads pct	reads_mapped_pct_dragen
+dragen_sash	Mapped reads adjusted for excluded mapping	reads_mapped_adjexcl_dragen
+dragen_sash	Mapped reads adjusted for excluded mapping pct	reads_mapped_adjexcl_pct_dragen
+dragen_sash	Mapped reads adjusted for filtered mapping	reads_mapped_adjfilt_dragen
+dragen_sash	Mapped reads adjusted for filtered mapping pct	reads_mapped_adjfilt_pct_dragen
+dragen_sash	Mapped reads adjusted for filtered and excluded mapping	reads_mapped_adjfiltexcl_dragen
+dragen_sash	Mapped reads adjusted for filtered and excluded mapping pct	reads_mapped_adjfiltexcl_pct_dragen
+dragen_sash	Mapped reads R1	reads_mapped_r1_dragen
+dragen_sash	Mapped reads R1 pct	reads_mapped_r1_pct_dragen
+dragen_sash	Mapped reads R2	reads_mapped_r2_dragen
+dragen_sash	Mapped reads R2 pct	reads_mapped_r2_pct_dragen
+dragen_sash	Number of unique & mapped reads (excl. duplicate marked reads)	reads_num_uniq_mapped_dragen
+dragen_sash	Number of unique & mapped reads (excl. duplicate marked reads) pct	reads_num_uniq_mapped_pct_dragen
+dragen_sash	Unmapped reads	reads_unmapped_dragen
+dragen_sash	Unmapped reads pct	reads_unmapped_pct_dragen
+dragen_sash	Unmapped reads adjusted for filtered mapping	reads_unmapped_adjfilt_dragen
+dragen_sash	Unmapped reads adjusted for filtered mapping pct	reads_unmapped_adjfilt_pct_dragen
+dragen_sash	Unmapped reads adjusted for excluded mapping	reads_unmapped_adjexcl_dragen
+dragen_sash	Unmapped reads adjusted for excluded mapping pct	reads_unmapped_adjexcl_pct_dragen
+dragen_sash	Unmapped reads adjusted for filtered and excluded mapping	reads_unmapped_adjfiltexcl_dragen
+dragen_sash	Unmapped reads adjusted for filtered and excluded mapping pct	reads_unmapped_adjfiltexcl_pct_dragen
+dragen_sash	Adjustment of reads matching non-reference decoys	reads_match_nonref_decoys_adj_dragen
+dragen_sash	Adjustment of reads matching non-reference decoys pct	reads_match_nonref_decoys_adj_pct_dragen
+dragen_sash	Singleton reads (itself mapped; mate unmapped)	reads_singleton_dragen
+dragen_sash	Singleton reads (itself mapped; mate unmapped) pct	reads_singleton_pct_dragen
+dragen_sash	Paired reads (itself & mate mapped)	reads_paired_dragen
+dragen_sash	Paired reads (itself & mate mapped) pct	reads_paired_pct_dragen
+dragen_sash	Properly paired reads	reads_paired_proper_dragen
+dragen_sash	Properly paired reads pct	reads_paired_proper_pct_dragen
+dragen_sash	Not properly paired reads (discordant)	reads_discordant_dragen
+dragen_sash	Not properly paired reads (discordant) pct	reads_discordant_pct_dragen
+dragen_sash	Paired reads mapped to different chromosomes	reads_paired_mapped_diff_chrom_dragen
+dragen_sash	Paired reads mapped to different chromosomes pct	reads_paired_mapped_diff_chrom_pct_dragen
+dragen_sash	Paired reads mapped to different chromosomes (MAPQ>=10)	reads_paired_mapped_diff_chrom_mapq10_dragen
+dragen_sash	Paired reads mapped to different chromosomes (MAPQ>=10) pct	reads_paired_mapped_diff_chrom_mapq10_pct_dragen
+dragen_sash	Reads mapping to multiple locations	reads_map_multiloc_dragen
+dragen_sash	Reads mapping to multiple locations pct	reads_map_multiloc_pct_dragen
+dragen_sash	Reads with MAPQ [40:inf)	reads_mapq_40_inf_dragen
+dragen_sash	Reads with MAPQ [40:inf) pct	reads_mapq_40_inf_pct_dragen
+dragen_sash	Reads with MAPQ [30:40)	reads_mapq_30_40_dragen
+dragen_sash	Reads with MAPQ [30:40) pct	reads_mapq_30_40_pct_dragen
+dragen_sash	Reads with MAPQ [20:30)	reads_mapq_20_30_dragen
+dragen_sash	Reads with MAPQ [20:30) pct	reads_mapq_20_30_pct_dragen
+dragen_sash	Reads with MAPQ [10:20)	reads_mapq_10_20_dragen
+dragen_sash	Reads with MAPQ [10:20) pct	reads_mapq_10_20_pct_dragen
+dragen_sash	Reads with MAPQ [ 0:10)	reads_mapq_0_10_dragen
+dragen_sash	Reads with MAPQ [ 0:10) pct	reads_mapq_0_10_pct_dragen
+dragen_sash	Reads with MAPQ NA (Unmapped reads)	reads_mapq_na_unmapped_dragen
+dragen_sash	Reads with MAPQ NA (Unmapped reads) pct	reads_mapq_na_unmapped_pct_dragen
+dragen_sash	Reads with indel R1	reads_indel_r1_dragen
+dragen_sash	Reads with indel R1 pct	reads_indel_r1_pct_dragen
+dragen_sash	Reads with indel R2	reads_indel_r2_dragen
+dragen_sash	Reads with indel R2 pct	reads_indel_r2_pct_dragen
+dragen_sash	Total bases	bases_tot_dragen
+dragen_sash	Total bases R1	bases_tot_r1_dragen
+dragen_sash	Total bases R2	bases_tot_r2_dragen
+dragen_sash	Mapped bases	bases_mapped_dragen
+dragen_sash	Mapped bases R1	bases_mapped_r1_dragen
+dragen_sash	Mapped bases R2	bases_mapped_r2_dragen
+dragen_sash	Soft-clipped bases	bases_softclip_dragen
+dragen_sash	Soft-clipped bases pct	bases_softclip_pct_dragen
+dragen_sash	Soft-clipped bases R1	bases_softclip_r1_dragen
+dragen_sash	Soft-clipped bases R1 pct	bases_softclip_r1_pct_dragen
+dragen_sash	Soft-clipped bases R2 pct	bases_softclip_r2_pct_dragen
+dragen_sash	Hard-clipped bases	bases_hardclip_dragen
+dragen_sash	Hard-clipped bases pct	bases_hardclip_pct_dragen
+dragen_sash	Hard-clipped bases R1	bases_hardclip_r1_dragen
+dragen_sash	Hard-clipped bases R1 pct	bases_hardclip_r1_pct_dragen
+dragen_sash	Hard-clipped bases R2	bases_hardclip_r2_dragen
+dragen_sash	Hard-clipped bases R2 pct	bases_hardclip_r2_pct_dragen
+dragen_sash	Mismatched bases R1	bases_mismatched_r1_dragen
+dragen_sash	Mismatched bases R1 pct	bases_mismatched_r1_pct_dragen
+dragen_sash	Mismatched bases R2 pct	bases_mismatched_r2_pct_dragen
+dragen_sash	Mismatched bases R1 (excl. indels)	bases_mismatched_r1_noindels_dragen
+dragen_sash	Mismatched bases R1 (excl. indels) pct	bases_mismatched_r1_noindels_pct_dragen
+dragen_sash	Mismatched bases R2 (excl. indels) pct	bases_mismatched_r2_noindels_pct_dragen
+dragen_sash	Q30 bases	bases_q30_dragen
+dragen_sash	Q30 bases pct	bases_q30_pct_dragen
+dragen_sash	Q30 bases R1	bases_q30_r1_dragen
+dragen_sash	Q30 bases R1 pct	bases_q30_r1_pct_dragen
+dragen_sash	Q30 bases R2	bases_q30_r2_dragen
+dragen_sash	Q30 bases R2 pct	bases_q30_r2_pct_dragen
+dragen_sash	Q30 bases (excl. dups & clipped bases)	bases_q30_nodups_noclipped_dragen
+dragen_sash	Total alignments	alignments_tot_dragen
+dragen_sash	Secondary alignments	alignments_secondary_dragen
+dragen_sash	Supplementary (chimeric) alignments	alignments_chimeric_dragen
+dragen_sash	Estimated read length	read_len_dragen
+dragen_sash	Bases in reference genome	bases_in_ref_genome_dragen
+dragen_sash	Insert length: mean	insert_len_mean_dragen
+dragen_sash	Insert length: median	insert_len_median_dragen
+dragen_sash	Insert length: standard deviation	insert_len_std_dev_dragen
+dragen_sash	DRAGEN mapping rate [mil. reads/second]	mapping_rate_dragen_milreads_per_sec_dragen
+dragen_sash	Secondary alignments pct	alignments_secondary_pct_dragen
+dragen_sash	Q30 bases (excl. dups & clipped bases) pct	bases_q30_nodups_noclipped_pct_dragen
+dragen_sash	Mapped bases R1 pct	bases_mapped_r1_pct_dragen
+dragen_sash	Mapped bases R2 pct	bases_mapped_r2_pct_dragen
+dragen_sash	Total	var_tot_dragen
+dragen_sash	Total pct	var_tot_pct_dragen
+dragen_sash	Biallelic	var_biallelic_dragen
+dragen_sash	Biallelic pct	var_biallelic_pct_dragen
+dragen_sash	Multiallelic	var_multiallelic_dragen
+dragen_sash	Multiallelic pct	var_multiallelic_pct_dragen
+dragen_sash	SNPs	var_snp_dragen
+dragen_sash	SNPs pct	var_snp_pct_dragen
+dragen_sash	Insertions (Hom)	var_ins_hom_dragen
+dragen_sash	Insertions (Hom) pct	var_ins_hom_pct_dragen
+dragen_sash	Insertions (Het)	var_ins_het_dragen
+dragen_sash	Insertions (Het) pct	var_ins_het_pct_dragen
+dragen_sash	Deletions (Hom)	var_del_hom_dragen
+dragen_sash	Deletions (Hom) pct	var_del_hom_pct_dragen
+dragen_sash	Deletions (Het)	var_del_het_dragen
+dragen_sash	Deletions (Het) pct	var_del_het_pct_dragen
+dragen_sash	Indels (Het)	var_indel_het_dragen
+dragen_sash	Indels (Het) pct	var_indel_het_pct_dragen
+dragen_sash	Chr X number of SNPs over genome	var_snp_x_over_genome_dragen
+dragen_sash	Chr Y number of SNPs over genome	var_snp_y_over_genome_dragen
+dragen_sash	(Chr X SNPs)/(chr Y SNPs) ratio over genome	var_x_over_y_snp_ratio_over_genome_dragen
+dragen_sash	SNP Transitions	var_snp_transitions_dragen
+dragen_sash	SNP Transversions	var_snp_transversions_dragen
+dragen_sash	Ti/Tv ratio	var_ti_tv_ratio_dragen
+dragen_sash	Heterozygous	var_heterozygous_dragen
+dragen_sash	Homozygous	var_homozygous_dragen
+dragen_sash	Het/Hom ratio	var_het_hom_ratio_dragen
+dragen_sash	In dbSNP	var_in_dbsnp_dragen
+dragen_sash	In dbSNP pct	var_in_dbsnp_pct_dragen
+dragen_sash	Not in dbSNP	var_nin_dbsnp_dragen
+dragen_sash	Not in dbSNP pct	var_nin_dbsnp_pct_dragen
+dragen_sash	Percent Callability	callability_pct_dragen
+dragen_sash	Percent Autosome Callability	callability_auto_pct_dragen
+dragen_sash	Insertions	var_ins_tot_dragen
+dragen_sash	Deletions	var_del_tot_dragen
+dragen_sash	Indels	var_indel_tot_dragen
+dragen_sash	Insertions pct	var_ins_tot_pct_dragen
+dragen_sash	Deletions pct	var_del_tot_pct_dragen
+dragen_sash	Indels pct	var_indel_tot_pct_dragen
+dragen_sash	Number of samples	sample_num_dragen
+dragen_sash	Reads Processed	reads_processed_dragen
+dragen_sash	Child Sample	sample_child_dragen
+dragen_sash	Filtered vars	vars_tot_filt_dragen
+dragen_sash	Filtered SNPs	vars_snp_filt_dragen
+dragen_sash	Filtered indels	vars_indel_filt_dragen
+dragen_sash	Filtered vars pct	vars_tot_filt_pct_dragen
+dragen_sash	Filtered SNPs pct	vars_snp_filt_pct_dragen
+dragen_sash	Autosomal median coverage	cov_auto_median_dragen
+dragen_sash	X median coverage	cov_x_median_dragen
+dragen_sash	Y median coverage	cov_y_median_dragen
+dragen_sash	1 median / Autosomal median	cov_1_div_auto_medians_dragen
+dragen_sash	2 median / Autosomal median	cov_2_div_auto_medians_dragen
+dragen_sash	3 median / Autosomal median	cov_3_div_auto_medians_dragen
+dragen_sash	4 median / Autosomal median	cov_4_div_auto_medians_dragen
+dragen_sash	5 median / Autosomal median	cov_5_div_auto_medians_dragen
+dragen_sash	6 median / Autosomal median	cov_6_div_auto_medians_dragen
+dragen_sash	7 median / Autosomal median	cov_7_div_auto_medians_dragen
+dragen_sash	8 median / Autosomal median	cov_8_div_auto_medians_dragen
+dragen_sash	9 median / Autosomal median	cov_9_div_auto_medians_dragen
+dragen_sash	10 median / Autosomal median	cov_10_div_auto_median_dragen
+dragen_sash	11 median / Autosomal median	cov_11_div_auto_median_dragen
+dragen_sash	12 median / Autosomal median	cov_12_div_auto_median_dragen
+dragen_sash	13 median / Autosomal median	cov_13_div_auto_median_dragen
+dragen_sash	14 median / Autosomal median	cov_14_div_auto_median_dragen
+dragen_sash	15 median / Autosomal median	cov_15_div_auto_median_dragen
+dragen_sash	16 median / Autosomal median	cov_16_div_auto_median_dragen
+dragen_sash	17 median / Autosomal median	cov_17_div_auto_median_dragen
+dragen_sash	18 median / Autosomal median	cov_18_div_auto_median_dragen
+dragen_sash	19 median / Autosomal median	cov_19_div_auto_median_dragen
+dragen_sash	20 median / Autosomal median	cov_20_div_auto_median_dragen
+dragen_sash	21 median / Autosomal median	cov_21_div_auto_median_dragen
+dragen_sash	22 median / Autosomal median	cov_22_div_auto_median_dragen
+dragen_sash	X median / Autosomal median	cov_x_div_auto_median_dragen
+dragen_sash	Y median / Autosomal median	cov_y_div_auto_median_dragen
+dragen_sash	Ploidy estimation	ploidy_est_dragen
+dragen_sash	wgs average alignment coverage over genome	cov_avg_genome_dragen
+dragen_sash	QCStatus	qc_status_purple
+dragen_sash	Method	method_purple
+dragen_sash	CopyNumberSegments	cn_segs_purple
+dragen_sash	UnsupportedCopyNumberSegments	unsupported_cn_segs_purple
+dragen_sash	Purity	purity_purple1
+dragen_sash	AmberGender	gender_amber
+dragen_sash	CobaltGender	gender_cobalt
+dragen_sash	DeletedGenes	deleted_genes_purple
+dragen_sash	Contamination	contamination_purple
+dragen_sash	GermlineAberrations	germline_aberrations_purple
+dragen_sash	AmberMeanDepth	avg_depth_amber
+dragen_sash	LohPercent	loh_pct_purple
+dragen_sash	purity	purity_purple2
+dragen_sash	normFactor	normfactor_purple
+dragen_sash	score	score_purple
+dragen_sash	diploidProportion	diploid_prop_purple
+dragen_sash	ploidy	ploidy_purple1
+dragen_sash	gender	gender_purple
+dragen_sash	status	status_purple
+dragen_sash	polyclonalProportion	polyclonal_prop_purple
+dragen_sash	minPurity	min_purity_purple
+dragen_sash	maxPurity	max_purity_purple
+dragen_sash	minPloidy	min_ploidy_purple
+dragen_sash	maxPloidy	max_ploidy_purple
+dragen_sash	minDiploidProportion	min_diploid_prop_purple
+dragen_sash	maxDiploidProportion	max_diploid_prop_purple
+dragen_sash	somaticPenalty	somatic_penalty_purple
+dragen_sash	wholeGenomeDuplication	whole_genome_dup_purple
+dragen_sash	msIndelsPerMb	ms_indels_permb_purple
+dragen_sash	msStatus	ms_status_purple
+dragen_sash	tml	tml_purple
+dragen_sash	tmlStatus	tml_status_purple
+dragen_sash	tmbPerMb	tmb_permb_purple
+dragen_sash	tmbStatus	tmb_status_purple
+dragen_sash	svTumorMutationalBurden	tmb_sv_purple
+dragen_sash	runMode	run_mode_purple
+dragen_sash	targeted	targeted_purple
+dragen_sash	filt_indels	var_filt_indels_pct_sash
+dragen_sash	filt_others	var_filt_other_pct_sash
+dragen_sash	filt_snps	var_filt_snps_pct_sash
+dragen_sash	filt_vars	var_filt_vars_pct_sash
+dragen_sash	indels	var_indels_sash
+dragen_sash	others	var_others_sash
+dragen_sash	snps	var_snps_sash
+dragen_sash	avg_gc_content_percent	gc_pct_dragen
+dragen_sash	germline	var_germline_sash
+dragen_sash	germline_predispose	var_germline_predispose_sash
