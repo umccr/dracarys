@@ -79,6 +79,7 @@ Wf <- R6::R6Class(
       wnames <- c(
         "bcl_convert",
         "tso_ctdna_tumor_only",
+        "tso_ctdna_tumor_only_v2",
         "wgs_alignment_qc",
         "wts_alignment_qc",
         "wts_tumor_only",
@@ -217,8 +218,7 @@ Wf <- R6::R6Class(
           out = list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid))
         ) |>
         dplyr::ungroup() |>
-        dplyr::select("name", "data") |>
-        tibble::deframe()
+        dplyr::select("name", "data")
       invisible(d_write)
     }
   ) # end public

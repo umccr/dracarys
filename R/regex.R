@@ -89,10 +89,7 @@ FILES_DOWNLOAD_BUT_IGNORE <- c(
 #' @return Evaluated function.
 #' @examples
 #' mean_1_to_10 <- dr_func_eval("mean", v = c("mean", "sd"))(1:10)
-#' x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
-#' obj <- dr_func_eval("TsoFragmentLengthHistFile")$new(x)
 #' @testexamples
-#' expect_equal("sample705.fragment_length_hist.json.gz", obj$bname())
 #' expect_equal(mean_1_to_10, base::mean(1:10))
 #' expect_null(dr_func_eval("foo"))
 #' @export

@@ -24,6 +24,4 @@ vector. If the function is not found, it returns NULL.
 }
 \examples{
 mean_1_to_10 <- dr_func_eval("mean", v = c("mean", "sd"))(1:10)
-x <- system.file("extdata/tso/sample705.fragment_length_hist.json.gz", package = "dracarys")
-obj <- dr_func_eval("TsoFragmentLengthHistFile")$new(x)
 }
