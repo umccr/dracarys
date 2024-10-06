@@ -93,7 +93,7 @@ Wf <- R6::R6Class(
         "sash"
       )
       assertthat::assert_that(wname %in% wnames)
-      self$path <- path
+      self$path <- sub("/$", "", path) # remove potential trailing slash
       self$wname <- wname
       self$filesystem <- dplyr::case_when(
         grepl("^gds://", path) ~ "gds",
