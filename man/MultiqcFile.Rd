@@ -12,7 +12,8 @@ Contains methods for reading and displaying contents of the
 x <- "/path/to/multiqc_data.json"
 mqc <- MultiqcFile$new(x)
 mqc_parsed <- mqc$read() # or read(mqc)
-mqc$write(mqc_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "tsv")
+outdir <- "nogit"
+mqc$write(mqc_parsed, out_dir = outdir, prefix = "SBJ02862_PRJ222112", out_format = "tsv")
 mqc_plots_parsed <- mqc$read(plot = TRUE, plot_names = "everything")
 mqc$write(mqc_plots_parsed, out_dir = tempdir(), prefix = "sample705", out_format = "rds")
 }

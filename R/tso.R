@@ -301,8 +301,8 @@ tso_tmbt_read <- function(x) {
     VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
     AlleleCountsGnomadExome = "d", AlleleCountsGnomadGenome = "d",
     AlleleCounts1000Genomes = "d", MaxDatabaseAlleleCounts = "d",
-    GermlineFilterDatabase = "l", GermlineFilterProxi = "l",
-    CodingVariant = "l", Nonsynonymous = "l", IncludedInTMBNumerator = "l"
+    GermlineFilterDatabase = "c", GermlineFilterProxi = "c",
+    CodingVariant = "c", Nonsynonymous = "c", IncludedInTMBNumerator = "c"
   )
   # cttso v2 has introduced a few extra columns
   ct2 <- list(
