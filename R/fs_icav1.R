@@ -132,7 +132,7 @@ gds_list_files_filter_relevant <- function(gdsdir, pattern = NULL, regexes = DR_
                                            no_recurse = TRUE, page_token = NULL,
                                            recursive = NULL) {
   pattern <- pattern %||% ".*" # keep all recognisable files by default
-  assertthat::assert_that(all(colnames(regexes) == c("regex", "fun")))
+  assertthat::assert_that(all(c("regex", "fun") %in% colnames(regexes)))
   cols_sel <- c("type", "bname", "size", "lastmodified", "file_id", "path", "presigned_url")
   d <- dracarys::gds_list_files_dir(
     gdsdir = gdsdir, token = token, page_size = page_size, include_url = include_url,
