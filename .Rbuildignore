@@ -5,7 +5,7 @@
 ^TODO\.md$
 ^\.DS_Store$
 ^\.Rproj\.user$
-^\.bumpversion\.cfg$
+^\.bumpversion\.toml$
 ^\.dockerignore$
 ^\.dvc$
 ^\.dvcignore$

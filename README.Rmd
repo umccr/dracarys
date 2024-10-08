@@ -36,14 +36,12 @@ require(dracarys)
 
 ## 🏆 Aim
 
-Given a [ICA GDS][ica-gds], AWS S3 or local directory with results from a UMCCR workflow,
+Given a directory with results from a DRAGEN/UMCCR workflow,
 {dracarys} will grab files of interest and transform them into 'tidier'
 structures for output into TSV/Parquet/RDS format for downstream ingestion
 into a database/data lake.
 See supported [workflows](#supported-workflows), [running](#running) examples,
 and [CLI](#cli) options in the sections below.
-
-[ica-gds]: <https://developer.illumina.com/illumina-connected-analytics>
 
 ## 🍕 Installation
 
@@ -98,7 +96,7 @@ docker pull --platform linux/amd64 ghcr.io/umccr/dracarys:X.X.X
 ## ✨ Supported Workflows
 
 
-{dracarys} supports most outputs from the following UMCCR workflows:
+{dracarys} supports most outputs from the following DRAGEN/UMCCR workflows:
 
 | Workflow   | Description |
 |------------|-------------|
