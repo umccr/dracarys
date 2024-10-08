@@ -9,7 +9,7 @@ vector. If the function is not found, it returns NULL."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@ vector. If the function is not found, it returns NULL."></head><body>
     <li><a class="dropdown-item" href="../articles/developers.html">DevNotes</a></li>
     <li><a class="dropdown-item" href="../articles/files.html">Files</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../articles/NEWS.html">NEWS</a></li>
       </ul><ul class="navbar-nav"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -48,7 +49,7 @@ vector. If the function is not found, it returns NULL.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dr_func_eval</span><span class="op">(</span><span class="va">f</span>, v <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dr_func_eval</span><span class="op">(</span><span class="va">f</span>, v <span class="op">=</span> <span class="cn">NULL</span>, envir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/sys.parent.html" class="external-link">parent.frame</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -63,6 +64,11 @@ vector. If the function is not found, it returns NULL.</p>
 <dd><p>Character vector of strings evaluating to functions. By default,
 this points to the functions in the DR_FILE_REGEX dracarys tibble.</p></dd>
 
+
+<dt id="arg-envir">envir<a class="anchor" aria-label="anchor" href="#arg-envir"></a></dt>
+<dd><p>the environment in which to evaluate the function e.g. use <code>self</code>
+when using inside R6 classes.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -72,8 +78,6 @@ this points to the functions in the DR_FILE_REGEX dracarys tibble.</p></dd>
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">mean_1_to_10</span> <span class="op">&lt;-</span> <span class="fu">dr_func_eval</span><span class="op">(</span><span class="st">"mean"</span>, v <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"mean"</span>, <span class="st">"sd"</span><span class="op">)</span><span class="op">)</span><span class="op">(</span><span class="fl">1</span><span class="op">:</span><span class="fl">10</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/system.file.html" class="external-link">system.file</a></span><span class="op">(</span><span class="st">"extdata/tso/sample705.fragment_length_hist.json.gz"</span>, package <span class="op">=</span> <span class="st">"dracarys"</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">obj</span> <span class="op">&lt;-</span> <span class="fu">dr_func_eval</span><span class="op">(</span><span class="st">"TsoFragmentLengthHistFile"</span><span class="op">)</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
@@ -85,7 +89,7 @@ this points to the functions in the DR_FILE_REGEX dracarys tibble.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

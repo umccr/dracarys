@@ -9,7 +9,7 @@ multiqc_data.json file output from MultiQC."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -24,6 +24,7 @@ multiqc_data.json file output from MultiQC."></head><body>
     <li><a class="dropdown-item" href="../articles/developers.html">DevNotes</a></li>
     <li><a class="dropdown-item" href="../articles/files.html">Files</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../articles/NEWS.html">NEWS</a></li>
       </ul><ul class="navbar-nav"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -148,7 +149,8 @@ the plotz.</p></dd>
 <span class="r-in"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="st">"/path/to/multiqc_data.json"</span></span></span>
 <span class="r-in"><span><span class="va">mqc</span> <span class="op">&lt;-</span> <span class="va">MultiqcFile</span><span class="op">$</span><span class="fu">new</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mqc_parsed</span> <span class="op">&lt;-</span> <span class="va">mqc</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span><span class="op">)</span> <span class="co"># or read(mqc)</span></span></span>
-<span class="r-in"><span><span class="va">mqc</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">mqc_parsed</span>, out_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, prefix <span class="op">=</span> <span class="st">"sample705"</span>, out_format <span class="op">=</span> <span class="st">"tsv"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">outdir</span> <span class="op">&lt;-</span> <span class="st">"nogit"</span></span></span>
+<span class="r-in"><span><span class="va">mqc</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">mqc_parsed</span>, out_dir <span class="op">=</span> <span class="va">outdir</span>, prefix <span class="op">=</span> <span class="st">"SBJ02862_PRJ222112"</span>, out_format <span class="op">=</span> <span class="st">"tsv"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mqc_plots_parsed</span> <span class="op">&lt;-</span> <span class="va">mqc</span><span class="op">$</span><span class="fu">read</span><span class="op">(</span>plot <span class="op">=</span> <span class="cn">TRUE</span>, plot_names <span class="op">=</span> <span class="st">"everything"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">mqc</span><span class="op">$</span><span class="fu">write</span><span class="op">(</span><span class="va">mqc_plots_parsed</span>, out_dir <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempdir</a></span><span class="op">(</span><span class="op">)</span>, prefix <span class="op">=</span> <span class="st">"sample705"</span>, out_format <span class="op">=</span> <span class="st">"rds"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
@@ -163,7 +165,7 @@ the plotz.</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

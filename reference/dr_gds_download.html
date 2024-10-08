@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -22,6 +22,7 @@
     <li><a class="dropdown-item" href="../articles/developers.html">DevNotes</a></li>
     <li><a class="dropdown-item" href="../articles/files.html">Files</a></li>
   </ul></li>
+<li class="nav-item"><a class="nav-link" href="../articles/NEWS.html">NEWS</a></li>
       </ul><ul class="navbar-nav"><li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json"></form></li>
@@ -35,7 +36,7 @@
   <main id="main" class="col-md-9"><div class="page-header">
 
       <h1>dracarys GDS Download</h1>
-      <small class="dont-index">Source: <a href="https://github.com/umccr/dracarys/blob/main/R/ica.R" class="external-link"><code>R/ica.R</code></a></small>
+      <small class="dont-index">Source: <a href="https://github.com/umccr/dracarys/blob/main/R/fs_icav1.R" class="external-link"><code>R/fs_icav1.R</code></a></small>
       <div class="d-none name"><code>dr_gds_download.Rd</code></div>
     </div>
 
@@ -48,9 +49,9 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">dr_gds_download</span><span class="op">(</span></span>
 <span>  <span class="va">gdsdir</span>,</span>
 <span>  <span class="va">outdir</span>,</span>
-<span>  <span class="va">token</span>,</span>
-<span>  page_size <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  token <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/Sys.getenv.html" class="external-link">Sys.getenv</a></span><span class="op">(</span><span class="st">"ICA_ACCESS_TOKEN"</span><span class="op">)</span>,</span>
 <span>  pattern <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  page_size <span class="op">=</span> <span class="fl">100</span>,</span>
 <span>  dryrun <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  regexes <span class="op">=</span> <span class="va">DR_FILE_REGEX</span>,</span>
 <span>  recursive <span class="op">=</span> <span class="cn">NULL</span></span>
@@ -66,19 +67,19 @@
 
 
 <dt id="arg-outdir">outdir<a class="anchor" aria-label="anchor" href="#arg-outdir"></a></dt>
-<dd><p>Path to output directory.</p></dd>
+<dd><p>Local output directory.</p></dd>
 
 
 <dt id="arg-token">token<a class="anchor" aria-label="anchor" href="#arg-token"></a></dt>
 <dd><p>ICA access token (def: $ICA_ACCESS_TOKEN env var).</p></dd>
 
 
-<dt id="arg-page-size">page_size<a class="anchor" aria-label="anchor" href="#arg-page-size"></a></dt>
-<dd><p>Page size (def: 100).</p></dd>
-
-
 <dt id="arg-pattern">pattern<a class="anchor" aria-label="anchor" href="#arg-pattern"></a></dt>
 <dd><p>Pattern to further filter the returned file type tibble.</p></dd>
+
+
+<dt id="arg-page-size">page_size<a class="anchor" aria-label="anchor" href="#arg-page-size"></a></dt>
+<dd><p>Page size (def: 10 via ICA API).</p></dd>
 
 
 <dt id="arg-dryrun">dryrun<a class="anchor" aria-label="anchor" href="#arg-dryrun"></a></dt>
@@ -87,15 +88,30 @@ download them).</p></dd>
 
 
 <dt id="arg-regexes">regexes<a class="anchor" aria-label="anchor" href="#arg-regexes"></a></dt>
-<dd><p>Tibble with regex and function name.</p></dd>
+<dd><p>Tibble with <code>regex</code> and <code>fun</code>ction name (see example).</p></dd>
 
 
 <dt id="arg-recursive">recursive<a class="anchor" aria-label="anchor" href="#arg-recursive"></a></dt>
 <dd><p>Should files be returned recursively <em>in and under</em> the specified
-GDS directory (TRUE), or <em>only directly in</em> the specified GDS directory (FALSE) (def: TRUE).</p></dd>
+GDS directory, or <em>only directly in</em> the specified GDS directory (def: TRUE via ICA API).</p></dd>
 
 </dl></div>
 
+    <div class="section level2">
+    <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="kw">if</span> <span class="op">(</span><span class="cn">FALSE</span><span class="op">)</span> <span class="op">{</span> <span class="co"># \dontrun{</span></span></span>
+<span class="r-in"><span><span class="va">gdsdir</span> <span class="op">&lt;-</span> <span class="st">"gds://production/analysis_data/SBJ01155/umccrise/202408300c218043/L2101566__L2101565"</span></span></span>
+<span class="r-in"><span><span class="va">outdir</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">"gds:/"</span>, <span class="st">"~/icav1/g"</span>, <span class="va">gdsdir</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">regexes</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tribble.html" class="external-link">tribble</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="op">~</span><span class="va">regex</span>, <span class="op">~</span><span class="va">fun</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"multiqc_data\\.json$"</span>, <span class="st">"MultiqcJsonFile"</span>,</span></span>
+<span class="r-in"><span>  <span class="st">"-somatic\\.pcgr\\.json\\.gz$"</span>, <span class="st">"pcgrjson"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">dr_gds_download</span><span class="op">(</span>gdsdir <span class="op">=</span> <span class="va">gdsdir</span>, outdir <span class="op">=</span> <span class="va">outdir</span>, regexes <span class="op">=</span> <span class="va">regexes</span>, dryrun <span class="op">=</span> <span class="cn">T</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">}</span> <span class="co"># }</span></span></span>
+<span class="r-in"><span></span></span>
+</code></pre></div>
+    </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside></div>
 
@@ -105,7 +121,7 @@ GDS directory (TRUE), or <em>only directly in</em> the specified GDS directory (
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer></div>

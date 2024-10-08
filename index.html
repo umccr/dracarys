@@ -22,7 +22,7 @@
 
     <a class="navbar-brand me-2" href="index.html">dracarys</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.15.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.16.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,6 +40,7 @@
     <li><a class="dropdown-item" href="articles/files.html">Files</a></li>
   </ul>
 </li>
+<li class="nav-item"><a class="nav-link" href="articles/NEWS.html">NEWS</a></li>
       </ul>
 <ul class="navbar-nav">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
@@ -56,13 +57,13 @@
 <div class="row">
   <main id="main" class="col-md-9"><ul>
 <li>
-<a href="#id_-dracarys---umccr-workflow-tidying">🔥 dracarys - UMCCR Workflow Tidying</a>
+<a href="#fire-dracarys---umccr-workflow-tidying">🔥 dracarys - UMCCR Workflow Tidying</a>
 <ul>
-<li><a href="#id_-aim">🏆 Aim</a></li>
-<li><a href="#id_-installation">🍕 Installation</a></li>
-<li><a href="#id_-supported-workflows">✨ Supported Workflows</a></li>
-<li><a href="#id_-cli">🌀 CLI</a></li>
-<li><a href="#id_-running">🚕 Running</a></li>
+<li><a href="#trophy-aim">🏆 Aim</a></li>
+<li><a href="#pizza-installation">🍕 Installation</a></li>
+<li><a href="#sparkles-supported-workflows">✨ Supported Workflows</a></li>
+<li><a href="#cyclone-cli">🌀 CLI</a></li>
+<li><a href="#taxi-running">🚕 Running</a></li>
 </ul>
 </li>
 </ul>
@@ -78,7 +79,7 @@
 <div class="section level2">
 <h2 id="trophy-aim">🏆 Aim<a class="anchor" aria-label="anchor" href="#trophy-aim"></a>
 </h2>
-<p>Given a <a href="https://developer.illumina.com/illumina-connected-analytics" class="external-link">ICA GDS</a>, AWS S3 or local directory with results from a UMCCR workflow, {dracarys} will grab files of interest and transform them into ‘tidier’ structures for output into TSV/Parquet/RDS format for downstream ingestion into a database/data lake. See supported <a href="#supported-workflows">workflows</a>, <a href="#running">running</a> examples, and <a href="#cli">CLI</a> options in the sections below.</p>
+<p>Given a directory with results from a DRAGEN/UMCCR workflow, {dracarys} will grab files of interest and transform them into ‘tidier’ structures for output into TSV/Parquet/RDS format for downstream ingestion into a database/data lake. See supported <a href="#supported-workflows">workflows</a>, <a href="#running">running</a> examples, and <a href="#cli">CLI</a> options in the sections below.</p>
 </div>
 <div class="section level2">
 <h2 id="pizza-installation">🍕 Installation<a class="anchor" aria-label="anchor" href="#pizza-installation"></a>
@@ -116,11 +117,11 @@ Docker
 <div class="section level2">
 <h2 id="sparkles-supported-workflows">✨ Supported Workflows<a class="anchor" aria-label="anchor" href="#sparkles-supported-workflows"></a>
 </h2>
-<p>{dracarys} supports most outputs from the following UMCCR workflows:</p>
+<p>{dracarys} supports most outputs from the following DRAGEN/UMCCR workflows:</p>
 <table class="table">
 <colgroup>
-<col width="13%">
-<col width="86%">
+<col width="50%">
+<col width="50%">
 </colgroup>
 <thead><tr>
 <th>Workflow</th>
@@ -193,7 +194,7 @@ Docker
 <div class="sourceCode" id="cb5"><pre class="sourceCode bash"><code class="sourceCode bash"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a><span class="va">dracarys_cli</span><span class="op">=</span><span class="va">$(</span><span class="ex">Rscript</span> <span class="at">-e</span> <span class="st">'x = system.file("cli", package = "dracarys"); cat(x, "\n")'</span> <span class="kw">|</span> <span class="fu">xargs</span><span class="va">)</span></span>
 <span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="bu">export</span> <span class="va">PATH</span><span class="op">=</span><span class="st">"</span><span class="va">${dracarys_cli}</span><span class="st">:</span><span class="va">${PATH}</span><span class="st">"</span></span></code></pre></div>
 <div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>dracarys.R <span class="sc">--</span>version</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>dracarys.R <span class="dv">0</span>.<span class="fl">14.0</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>dracarys.R <span class="dv">0</span>.<span class="fl">16.0</span></span>
 <span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#-----------------------------------#</span></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>dracarys.R <span class="sc">--</span>help</span>
@@ -322,7 +323,7 @@ Docker
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
 </div>
 
     </footer>
