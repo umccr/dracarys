@@ -1,3 +1,11 @@
+# dracarys 0.16.0 (2024-10-08)
+
+[0.15.0 - 0.16.0 diff](https://github.com/umccr/dracarys/compare/v0.15.0...v0.16.0)
+
+# dracarys 0.15.0 (2024-08-14)
+
+[0.14.0 - 0.15.0 diff](https://github.com/umccr/dracarys/compare/v0.14.0...v0.15.0)
+
 # dracarys 0.14.0 (2024-05-13)
 
 [0.13.0 - 0.14.0 diff](https://github.com/umccr/dracarys/compare/v0.13.0...v0.14.0)
