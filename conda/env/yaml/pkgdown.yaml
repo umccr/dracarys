@@ -6,6 +6,8 @@ dependencies:
   - r-dracarys
   - r-devtools
   - r-dt
+  - r-glue
+  - r-htmltools
   - r-kableextra
   - r-patchwork
   - r-pkgdown

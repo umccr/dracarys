@@ -1,34 +1,96 @@
-# dracarys 0.14.0 (2024-05-13)
+---
+title: "News"
+output: rmarkdown::html_document
+---
 
-[0.13.0 - 0.14.0 diff](https://github.com/umccr/dracarys/compare/v0.13.0...v0.14.0)
+```{r load_pkgs, echo=FALSE, message=FALSE, warning=FALSE}
+require(htmltools, include.only = c("a"))
+require(glue, include.only = "glue")
+```
 
-# dracarys 0.13.0 (2024-03-15)
 
-[0.12.0 - 0.13.0 diff](https://github.com/umccr/dracarys/compare/v0.12.0...v0.13.0)
+```{r echo=FALSE}
+repo <- "https://github.com/umccr/dracarys"
+vdiff <- function(new, old) {
+  stopifnot(utils::compareVersion(new, old) == 1)
+  htmltools::a(
+    href = glue::glue("{repo}/compare/v{old}...v{new}"),
+    glue::glue("v{new} - v{old} diff")
+  )
+}
 
-# dracarys 0.12.0 (2023-12-12)
+pr_or_issue <- function(n, type) {
+  stopifnot(is.numeric(n), n > 0, type %in% c("issue", "pr"))
+  type2 <- ifelse(type == "pr", "pull", "issue")
+  htmltools::a(
+    href = glue::glue("{repo}/{type2}/{n}"),
+    glue::glue("{type}{n}")
+  )
+}
 
-[0.11.0 - 0.12.0 diff](https://github.com/umccr/dracarys/compare/v0.11.0...v0.12.0)
+issue <- function(n) {
+  pr_or_issue(n, "issue")
+}
 
-# dracarys 0.11.0 (2023-08-22)
+pr <- function(n) {
+  pr_or_issue(n, "pr")
+}
+```
 
-[0.10.0 - 0.11.0 diff](https://github.com/umccr/dracarys/compare/v0.10.0...v0.11.0)
+## dracarys 0.16.0 (2024-10-08)
 
-# dracarys 0.10.0 (2023-06-22)
+Complete refactor of the dracarys R6 class system.
+We now have a Wf super class which is the base for `Wf_*` subclasses.
 
-[0.9.0 - 0.10.0 diff](https://github.com/umccr/dracarys/compare/v0.9.0...v0.10.0)
+- cttsov2: initial support (`r pr(135)`)
+- cttsov1: major refactor (`r pr(133)`)
+- umccrise: major refactor, summary report (`r pr(127)`)
+- switch to bump-my-version for bumping (`r pr(139)`)
+- Sash support (`r pr(129)`)
+  - add summary report
+- MultiQC: add Sash support (`r pr(137)`)
+- docker: use multi-stage build (`r pr(122)`)
+- BCL Convert: support 4.2.7 (`r pr(124)`)
+- refactor filesystem management
+  - better support for S3
 
-# dracarys 0.9.0 (2023-05-10)
+- `r vdiff("0.16.0", "0.15.0")`
 
-[0.8.0 - 0.9.0 diff](https://github.com/umccr/dracarys/compare/v0.8.0...v0.9.0)
+## dracarys 0.15.0 (2024-08-14)
 
-# dracarys 0.8.0 (2023-02-24)
+- `r vdiff("0.15.0", "0.14.0")`
 
-[0.7.0 - 0.8.0 diff](https://github.com/umccr/dracarys/compare/v0.7.0...v0.8.0)
+## dracarys 0.14.0 (2024-05-13)
 
-# dracarys 0.7.0 (2023-02-15)
+- `r vdiff("0.14.0", "0.13.0")`
 
-[0.6.0 - 0.7.0 diff](https://github.com/umccr/dracarys/compare/v0.6.0...v0.7.0)
+## dracarys 0.13.0 (2024-03-15)
+
+- `r vdiff("0.13.0", "0.12.0")`
+
+## dracarys 0.12.0 (2023-12-12)
+
+- `r vdiff("0.12.0", "0.11.0")`
+
+## dracarys 0.11.0 (2023-08-22)
+
+- `r vdiff("0.11.0", "0.10.0")`
+
+## dracarys 0.10.0 (2023-06-22)
+
+- `r vdiff("0.10.0", "0.9.0")`
+
+## dracarys 0.9.0 (2023-05-10)
+
+- `r vdiff("0.9.0", "0.8.0")`
+
+## dracarys 0.8.0 (2023-02-24)
+
+- `r vdiff("0.8.0", "0.7.0")`
+
+## dracarys 0.7.0 (2023-02-15)
+
+- `r vdiff("0.7.0", "0.6.0")`
 
 Mostly added use cases based on requests from the curation team related to
 umccrise (CHORD, HRDetect, QC summary), PCGR, and MultiQC.
@@ -52,9 +114,9 @@ umccrise (CHORD, HRDetect, QC summary), PCGR, and MultiQC.
   - GH Actions: use "miniforge-variant: Mambaforge"
     (see [this issue](https://github.com/conda-incubator/setup-miniconda/issues/274)).
 
-# dracarys 0.6.0 (2023-01-09)
+## dracarys 0.6.0 (2023-01-09)
 
-[0.5.0 - 0.6.0 diff](https://github.com/umccr/dracarys/compare/v0.5.0...v0.6.0)
+- `r vdiff("0.6.0", "0.5.0")`
 
 - :wrench: GH Actions:
   - replace `::set-output`.
@@ -86,37 +148,37 @@ umccrise (CHORD, HRDetect, QC summary), PCGR, and MultiQC.
   - Remove {tibble}, {readr} and {ggplot} multi-imports for R6, since we can get away with just importing a single
     function in one of the R6 classes.
 
-# dracarys 0.5.0 (2022-09-28)
+## dracarys 0.5.0 (2022-09-28)
 
-[0.4.0 - 0.5.0 diff](https://github.com/umccr/dracarys/compare/v0.4.0...v0.5.0)
+- `r vdiff("0.5.0", "0.4.0")`
 
 - MultiQC: update column mappings ([pr15](https://github.com/umccr/dracarys/pull/15), [pr16](https://github.com/umccr/dracarys/pull/16)).
   - move map to separate TSV
 - CLI: add option for output format (tsv, parquet, or both) ([pr18](https://github.com/umccr/dracarys/pull/18)).
 - new contributors: [@victorskl](https://github.com/victorskl)
 
-# dracarys 0.4.0 (2022-09-12)
+## dracarys 0.4.0 (2022-09-12)
 
-[0.3.0 - 0.4.0 diff](https://github.com/umccr/dracarys/compare/v0.3.0...v0.4.0)
+- `r vdiff("0.4.0", "0.3.0")`
 
 - :star: support for DRAGEN TSO500 ctdna output ([pr14](https://github.com/umccr/dracarys/pull/14)).
   - also add Quarto HTML report template
 
-# dracarys 0.3.0 (2022-08-28)
+## dracarys 0.3.0 (2022-08-28)
 
-[0.2.0 - 0.3.0 diff](https://github.com/umccr/dracarys/compare/v0.2.0...v0.3.0)
+- `r vdiff("0.3.0", "0.2.0")`
 
 - :star: MultiQC: support for DRAGEN ctdna output ([pr13](https://github.com/umccr/dracarys/pull/13)).
 
-# dracarys 0.2.0 (2022-07-23)
+## dracarys 0.2.0 (2022-07-23)
 
-[0.1.0 - 0.2.0 diff](https://github.com/umccr/dracarys/compare/v0.1.0...v0.2.0)
+- `r vdiff("0.2.0", "0.1.0")`
 
 - Add `MULTIQC_COLUMNS` tibble that maps the raw metric name to a cleaner name
   ([pr12](https://github.com/umccr/dracarys/pull/12)).
 - Support for more MultiQC JSONs (from bcbio-wts and bcbio-wgs).
 
-# dracarys 0.1.0 (2022-07-11)
+## dracarys 0.1.0 (2022-07-11)
 
 - Initial release of dracarys.
 - Support for [MultiQC](https://github.com/ewels/MultiQC) JSON tidying.

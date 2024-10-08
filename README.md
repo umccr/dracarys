@@ -1,11 +1,11 @@
 
 - [🔥 dracarys - UMCCR Workflow
-  Tidying](#-dracarys---umccr-workflow-tidying)
-  - [🏆 Aim](#-aim)
-  - [🍕 Installation](#-installation)
-  - [✨ Supported Workflows](#-supported-workflows)
-  - [🌀 CLI](#-cli)
-  - [🚕 Running](#-running)
+  Tidying](#fire-dracarys---umccr-workflow-tidying)
+  - [🏆 Aim](#trophy-aim)
+  - [🍕 Installation](#pizza-installation)
+  - [✨ Supported Workflows](#sparkles-supported-workflows)
+  - [🌀 CLI](#cyclone-cli)
+  - [🚕 Running](#taxi-running)
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
@@ -22,9 +22,7 @@ install](https://anaconda.org/umccr/r-dracarys/badges/latest_release_date.svg)](
 
 ## 🏆 Aim
 
-Given a [ICA
-GDS](https://developer.illumina.com/illumina-connected-analytics), AWS
-S3 or local directory with results from a UMCCR workflow, {dracarys}
+Given a directory with results from a DRAGEN/UMCCR workflow, {dracarys}
 will grab files of interest and transform them into ‘tidier’ structures
 for output into TSV/Parquet/RDS format for downstream ingestion into a
 database/data lake. See supported [workflows](#supported-workflows),
@@ -34,7 +32,9 @@ below.
 ## 🍕 Installation
 
 <details>
+
 <summary>
+
 R
 </summary>
 
@@ -43,8 +43,11 @@ remotes::install_github("umccr/dracarys@vX.X.X") # for vX.X.X Release/Tag
 ```
 
 </details>
+
 <details>
+
 <summary>
+
 Conda
 </summary>
 
@@ -72,8 +75,11 @@ conda activate dracarys_env
 ```
 
 </details>
+
 <details>
+
 <summary>
+
 Docker
 </summary>
 
@@ -87,20 +93,21 @@ docker pull --platform linux/amd64 ghcr.io/umccr/dracarys:X.X.X
 
 ## ✨ Supported Workflows
 
-{dracarys} supports most outputs from the following UMCCR workflows:
+{dracarys} supports most outputs from the following DRAGEN/UMCCR
+workflows:
 
-| Workflow             | Description                                                                                                                                    |
-|----------------------|------------------------------------------------------------------------------------------------------------------------------------------------|
-| bcl_convert          | [BCLConvert](https://emea.support.illumina.com/sequencing/sequencing_software/bcl-convert.html) workflow                                       |
+| Workflow | Description |
+|----|----|
+| bcl_convert | [BCLConvert](https://emea.support.illumina.com/sequencing/sequencing_software/bcl-convert.html) workflow |
 | tso_ctdna_tumor_only | [ctDNA TSO500](https://support-docs.illumina.com/SW/DRAGEN_TSO500_ctDNA_v2.1/Content/SW/TSO500/WorkflowDiagram_appT500ctDNAlocal.htm) workflow |
-| wgs_alignment_qc     | [DRAGEN DNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment) workflow                    |
-| wts_alignment_qc     | [DRAGEN RNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment) workflow                    |
-| wts_tumor_only       | [DRAGEN RNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) workflow                                |
-| wgs_tumor_normal     | [DRAGEN Tumor/Normal](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) workflow                       |
-| umccrise             | [umccrise](https://github.com/umccr/umccrise) workflow                                                                                         |
-| rnasum               | [RNAsum](https://github.com/umccr/RNAsum) workflow                                                                                             |
-| sash                 | [sash](https://github.com/scwatts/sash) workflow                                                                                               |
-| oncoanalyser         | [oncoanalyser](https://github.com/nf-core/oncoanalyser) workflow                                                                               |
+| wgs_alignment_qc | [DRAGEN DNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment) workflow |
+| wts_alignment_qc | [DRAGEN RNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) (alignment) workflow |
+| wts_tumor_only | [DRAGEN RNA](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) workflow |
+| wgs_tumor_normal | [DRAGEN Tumor/Normal](https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm) workflow |
+| umccrise | [umccrise](https://github.com/umccr/umccrise) workflow |
+| rnasum | [RNAsum](https://github.com/umccr/RNAsum) workflow |
+| sash | [sash](https://github.com/scwatts/sash) workflow |
+| oncoanalyser | [oncoanalyser](https://github.com/nf-core/oncoanalyser) workflow |
 
 See which output files from these workflows are supported in [Supported
 Files](https://umccr.github.io/dracarys/articles/files.html).
@@ -123,7 +130,7 @@ export PATH="${dracarys_cli}:${PATH}"
 ```
 
     dracarys.R --version
-    dracarys.R 0.14.0
+    dracarys.R 0.16.0
 
     #-----------------------------------#
     dracarys.R --help
@@ -181,7 +188,9 @@ parquet, or both. To get just a list of supported files within the
 specified input directory, use the `-n (--dryrun)` option.
 
 <details>
+
 <summary>
+
 R
 </summary>
 
@@ -194,8 +203,11 @@ umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix)
 ```
 
 </details>
+
 <details>
+
 <summary>
+
 Mac/Linux
 </summary>
 
@@ -210,8 +222,11 @@ dracarys.R tidy \
 ```
 
 </details>
+
 <details>
+
 <summary>
+
 Docker
 </summary>
 

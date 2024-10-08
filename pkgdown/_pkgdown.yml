@@ -12,7 +12,7 @@ authors:
     href: https://github.com/victorskl
 navbar:
   structure:
-    left: [home, articles]
+    left: [home, articles, news]
     right: [reference, search, github]
   components:
     home:
@@ -27,6 +27,6 @@ navbar:
         href: articles/developers.html
       - text: Files
         href: articles/files.html
-
-news:
-  one_page: true
+    news:
+      text: NEWS
+      href: articles/NEWS.html
