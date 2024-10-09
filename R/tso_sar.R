@@ -23,16 +23,30 @@ tso_sar_read <- function(x) {
     tibble::as_tibble_row()
   ## softwareConfiguration
   sw_conf <- dat[["softwareConfiguration"]]
-  sw_nl_data_sources <- sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] |>
-    purrr::map(tibble::as_tibble_row) |>
-    dplyr::bind_rows()
-  # get rid of it to grab the remaining elements
-  sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] <- NULL
-  sw_nl_rest <- sw_conf[["nirvanaVersionList"]][[1]] |>
-    tibble::as_tibble_row()
+  sw_nvl <- sw_conf[["nirvanaVersionList"]]
+  assertthat::assert_that(length(sw_nvl) %in% c(0, 1))
+  if (length(sw_nvl) == 1) {
+    sw_nl_data_sources <- sw_nvl[[1]][["dataSources"]] |>
+      purrr::map(tibble::as_tibble_row) |>
+      dplyr::bind_rows()
+    # get rid of it to grab the remaining elements
+    sw_conf[["nirvanaVersionList"]][[1]][["dataSources"]] <- NULL
+    sw_nl_rest <- sw_conf[["nirvanaVersionList"]][[1]] |>
+      tibble::as_tibble_row()
+  } else if (length(sw_nvl) == 0) {
+    # edge case
+    sw_nl_data_sources <- c("name", "version", "description", "releaseDate") |>
+      empty_tbl()
+    sw_nl_rest <- c("instanceName", "nirvanaSoftwareVersion", "genomeAssembly", "refseqVersion") |>
+      empty_tbl()
+  }
   sw_conf[["nirvanaVersionList"]] <- NULL
   sw_rest <- tibble::as_tibble_row(sw_conf)
-  sw_all <- dplyr::bind_cols(sw_rest, sw_nl_rest)
+  if (nrow(sw_nl_rest) != 0) {
+    sw_all <- dplyr::bind_cols(sw_rest, sw_nl_rest)
+  } else {
+    sw_all <- sw_rest
+  }
   sw <- list(
     data_sources = sw_nl_data_sources,
     other = sw_all
@@ -81,15 +95,25 @@ tso_sar_read <- function(x) {
   smet_em <- smet[["expandedMetrics"]][[1]][["metrics"]] |>
     purrr::map(tibble::as_tibble_row) |>
     dplyr::bind_rows() |>
-    dplyr::mutate(name = tolower(.data$name)) |>
+    dplyr::mutate(name = tolower(.data$name))
+  if (!"value" %in% colnames(smet_em)) {
+    # edge case
+    smet_em <- smet_em |>
+      dplyr::mutate(value = NA_real_)
+  }
+  smet_em <- smet_em |>
     dplyr::select("name", "value")
-  smet_qc <- smet[["qualityControlMetrics"]]
-  smet_nms <- purrr::map_chr(smet_qc, "name")
-  smet_qc <- smet_qc |>
+  smet_qc <- smet[["qualityControlMetrics"]] |>
     purrr::map(qc2tib) |>
     dplyr::bind_rows() |>
     dplyr::distinct() |>
-    dplyr::mutate(name = tolower(.data$name)) |>
+    dplyr::mutate(name = tolower(.data$name))
+  if (!"value" %in% colnames(smet_qc)) {
+    # edge case
+    smet_qc <- smet_qc |>
+      dplyr::mutate(value = NA_real_)
+  }
+  smet_qc <- smet_qc |>
     dplyr::select("name", "value")
   qc <- dplyr::bind_rows(smet_qc, smet_em) |>
     tidyr::pivot_wider(names_from = "name", values_from = "value")
