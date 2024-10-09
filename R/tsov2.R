@@ -78,7 +78,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
         glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
         glue("{res}/{pref}_Fusions\\.csv$"), "fus",
         glue("{res}/{pref}_MetricsOutput\\.tsv$"), "DOWNLOAD_ONLY",
-        glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY",
+        # glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY",
         glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"), "sar"
       )
       # DragenCaller

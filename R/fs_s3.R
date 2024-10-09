@@ -142,10 +142,16 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
       s3path = .data$path
     ) |>
     dplyr::select("type", "bname", "size", "lastmodified", "localpath", "s3path")
+  tot_size <- d |>
+    dplyr::summarise(tot_size = sum(.data$size)) |>
+    dplyr::pull(tot_size)
   # download recognisable dracarys files to outdir/<mirrored-cloud-path>/{bname}
   if (!dryrun) {
-    cli::cli_alert_info("{date_log()} {e('arrow_heading_down')} Downloading files from {.file {s3dir}}")
-    d |>
+    txt <- paste0(
+      "{e('arrow_heading_down')} {nrow(d)} files ({tot_size}): {.file {s3dir}}\n"
+    )
+    cli::cli_alert_info(txt)
+    res <- d |>
       dplyr::rowwise() |>
       dplyr::mutate(
         s3bucket = sub("s3://(.*?)/.*", "\\1", .data$s3path),
@@ -158,6 +164,7 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
         localpath = normalizePath(.data$localpath)
       ) |>
       dplyr::select("type", "bname", "size", "lastmodified", "localpath", "s3path")
+    return(res)
   } else {
     cli::cli_alert_info("{date_log()} {e('camera')} Just list relevant files from {.file {s3dir}}")
     d |>

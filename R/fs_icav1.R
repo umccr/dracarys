@@ -189,10 +189,10 @@ dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN
       gdspath = .data$path
     ) |>
     dplyr::select("type", "bname", "size", "lastmodified", "file_id", "localpath", "gdspath")
-  # download recognisable dracarys files to outdir/<mirrored-cloud-path>/{bname}
   tot_size <- d |>
     dplyr::summarise(tot_size = sum(.data$size)) |>
     dplyr::pull(tot_size)
+  # download recognisable dracarys files to outdir/<mirrored-cloud-path>/{bname}
   if (!dryrun) {
     txt <- paste0(
       "{e('arrow_heading_down')} {nrow(d)} files ({tot_size}): {.file {gdsdir}}\n"
