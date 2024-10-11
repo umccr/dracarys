@@ -161,7 +161,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     #' @description Read `cnv.vcf` file.
     #' @param x Path to file.
     read_cnv = function(x) {
-      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
       tibble::tibble(name = "cnv", data = list(dat))
     },
     #' @description Read `exon_cov_report.tsv` file.
@@ -190,7 +190,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     #' @description Read `hard-filtered.vcf` file.
     #' @param x Path to file.
     read_hardfilt = function(x) {
-      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
       tibble::tibble(name = "hardfilt", data = list(dat))
     },
     #' @description Read `microsat_output.json` file.
