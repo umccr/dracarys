@@ -119,13 +119,13 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Read `MergedSmallVariants.vcf.gz` file.
     #' @param x Path to file.
     read_msv = function(x) {
-      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
       tibble::tibble(name = "mergedsmallv", data = list(dat))
     },
     #' @description Read `MergedSmallVariants.genome.vcf.gz` file.
     #' @param x Path to file.
     read_msvg = function(x) {
-      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
       tibble::tibble(name = "mergedsmallvg", data = list(dat))
     },
     #' @description Read `CombinedVariantOutput.tsv` file.
@@ -137,7 +137,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Read `CopyNumberVariants.vcf.gz` file.
     #' @param x Path to file.
     read_cnv = function(x) {
-      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = FALSE)
+      dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
       tibble::tibble(name = "cnv", data = list(dat))
     },
     #' @description Read `fragment_length_hist.json.gz` file.
