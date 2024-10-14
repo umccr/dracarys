@@ -92,7 +92,8 @@ Wf <- R6::R6Class(
         "oncoanalyser_wgts_existing_both",
         "sash"
       )
-      assertthat::assert_that(wname %in% wnames)
+      subwnames <- c("dragen")
+      assertthat::assert_that(wname %in% c(wnames, subwnames))
       self$path <- sub("/$", "", path) # remove potential trailing slash
       self$wname <- wname
       self$filesystem <- dplyr::case_when(

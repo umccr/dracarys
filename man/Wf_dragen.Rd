@@ -16,8 +16,8 @@ p <- file.path(
   "analysis/cttsov2/20240915ff0295ed/Logs_Intermediates/DragenCaller",
   prefix
 )
-t1 <- Wf_dragen$new(path = p, prefix = prefix)
-t1$list_files(max_files = 100)
+d1 <- Wf_dragen$new(path = p, prefix = prefix)
+d1$list_files(max_files = 100)
 t1$list_files_filter_relevant(max_files = 300)
 d <- t1$download_files(max_files = 100, dryrun = F)
 d_tidy <- t1$tidy_files(d)
@@ -47,6 +47,8 @@ d_write <- t1$write(
 \item \href{#method-Wf_dragen-read_replay}{\code{Wf_dragen$read_replay()}}
 \item \href{#method-Wf_dragen-read_contigMeanCov}{\code{Wf_dragen$read_contigMeanCov()}}
 \item \href{#method-Wf_dragen-read_coverageMetrics}{\code{Wf_dragen$read_coverageMetrics()}}
+\item \href{#method-Wf_dragen-read_fineHist}{\code{Wf_dragen$read_fineHist()}}
+\item \href{#method-Wf_dragen-read_fragmentLengthHist}{\code{Wf_dragen$read_fragmentLengthHist()}}
 \item \href{#method-Wf_dragen-clone}{\code{Wf_dragen$clone()}}
 }
 }
@@ -138,9 +140,43 @@ Read \code{contig_mean_cov.csv} file.
 \if{html}{\out{<a id="method-Wf_dragen-read_coverageMetrics"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf_dragen-read_coverageMetrics}{}}}
 \subsection{Method \code{read_coverageMetrics()}}{
-Read \code{dragen.tsv.gz} cancer report hrd file.
+Read \code{coverage_metrics.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_coverageMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_fineHist"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_fineHist}{}}}
+\subsection{Method \code{read_fineHist()}}{
+Read \code{fine_hist.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_fineHist(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_fragmentLengthHist"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_fragmentLengthHist}{}}}
+\subsection{Method \code{read_fragmentLengthHist()}}{
+Read \code{fragment_length_hist.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_fragmentLengthHist(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

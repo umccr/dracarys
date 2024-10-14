@@ -13,8 +13,8 @@
 #'   "analysis/cttsov2/20240915ff0295ed/Logs_Intermediates/DragenCaller",
 #'   prefix
 #' )
-#' t1 <- Wf_dragen$new(path = p, prefix = prefix)
-#' t1$list_files(max_files = 100)
+#' d1 <- Wf_dragen$new(path = p, prefix = prefix)
+#' d1$list_files(max_files = 100)
 #' t1$list_files_filter_relevant(max_files = 300)
 #' d <- t1$download_files(max_files = 100, dryrun = F)
 #' d_tidy <- t1$tidy_files(d)
@@ -114,13 +114,14 @@ Wf_dragen <- R6::R6Class(
       # (though never say never!)
       res[["dragen_config"]] <- res[["dragen_config"]] |>
         tidyr::pivot_wider(names_from = "name", values_from = "value")
-      return(dplyr::bind_cols(res))
+      dat <- dplyr::bind_cols(res)
+      tibble::tibble(name = "replay", data = list(dat))
     },
     #' @description Read `contig_mean_cov.csv` file.
     #' @param x Path to file.
     #' @param keep_alt Keep ALT contigs.
     read_contigMeanCov = function(x, keep_alt = FALSE) {
-      readr::read_csv(x, col_names = c("chrom", "n_bases", "coverage"), col_types = "cdd") |>
+      dat <- readr::read_csv(x, col_names = c("chrom", "n_bases", "coverage"), col_types = "cdd") |>
         dplyr::filter(
           if (!keep_alt) {
             !grepl("chrM|MT|_|Autosomal|HLA-|EBV|GL|hs37d5", .data$chrom)
@@ -128,90 +129,43 @@ Wf_dragen <- R6::R6Class(
             TRUE
           }
         )
+      tibble::tibble(name = "contigmeancov", data = list(dat[]))
     },
-    #' @description Read `dragen.tsv.gz` cancer report hrd file.
+    #' @description Read `coverage_metrics.csv` file.
     #' @param x Path to file.
     read_coverageMetrics = function(x) {
-      # all rows except 'Aligned bases' and 'Aligned reads' refer to the region
-      abbrev_nm <- tibble::tribble(
-        ~raw, ~clean, ~region,
-        "Aligned bases", "bases_aligned_tot_dragen", FALSE,
-        "Aligned reads", "reads_aligned_tot_dragen", FALSE,
-        "Aligned bases in ", "bases_aligned_", TRUE,
-        "Average alignment coverage over ", "cov_alignment_avg_over_", TRUE,
-        "Uniformity of coverage (PCT > 0.2*mean) over ", "cov_uniformity_pct_gt02mean_", TRUE,
-        "Uniformity of coverage (PCT > 0.4*mean) over ", "cov_uniformity_pct_gt04mean_", TRUE,
-        "Average chr X coverage over ", "cov_avg_x_over_", TRUE,
-        "Average chr Y coverage over ", "cov_avg_y_over_", TRUE,
-        "Average mitochondrial coverage over ", "cov_avg_mt_over_", TRUE,
-        "Average autosomal coverage over ", "cov_avg_auto_over_", TRUE,
-        "Median autosomal coverage over ", "cov_median_auto_over_", TRUE,
-        "Mean/Median autosomal coverage ratio over ", "cov_mean_median_auto_ratio_over_", TRUE,
-        "Aligned reads in ", "reads_aligned_in_", TRUE
-      )
-      raw <- readr::read_lines(x)
-      assertthat::assert_that(grepl("COVERAGE SUMMARY", raw[1]))
-      # first detect if this is genome, QC coverage region, or target region
-      res <- raw |>
-        tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim(
-          "value",
-          delim = ",", too_few = "align_start",
-          names = c("category", "dummy1", "var", "value", "pct")
-        )
-      reg1 <- NULL
-      str1 <- NULL
-      tmp <- res |>
-        dplyr::filter(grepl("PCT of .* with coverage ", .data$var)) |>
-        dplyr::slice_head(n = 1) |>
-        dplyr::pull("var")
-      assertthat::assert_that(length(tmp) == 1)
-      if (grepl("genome", tmp)) {
-        str1 <- "genome"
-        reg1 <- "genome"
-      } else if (grepl("QC coverage region", tmp)) {
-        str1 <- "QC coverage region"
-        reg1 <- "qccovreg"
-      } else if (grepl("target region", tmp)) {
-        str1 <- "target region"
-        reg1 <- "targetreg"
-      } else {
-        cli::cli_abort("Cannot determine the coverage region from: {x}")
-      }
-      abbrev_nm <- abbrev_nm |>
+      dat <- dragen_coverage_metrics_read(x)
+      tibble::tibble(name = "covmetrics", data = list(dat))
+    },
+    #' @description Read `fine_hist.csv` file.
+    #' @param x Path to file.
+    read_fineHist = function(x) {
+      d <- readr::read_csv(x, col_types = "cd")
+      assertthat::assert_that(all(colnames(d) == c("Depth", "Overall")))
+      # there's a max Depth of 2000+, so convert to numeric for easier plotting
+      dat <- d |>
         dplyr::mutate(
-          raw = ifelse(.data$region, glue("{.data$raw}{str1}"), .data$raw),
-          clean = ifelse(.data$region, glue("{.data$clean}{reg1}_dragen"), .data$clean)
+          Depth = ifelse(grepl("+", .data$Depth), sub("(\\d*)\\+", "\\1", .data$Depth), .data$Depth),
+          Depth = as.integer(.data$Depth)
         ) |>
-        dplyr::select("raw", "clean") |>
-        tibble::deframe()
-      # split to rename the
-      # "PCT of genome with coverage [100x: inf)" values
-      pat <- glue("PCT of {str1} with coverage ")
-      res1 <- res |>
-        # pct just shows % for a couple rows which can be
-        # calculated from their above values
-        dplyr::filter(!grepl(pat, .data$var)) |>
-        dplyr::select("var", "value")
-      res2 <- res |>
-        dplyr::filter(grepl(pat, .data$var)) |>
+        dplyr::select(depth = "Depth", n_loci = "Overall")
+      tibble::tibble(name = "finehist", data = list(dat))
+    },
+    #' @description Read `fragment_length_hist.csv` file.
+    #' @param x Path to file.
+    read_fragmentLengthHist = function(x) {
+      d <- readr::read_lines(x)
+      assertthat::assert_that(grepl("#Sample", d[1]))
+      dat <- d |>
+        tibble::enframe(name = "name", value = "value") |>
+        dplyr::filter(!grepl("#Sample: |FragmentLength,Count", .data$value)) |>
+        tidyr::separate_wider_delim(cols = "value", names = c("fragmentLength", "count"), delim = ",") |>
         dplyr::mutate(
-          var = sub(pat, "", .data$var),
-          var = gsub("\\[|\\]|\\(|\\)| ", "", .data$var),
-          var = gsub("x", "", .data$var),
-          var = gsub("inf", "Inf", .data$var)
+          count = as.numeric(.data$count),
+          fragmentLength = as.numeric(.data$fragmentLength)
         ) |>
-        tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
-        dplyr::mutate(var = as.character(glue("cov_pct_{start}_{end}_{region}_dragen"))) |>
-        dplyr::select("var", "value")
-      res <- dplyr::bind_rows(res1, res2) |>
-        dplyr::mutate(
-          value = dplyr::na_if(.data$value, "NA"),
-          value = as.numeric(.data$value),
-          var = dplyr::recode(.data$var, !!!abbrev_nm)
-        ) |>
-        tidyr::pivot_wider(names_from = "var", values_from = "value")
-      return(res)
+        dplyr::select("fragmentLength", "count")
+      tibble::tibble(name = "fraglen", data = list(dat))
     }
   ) # end public
 ) # end Wf_dragen
