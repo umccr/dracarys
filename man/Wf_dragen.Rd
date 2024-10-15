@@ -18,9 +18,9 @@ p <- file.path(
 )
 d1 <- Wf_dragen$new(path = p, prefix = prefix)
 d1$list_files(max_files = 100)
-t1$list_files_filter_relevant(max_files = 300)
-d <- t1$download_files(max_files = 100, dryrun = F)
-d_tidy <- t1$tidy_files(d)
+d1$list_files_filter_relevant(max_files = 300)
+d <- d1$download_files(max_files = 100, dryrun = F)
+d_tidy <- d1$tidy_files(d)
 d_write <- t1$write(
   d_tidy,
   outdir = file.path(p, "dracarys_tidy"),
@@ -49,6 +49,7 @@ d_write <- t1$write(
 \item \href{#method-Wf_dragen-read_coverageMetrics}{\code{Wf_dragen$read_coverageMetrics()}}
 \item \href{#method-Wf_dragen-read_fineHist}{\code{Wf_dragen$read_fineHist()}}
 \item \href{#method-Wf_dragen-read_fragmentLengthHist}{\code{Wf_dragen$read_fragmentLengthHist()}}
+\item \href{#method-Wf_dragen-read_mappingMetrics}{\code{Wf_dragen$read_mappingMetrics()}}
 \item \href{#method-Wf_dragen-clone}{\code{Wf_dragen$clone()}}
 }
 }
@@ -177,6 +178,23 @@ Read \code{fine_hist.csv} file.
 Read \code{fragment_length_hist.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_fragmentLengthHist(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_mappingMetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_mappingMetrics}{}}}
+\subsection{Method \code{read_mappingMetrics()}}{
+Read \code{mapping_metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_mappingMetrics(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

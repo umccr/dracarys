@@ -15,9 +15,9 @@
 #' )
 #' d1 <- Wf_dragen$new(path = p, prefix = prefix)
 #' d1$list_files(max_files = 100)
-#' t1$list_files_filter_relevant(max_files = 300)
-#' d <- t1$download_files(max_files = 100, dryrun = F)
-#' d_tidy <- t1$tidy_files(d)
+#' d1$list_files_filter_relevant(max_files = 300)
+#' d <- d1$download_files(max_files = 100, dryrun = F)
+#' d_tidy <- d1$tidy_files(d)
 #' d_write <- t1$write(
 #'   d_tidy,
 #'   outdir = file.path(p, "dracarys_tidy"),
@@ -44,37 +44,37 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\-replay\\.json$"), "replay",
         glue("{pref}\\.cnv_metrics.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.exon_contig_mean_cov\\.csv$"), "contigMeanCov",
-        glue("{pref}\\.exon_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.exon_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.target_bed_contig_mean_cov\\.csv$"), "contigMeanCov",
+        glue("{pref}\\.tmb_contig_mean_cov\\.csv$"), "contigMeanCov",
+        glue("{pref}\\.wgs_contig_mean_cov\\.csv$"), "contigMeanCov",
+        glue("{pref}\\.exon_coverage_metrics\\.csv$"), "coverageMetrics",
+        glue("{pref}\\.target_bed_coverage_metrics\\.csv$"), "coverageMetrics",
+        glue("{pref}\\.tmb_coverage_metrics\\.csv$"), "coverageMetrics",
+        glue("{pref}\\.wgs_coverage_metrics\\.csv$"), "coverageMetrics",
+        glue("{pref}\\.exon_fine_hist\\.csv$"), "fineHist",
+        glue("{pref}\\.target_bed_fine_hist\\.csv$"), "fineHist",
+        glue("{pref}\\.tmb_fine_hist\\.csv$"), "fineHist",
+        glue("{pref}\\.wgs_fine_hist\\.csv$"), "fineHist",
         glue("{pref}\\.exon_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.target_bed_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.tmb_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.wgs_hist\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.exon_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.target_bed_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.tmb_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.wgs_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.fastqc_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.fragment_length_hist\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.fragment_length_hist\\.csv$"), "fragmentLengthHist",
         glue("{pref}\\.gc_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.gvcf_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.mapping_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.microsat_diffs\\.txt$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.microsat_output\\.json$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.sv_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.target_bed_contig_mean_cov\\.csv$"), "contigMeanCov",
-        glue("{pref}\\.target_bed_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.target_bed_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.target_bed_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.target_bed_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.time_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.tmb_contig_mean_cov\\.csv$"), "contigMeanCov",
-        glue("{pref}\\.tmb_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.tmb_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.tmb_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.tmb_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.trimmer_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.umi_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.vc_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.wgs_contig_mean_cov\\.csv$"), "contigMeanCov",
-        glue("{pref}\\.wgs_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.wgs_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.wgs_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.wgs_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY"
+        glue("{pref}\\.vc_metrics\\.csv$"), "DOWNLOAD_ONLY"
       )
       regexes <- reg1 |>
         dplyr::mutate(
@@ -121,6 +121,7 @@ Wf_dragen <- R6::R6Class(
     #' @param x Path to file.
     #' @param keep_alt Keep ALT contigs.
     read_contigMeanCov = function(x, keep_alt = FALSE) {
+      subprefix <- dragen_subprefix(x, "_contig_mean_cov")
       dat <- readr::read_csv(x, col_names = c("chrom", "n_bases", "coverage"), col_types = "cdd") |>
         dplyr::filter(
           if (!keep_alt) {
@@ -129,17 +130,19 @@ Wf_dragen <- R6::R6Class(
             TRUE
           }
         )
-      tibble::tibble(name = "contigmeancov", data = list(dat[]))
+      tibble::tibble(name = glue("contigmeancov_{subprefix}"), data = list(dat[]))
     },
     #' @description Read `coverage_metrics.csv` file.
     #' @param x Path to file.
     read_coverageMetrics = function(x) {
+      subprefix <- dragen_subprefix(x, "_coverage_metrics")
       dat <- dragen_coverage_metrics_read(x)
-      tibble::tibble(name = "covmetrics", data = list(dat))
+      tibble::tibble(name = glue("covmetrics_{subprefix}"), data = list(dat))
     },
     #' @description Read `fine_hist.csv` file.
     #' @param x Path to file.
     read_fineHist = function(x) {
+      subprefix <- dragen_subprefix(x, "_fine_hist")
       d <- readr::read_csv(x, col_types = "cd")
       assertthat::assert_that(all(colnames(d) == c("Depth", "Overall")))
       # there's a max Depth of 2000+, so convert to numeric for easier plotting
@@ -149,7 +152,7 @@ Wf_dragen <- R6::R6Class(
           Depth = as.integer(.data$Depth)
         ) |>
         dplyr::select(depth = "Depth", n_loci = "Overall")
-      tibble::tibble(name = "finehist", data = list(dat))
+      tibble::tibble(name = glue("finehist_{subprefix}"), data = list(dat))
     },
     #' @description Read `fragment_length_hist.csv` file.
     #' @param x Path to file.
@@ -166,6 +169,12 @@ Wf_dragen <- R6::R6Class(
         ) |>
         dplyr::select("fragmentLength", "count")
       tibble::tibble(name = "fraglen", data = list(dat))
+    },
+    #' @description Read `mapping_metrics.csv` file.
+    #' @param x Path to file.
+    read_mappingMetrics = function(x) {
+      dat <- dragen_mapping_metrics_read(x)
+      tibble::tibble(name = "mapmetrics", data = list(dat))
     }
   ) # end public
 ) # end Wf_dragen
