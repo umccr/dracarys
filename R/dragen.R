@@ -9,6 +9,102 @@ dragen_subprefix <- function(x, suffix) {
   sub(suffix, "", s2)
 }
 
+#' Read DRAGEN SV Metrics
+#'
+#' Reads the `sv_metrics.csv` file output from DRAGEN.
+#'
+#' @param x Path to file.
+#'
+#' @return Tibble with metrics.
+#' @export
+dragen_sv_metrics_read <- function(x) {
+  d <- readr::read_lines(x)
+  assertthat::assert_that(grepl("SV SUMMARY", d[1]))
+  abbrev_nm <- c(
+    "Number of deletions (PASS)" = "del",
+    "Number of insertions (PASS)" = "ins",
+    "Number of duplications (PASS)" = "dup",
+    "Number of breakend pairs (PASS)" = "bnd"
+  )
+  d |>
+    tibble::as_tibble_col(column_name = "value") |>
+    dplyr::filter(!grepl("Total number of structural variants", .data$value)) |>
+    tidyr::separate_wider_delim(
+      "value",
+      names = c("svsum", "sample", "var", "count", "pct"), delim = ",",
+      too_few = "align_start"
+    ) |>
+    dplyr::mutate(
+      count = as.numeric(.data$count),
+      var = dplyr::recode(.data$var, !!!abbrev_nm)
+    ) |>
+    dplyr::select("var", "count") |>
+    tidyr::pivot_wider(names_from = "var", values_from = "count")
+}
+
+#' Read DRAGEN Trimmer Metrics
+#'
+#' Reads the `trimmer_metrics.csv` file output from DRAGEN.
+#'
+#' @param x Path to file.
+#'
+#' @return Tibble with metrics.
+#' @export
+dragen_trimmer_metrics_read <- function(x) {
+  d <- readr::read_lines(x)
+  assertthat::assert_that(grepl("TRIMMER STATISTICS", d[1]))
+  abbrev_nm <- c(
+    "Total input reads"                              = "reads_tot_input_dragen",
+    "Total input bases"                              = "bases_tot_dragen",
+    "Total input bases R1"                           = "bases_r1_dragen",
+    "Total input bases R2"                           = "bases_r2_dragen",
+    "Average input read length"                      = "read_len_avg_dragen",
+    "Total trimmed reads"                            = "reads_trimmed_tot_dragen",
+    "Total trimmed bases"                            = "bases_trimmed_tot_dragen",
+    "Average bases trimmed per read"                 = "bases_trimmed_avg_per_read_dragen",
+    "Average bases trimmed per trimmed read"         = "bases_trimmed_avg_per_trimmedread_dragen",
+    "Remaining poly-G K-mers R1 3prime"              = "polygkmers3r1_remaining_dragen",
+    "Remaining poly-G K-mers R2 3prime"              = "polygkmers3r2_remaining_dragen",
+    "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trimmed_reads_unfilt_3r1_dragen",
+    "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trimmed_reads_unfilt_3r2_dragen",
+    "Poly-G soft trimmed reads filtered R1 3prime"   = "polyg_soft_trimmed_reads_filt_3r1_dragen",
+    "Poly-G soft trimmed reads filtered R2 3prime"   = "polyg_soft_trimmed_reads_filt_3r2_dragen",
+    "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trimmed_bases_unfilt_3r1_dragen",
+    "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trimmed_bases_unfilt_3r2_dragen",
+    "Poly-G soft trimmed bases filtered R1 3prime"   = "polyg_soft_trimmed_bases_filt_3r1_dragen",
+    "Poly-G soft trimmed bases filtered R2 3prime"   = "polyg_soft_trimmed_bases_filt_3r2_dragen",
+    "Total filtered reads"                           = "reads_tot_filt_dragen",
+    "Reads filtered for minimum read length R1"      = "reads_filt_minreadlenr1_dragen",
+    "Reads filtered for minimum read length R2"      = "reads_filt_minreadlenr2_dragen"
+  )
+
+  d |>
+    tibble::as_tibble_col(column_name = "value") |>
+    tidyr::separate_wider_delim("value", names = c("category", "extra", "var", "count", "pct"), delim = ",", too_few = "align_start") |>
+    dplyr::mutate(
+      count = as.numeric(.data$count),
+      pct = round(as.numeric(.data$pct), 2),
+      var = dplyr::recode(.data$var, !!!abbrev_nm)
+    ) |>
+    dplyr::select("var", "count", "pct") |>
+    tidyr::pivot_longer(c("count", "pct")) |>
+    dplyr::filter(!is.na(.data$value)) |>
+    dplyr::mutate(
+      name = dplyr::if_else(.data$name == "count", "", "_pct"),
+      var = glue("{.data$var}{.data$name}")
+    ) |>
+    dplyr::select("var", "value") |>
+    tidyr::pivot_wider(names_from = "var", values_from = "value")
+}
+
+#' Read DRAGEN VariantCall Metrics
+#'
+#' Reads the `vc_metrics.csv` file output from DRAGEN.
+#'
+#' @param x Path to file.
+#'
+#' @return Tibble with metrics.
+#' @export
 dragen_vc_metrics_read <- function(x) {
   abbrev_nm1 <- tibble::tribble(
     ~raw, ~clean, ~region,

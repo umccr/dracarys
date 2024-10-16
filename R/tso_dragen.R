@@ -66,9 +66,9 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.mapping_metrics\\.csv$"), "mappingMetrics",
         glue("{pref}\\.microsat_diffs\\.txt$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.microsat_output\\.json$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.sv_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.sv_metrics\\.csv$"), "svMetrics",
         glue("{pref}\\.time_metrics\\.csv$"), "timeMetrics",
-        glue("{pref}\\.trimmer_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.trimmer_metrics\\.csv$"), "trimmerMetrics",
         glue("{pref}\\.umi_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.vc_metrics\\.csv$"), "vcMetrics"
       )
@@ -218,6 +218,18 @@ Wf_dragen <- R6::R6Class(
       subprefix <- dragen_subprefix(x, "_metrics")
       dat <- dragen_vc_metrics_read(x)
       tibble::tibble(name = glue("vcmetrics_{subprefix}"), data = list(dat[]))
+    },
+    #' @description Read `trimmer_metrics.csv` file.
+    #' @param x Path to file.
+    read_trimmerMetrics = function(x) {
+      dat <- dragen_trimmer_metrics_read(x)
+      tibble::tibble(name = "trimmermetrics", data = list(dat[]))
+    },
+    #' @description Read `sv_metrics.csv` file.
+    #' @param x Path to file.
+    read_svMetrics = function(x) {
+      dat <- dragen_sv_metrics_read(x)
+      tibble::tibble(name = "svmetrics", data = list(dat[]))
     }
   ) # end public
 ) # end Wf_dragen

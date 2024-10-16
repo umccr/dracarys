@@ -53,6 +53,8 @@ d_write <- t1$write(
 \item \href{#method-Wf_dragen-read_hist}{\code{Wf_dragen$read_hist()}}
 \item \href{#method-Wf_dragen-read_timeMetrics}{\code{Wf_dragen$read_timeMetrics()}}
 \item \href{#method-Wf_dragen-read_vcMetrics}{\code{Wf_dragen$read_vcMetrics()}}
+\item \href{#method-Wf_dragen-read_trimmerMetrics}{\code{Wf_dragen$read_trimmerMetrics()}}
+\item \href{#method-Wf_dragen-read_svMetrics}{\code{Wf_dragen$read_svMetrics()}}
 \item \href{#method-Wf_dragen-clone}{\code{Wf_dragen$clone()}}
 }
 }
@@ -249,6 +251,40 @@ Read \code{time_metrics.csv} file.
 Read \code{vc_metrics.csv}/\code{gvcf_metrics.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_vcMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_trimmerMetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_trimmerMetrics}{}}}
+\subsection{Method \code{read_trimmerMetrics()}}{
+Read \code{trimmer_metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_trimmerMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_svMetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_svMetrics}{}}}
+\subsection{Method \code{read_svMetrics()}}{
+Read \code{sv_metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_svMetrics(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
