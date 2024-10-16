@@ -50,6 +50,9 @@ d_write <- t1$write(
 \item \href{#method-Wf_dragen-read_fineHist}{\code{Wf_dragen$read_fineHist()}}
 \item \href{#method-Wf_dragen-read_fragmentLengthHist}{\code{Wf_dragen$read_fragmentLengthHist()}}
 \item \href{#method-Wf_dragen-read_mappingMetrics}{\code{Wf_dragen$read_mappingMetrics()}}
+\item \href{#method-Wf_dragen-read_hist}{\code{Wf_dragen$read_hist()}}
+\item \href{#method-Wf_dragen-read_timeMetrics}{\code{Wf_dragen$read_timeMetrics()}}
+\item \href{#method-Wf_dragen-read_vcMetrics}{\code{Wf_dragen$read_vcMetrics()}}
 \item \href{#method-Wf_dragen-clone}{\code{Wf_dragen$clone()}}
 }
 }
@@ -195,6 +198,57 @@ Read \code{fragment_length_hist.csv} file.
 Read \code{mapping_metrics.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_mappingMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_hist"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_hist}{}}}
+\subsection{Method \code{read_hist()}}{
+Read \code{hist.csv} (not \code{fine_hist.csv}!) file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_hist(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_timeMetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_timeMetrics}{}}}
+\subsection{Method \code{read_timeMetrics()}}{
+Read \code{time_metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_timeMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_vcMetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_vcMetrics}{}}}
+\subsection{Method \code{read_vcMetrics()}}{
+Read \code{vc_metrics.csv}/\code{gvcf_metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_vcMetrics(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

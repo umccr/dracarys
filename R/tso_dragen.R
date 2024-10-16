@@ -62,15 +62,15 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.fastqc_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.fragment_length_hist\\.csv$"), "fragmentLengthHist",
         glue("{pref}\\.gc_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.gvcf_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.mapping_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.gvcf_metrics\\.csv$"), "vcMetrics",
+        glue("{pref}\\.mapping_metrics\\.csv$"), "mappingMetrics",
         glue("{pref}\\.microsat_diffs\\.txt$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.microsat_output\\.json$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.sv_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.time_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.time_metrics\\.csv$"), "timeMetrics",
         glue("{pref}\\.trimmer_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.umi_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.vc_metrics\\.csv$"), "DOWNLOAD_ONLY"
+        glue("{pref}\\.vc_metrics\\.csv$"), "vcMetrics"
       )
       regexes <- reg1 |>
         dplyr::mutate(
@@ -172,7 +172,8 @@ Wf_dragen <- R6::R6Class(
       dat <- dragen_mapping_metrics_read(x)
       tibble::tibble(name = "mapmetrics", data = list(dat))
     },
-    #' @description Read `hist.csv` file.
+    #' @description Read `hist.csv` (not `fine_hist.csv`!) file.
+    #' @param x Path to file.
     read_hist = function(x) {
       subprefix <- dragen_subprefix(x, "_hist")
       d <- readr::read_csv(x, col_names = c("var", "pct"), col_types = "cd")
@@ -191,6 +192,32 @@ Wf_dragen <- R6::R6Class(
           cumsum = cumsum(.data$pct)
         )
       tibble::tibble(name = glue("hist_{subprefix}"), data = list(dat))
+    },
+    #' @description Read `time_metrics.csv` file.
+    #' @param x Path to file.
+    read_timeMetrics = function(x) {
+      cn <- c("dummy1", "dummy2", "Step", "time_hrs", "time_sec")
+      ct <- readr::cols(.default = "c", time_hrs = readr::col_time(format = "%T"), time_sec = "d")
+      d <- readr::read_csv(x, col_names = cn, col_types = ct)
+      assertthat::assert_that(d$dummy1[1] == "RUN TIME", is.na(d$dummy2[1]))
+      assertthat::assert_that(inherits(d$time_hrs, "hms"))
+      dat <- d |>
+        dplyr::mutate(
+          Step = tools::toTitleCase(sub("Time ", "", .data$Step)),
+          Step = gsub(" |/", "", .data$Step),
+          Time = substr(.data$time_hrs, 1, 5)
+        ) |>
+        dplyr::select("Step", "Time") |>
+        tidyr::pivot_wider(names_from = "Step", values_from = "Time") |>
+        dplyr::relocate("TotalRuntime")
+      tibble::tibble(name = "timemetrics", data = list(dat))
+    },
+    #' @description Read `vc_metrics.csv`/`gvcf_metrics.csv` file.
+    #' @param x Path to file.
+    read_vcMetrics = function(x) {
+      subprefix <- dragen_subprefix(x, "_metrics")
+      dat <- dragen_vc_metrics_read(x)
+      tibble::tibble(name = glue("vcmetrics_{subprefix}"), data = list(dat[]))
     }
   ) # end public
 ) # end Wf_dragen

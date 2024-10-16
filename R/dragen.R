@@ -9,6 +9,99 @@ dragen_subprefix <- function(x, suffix) {
   sub(suffix, "", s2)
 }
 
+dragen_vc_metrics_read <- function(x) {
+  abbrev_nm1 <- tibble::tribble(
+    ~raw, ~clean, ~region,
+    "Total", "var_tot_dragen", FALSE,
+    "Biallelic", "var_biallelic_dragen", FALSE,
+    "Multiallelic", "var_multiallelic_dragen", FALSE,
+    "SNPs", "var_snp_dragen", FALSE,
+    "Insertions (Hom)", "var_ins_hom_dragen", FALSE,
+    "Insertions (Het)", "var_ins_het_dragen", FALSE,
+    "Deletions (Hom)", "var_del_hom_dragen", FALSE,
+    "Deletions (Het)", "var_del_het_dragen", FALSE,
+    "Indels (Het)", "var_indel_het_dragen", FALSE,
+    "Chr X number of SNPs over ", "var_snp_x_over_", TRUE,
+    "Chr Y number of SNPs over ", "var_snp_y_over_", TRUE,
+    "(Chr X SNPs)/(chr Y SNPs) ratio over ", "var_x_over_y_snp_ratio_over_", TRUE,
+    "SNP Transitions", "var_snp_transitions_dragen", FALSE,
+    "SNP Transversions", "var_snp_transversions_dragen", FALSE,
+    "Ti/Tv ratio", "var_ti_tv_ratio_dragen", FALSE,
+    "Heterozygous", "var_heterozygous_dragen", FALSE,
+    "Homozygous", "var_homozygous_dragen", FALSE,
+    "Het/Hom ratio", "var_het_hom_ratio_dragen", FALSE,
+    "In dbSNP", "var_in_dbsnp_dragen", FALSE,
+    "Not in dbSNP", "var_nin_dbsnp_dragen", FALSE,
+    "Percent Callability", "callability_pct_dragen", FALSE,
+    "Percent Autosome Callability", "callability_auto_pct_dragen", FALSE,
+    "Number of samples", "sample_num_dragen", FALSE,
+    "Reads Processed", "reads_processed_dragen", FALSE,
+    "Child Sample", "sample_child_dragen", FALSE
+  )
+  raw <- readr::read_lines(x)
+  assertthat::assert_that(grepl("VARIANT CALLER", raw[1]))
+  # first detect if this is genome or target region
+  res <- raw |>
+    tibble::as_tibble_col(column_name = "value") |>
+    tidyr::separate_wider_delim(
+      "value",
+      names = c("category", "sample", "var", "count", "pct"),
+      delim = ",", too_few = "align_start"
+    )
+  reg1 <- NULL
+  str1 <- NULL
+  tmp <- res |>
+    dplyr::filter(grepl("Chr X number of SNPs over ", .data$var)) |>
+    dplyr::slice_head(n = 1) |>
+    dplyr::pull("var")
+  assertthat::assert_that(length(tmp) == 1)
+  if (grepl("genome", tmp)) {
+    str1 <- "genome"
+    reg1 <- "genome"
+  } else if (grepl("QC coverage region", tmp)) {
+    str1 <- "QC coverage region"
+    reg1 <- "qccovreg"
+  } else if (grepl("target region", tmp)) {
+    str1 <- "target region"
+    reg1 <- "targetreg"
+  } else {
+    cli::cli_abort("Cannot determine the varcall region from: {x}")
+  }
+  abbrev_nm <- abbrev_nm1 |>
+    dplyr::mutate(
+      raw = ifelse(.data$region, glue("{.data$raw}{str1}"), .data$raw),
+      clean = ifelse(.data$region, glue("{.data$clean}{reg1}_dragen"), .data$clean)
+    ) |>
+    dplyr::select("raw", "clean") |>
+    tibble::deframe()
+
+  d <- res |>
+    dplyr::mutate(
+      var = dplyr::recode(.data$var, !!!abbrev_nm),
+      count = dplyr::na_if(.data$count, "NA"),
+      count = as.numeric(.data$count),
+      pct = round(as.numeric(.data$pct), 2),
+      category = dplyr::case_when(
+        grepl("SUMMARY", .data$category) ~ "summary",
+        grepl("PREFILTER", .data$category) ~ "prefilter",
+        grepl("POSTFILTER", .data$category) ~ "postfilter",
+        TRUE ~ "unknown"
+      )
+    ) |>
+    dplyr::filter(.data$category != "summary") |>
+    dplyr::select("category", "sample", "var", "count", "pct")
+  # pivot
+  d |>
+    tidyr::pivot_longer(c("count", "pct")) |>
+    dplyr::mutate(
+      name = dplyr::if_else(.data$name == "count", "", "_pct"),
+      var = glue("{.data$var}{.data$name}")
+    ) |>
+    dplyr::select("category", "sample", "var", "value") |>
+    dplyr::filter(!is.na(.data$value)) |>
+    tidyr::pivot_wider(names_from = "var", values_from = "value")
+}
+
 #' Read DRAGEN Mapping Metrics
 #'
 #' Reads the `mapping_metrics.csv` file output from DRAGEN.
