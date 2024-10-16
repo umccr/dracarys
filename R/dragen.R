@@ -1,12 +1,63 @@
-dragen_subprefix <- function(x, suffix) {
-  # L2401290.exon_contig_mean_cov.csv -> exon
-  # L2401290.target_bed_contig_mean_cov.csv -> target_bed
-  # L2401290.tmb_contig_mean_cov.csv -> tmb
-  # L2401290.wgs_contig_mean_cov.csv -> wgs
-  bname <- basename(x)
-  s1 <- tools::file_path_sans_ext(bname)
-  s2 <- sub(".*\\.(.*)", "\\1", s1)
-  sub(suffix, "", s2)
+#' Read DRAGEN CNV Metrics
+#'
+#' Reads the `cnv_metrics.csv` file output from DRAGEN.
+#'
+#' @param x Path to file.
+#'
+#' @return Tibble with metrics.
+#' @export
+dragen_cnv_metrics_read <- function(x) {
+  d0 <- readr::read_lines(x)
+  assertthat::assert_that(grepl("SEX GENOTYPER", d0[1]))
+  abbrev_nm <- c(
+    "Bases in reference genome" = "bases_in_ref_genome_dragen",
+    "Average alignment coverage over genome" = "cov_alignment_avg_over_genome_dragen",
+    "Number of alignment records" = "n_alignment_records",
+    "Number of filtered records (total)" = "n_filtered_records_tot",
+    "Number of filtered records (duplicates)" = "n_filtered_records_dup",
+    "Number of filtered records (MAPQ)" = "n_filtered_records_mapq",
+    "Number of filtered records (unmapped)" = "n_filtered_records_unmap",
+    "Coverage MAD" = "coverage_mad",
+    "Gene Scaled MAD" = "gene_scaled_mad",
+    "Median Bin Count" = "median_bin_count",
+    "Number of target intervals" = "n_target_intervals",
+    "Number of normal samples" = "n_samp_norm",
+    "Number of segments" = "n_seg",
+    "Number of amplifications" = "n_amp",
+    "Number of deletions" = "n_del",
+    "Number of passing amplifications" = "n_amp_pass",
+    "Number of passing deletions" = "n_del_pass"
+  )
+
+  d1 <- d0 |>
+    tibble::as_tibble_col(column_name = "value") |>
+    tidyr::separate_wider_delim(
+      "value",
+      names = c("category", "extra", "var", "count", "pct"),
+      delim = ",", too_few = "align_start"
+    )
+  sexgt <- d1 |>
+    dplyr::filter(.data$category == "SEX GENOTYPER") |>
+    dplyr::select(sexgt = "count", sexgt_pct = "pct")
+
+  d2 <- d1 |>
+    dplyr::filter(!.data$category == "SEX GENOTYPER") |>
+    dplyr::mutate(
+      count = as.numeric(.data$count),
+      pct = round(as.numeric(.data$pct), 2),
+      var = dplyr::recode(.data$var, !!!abbrev_nm)
+    ) |>
+    dplyr::select("var", "count", "pct") |>
+    tidyr::pivot_longer(c("count", "pct")) |>
+    dplyr::filter(!is.na(.data$value)) |>
+    dplyr::mutate(
+      name = dplyr::if_else(.data$name == "count", "", "_pct"),
+      var = glue("{.data$var}{.data$name}")
+    ) |>
+    dplyr::select("var", "value") |>
+    tidyr::pivot_wider(names_from = "var", values_from = "value")
+  res <- dplyr::bind_cols(sexgt, d2)
+  return(res)
 }
 
 #' Read DRAGEN SV Metrics
@@ -1514,3 +1565,14 @@ WgsHistFile <- R6::R6Class(
     }
   )
 )
+
+dragen_subprefix <- function(x, suffix) {
+  # L2401290.exon_contig_mean_cov.csv -> exon
+  # L2401290.target_bed_contig_mean_cov.csv -> target_bed
+  # L2401290.tmb_contig_mean_cov.csv -> tmb
+  # L2401290.wgs_contig_mean_cov.csv -> wgs
+  bname <- basename(x)
+  s1 <- tools::file_path_sans_ext(bname)
+  s2 <- sub(".*\\.(.*)", "\\1", s1)
+  sub(suffix, "", s2)
+}

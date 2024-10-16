@@ -22,7 +22,7 @@ FastqcMetricsFile <- R6::R6Class(
     #' @return tibble. TODO.
     read = function() {
       x <- self$path
-      res <- read_fastqc_metrics(x)
+      res <- dragen_fastqc_metrics_read(x)
     },
     #' @description
     #' Writes a tidy version of the `fastqc_metrics.csv` file output
@@ -53,7 +53,15 @@ FastqcMetricsFile <- R6::R6Class(
   )
 )
 
-read_fastqc_metrics <- function(x) {
+#' DRAGEN FASTQC Metrics
+#'
+#' Read DRAGEN `fastqc_metrics.csv` file.
+#'
+#' @param x Path to file.
+#'
+#' @return Tibble with metrics.
+#' @export
+dragen_fastqc_metrics_read <- function(x) {
   # 'SEQUENCE POSITIONS' has an extra field for 'Total Sequence Starts' which
   # can be filtered out since that can be computed by the rest of that section.
   raw <- readr::read_lines(x) |>
@@ -69,6 +77,15 @@ read_fastqc_metrics <- function(x) {
       value = dplyr::na_if(.data$value, "NA"),
       value = as.numeric(.data$value)
     )
+
+  # 1 POSITIONAL BASE CONTENT
+  # 2 POSITIONAL BASE MEAN QUALITY
+  # 3 POSITIONAL QUALITY
+  # 4 READ GC CONTENT
+  # 5 READ GC CONTENT QUALITY
+  # 6 READ LENGTHS
+  # 7 READ MEAN QUALITY
+  # 8 SEQUENCE POSITIONS
 
   # there are binned pos e.g. "149-150"
   # the value is an accumulation, so divide by number of grains
@@ -166,5 +183,6 @@ read_fastqc_metrics <- function(x) {
     read_lengths = read_len,
     read_mean_quality = read_mean_qual,
     sequence_positions = seq_pos
-  )
+  ) |>
+    tibble::enframe(name = "fastqc_name", value = "fastqc_value")
 }

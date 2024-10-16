@@ -42,7 +42,7 @@ Wf_dragen <- R6::R6Class(
       reg1 <- tibble::tribble(
         ~regex, ~fun,
         glue("{pref}\\-replay\\.json$"), "replay",
-        glue("{pref}\\.cnv_metrics.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.cnv_metrics.csv$"), "cnvMetrics",
         glue("{pref}\\.exon_contig_mean_cov\\.csv$"), "contigMeanCov",
         glue("{pref}\\.target_bed_contig_mean_cov\\.csv$"), "contigMeanCov",
         glue("{pref}\\.tmb_contig_mean_cov\\.csv$"), "contigMeanCov",
@@ -59,7 +59,7 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.target_bed_hist\\.csv$"), "hist",
         glue("{pref}\\.tmb_hist\\.csv$"), "hist",
         glue("{pref}\\.wgs_hist\\.csv$"), "hist",
-        glue("{pref}\\.fastqc_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.fastqc_metrics\\.csv$"), "fastqcMetrics",
         glue("{pref}\\.fragment_length_hist\\.csv$"), "fragmentLengthHist",
         glue("{pref}\\.gc_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.gvcf_metrics\\.csv$"), "vcMetrics",
@@ -230,6 +230,18 @@ Wf_dragen <- R6::R6Class(
     read_svMetrics = function(x) {
       dat <- dragen_sv_metrics_read(x)
       tibble::tibble(name = "svmetrics", data = list(dat[]))
+    },
+    #' @description Read `cnv_metrics.csv` file.
+    #' @param x Path to file.
+    read_cnvMetrics = function(x) {
+      dat <- dragen_cnv_metrics_read(x)
+      tibble::tibble(name = "cnvmetrics", data = list(dat[]))
+    },
+    #' @description Read `fastqc_metrics.csv` file.
+    #' @param x Path to file.
+    read_fastqcMetrics = function(x) {
+      dat <- dragen_fastqc_metrics_read(x)
+      tibble::tibble(name = "fastqcmetrics", data = list(dat[]))
     }
   ) # end public
 ) # end Wf_dragen
