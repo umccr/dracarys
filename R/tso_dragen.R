@@ -55,14 +55,10 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.target_bed_fine_hist\\.csv$"), "fineHist",
         glue("{pref}\\.tmb_fine_hist\\.csv$"), "fineHist",
         glue("{pref}\\.wgs_fine_hist\\.csv$"), "fineHist",
-        glue("{pref}\\.exon_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.target_bed_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.tmb_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.wgs_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.exon_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.target_bed_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.tmb_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.wgs_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.exon_hist\\.csv$"), "hist",
+        glue("{pref}\\.target_bed_hist\\.csv$"), "hist",
+        glue("{pref}\\.tmb_hist\\.csv$"), "hist",
+        glue("{pref}\\.wgs_hist\\.csv$"), "hist",
         glue("{pref}\\.fastqc_metrics\\.csv$"), "DOWNLOAD_ONLY",
         glue("{pref}\\.fragment_length_hist\\.csv$"), "fragmentLengthHist",
         glue("{pref}\\.gc_metrics\\.csv$"), "DOWNLOAD_ONLY",
@@ -175,6 +171,26 @@ Wf_dragen <- R6::R6Class(
     read_mappingMetrics = function(x) {
       dat <- dragen_mapping_metrics_read(x)
       tibble::tibble(name = "mapmetrics", data = list(dat))
+    },
+    #' @description Read `hist.csv` file.
+    read_hist = function(x) {
+      subprefix <- dragen_subprefix(x, "_hist")
+      d <- readr::read_csv(x, col_names = c("var", "pct"), col_types = "cd")
+      dat <- d |>
+        dplyr::mutate(
+          var = sub("PCT of bases in .* with coverage ", "", .data$var),
+          var = gsub("\\[|\\]|\\(|\\)", "", .data$var),
+          var = gsub("x", "", .data$var),
+          var = gsub("inf", "Inf", .data$var)
+        ) |>
+        tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
+        dplyr::mutate(
+          start = as.numeric(.data$start),
+          end = as.numeric(.data$end),
+          pct = round(.data$pct, 2),
+          cumsum = cumsum(.data$pct)
+        )
+      tibble::tibble(name = glue("hist_{subprefix}"), data = list(dat))
     }
   ) # end public
 ) # end Wf_dragen
