@@ -1,3 +1,72 @@
+#' Read DRAGEN GC Metrics
+#'
+#' Reads the `gc_metrics.csv` file output from DRAGEN.
+#'
+#' @param x Path to file.
+#'
+#' @return Tibble with metrics.
+#' @export
+dragen_gc_metrics_read <- function(x) {
+  d0 <- readr::read_lines(x)
+  assertthat::assert_that(grepl("GC BIAS DETAILS", d0[1]))
+  d1 <- d0 |>
+    tibble::as_tibble_col(column_name = "value") |>
+    tidyr::separate_wider_delim(
+      "value",
+      names = c("category", "dummy1", "name", "value", "fraction"),
+      delim = ",", too_few = "align_start"
+    )
+  abbrev_nm <- c(
+    "Window size" = "window_size",
+    "Number of valid windows" = "n_windows_valid",
+    "Number of discarded windows" = "n_windows_discard",
+    "Average reference GC" = "gc_avg_reference",
+    "Mean global coverage" = "cov_avg_global",
+    "Normalized coverage at GCs 0-19" = "cov_norm_0to19",
+    "Normalized coverage at GCs 20-39" = "cov_norm_20to39",
+    "Normalized coverage at GCs 40-59" = "cov_norm_40to59",
+    "Normalized coverage at GCs 60-79" = "cov_norm_60to79",
+    "Normalized coverage at GCs 80-100" = "cov_norm_80to100",
+    "AT Dropout" = "dropout_at",
+    "GC Dropout" = "dropout_gc"
+  )
+  # GC METRICS SUMMARY
+  summary <- d1 |>
+    dplyr::filter(.data$category == "GC METRICS SUMMARY") |>
+    dplyr::select("name", "value") |>
+    dplyr::mutate(
+      value = as.numeric(.data$value),
+      name = dplyr::recode(.data$name, !!!abbrev_nm)
+    ) |>
+    tidyr::pivot_wider(names_from = "name", values_from = "value")
+
+  # GC BIAS DETAILS
+  details <- d1 |>
+    dplyr::filter(.data$category == "GC BIAS DETAILS") |>
+    dplyr::mutate(
+      gc = sub(".* at GC (.*)", "\\1", .data$name),
+      name = sub("(.*) at GC .*", "\\1", .data$name),
+      name = tolower(.data$name),
+      name = sub(" ", "", .data$name),
+      value = as.numeric(.data$value),
+      fraction = as.numeric(.data$fraction)
+    )
+  details_wind <- details |>
+    dplyr::filter(.data$name == "windows") |>
+    dplyr::select("gc", "value")
+
+  details_cov <- details |>
+    dplyr::filter(.data$name == "normalizedcoverage") |>
+    dplyr::select("gc", "value")
+
+  list(
+    gcmetrics_summary = summary,
+    gcmetrics_windows = details_wind,
+    gcmetrics_coverage = details_cov
+  ) |>
+    tibble::enframe(name = "name", value = "data")
+}
+
 #' Read DRAGEN CNV Metrics
 #'
 #' Reads the `cnv_metrics.csv` file output from DRAGEN.
@@ -28,7 +97,6 @@ dragen_cnv_metrics_read <- function(x) {
     "Number of passing amplifications" = "n_amp_pass",
     "Number of passing deletions" = "n_del_pass"
   )
-
   d1 <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
     tidyr::separate_wider_delim(

@@ -61,7 +61,7 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.wgs_hist\\.csv$"), "hist",
         glue("{pref}\\.fastqc_metrics\\.csv$"), "fastqcMetrics",
         glue("{pref}\\.fragment_length_hist\\.csv$"), "fragmentLengthHist",
-        glue("{pref}\\.gc_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.gc_metrics\\.csv$"), "gcMetrics",
         glue("{pref}\\.gvcf_metrics\\.csv$"), "vcMetrics",
         glue("{pref}\\.mapping_metrics\\.csv$"), "mappingMetrics",
         glue("{pref}\\.microsat_diffs\\.txt$"), "DOWNLOAD_ONLY",
@@ -242,6 +242,12 @@ Wf_dragen <- R6::R6Class(
     read_fastqcMetrics = function(x) {
       dat <- dragen_fastqc_metrics_read(x)
       tibble::tibble(name = "fastqcmetrics", data = list(dat[]))
+    },
+    #' @description Read `gc_metrics.csv` file.
+    #' @param x Path to file.
+    read_gcMetrics = function(x) {
+      dat <- dragen_gc_metrics_read(x)
+      dat
     }
   ) # end public
 ) # end Wf_dragen
