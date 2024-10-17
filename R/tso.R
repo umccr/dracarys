@@ -325,34 +325,6 @@ tso_tmbt_read <- function(x) {
   d[]
 }
 
-#' Plot Fragment Length Hist
-#'
-#' Plots the fragment length distributions as given in the
-#' `fragment_length_hist` file.
-#'
-#' @param d Parsed tibble.
-#' @param min_count Minimum read count to be plotted (def: 10).
-#'
-#' @return A ggplot2 plot containing fragment lengths on X axis and read counts
-#' on Y axis for each sample.
-tso_fraglenhist_plot <- function(d, min_count = 10) {
-  assertthat::assert_that(is.numeric(min_count), min_count >= 0)
-  d |>
-    dplyr::filter(.data$Count >= min_count) |>
-    ggplot2::ggplot(ggplot2::aes(x = .data$FragmentLength, y = .data$Count)) +
-    ggplot2::geom_line() +
-    ggplot2::labs(title = "Fragment Length Distribution") +
-    ggplot2::xlab("Fragment Length (bp)") +
-    ggplot2::ylab(glue("Read Count (min: {min_count})")) +
-    ggplot2::theme_minimal() +
-    ggplot2::theme(
-      legend.position = c(0.9, 0.9),
-      legend.justification = c(1, 1),
-      panel.grid.minor = ggplot2::element_blank(),
-      panel.grid.major = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
-    )
-}
 
 #' Read TSO TargetRegionCoverage File
 #'

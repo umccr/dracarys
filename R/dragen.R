@@ -1,3 +1,32 @@
+#' DRAGEN Fragment Length Hist Plot
+#'
+#' Plots the fragment length distributions as given in the
+#' `fragment_length_hist` file.
+#'
+#' @param d Parsed tibble.
+#' @param min_count Minimum read count to be plotted (def: 10).
+#'
+#' @return A ggplot2 plot containing fragment lengths on X axis and read counts
+#' on Y axis for each sample.
+dragen_fraglenhist_plot <- function(d, min_count = 10) {
+  assertthat::assert_that(is.numeric(min_count), min_count >= 0)
+  d |>
+    dplyr::filter(.data$Count >= min_count) |>
+    ggplot2::ggplot(ggplot2::aes(x = .data$FragmentLength, y = .data$Count)) +
+    ggplot2::geom_line() +
+    ggplot2::labs(title = "Fragment Length Distribution") +
+    ggplot2::xlab("Fragment Length (bp)") +
+    ggplot2::ylab(glue("Read Count (min: {min_count})")) +
+    ggplot2::theme_minimal() +
+    ggplot2::theme(
+      legend.position = c(0.9, 0.9),
+      legend.justification = c(1, 1),
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_blank(),
+      plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
+    )
+}
+
 #' Read DRAGEN UMI Metrics
 #'
 #' Reads the `umi_metrics.csv` file output from DRAGEN.
@@ -608,577 +637,87 @@ dragen_coverage_metrics_read <- function(x) {
   return(res)
 }
 
-#' WgsContigMeanCovFile R6 Class
+#' Plot DRAGEN Contig Mean Coverage
+#' TODO
+#' Plots the `wgs_contig_mean_cov_<phenotype>.csv` files.
 #'
-#' @description
-#' Contains methods for reading and displaying contents of
-#' the `wgs_contig_mean_cov_<phenotype>.csv` file output from DRAGEN.
-#' This file contains the estimated coverage for all contigs, and an autosomal
-#' estimated coverage.
-#'
-#' @examples
-#' x1 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_normal.csv.gz", package = "dracarys")
-#' x2 <- system.file("extdata/wgs/SEQC-II.wgs_contig_mean_cov_tumor.csv.gz", package = "dracarys")
-#' cc1 <- WgsContigMeanCovFile$new(x1)
-#' cc2 <- WgsContigMeanCovFile$new(x2)
-#' d1 <- cc1$read()
-#' d2 <- cc2$read()
-#' cc1$write(d1, out_dir = tempdir(), prefix = "seqc_n", out_format = "tsv")
-#' cc2$write(d2, out_dir = tempdir(), prefix = "seqc_t", out_format = "tsv")
-#'
-#' cc1$plot(d1)
-#' cc2$plot(d2)
-#'
-#' @export
-WgsContigMeanCovFile <- R6::R6Class(
-  "WgsContigMeanCovFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `wgs_contig_mean_cov_<phenotype>.csv` file output from DRAGEN.
-    #'
-    #' @param keep_alt Keep the ALT + Mito chromosomes?
-    #' @return tibble with the following columns:
-    #'   - label: file label.
-    #'   - chrom: contig name.
-    #'   - n_bases: number of bases aligned to contig (excludes bases from
-    #'   duplicate marked reads, reads with MAPQ=0, and clipped bases).
-    #'   - coverage: col2 / contig length
-    read = function(keep_alt = TRUE) {
-      x <- self$path
-      readr::read_csv(x, col_names = c("chrom", "n_bases", "coverage"), col_types = "cdd") |>
-        dplyr::filter(
-          if (!keep_alt) {
-            !grepl("chrM|MT|_|Autosomal|HLA-|EBV", .data$chrom)
-          } else {
-            TRUE
-          }
-        )
-    },
+#' @param d Parsed tibble.
+#' @param top_alt_n Number of top covered alt contigs to plot per phenotype.
+#' @return A ggplot2 object with chromosomes on X axis, and coverage on Y axis.
+dragen_contig_mean_coverage_plot <- function(d, top_alt_n = 15) {
+  assertthat::assert_that(top_alt_n >= 0)
 
-    #' @description
-    #' Writes a tidy version of the `wgs_contig_mean_cov_<phenotype>.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    },
+  # Display chr1-22, X, Y at top (M goes to bottom).
+  # Display top 20 of the rest, plus rest as 'other', at bottom
+  main_chrom1 <- c(1:22, "X", "Y")
+  main_chrom2 <- c(paste0("chr", main_chrom1))
+  main_chrom <- c(main_chrom1, main_chrom2, "Autosomal regions")
+  min_cvg <- 0.000001
 
+  d <- d |>
+    dplyr::mutate(
+      panel = dplyr::if_else(.data$chrom %in% main_chrom, "main", "alt"),
+      panel = factor(.data$panel, levels = c("main", "alt"))
+    ) |>
+    dplyr::select("chrom", "coverage", "panel")
 
-    #' @description Plots the `wgs_contig_mean_cov_<phenotype>.csv` files.
-    #' @param d Parsed object from `self$read()`.
-    #' @param top_alt_n Number of top covered alt contigs to plot per phenotype.
-    #' @return A ggplot2 object with chromosomes on X axis, and coverage on Y axis.
-    plot = function(d, top_alt_n = 15) {
-      assertthat::assert_that(top_alt_n >= 0)
+  main_panel <- d |> dplyr::filter(.data$panel == "main")
+  alt_panel <- d |> dplyr::filter(.data$panel == "alt")
+  top_alt <- alt_panel |>
+    dplyr::top_n(top_alt_n, wt = .data$coverage) |>
+    dplyr::arrange(dplyr::desc(.data$coverage)) |>
+    dplyr::pull(.data$chrom) |>
+    unique()
 
-      # Display chr1-22, X, Y at top (M goes to bottom).
-      # Display top 20 of the rest, plus rest as 'other', at bottom
-      main_chrom1 <- c(1:22, "X", "Y")
-      main_chrom2 <- c(paste0("chr", main_chrom1))
-      main_chrom <- c(main_chrom1, main_chrom2, "Autosomal regions")
-      min_cvg <- 0.000001
+  alt_panel2 <- alt_panel |>
+    dplyr::mutate(alt_group = dplyr::if_else(.data$chrom %in% top_alt, "top", "bottom"))
 
-      d <- d |>
-        dplyr::mutate(
-          panel = dplyr::if_else(.data$chrom %in% main_chrom, "main", "alt"),
-          panel = factor(.data$panel, levels = c("main", "alt"))
-        ) |>
-        dplyr::select("chrom", "coverage", "panel")
+  alt_panel_final <- alt_panel2 |>
+    dplyr::group_by(.data$alt_group) |>
+    dplyr::summarise(mean_cov = mean(.data$coverage)) |>
+    dplyr::inner_join(alt_panel2, by = c("alt_group")) |>
+    dplyr::mutate(
+      chrom = dplyr::if_else(.data$alt_group == "bottom", "OTHER", .data$chrom),
+      coverage = dplyr::if_else(.data$alt_group == "bottom", .data$mean_cov, .data$coverage)
+    ) |>
+    dplyr::distinct() |>
+    dplyr::filter(.data$coverage > min_cvg) |>
+    dplyr::ungroup() |>
+    dplyr::select("chrom", "coverage", "panel")
 
-      main_panel <- d |> dplyr::filter(.data$panel == "main")
-      alt_panel <- d |> dplyr::filter(.data$panel == "alt")
-      top_alt <- alt_panel |>
-        dplyr::top_n(top_alt_n, wt = .data$coverage) |>
-        dplyr::arrange(dplyr::desc(.data$coverage)) |>
-        dplyr::pull(.data$chrom) |>
-        unique()
+  chrom_fac_levels <- c(main_chrom, "chrM", "MT", top_alt[!top_alt %in% c("chrM", "MT")], "OTHER")
+  d <- dplyr::bind_rows(main_panel, alt_panel_final) |>
+    dplyr::mutate(chrom = factor(.data$chrom, levels = chrom_fac_levels))
 
-      alt_panel2 <- alt_panel |>
-        dplyr::mutate(alt_group = dplyr::if_else(.data$chrom %in% top_alt, "top", "bottom"))
-
-      alt_panel_final <- alt_panel2 |>
-        dplyr::group_by(.data$alt_group) |>
-        dplyr::summarise(mean_cov = mean(.data$coverage)) |>
-        dplyr::inner_join(alt_panel2, by = c("alt_group")) |>
-        dplyr::mutate(
-          chrom = dplyr::if_else(.data$alt_group == "bottom", "OTHER", .data$chrom),
-          coverage = dplyr::if_else(.data$alt_group == "bottom", .data$mean_cov, .data$coverage)
-        ) |>
-        dplyr::distinct() |>
-        dplyr::filter(coverage > min_cvg) |>
-        dplyr::ungroup() |>
-        dplyr::select("chrom", "coverage", "panel")
-
-      chrom_fac_levels <- c(main_chrom, "chrM", "MT", top_alt[!top_alt %in% c("chrM", "MT")], "OTHER")
-      d <- dplyr::bind_rows(main_panel, alt_panel_final) |>
-        dplyr::mutate(chrom = factor(.data$chrom, levels = chrom_fac_levels))
-
-      d |>
-        dplyr::mutate(label = "sampleA") |>
-        ggplot2::ggplot(
-          ggplot2::aes(
-            x = .data$chrom, y = .data$coverage, group = .data$label,
-          )
-        ) +
-        ggplot2::geom_point() +
-        ggplot2::geom_line() +
-        ggplot2::scale_y_continuous(
-          limits = c(0, NA), expand = c(0, 0), labels = scales::comma,
-          breaks = scales::pretty_breaks(n = 8)
-        ) +
-        ggplot2::theme_minimal() +
-        ggplot2::labs(title = "Mean Coverage Per Chromosome", colour = "Label") +
-        ggplot2::xlab("Chromosome") +
-        ggplot2::ylab("Coverage") +
-        ggplot2::theme(
-          legend.position = "top",
-          panel.grid.minor = ggplot2::element_blank(),
-          panel.grid.major.y = ggplot2::element_blank(),
-          strip.background = ggplot2::element_blank(),
-          strip.text.x = ggplot2::element_blank(),
-          axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1, size = 6),
-          plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold"),
-          panel.spacing = ggplot2::unit(2, "lines")
-        ) +
-        ggplot2::facet_wrap(ggplot2::vars(.data$panel), nrow = 2, scales = "free")
-    }
-  )
-)
-
-#' WgsCoverageMetricsFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of
-#' the `wgs_coverage_metrics_<phenotype>.csv` file output from DRAGEN.
-#' This file contains read depth of coverage metrics.
-#'
-#' @examples
-#' x1 <- system.file("extdata/wgs/SEQC-II.wgs_coverage_metrics_normal.csv.gz", package = "dracarys")
-#' x2 <- system.file("extdata/wgs/SEQC-II.wgs_coverage_metrics_tumor.csv.gz", package = "dracarys")
-#' cm1 <- WgsCoverageMetricsFile$new(x1)
-#' cm2 <- WgsCoverageMetricsFile$new(x2)
-#' d1 <- read(cm1)
-#' d2 <- read(cm2)
-#' cm1$write(d1, out_dir = tempdir(), prefix = "seqc_n", out_format = "tsv")
-#' cm2$write(d2, out_dir = tempdir(), prefix = "seqc_t", out_format = "tsv")
-#'
-#' @export
-WgsCoverageMetricsFile <- R6::R6Class(
-  "WgsCoverageMetricsFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `wgs_coverage_metrics_<phenotype>.csv` file output from DRAGEN.
-    #'
-    #' @return tibble with one row and metrics spread across individual columns.
-    read = function() {
-      abbrev_nm <- c(
-        "Aligned bases"                                       = "bases_aligned",
-        "Aligned bases in genome"                             = "bases_aligned_in_genome",
-        "Average alignment coverage over genome"              = "cov_alignment_avg_over_genome",
-        "Uniformity of coverage (PCT > 0.2*mean) over genome" = "cov_uniformity_over_genome_pct_gt02mean",
-        "Uniformity of coverage (PCT > 0.4*mean) over genome" = "cov_uniformity_over_genome_pct_gt04mean",
-        "Average chr X coverage over genome"                  = "cov_avg_x_over_genome",
-        "Average chr Y coverage over genome"                  = "cov_avg_y_over_genome",
-        "Average mitochondrial coverage over genome"          = "cov_avg_mt_over_genome",
-        "Average autosomal coverage over genome"              = "cov_avg_auto_over_genome",
-        "Median autosomal coverage over genome"               = "cov_median_auto_over_genome",
-        "Mean/Median autosomal coverage ratio over genome"    = "cov_mean_median_auto_ratio_over_genome",
-        "Aligned reads"                                       = "reads_aligned",
-        "Aligned reads in genome"                             = "reads_aligned_in_genome"
+  d |>
+    dplyr::mutate(label = "sampleA") |>
+    ggplot2::ggplot(
+      ggplot2::aes(
+        x = .data$chrom, y = .data$coverage, group = .data$label,
       )
-
-      x <- self$path
-      raw <- readr::read_lines(x)
-      assertthat::assert_that(grepl("COVERAGE SUMMARY", raw[1]))
-
-      res <- raw |>
-        tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim(
-          "value",
-          delim = ",", too_few = "align_start",
-          names = c("category", "dummy1", "var", "value", "pct")
-        )
-      # split to rename the
-      # "PCT of genome with coverage [100x: inf)" values
-      res1 <- res |>
-        # pct just shows 100% for a couple rows
-        dplyr::filter(!grepl("PCT of genome with coverage", .data$var)) |>
-        dplyr::select("var", "value")
-      res2 <- res |>
-        dplyr::filter(grepl("PCT of genome with coverage", .data$var)) |>
-        dplyr::mutate(
-          var = sub("PCT of genome with coverage ", "", .data$var),
-          var = gsub("\\[|\\]|\\(|\\)| ", "", .data$var),
-          var = gsub("x", "", .data$var),
-          var = gsub("inf", "Inf", .data$var)
-        ) |>
-        tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
-        dplyr::mutate(var = as.character(glue("cov_genome_pct_{start}_{end}"))) |>
-        dplyr::select("var", "value")
-      res <- dplyr::bind_rows(res1, res2) |>
-        dplyr::mutate(
-          value = dplyr::na_if(.data$value, "NA"),
-          value = as.numeric(.data$value),
-          var = dplyr::recode(.data$var, !!!abbrev_nm)
-        ) |>
-        tidyr::pivot_wider(names_from = "var", values_from = "value")
-    },
-    #' @description
-    #' Writes a tidy version of the `wgs_coverage_metrics_<phenotype>.csv` file output
-    #' from DRAGEN
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' WgsFineHistFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of
-#' the `wgs_fine_hist_<phenotype>.csv` file output from DRAGEN.
-#' This file contains two columns: Depth and Overall.
-#' The value in the Depth column ranges from 0 to 1000+ and the Overall
-#' column indicates the number of loci covered at the corresponding depth.
-#'
-#' @examples
-#' x1 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_normal.csv.gz", package = "dracarys")
-#' x2 <- system.file("extdata/wgs/SEQC-II.wgs_fine_hist_tumor.csv.gz", package = "dracarys")
-#' ch1 <- WgsFineHistFile$new(x1)
-#' ch2 <- WgsFineHistFile$new(x2)
-#' d1 <- read(ch1)
-#' d2 <- read(ch2)
-#' ch1$plot(d1)
-#' ch2$plot(d2)
-#' ch1$write(d1, out_dir = tempdir(), prefix = "seqc_n", out_format = "tsv")
-#' ch2$write(d2, out_dir = tempdir(), prefix = "seqc_t", out_format = "tsv")
-#' @export
-WgsFineHistFile <- R6::R6Class(
-  "WgsFineHistFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `wgs_fine_hist_<phenotype>.csv` file output from DRAGEN.
-    #' @return tibble with following columns:
-    #'   - depth
-    #'   - number of loci with given depth
-    read = function() {
-      x <- self$path
-      d <- readr::read_csv(x, col_types = "cd")
-      assertthat::assert_that(all(colnames(d) == c("Depth", "Overall")))
-
-      # there's a max Depth of 2000+, so convert to numeric for easier plotting
-      d |>
-        dplyr::mutate(
-          Depth = ifelse(grepl("+", .data$Depth), sub("(\\d*)\\+", "\\1", .data$Depth), .data$Depth),
-          Depth = as.integer(.data$Depth)
-        ) |>
-        dplyr::select(depth = "Depth", n_loci = "Overall")
-    },
-    #' @description
-    #' Writes a tidy version of the `wgs_fine_hist_<phenotype>.csv` file output
-    #' from DRAGEN
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    },
-
-    #' @description Plots the `wgs_fine_hist_<phenotype>.csv` files.
-    #' @param d Parsed object from `self$read()`.
-    #' @param x_lim X axis range to plot.
-    #' @return A ggplot2 object with depth of coverage on X axis,
-    #' and number of loci with that depth on Y axis.
-    plot = function(d, x_lim = c(0, 300)) {
-      assertthat::assert_that(length(x_lim) == 2)
-      d |>
-        ggplot2::ggplot(ggplot2::aes(x = .data$depth, y = .data$n_loci)) +
-        ggplot2::geom_line() +
-        ggplot2::coord_cartesian(xlim = x_lim) +
-        ggplot2::scale_y_continuous(labels = scales::label_comma()) +
-        ggplot2::scale_x_continuous(n.breaks = 8) +
-        ggplot2::labs(title = "Coverage Distribution", colour = "Label") +
-        ggplot2::xlab("Depth of Coverage") +
-        ggplot2::ylab("Number of Loci with Given Coverage") +
-        ggplot2::theme_minimal() +
-        ggplot2::theme(
-          legend.position = c(0.9, 0.9),
-          legend.justification = c(1, 1),
-          panel.grid.minor = ggplot2::element_blank(),
-          panel.grid.major.y = ggplot2::element_blank(),
-          plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
-        )
-    }
-  )
-)
-
-#' FragmentLengthHistFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and plotting contents of
-#' the `fragment_length_hist.csv` file output from DRAGEN.
-#'
-#' @examples
-#' x <- system.file("extdata/wgs/SEQC-II.fragment_length_hist.csv.gz", package = "dracarys")
-#' fl <- FragmentLengthHistFile$new(x)
-#' d <- fl$read() # or read(fl)
-#' fl$plot(d) # or plot(fl)
-#' fl$write(d |> dplyr::filter(count > 10), out_dir = tempdir(), prefix = "seqc_fl")
-#' @export
-FragmentLengthHistFile <- R6::R6Class(
-  "FragmentLengthHistFile",
-  inherit = File,
-  public = list(
-    #' @description Reads the `fragment_length_hist.csv` file, which contains the
-    #' fragment length distribution for each sample.
-    #' @return A tibble with the following columns:
-    #' - sample: name of sample
-    #' - fragmentLength: estimated fragment length
-    #' - count: number of reads with estimated fragment length
-    read = function() {
-      x <- self$path
-      d <- readr::read_lines(x)
-      assertthat::assert_that(grepl("#Sample", d[1]))
-
-      d |>
-        tibble::enframe() |>
-        dplyr::mutate(
-          sample = dplyr::if_else(
-            grepl("#Sample", .data$value),
-            sub("#Sample: (.*)", "\\1", .data$value),
-            NA_character_
-          )
-        ) |>
-        tidyr::fill("sample", .direction = "down") |>
-        dplyr::filter(!grepl("#Sample: |FragmentLength,Count", .data$value)) |>
-        tidyr::separate_wider_delim(cols = "value", names = c("fragmentLength", "count"), delim = ",") |>
-        dplyr::mutate(
-          count = as.numeric(.data$count),
-          fragmentLength = as.numeric(.data$fragmentLength)
-        ) |>
-        dplyr::select("sample", "fragmentLength", "count")
-    },
-    #' @description
-    #' Writes a tidy version of the `fragment_length_hist.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    },
-
-
-    #' @description Plots the fragment length distributions as given in the
-    #' `fragment_length_hist.csv` file.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param min_count Minimum read count to be plotted (Default: 10).
-    #' @return A ggplot2 plot containing fragment lengths on X axis and read counts
-    #'   on Y axis for each sample.
-    plot = function(d, min_count = 10) {
-      assertthat::assert_that(min_count >= 0)
-      d <- d |>
-        dplyr::filter(.data$count >= min_count)
-
-      d |>
-        ggplot2::ggplot(ggplot2::aes(x = .data$fragmentLength, y = .data$count, colour = sample)) +
-        ggplot2::geom_line() +
-        ggplot2::labs(title = "Fragment Length Distribution") +
-        ggplot2::xlab("Fragment Length (bp)") +
-        ggplot2::ylab(glue("Read Count (min: {min_count})")) +
-        ggplot2::theme_minimal() +
-        ggplot2::theme(
-          legend.position = c(0.9, 0.9),
-          legend.justification = c(1, 1),
-          panel.grid.minor = ggplot2::element_blank(),
-          panel.grid.major = ggplot2::element_blank(),
-          plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
-        )
-    }
-  )
-)
-
-#' MappingMetricsFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of
-#' the `mapping_metrics.csv` file output from DRAGEN.
-#' This file contains mapping and aligning metrics, like the metrics computed by
-#' the Samtools Flagstat command. These metrics are available on an aggregate
-#' level (over all input data), and on a per read group level. NOTE: we are
-#' keeping only the read group level metrics (i.e. removing the aggregate data).
-#' Unless explicitly stated, the metrics units are in reads (i.e., not in
-#' terms of pairs or alignments).
-#'
-#' @examples
-#' x <- system.file("extdata/wgs/SEQC-II.mapping_metrics.csv.gz", package = "dracarys")
-#' mm <- MappingMetricsFile$new(x)
-#' d <- mm$read() # or read(mm)
-#' mm$write(d, out_dir = tempdir(), prefix = "seqc_mm", out_format = "tsv")
-#'
-#' @export
-MappingMetricsFile <- R6::R6Class(
-  "MappingMetricsFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `mapping_metrics.csv` file output from DRAGEN.
-    #'
-    #' @return tibble with one row of X metrics per read group.
-    read = function() {
-      abbrev_nm <- c(
-        "Total input reads" = "reads_tot_input",
-        "Number of duplicate marked reads" = "reads_num_dupmarked",
-        "Number of unique reads (excl. duplicate marked reads)" = "reads_num_uniq",
-        "Reads with mate sequenced" = "reads_w_mate_seq",
-        "Reads without mate sequenced" = "reads_wo_mate_seq",
-        "QC-failed reads" = "reads_qcfail",
-        "Mapped reads adjusted for excluded mapping" = "reads_mapped_adjexcl",
-        "Mapped reads adjusted for filtered and excluded mapping" = "reads_mapped_adjfiltexcl",
-        "Unmapped reads adjusted for excluded mapping" = "reads_unmapped_adjexcl",
-        "Unmapped reads adjusted for filtered and excluded mapping" = "reads_unmapped_adjfiltexcl",
-        "Reads mapping to multiple locations" = "reads_map_multiloc",
-        "Hard-clipped bases R1" = "bases_hardclip_r1",
-        "Hard-clipped bases R2" = "bases_hardclip_r2",
-        "Soft-clipped bases" = "bases_softclip",
-        "Hard-clipped bases" = "bases_hardclip",
-        "Mapped reads" = "reads_mapped",
-        "Mapped reads adjusted for filtered mapping" = "reads_mapped_adjfilt",
-        "Mapped reads R1" = "reads_mapped_r1",
-        "Mapped reads R2" = "reads_mapped_r2",
-        "Number of unique & mapped reads (excl. duplicate marked reads)" = "reads_num_uniq_mapped",
-        "Unmapped reads" = "reads_unmapped",
-        "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt",
-        "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj",
-        "Adjustment of reads matching filter contigs" = "reads_match_filt_contig_adj",
-        "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton",
-        "Paired reads (itself & mate mapped)" = "reads_paired",
-        "Properly paired reads" = "reads_paired_proper",
-        "Not properly paired reads (discordant)" = "reads_discordant",
-        "Paired reads mapped to different chromosomes" = "reads_paired_mapped_diff_chrom",
-        "Paired reads mapped to different chromosomes (MAPQ>=10)" = "reads_paired_mapped_diff_chrom_mapq10",
-        "Reads with MAPQ [40:inf)" = "reads_mapq_40_inf",
-        "Reads with MAPQ [30:40)" = "reads_mapq_30_40",
-        "Reads with MAPQ [20:30)" = "reads_mapq_20_30",
-        "Reads with MAPQ [10:20)" = "reads_mapq_10_20",
-        "Reads with MAPQ [ 0:10)" = "reads_mapq_0_10",
-        "Reads with MAPQ NA (Unmapped reads)" = "reads_mapq_na_unmapped",
-        "Reads with indel R1" = "reads_indel_r1",
-        "Reads with indel R2" = "reads_indel_r2",
-        "Reads with splice junction" = "reads_splicejunc",
-        "Total bases" = "bases_tot",
-        "Total bases R1" = "bases_tot_r1",
-        "Total bases R2" = "bases_tot_r2",
-        "Mapped bases" = "bases_mapped",
-        "Mapped bases R1" = "bases_mapped_r1",
-        "Mapped bases R2" = "bases_mapped_r2",
-        "Soft-clipped bases R1" = "bases_softclip_r1",
-        "Soft-clipped bases R2" = "bases_softclip_r2",
-        "Mismatched bases R1" = "bases_mismatched_r1",
-        "Mismatched bases R2" = "bases_mismatched_r2",
-        "Mismatched bases R1 (excl. indels)" = "bases_mismatched_r1_noindels",
-        "Mismatched bases R2 (excl. indels)" = "bases_mismatched_r2_noindels",
-        "Q30 bases" = "bases_q30",
-        "Q30 bases R1" = "bases_q30_r1",
-        "Q30 bases R2" = "bases_q30_r2",
-        "Q30 bases (excl. dups & clipped bases)" = "bases_q30_nodups_noclipped",
-        "Total alignments" = "alignments_tot",
-        "Secondary alignments" = "alignments_secondary",
-        "Supplementary (chimeric) alignments" = "alignments_chimeric",
-        "Estimated read length" = "read_len",
-        "Bases in reference genome" = "bases_in_ref_genome",
-        "Bases in target bed [% of genome]" = "bases_in_target_bed_genome_pct",
-        "Average sequenced coverage over genome" = "cov_avg_seq_over_genome",
-        "Insert length: mean" = "insert_len_mean",
-        "Insert length: median" = "insert_len_median",
-        "Insert length: standard deviation" = "insert_len_std_dev",
-        "Provided sex chromosome ploidy" = "ploidy_sex_chrom_provided",
-        "Estimated sample contamination" = "contamination_est",
-        "DRAGEN mapping rate [mil. reads/second]" = "mapping_rate_dragen_milreads_per_sec",
-        "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed",
-        "Total reads in RG" = "reads_tot_rg",
-        "Filtered rRNA reads" = "reads_rrna_filtered"
-      )
-      x <- self$path
-      raw <- readr::read_lines(x)
-      assertthat::assert_that(grepl("MAPPING/ALIGNING", raw[1]))
-      # tidy
-      d <- raw |>
-        tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim(
-          "value",
-          names = c("category", "RG", "var", "count", "pct"),
-          delim = ",", too_few = "align_start"
-        ) |>
-        dplyr::filter(.data$RG != "") |>
-        dplyr::mutate(
-          count = dplyr::na_if(.data$count, "NA"),
-          count = as.numeric(.data$count),
-          pct = as.numeric(.data$pct),
-          var = dplyr::recode(.data$var, !!!abbrev_nm)
-        ) |>
-        dplyr::select("RG", "var", "count", "pct")
-      # pivot
-      d |>
-        tidyr::pivot_longer(c("count", "pct")) |>
-        dplyr::mutate(
-          name = dplyr::if_else(.data$name == "count", "", "_pct"),
-          var = glue("{.data$var}{.data$name}")
-        ) |>
-        dplyr::select("RG", "var", "value") |>
-        dplyr::filter(!is.na(.data$value)) |>
-        tidyr::pivot_wider(names_from = "var", values_from = "value")
-    },
-    #' @description
-    #' Writes a tidy version of the `mapping_metrics.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
+    ) +
+    ggplot2::geom_point() +
+    ggplot2::geom_line() +
+    ggplot2::scale_y_continuous(
+      limits = c(0, NA), expand = c(0, 0), labels = scales::comma,
+      breaks = scales::pretty_breaks(n = 8)
+    ) +
+    ggplot2::theme_minimal() +
+    ggplot2::labs(title = "Mean Coverage Per Chromosome", colour = "Label") +
+    ggplot2::xlab("Chromosome") +
+    ggplot2::ylab("Coverage") +
+    ggplot2::theme(
+      legend.position = "top",
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major.y = ggplot2::element_blank(),
+      strip.background = ggplot2::element_blank(),
+      strip.text.x = ggplot2::element_blank(),
+      axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1, size = 6),
+      plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold"),
+      panel.spacing = ggplot2::unit(2, "lines")
+    ) +
+    ggplot2::facet_wrap(ggplot2::vars(.data$panel), nrow = 2, scales = "free")
+}
 
 #' PloidyEstimationMetricsFile R6 Class
 #'
@@ -1251,460 +790,6 @@ PloidyEstimationMetricsFile <- R6::R6Class(
     },
     #' @description
     #' Writes a tidy version of the `ploidy_estimation_metrics.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' ReplayFile R6 Class
-#'
-#' @description
-#' Contains methods for reading contents of
-#' the `replay.json` file output from DRAGEN, which contains the DRAGEN command
-#' line, parameters and version for the specific run.
-#'
-#' @examples
-#' x <- system.file("extdata/wgs/SEQC-II-replay.json.gz", package = "dracarys")
-#' r <- ReplayFile$new(x)
-#' d <- r$read() # or read(r)
-#' r$write(d, out_dir = tempdir(), prefix = "seqc_replay", out_format = "tsv")
-#' @export
-ReplayFile <- R6::R6Class(
-  "ReplayFile",
-  inherit = File,
-  public = list(
-    #' @description Reads the `replay.json` file.
-    #' @return tibble with one row and metrics spread across individual columns.
-    read = function() {
-      x <- self$path
-      res <- x |>
-        jsonlite::read_json(simplifyVector = TRUE) |>
-        purrr::map_if(is.data.frame, tibble::as_tibble)
-
-      req_elements <- c("command_line", "hash_table_build", "dragen_config", "system")
-      assertthat::assert_that(all(names(res) %in% req_elements))
-      res[["system"]] <- res[["system"]] |>
-        tibble::as_tibble_row()
-      res[["hash_table_build"]] <- res[["hash_table_build"]] |>
-        tibble::as_tibble_row()
-      # we don't care if the columns are characters, no analysis likely to be done on dragen options
-      # (though never say never!)
-      res[["dragen_config"]] <- res[["dragen_config"]] |>
-        tidyr::pivot_wider(names_from = "name", values_from = "value")
-
-      dplyr::bind_cols(res)
-    },
-    #' @description
-    #' Writes a tidy version of the `replay.json` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' TimeMetricsFile R6 Class
-#'
-#' @description
-#' Contains methods for reading contents of
-#' the `time_metrics.csv` file output from DRAGEN, which contains
-#' a breakdown of the run duration for each DRAGEN process.
-#'
-#' @examples
-#' x <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
-#' tm <- TimeMetricsFile$new(x)
-#' d <- tm$read() # or read(tm)
-#' tm$write(d, out_dir = tempdir(), prefix = "seqc_time", out_format = "tsv")
-#' @export
-TimeMetricsFile <- R6::R6Class(
-  "TimeMetricsFile",
-  inherit = File,
-  public = list(
-    #' @description Reads the `time_metrics.csv` file.
-    #' @return tibble with one row and metrics spread across individual columns.
-    read = function() {
-      x <- self$path
-      cn <- c("dummy1", "dummy2", "Step", "time_hrs", "time_sec")
-      ct <- readr::cols(.default = "c", time_hrs = readr::col_time(format = "%T"), time_sec = "d")
-      d <- readr::read_csv(x, col_names = cn, col_types = ct)
-      assertthat::assert_that(d$dummy1[1] == "RUN TIME", is.na(d$dummy2[1]))
-      assertthat::assert_that(inherits(d$time_hrs, "hms"))
-      d |>
-        dplyr::mutate(
-          Step = tools::toTitleCase(sub("Time ", "", .data$Step)),
-          Time = substr(.data$time_hrs, 1, 5)
-        ) |>
-        dplyr::select("Step", "Time") |>
-        tidyr::pivot_wider(names_from = "Step", values_from = "Time") |>
-        dplyr::relocate("Total Runtime")
-    },
-    #' @description
-    #' Writes a tidy version of the `time_metrics.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' Process Multiple TimeMetricsFile Objects
-#'
-#' Processes multiple TimeMetricsFile objects.
-#'
-#' @param x Atomic vector with one or more TimeMetricsFile objects.
-#' @param id ID for each input, which is used to disambiguate files
-#' generated from same samples. Default: index from 1 to length of `x`.
-#' @return tibble with the following columns:
-#'   - Step: DRAGEN step
-#'   - Time: time in HH:MM
-#'
-#' @examples
-#' p <- system.file("extdata/wgs/SEQC-II.time_metrics.csv.gz", package = "dracarys")
-#' x <- TimeMetricsFile$new(p)
-#' (tm <- time_metrics_process(c(x, x), id = c("run1", "run2")))
-#'
-#' @testexamples
-#' expect_equal(nrow(tm), 2)
-#'
-#' @export
-time_metrics_process <- function(x, id = seq_len(length(x))) {
-  assertthat::assert_that(all(purrr::map_lgl(x, ~ inherits(.x, "TimeMetricsFile"))))
-  x |>
-    purrr::map(read) |>
-    purrr::set_names(id) |>
-    dplyr::bind_rows(.id = "ID")
-}
-
-#' VCMetricsFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of
-#' the `vc_metrics.csv` file output from DRAGEN, which contains variant calling metrics.
-#' @examples
-#' x <- system.file("extdata/wgs/SEQC-II.vc_metrics.csv.gz", package = "dracarys")
-#' vm <- VCMetricsFile$new(x)
-#' d <- vm$read() # or read(vm)
-#' vm$write(d, out_dir = tempdir(), prefix = "seqc_vc", out_format = "tsv")
-#'
-#' @export
-VCMetricsFile <- R6::R6Class(
-  "VCMetricsFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `vc_metrics.csv` file output from DRAGEN.
-    #'
-    #' @return tibble with one row and metrics spread across individual columns.
-    read = function() {
-      abbrev_nm <- c(
-        "Total" = "var_tot",
-        "Biallelic" = "var_biallelic",
-        "Multiallelic" = "var_multiallelic",
-        "SNPs" = "var_snp",
-        "Insertions (Hom)" = "var_ins_hom",
-        "Insertions (Het)" = "var_ins_het",
-        "Deletions (Hom)" = "var_del_hom",
-        "Deletions (Het)" = "var_del_het",
-        "Indels (Het)" = "var_indel_het",
-        "Chr X number of SNPs over genome" = "var_snp_x_over_genome",
-        "Chr Y number of SNPs over genome" = "var_snp_y_over_genome",
-        "(Chr X SNPs)/(chr Y SNPs) ratio over genome" = "var_x_over_y_snp_ratio_over_genome",
-        "SNP Transitions" = "var_snp_transitions",
-        "SNP Transversions" = "var_snp_transversions",
-        "Ti/Tv ratio" = "var_ti_tv_ratio",
-        "Heterozygous" = "var_heterozygous",
-        "Homozygous" = "var_homozygous",
-        "Het/Hom ratio" = "var_het_hom_ratio",
-        "In dbSNP" = "var_in_dbsnp",
-        "Not in dbSNP" = "var_nin_dbsnp",
-        "Percent Callability" = "callability_pct",
-        "Percent Autosome Callability" = "callability_auto_pct",
-        "Number of samples" = "sample_num",
-        "Reads Processed" = "reads_processed",
-        "Child Sample" = "sample_child"
-      )
-      x <- self$path
-      raw <- readr::read_lines(x)
-      assertthat::assert_that(grepl("VARIANT CALLER", raw[1]))
-      # tidy
-      d <- raw |>
-        tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim(
-          "value",
-          names = c("category", "sample", "var", "count", "pct"),
-          delim = ",", too_few = "align_start"
-        ) |>
-        dplyr::mutate(
-          var = dplyr::recode(.data$var, !!!abbrev_nm),
-          count = dplyr::na_if(.data$count, "NA"),
-          count = as.numeric(.data$count),
-          pct = round(as.numeric(.data$pct), 2),
-          category = dplyr::case_when(
-            grepl("SUMMARY", .data$category) ~ "summary",
-            grepl("PREFILTER", .data$category) ~ "prefilter",
-            grepl("POSTFILTER", .data$category) ~ "postfilter",
-            TRUE ~ "unknown"
-          )
-        ) |>
-        dplyr::filter(.data$category != "summary") |>
-        dplyr::select("category", "sample", "var", "count", "pct")
-      # pivot
-      d |>
-        tidyr::pivot_longer(c("count", "pct")) |>
-        dplyr::mutate(
-          name = dplyr::if_else(.data$name == "count", "", "_pct"),
-          var = glue("{.data$var}{.data$name}")
-        ) |>
-        dplyr::select("category", "sample", "var", "value") |>
-        dplyr::filter(!is.na(.data$value)) |>
-        tidyr::pivot_wider(names_from = "var", values_from = "value")
-    },
-    #' @description
-    #' Writes a tidy version of the `vc_metrics.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' TrimmerMetricsFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of
-#' the `trimmer_metrics.csv` file output from DRAGEN
-#'
-#' @examples
-#' x <- system.file("extdata/wgs/SEQC-II.trimmer_metrics.csv.gz", package = "dracarys")
-#' tm <- TrimmerMetricsFile$new(x)
-#' d <- tm$read()
-#' tm$write(d, out_dir = tempdir(), prefix = "seqc_tm", out_format = "tsv")
-#'
-#' @export
-TrimmerMetricsFile <- R6::R6Class(
-  "TrimmerMetricsFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `trimmer_metrics.csv` file output from DRAGEN.
-    #'
-    #' @return tibble with one row and metrics spread across individual columns.
-    read = function() {
-      x <- self$path
-      d <- readr::read_lines(x)
-      assertthat::assert_that(grepl("TRIMMER STATISTICS", d[1]))
-      abbrev_nm <- c(
-        "Total input reads"                              = "reads_tot_input",
-        "Total input bases"                              = "bases_tot",
-        "Total input bases R1"                           = "bases_r1",
-        "Total input bases R2"                           = "bases_r2",
-        "Average input read length"                      = "read_len_avg",
-        "Total trimmed reads"                            = "reads_trimmed_tot",
-        "Total trimmed bases"                            = "bases_trimmed_tot",
-        "Average bases trimmed per read"                 = "bases_trimmed_avg_per_read",
-        "Average bases trimmed per trimmed read"         = "bases_trimmed_avg_per_trimmedread",
-        "Remaining poly-G K-mers R1 3prime"              = "polygkmers3r1_remaining",
-        "Remaining poly-G K-mers R2 3prime"              = "polygkmers3r2_remaining",
-        "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trimmed_reads_unfilt_3r1",
-        "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trimmed_reads_unfilt_3r2",
-        "Poly-G soft trimmed reads filtered R1 3prime"   = "polyg_soft_trimmed_reads_filt_3r1",
-        "Poly-G soft trimmed reads filtered R2 3prime"   = "polyg_soft_trimmed_reads_filt_3r2",
-        "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trimmed_bases_unfilt_3r1",
-        "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trimmed_bases_unfilt_3r2",
-        "Poly-G soft trimmed bases filtered R1 3prime"   = "polyg_soft_trimmed_bases_filt_3r1",
-        "Poly-G soft trimmed bases filtered R2 3prime"   = "polyg_soft_trimmed_bases_filt_3r2",
-        "Total filtered reads"                           = "reads_tot_filt",
-        "Reads filtered for minimum read length R1"      = "reads_filt_minreadlenr1",
-        "Reads filtered for minimum read length R2"      = "reads_filt_minreadlenr2"
-      )
-
-      d |>
-        tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim("value", names = c("category", "extra", "var", "count", "pct"), delim = ",", too_few = "align_start") |>
-        dplyr::mutate(
-          count = as.numeric(.data$count),
-          pct = round(as.numeric(.data$pct), 2),
-          var = dplyr::recode(.data$var, !!!abbrev_nm)
-        ) |>
-        dplyr::select("var", "count", "pct") |>
-        tidyr::pivot_longer(c("count", "pct")) |>
-        dplyr::filter(!is.na(.data$value)) |>
-        dplyr::mutate(
-          name = dplyr::if_else(.data$name == "count", "", "_pct"),
-          var = glue("{.data$var}{.data$name}")
-        ) |>
-        dplyr::select("var", "value") |>
-        tidyr::pivot_wider(names_from = "var", values_from = "value")
-    },
-    #' @description
-    #' Writes a tidy version of the `trimmer_metrics.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' SvMetricsFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of
-#' the `sv_metrics.csv` file output from DRAGEN
-#'
-#' @examples
-#' x <- system.file("extdata/wgs/SEQC-II.sv_metrics.csv.gz", package = "dracarys")
-#' sv <- SvMetricsFile$new(x)
-#' d <- sv$read()
-#' sv$write(d, out_dir = tempdir(), prefix = "seqc_sv", out_format = "tsv")
-#'
-#' @export
-SvMetricsFile <- R6::R6Class(
-  "SvMetricsFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `sv_metrics.csv` file output from DRAGEN.
-    #'
-    #' @return tibble with one row and metrics spread across individual columns.
-    read = function() {
-      x <- self$path
-      d <- readr::read_lines(x)
-      assertthat::assert_that(grepl("SV SUMMARY", d[1]))
-      abbrev_nm <- c(
-        "Number of deletions (PASS)" = "n_del",
-        "Number of insertions (PASS)" = "n_ins",
-        "Number of duplications (PASS)" = "n_dup",
-        "Number of breakend pairs (PASS)" = "n_bnd"
-      )
-      d |>
-        tibble::as_tibble_col(column_name = "value") |>
-        dplyr::filter(!grepl("Total number of structural variants", .data$value)) |>
-        tidyr::separate_wider_delim(
-          "value",
-          names = c("svsum", "sample", "var", "count", "pct"), delim = ",",
-          too_few = "align_start"
-        ) |>
-        dplyr::mutate(
-          count = as.numeric(.data$count),
-          pct = round(as.numeric(.data$pct), 2),
-          var = dplyr::recode(.data$var, !!!abbrev_nm)
-        ) |>
-        dplyr::select("var", "count", "pct") |>
-        tidyr::pivot_longer(c("count", "pct")) |>
-        dplyr::mutate(
-          name = dplyr::if_else(.data$name == "count", "", "_pct"),
-          var = glue("{.data$var}{.data$name}")
-        ) |>
-        dplyr::arrange(.data$name, .data$var) |>
-        dplyr::select("var", "value") |>
-        tidyr::pivot_wider(names_from = "var", values_from = "value")
-    },
-    #' @description
-    #' Writes a tidy version of the `sv_metrics.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
-    }
-  )
-)
-
-#' WgsHistFile R6 Class
-#'
-#' @description
-#' Contains methods for reading and displaying contents of
-#' the `wgs_hist.csv` file output from DRAGEN
-#'
-#' @examples
-#' x <- system.file("extdata/wgs/SEQC-II.wgs_hist.csv.gz", package = "dracarys")
-#' h <- WgsHistFile$new(x)
-#' d <- h$read()
-#' h$write(d, out_dir = tempdir(), prefix = "seqc_sv", out_format = "tsv")
-#'
-#' @export
-WgsHistFile <- R6::R6Class(
-  "WgsHistFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `wgs_hist.csv` file output from DRAGEN.
-    #'
-    #' @return tibble with one row and metrics spread across individual columns.
-    read = function() {
-      x <- self$path
-      d <- readr::read_csv(x, col_names = c("var", "pct"), col_types = "cd")
-      d |>
-        dplyr::mutate(
-          var = sub("PCT of bases in wgs with coverage ", "", .data$var),
-          var = gsub("\\[|\\]|\\(|\\)", "", .data$var),
-          var = gsub("x", "", .data$var),
-          var = gsub("inf", "Inf", .data$var)
-        ) |>
-        tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
-        dplyr::mutate(
-          start = as.numeric(.data$start),
-          end = as.numeric(.data$end),
-          pct = round(.data$pct, 2),
-          cumsum = cumsum(.data$pct)
-        )
-    },
-    #' @description
-    #' Writes a tidy version of the `wgs_hist.csv` file output
     #' from DRAGEN.
     #'
     #' @param d Parsed object from `self$read()`.
