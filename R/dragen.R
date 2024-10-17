@@ -1,3 +1,90 @@
+#' Read DRAGEN UMI Metrics
+#'
+#' Reads the `umi_metrics.csv` file output from DRAGEN.
+#'
+#' @param x Path to file.
+#'
+#' @return Tibble with metrics.
+#' @export
+dragen_umi_metrics_read <- function(x) {
+  d0 <- readr::read_lines(x)
+  assertthat::assert_that(grepl("UMI STATISTICS", d0[1]))
+  abbrev_nm <- tibble::tribble(
+    ~raw, ~clean, ~target,
+    "number of reads", "reads_tot", TRUE,
+    "number of reads with valid or correctable umis", "reads_umi_valid_correctable", TRUE,
+    "number of reads in discarded families", "reads_discarded_families", TRUE,
+    "reads filtered out", "reads_filtered_out", FALSE,
+    "reads with all-g umis filtered out", "reads_filtered_out_all_g_umis", FALSE,
+    "reads with uncorrectable umis", "reads_uncorrectable_umis", FALSE,
+    "total number of families", "families_tot", FALSE,
+    "families contextually corrected", "families_contextually_corrected", FALSE,
+    "families shifted", "families_shifted", FALSE,
+    "families discarded", "families_discarded_tot", TRUE,
+    "families discarded by min-support-reads", "families_discarded_minsupportreads", TRUE,
+    "families discarded by duplex/simplex", "families_discarded_duplexsimplex", TRUE,
+    "families with ambiguous correction", "families_ambiguous_correction", TRUE,
+    "duplex families", "duplex_families", TRUE,
+    "consensus pairs emitted", "consensus_pairs_emitted", FALSE,
+    "mean family depth", "avg_family_depth", TRUE,
+    "number of collapsible regions", "collapsible_regions_tot", FALSE,
+    "min collapsible region size (num reads)", "collapsible_region_size_min", FALSE,
+    "max collapsible region size (num reads)", "collapsible_region_size_max", FALSE,
+    "mean collapsible region size (num reads)", "collapsible_region_size_mean", FALSE,
+    "collapsible region size standard deviation", "collapsible_region_size_sd", FALSE,
+    "histogram of num supporting fragments", "histo_num_supporting_fragments", TRUE,
+    "histogram of unique umis per fragment position", "histo_unique_umis", FALSE
+  )
+  abbrev_nm_target <- abbrev_nm |>
+    dplyr::filter(.data$target) |>
+    dplyr::mutate(
+      raw = as.character(glue("on target {.data$raw}")),
+      clean = as.character(glue("{.data$clean}_ontarget"))
+    )
+  abbrev_nm <- abbrev_nm |>
+    dplyr::bind_rows(abbrev_nm_target) |>
+    dplyr::select("raw", "clean") |>
+    tibble::deframe()
+  d1 <- d0 |>
+    tibble::as_tibble_col(column_name = "value") |>
+    tidyr::separate_wider_delim(
+      "value",
+      names = c("category", "dummy1", "var", "count", "pct"),
+      delim = ",", too_few = "align_start"
+    ) |>
+    dplyr::mutate(
+      var = tolower(.data$var),
+      var = dplyr::recode(.data$var, !!!abbrev_nm)
+    )
+  hist <- d1 |>
+    dplyr::filter(grepl("histo", .data$var)) |>
+    dplyr::select(name = "var", "count") |>
+    dplyr::mutate(
+      count = gsub("\\{|\\}", "", .data$count),
+      count = strsplit(.data$count, "\\|")
+    ) |>
+    tidyr::unnest(count) |>
+    dplyr::mutate(count = as.numeric(.data$count)) |>
+    tidyr::nest(.by = "name")
+  d2 <- d1 |>
+    dplyr::filter(!grepl("histo", .data$var)) |>
+    dplyr::select("var", "count", "pct") |>
+    tidyr::pivot_longer(c("count", "pct"), names_to = "name", values_to = "value") |>
+    dplyr::mutate(
+      value = as.numeric(.data$value),
+      name = dplyr::if_else(.data$name == "count", "", "_pct"),
+      var = glue("{.data$var}{.data$name}")
+    ) |>
+    dplyr::select("var", "value") |>
+    dplyr::filter(!is.na(.data$value)) |>
+    tidyr::pivot_wider(names_from = "var", values_from = "value")
+  res <- list(metrics = d2) |>
+    tibble::enframe(name = "name", value = "data") |>
+    dplyr::bind_rows(hist) |>
+    dplyr::mutate(name = glue("umi_{.data$name}"))
+  res
+}
+
 #' Read DRAGEN GC Metrics
 #'
 #' Reads the `gc_metrics.csv` file output from DRAGEN.
@@ -79,8 +166,8 @@ dragen_cnv_metrics_read <- function(x) {
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("SEX GENOTYPER", d0[1]))
   abbrev_nm <- c(
-    "Bases in reference genome" = "bases_in_ref_genome_dragen",
-    "Average alignment coverage over genome" = "cov_alignment_avg_over_genome_dragen",
+    "Bases in reference genome" = "bases_in_ref_genome",
+    "Average alignment coverage over genome" = "cov_alignment_avg_over_genome",
     "Number of alignment records" = "n_alignment_records",
     "Number of filtered records (total)" = "n_filtered_records_tot",
     "Number of filtered records (duplicates)" = "n_filtered_records_dup",
@@ -173,28 +260,28 @@ dragen_trimmer_metrics_read <- function(x) {
   d <- readr::read_lines(x)
   assertthat::assert_that(grepl("TRIMMER STATISTICS", d[1]))
   abbrev_nm <- c(
-    "Total input reads"                              = "reads_tot_input_dragen",
-    "Total input bases"                              = "bases_tot_dragen",
-    "Total input bases R1"                           = "bases_r1_dragen",
-    "Total input bases R2"                           = "bases_r2_dragen",
-    "Average input read length"                      = "read_len_avg_dragen",
-    "Total trimmed reads"                            = "reads_trimmed_tot_dragen",
-    "Total trimmed bases"                            = "bases_trimmed_tot_dragen",
-    "Average bases trimmed per read"                 = "bases_trimmed_avg_per_read_dragen",
-    "Average bases trimmed per trimmed read"         = "bases_trimmed_avg_per_trimmedread_dragen",
-    "Remaining poly-G K-mers R1 3prime"              = "polygkmers3r1_remaining_dragen",
-    "Remaining poly-G K-mers R2 3prime"              = "polygkmers3r2_remaining_dragen",
-    "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trimmed_reads_unfilt_3r1_dragen",
-    "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trimmed_reads_unfilt_3r2_dragen",
-    "Poly-G soft trimmed reads filtered R1 3prime"   = "polyg_soft_trimmed_reads_filt_3r1_dragen",
-    "Poly-G soft trimmed reads filtered R2 3prime"   = "polyg_soft_trimmed_reads_filt_3r2_dragen",
-    "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trimmed_bases_unfilt_3r1_dragen",
-    "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trimmed_bases_unfilt_3r2_dragen",
-    "Poly-G soft trimmed bases filtered R1 3prime"   = "polyg_soft_trimmed_bases_filt_3r1_dragen",
-    "Poly-G soft trimmed bases filtered R2 3prime"   = "polyg_soft_trimmed_bases_filt_3r2_dragen",
-    "Total filtered reads"                           = "reads_tot_filt_dragen",
-    "Reads filtered for minimum read length R1"      = "reads_filt_minreadlenr1_dragen",
-    "Reads filtered for minimum read length R2"      = "reads_filt_minreadlenr2_dragen"
+    "Total input reads"                              = "reads_tot_input",
+    "Total input bases"                              = "bases_tot",
+    "Total input bases R1"                           = "bases_r1",
+    "Total input bases R2"                           = "bases_r2",
+    "Average input read length"                      = "read_len_avg",
+    "Total trimmed reads"                            = "reads_trimmed_tot",
+    "Total trimmed bases"                            = "bases_trimmed_tot",
+    "Average bases trimmed per read"                 = "bases_trimmed_avg_per_read",
+    "Average bases trimmed per trimmed read"         = "bases_trimmed_avg_per_trimmedread",
+    "Remaining poly-G K-mers R1 3prime"              = "polygkmers3r1_remaining",
+    "Remaining poly-G K-mers R2 3prime"              = "polygkmers3r2_remaining",
+    "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trimmed_reads_unfilt_3r1",
+    "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trimmed_reads_unfilt_3r2",
+    "Poly-G soft trimmed reads filtered R1 3prime"   = "polyg_soft_trimmed_reads_filt_3r1",
+    "Poly-G soft trimmed reads filtered R2 3prime"   = "polyg_soft_trimmed_reads_filt_3r2",
+    "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trimmed_bases_unfilt_3r1",
+    "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trimmed_bases_unfilt_3r2",
+    "Poly-G soft trimmed bases filtered R1 3prime"   = "polyg_soft_trimmed_bases_filt_3r1",
+    "Poly-G soft trimmed bases filtered R2 3prime"   = "polyg_soft_trimmed_bases_filt_3r2",
+    "Total filtered reads"                           = "reads_tot_filt",
+    "Reads filtered for minimum read length R1"      = "reads_filt_minreadlenr1",
+    "Reads filtered for minimum read length R2"      = "reads_filt_minreadlenr2"
   )
 
   d |>
@@ -227,31 +314,31 @@ dragen_trimmer_metrics_read <- function(x) {
 dragen_vc_metrics_read <- function(x) {
   abbrev_nm1 <- tibble::tribble(
     ~raw, ~clean, ~region,
-    "Total", "var_tot_dragen", FALSE,
-    "Biallelic", "var_biallelic_dragen", FALSE,
-    "Multiallelic", "var_multiallelic_dragen", FALSE,
-    "SNPs", "var_snp_dragen", FALSE,
-    "Insertions (Hom)", "var_ins_hom_dragen", FALSE,
-    "Insertions (Het)", "var_ins_het_dragen", FALSE,
-    "Deletions (Hom)", "var_del_hom_dragen", FALSE,
-    "Deletions (Het)", "var_del_het_dragen", FALSE,
-    "Indels (Het)", "var_indel_het_dragen", FALSE,
+    "Total", "var_tot", FALSE,
+    "Biallelic", "var_biallelic", FALSE,
+    "Multiallelic", "var_multiallelic", FALSE,
+    "SNPs", "var_snp", FALSE,
+    "Insertions (Hom)", "var_ins_hom", FALSE,
+    "Insertions (Het)", "var_ins_het", FALSE,
+    "Deletions (Hom)", "var_del_hom", FALSE,
+    "Deletions (Het)", "var_del_het", FALSE,
+    "Indels (Het)", "var_indel_het", FALSE,
     "Chr X number of SNPs over ", "var_snp_x_over_", TRUE,
     "Chr Y number of SNPs over ", "var_snp_y_over_", TRUE,
     "(Chr X SNPs)/(chr Y SNPs) ratio over ", "var_x_over_y_snp_ratio_over_", TRUE,
-    "SNP Transitions", "var_snp_transitions_dragen", FALSE,
-    "SNP Transversions", "var_snp_transversions_dragen", FALSE,
-    "Ti/Tv ratio", "var_ti_tv_ratio_dragen", FALSE,
-    "Heterozygous", "var_heterozygous_dragen", FALSE,
-    "Homozygous", "var_homozygous_dragen", FALSE,
-    "Het/Hom ratio", "var_het_hom_ratio_dragen", FALSE,
-    "In dbSNP", "var_in_dbsnp_dragen", FALSE,
-    "Not in dbSNP", "var_nin_dbsnp_dragen", FALSE,
-    "Percent Callability", "callability_pct_dragen", FALSE,
-    "Percent Autosome Callability", "callability_auto_pct_dragen", FALSE,
-    "Number of samples", "sample_num_dragen", FALSE,
-    "Reads Processed", "reads_processed_dragen", FALSE,
-    "Child Sample", "sample_child_dragen", FALSE
+    "SNP Transitions", "var_snp_transitions", FALSE,
+    "SNP Transversions", "var_snp_transversions", FALSE,
+    "Ti/Tv ratio", "var_ti_tv_ratio", FALSE,
+    "Heterozygous", "var_heterozygous", FALSE,
+    "Homozygous", "var_homozygous", FALSE,
+    "Het/Hom ratio", "var_het_hom_ratio", FALSE,
+    "In dbSNP", "var_in_dbsnp", FALSE,
+    "Not in dbSNP", "var_nin_dbsnp", FALSE,
+    "Percent Callability", "callability_pct", FALSE,
+    "Percent Autosome Callability", "callability_auto_pct", FALSE,
+    "Number of samples", "sample_num", FALSE,
+    "Reads Processed", "reads_processed", FALSE,
+    "Child Sample", "sample_child", FALSE
   )
   raw <- readr::read_lines(x)
   assertthat::assert_that(grepl("VARIANT CALLER", raw[1]))
@@ -285,7 +372,7 @@ dragen_vc_metrics_read <- function(x) {
   abbrev_nm <- abbrev_nm1 |>
     dplyr::mutate(
       raw = ifelse(.data$region, glue("{.data$raw}{str1}"), .data$raw),
-      clean = ifelse(.data$region, glue("{.data$clean}{reg1}_dragen"), .data$clean)
+      clean = ifelse(.data$region, glue("{.data$clean}{reg1}"), .data$clean)
     ) |>
     dplyr::select("raw", "clean") |>
     tibble::deframe()
@@ -327,78 +414,78 @@ dragen_vc_metrics_read <- function(x) {
 #' @export
 dragen_mapping_metrics_read <- function(x) {
   abbrev_nm <- c(
-    "Total input reads" = "reads_tot_input_dragen",
-    "Number of duplicate marked reads" = "reads_num_dupmarked_dragen",
-    "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed_dragen",
-    "Number of unique reads (excl. duplicate marked reads)" = "reads_num_uniq_dragen",
-    "Reads with mate sequenced" = "reads_w_mate_seq_dragen",
-    "Reads without mate sequenced" = "reads_wo_mate_seq_dragen",
-    "QC-failed reads" = "reads_qcfail_dragen",
-    "Mapped reads" = "reads_mapped_dragen",
-    "Mapped reads adjusted for filtered mapping" = "reads_mapped_adjfilt_dragen",
-    "Mapped reads R1" = "reads_mapped_r1_dragen",
-    "Mapped reads R2" = "reads_mapped_r2_dragen",
-    "Number of unique & mapped reads (excl. duplicate marked reads)" = "reads_num_uniq_mapped_dragen",
-    "Unmapped reads" = "reads_unmapped_dragen",
-    "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt_dragen",
-    "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj_dragen",
-    "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton_dragen",
-    "Paired reads (itself & mate mapped)" = "reads_paired_dragen",
-    "Properly paired reads" = "reads_paired_proper_dragen",
-    "Not properly paired reads (discordant)" = "reads_discordant_dragen",
-    "Paired reads mapped to different chromosomes" = "reads_paired_mapped_diff_chrom_dragen",
-    "Paired reads mapped to different chromosomes (MAPQ>=10)" = "reads_paired_mapped_diff_chrom_mapq10_dragen",
-    "Reads with MAPQ [40:inf)" = "reads_mapq_40_inf_dragen",
-    "Reads with MAPQ [30:40)" = "reads_mapq_30_40_dragen",
-    "Reads with MAPQ [20:30)" = "reads_mapq_20_30_dragen",
-    "Reads with MAPQ [10:20)" = "reads_mapq_10_20_dragen",
-    "Reads with MAPQ [ 0:10)" = "reads_mapq_0_10_dragen",
-    "Reads with MAPQ NA (Unmapped reads)" = "reads_mapq_na_unmapped_dragen",
-    "Reads with indel R1" = "reads_indel_r1_dragen",
-    "Reads with indel R2" = "reads_indel_r2_dragen",
-    "Total bases" = "bases_tot_dragen",
-    "Total bases R1" = "bases_tot_r1_dragen",
-    "Total bases R2" = "bases_tot_r2_dragen",
-    "Mapped bases" = "bases_mapped_dragen",
-    "Mapped bases R1" = "bases_mapped_r1_dragen",
-    "Mapped bases R2" = "bases_mapped_r2_dragen",
-    "Soft-clipped bases" = "bases_softclip_dragen",
-    "Soft-clipped bases R1" = "bases_softclip_r1_dragen",
-    "Soft-clipped bases R2" = "bases_softclip_r2_dragen",
-    "Hard-clipped bases" = "bases_hardclip_dragen",
-    "Hard-clipped bases R1" = "bases_hardclip_r1_dragen",
-    "Hard-clipped bases R2" = "bases_hardclip_r2_dragen",
-    "Mismatched bases R1" = "bases_mismatched_r1_dragen",
-    "Mismatched bases R2" = "bases_mismatched_r2_dragen",
-    "Mismatched bases R1 (excl. indels)" = "bases_mismatched_r1_noindels_dragen",
-    "Mismatched bases R2 (excl. indels)" = "bases_mismatched_r2_noindels_dragen",
-    "Q30 bases" = "bases_q30_dragen",
-    "Q30 bases R1" = "bases_q30_r1_dragen",
-    "Q30 bases R2" = "bases_q30_r2_dragen",
-    "Q30 bases (excl. dups & clipped bases)" = "bases_q30_nodups_noclipped_dragen",
-    "Total alignments" = "alignments_tot_dragen",
-    "Secondary alignments" = "alignments_secondary_dragen",
-    "Supplementary (chimeric) alignments" = "alignments_chimeric_dragen",
-    "Estimated read length" = "read_len_dragen",
-    "Bases in reference genome" = "bases_in_ref_genome_dragen",
-    "Bases in target bed [% of genome]" = "bases_in_target_bed_genome_pct_dragen",
-    "Insert length: mean" = "insert_len_mean_dragen",
-    "Insert length: median" = "insert_len_median_dragen",
-    "Insert length: standard deviation" = "insert_len_std_dev_dragen",
-    "Provided sex chromosome ploidy" = "ploidy_sex_chrom_provided_dragen",
-    "Estimated sample contamination" = "contamination_est_dragen",
-    "Estimated sample contamination standard error" = "contamination_stderr_est_dragen",
-    "DRAGEN mapping rate [mil. reads/second]" = "mapping_rate_dragen_milreads_per_sec_dragen",
-    "Total reads in RG" = "reads_tot_rg_dragen",
-    "Mapped reads adjusted for excluded mapping" = "reads_mapped_adjexcl_dragen",
-    "Mapped reads adjusted for filtered and excluded mapping" = "reads_mapped_adjfiltexcl_dragen",
-    "Unmapped reads adjusted for excluded mapping" = "reads_unmapped_adjexcl_dragen",
-    "Unmapped reads adjusted for filtered and excluded mapping" = "reads_unmapped_adjfiltexcl_dragen",
-    "Reads mapping to multiple locations" = "reads_map_multiloc_dragen",
-    "Adjustment of reads matching filter contigs" = "reads_match_filt_contig_adj_dragen",
-    "Reads with splice junction" = "reads_splicejunc_dragen",
-    "Average sequenced coverage over genome" = "cov_avg_seq_over_genome_dragen",
-    "Filtered rRNA reads" = "reads_rrna_filtered_dragen"
+    "Total input reads" = "reads_tot_input",
+    "Number of duplicate marked reads" = "reads_num_dupmarked",
+    "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed",
+    "Number of unique reads (excl. duplicate marked reads)" = "reads_num_uniq",
+    "Reads with mate sequenced" = "reads_w_mate_seq",
+    "Reads without mate sequenced" = "reads_wo_mate_seq",
+    "QC-failed reads" = "reads_qcfail",
+    "Mapped reads" = "reads_mapped",
+    "Mapped reads adjusted for filtered mapping" = "reads_mapped_adjfilt",
+    "Mapped reads R1" = "reads_mapped_r1",
+    "Mapped reads R2" = "reads_mapped_r2",
+    "Number of unique & mapped reads (excl. duplicate marked reads)" = "reads_num_uniq_mapped",
+    "Unmapped reads" = "reads_unmapped",
+    "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt",
+    "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj",
+    "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton",
+    "Paired reads (itself & mate mapped)" = "reads_paired",
+    "Properly paired reads" = "reads_paired_proper",
+    "Not properly paired reads (discordant)" = "reads_discordant",
+    "Paired reads mapped to different chromosomes" = "reads_paired_mapped_diff_chrom",
+    "Paired reads mapped to different chromosomes (MAPQ>=10)" = "reads_paired_mapped_diff_chrom_mapq10",
+    "Reads with MAPQ [40:inf)" = "reads_mapq_40_inf",
+    "Reads with MAPQ [30:40)" = "reads_mapq_30_40",
+    "Reads with MAPQ [20:30)" = "reads_mapq_20_30",
+    "Reads with MAPQ [10:20)" = "reads_mapq_10_20",
+    "Reads with MAPQ [ 0:10)" = "reads_mapq_0_10",
+    "Reads with MAPQ NA (Unmapped reads)" = "reads_mapq_na_unmapped",
+    "Reads with indel R1" = "reads_indel_r1",
+    "Reads with indel R2" = "reads_indel_r2",
+    "Total bases" = "bases_tot",
+    "Total bases R1" = "bases_tot_r1",
+    "Total bases R2" = "bases_tot_r2",
+    "Mapped bases" = "bases_mapped",
+    "Mapped bases R1" = "bases_mapped_r1",
+    "Mapped bases R2" = "bases_mapped_r2",
+    "Soft-clipped bases" = "bases_softclip",
+    "Soft-clipped bases R1" = "bases_softclip_r1",
+    "Soft-clipped bases R2" = "bases_softclip_r2",
+    "Hard-clipped bases" = "bases_hardclip",
+    "Hard-clipped bases R1" = "bases_hardclip_r1",
+    "Hard-clipped bases R2" = "bases_hardclip_r2",
+    "Mismatched bases R1" = "bases_mismatched_r1",
+    "Mismatched bases R2" = "bases_mismatched_r2",
+    "Mismatched bases R1 (excl. indels)" = "bases_mismatched_r1_noindels",
+    "Mismatched bases R2 (excl. indels)" = "bases_mismatched_r2_noindels",
+    "Q30 bases" = "bases_q30",
+    "Q30 bases R1" = "bases_q30_r1",
+    "Q30 bases R2" = "bases_q30_r2",
+    "Q30 bases (excl. dups & clipped bases)" = "bases_q30_nodups_noclipped",
+    "Total alignments" = "alignments_tot",
+    "Secondary alignments" = "alignments_secondary",
+    "Supplementary (chimeric) alignments" = "alignments_chimeric",
+    "Estimated read length" = "read_len",
+    "Bases in reference genome" = "bases_in_ref_genome",
+    "Bases in target bed [% of genome]" = "bases_in_target_bed_genome_pct",
+    "Insert length: mean" = "insert_len_mean",
+    "Insert length: median" = "insert_len_median",
+    "Insert length: standard deviation" = "insert_len_std_dev",
+    "Provided sex chromosome ploidy" = "ploidy_sex_chrom_provided",
+    "Estimated sample contamination" = "contamination_est",
+    "Estimated sample contamination standard error" = "contamination_stderr_est",
+    "DRAGEN mapping rate [mil. reads/second]" = "mapping_rate_dragen_milreads_per_sec",
+    "Total reads in RG" = "reads_tot_rg",
+    "Mapped reads adjusted for excluded mapping" = "reads_mapped_adjexcl",
+    "Mapped reads adjusted for filtered and excluded mapping" = "reads_mapped_adjfiltexcl",
+    "Unmapped reads adjusted for excluded mapping" = "reads_unmapped_adjexcl",
+    "Unmapped reads adjusted for filtered and excluded mapping" = "reads_unmapped_adjfiltexcl",
+    "Reads mapping to multiple locations" = "reads_map_multiloc",
+    "Adjustment of reads matching filter contigs" = "reads_match_filt_contig_adj",
+    "Reads with splice junction" = "reads_splicejunc",
+    "Average sequenced coverage over genome" = "cov_avg_seq_over_genome",
+    "Filtered rRNA reads" = "reads_rrna_filtered"
   )
   raw <- readr::read_lines(x)
   assertthat::assert_that(grepl("MAPPING/ALIGNING", raw[1]))
@@ -442,8 +529,8 @@ dragen_coverage_metrics_read <- function(x) {
   # all rows except 'Aligned bases' and 'Aligned reads' refer to the region
   abbrev_nm <- tibble::tribble(
     ~raw, ~clean, ~region,
-    "Aligned bases", "bases_aligned_tot_dragen", FALSE,
-    "Aligned reads", "reads_aligned_tot_dragen", FALSE,
+    "Aligned bases", "bases_aligned_tot", FALSE,
+    "Aligned reads", "reads_aligned_tot", FALSE,
     "Aligned bases in ", "bases_aligned_", TRUE,
     "Average alignment coverage over ", "cov_alignment_avg_over_", TRUE,
     "Uniformity of coverage (PCT > 0.2*mean) over ", "cov_uniformity_pct_gt02mean_", TRUE,
@@ -488,7 +575,7 @@ dragen_coverage_metrics_read <- function(x) {
   abbrev_nm <- abbrev_nm |>
     dplyr::mutate(
       raw = ifelse(.data$region, glue("{.data$raw}{str1}"), .data$raw),
-      clean = ifelse(.data$region, glue("{.data$clean}{reg1}_dragen"), .data$clean)
+      clean = ifelse(.data$region, glue("{.data$clean}{reg1}"), .data$clean)
     ) |>
     dplyr::select("raw", "clean") |>
     tibble::deframe()
@@ -509,7 +596,7 @@ dragen_coverage_metrics_read <- function(x) {
       var = gsub("inf", "Inf", .data$var)
     ) |>
     tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
-    dplyr::mutate(var = as.character(glue("cov_pct_{start}_{end}_{reg1}_dragen"))) |>
+    dplyr::mutate(var = as.character(glue("cov_pct_{start}_{end}_{reg1}"))) |>
     dplyr::select("var", "value")
   res <- dplyr::bind_rows(res1, res2) |>
     dplyr::mutate(
@@ -695,19 +782,19 @@ WgsCoverageMetricsFile <- R6::R6Class(
     #' @return tibble with one row and metrics spread across individual columns.
     read = function() {
       abbrev_nm <- c(
-        "Aligned bases"                                       = "bases_aligned_dragen",
-        "Aligned bases in genome"                             = "bases_aligned_in_genome_dragen",
-        "Average alignment coverage over genome"              = "cov_alignment_avg_over_genome_dragen",
-        "Uniformity of coverage (PCT > 0.2*mean) over genome" = "cov_uniformity_over_genome_pct_gt02mean_dragen",
-        "Uniformity of coverage (PCT > 0.4*mean) over genome" = "cov_uniformity_over_genome_pct_gt04mean_dragen",
-        "Average chr X coverage over genome"                  = "cov_avg_x_over_genome_dragen",
-        "Average chr Y coverage over genome"                  = "cov_avg_y_over_genome_dragen",
-        "Average mitochondrial coverage over genome"          = "cov_avg_mt_over_genome_dragen",
-        "Average autosomal coverage over genome"              = "cov_avg_auto_over_genome_dragen",
-        "Median autosomal coverage over genome"               = "cov_median_auto_over_genome_dragen",
-        "Mean/Median autosomal coverage ratio over genome"    = "cov_mean_median_auto_ratio_over_genome_dragen",
-        "Aligned reads"                                       = "reads_aligned_dragen",
-        "Aligned reads in genome"                             = "reads_aligned_in_genome_dragen"
+        "Aligned bases"                                       = "bases_aligned",
+        "Aligned bases in genome"                             = "bases_aligned_in_genome",
+        "Average alignment coverage over genome"              = "cov_alignment_avg_over_genome",
+        "Uniformity of coverage (PCT > 0.2*mean) over genome" = "cov_uniformity_over_genome_pct_gt02mean",
+        "Uniformity of coverage (PCT > 0.4*mean) over genome" = "cov_uniformity_over_genome_pct_gt04mean",
+        "Average chr X coverage over genome"                  = "cov_avg_x_over_genome",
+        "Average chr Y coverage over genome"                  = "cov_avg_y_over_genome",
+        "Average mitochondrial coverage over genome"          = "cov_avg_mt_over_genome",
+        "Average autosomal coverage over genome"              = "cov_avg_auto_over_genome",
+        "Median autosomal coverage over genome"               = "cov_median_auto_over_genome",
+        "Mean/Median autosomal coverage ratio over genome"    = "cov_mean_median_auto_ratio_over_genome",
+        "Aligned reads"                                       = "reads_aligned",
+        "Aligned reads in genome"                             = "reads_aligned_in_genome"
       )
 
       x <- self$path
@@ -736,7 +823,7 @@ WgsCoverageMetricsFile <- R6::R6Class(
           var = gsub("inf", "Inf", .data$var)
         ) |>
         tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
-        dplyr::mutate(var = as.character(glue("cov_genome_pct_{start}_{end}_dragen"))) |>
+        dplyr::mutate(var = as.character(glue("cov_genome_pct_{start}_{end}"))) |>
         dplyr::select("var", "value")
       res <- dplyr::bind_rows(res1, res2) |>
         dplyr::mutate(
@@ -973,77 +1060,77 @@ MappingMetricsFile <- R6::R6Class(
     #' @return tibble with one row of X metrics per read group.
     read = function() {
       abbrev_nm <- c(
-        "Total input reads" = "reads_tot_input_dragen",
-        "Number of duplicate marked reads" = "reads_num_dupmarked_dragen",
-        "Number of unique reads (excl. duplicate marked reads)" = "reads_num_uniq_dragen",
-        "Reads with mate sequenced" = "reads_w_mate_seq_dragen",
-        "Reads without mate sequenced" = "reads_wo_mate_seq_dragen",
-        "QC-failed reads" = "reads_qcfail_dragen",
-        "Mapped reads adjusted for excluded mapping" = "reads_mapped_adjexcl_dragen",
-        "Mapped reads adjusted for filtered and excluded mapping" = "reads_mapped_adjfiltexcl_dragen",
-        "Unmapped reads adjusted for excluded mapping" = "reads_unmapped_adjexcl_dragen",
-        "Unmapped reads adjusted for filtered and excluded mapping" = "reads_unmapped_adjfiltexcl_dragen",
-        "Reads mapping to multiple locations" = "reads_map_multiloc_dragen",
-        "Hard-clipped bases R1" = "bases_hardclip_r1_dragen",
-        "Hard-clipped bases R2" = "bases_hardclip_r2_dragen",
-        "Soft-clipped bases" = "bases_softclip_dragen",
-        "Hard-clipped bases" = "bases_hardclip_dragen",
-        "Mapped reads" = "reads_mapped_dragen",
-        "Mapped reads adjusted for filtered mapping" = "reads_mapped_adjfilt_dragen",
-        "Mapped reads R1" = "reads_mapped_r1_dragen",
-        "Mapped reads R2" = "reads_mapped_r2_dragen",
-        "Number of unique & mapped reads (excl. duplicate marked reads)" = "reads_num_uniq_mapped_dragen",
-        "Unmapped reads" = "reads_unmapped_dragen",
-        "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt_dragen",
-        "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj_dragen",
-        "Adjustment of reads matching filter contigs" = "reads_match_filt_contig_adj_dragen",
-        "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton_dragen",
-        "Paired reads (itself & mate mapped)" = "reads_paired_dragen",
-        "Properly paired reads" = "reads_paired_proper_dragen",
-        "Not properly paired reads (discordant)" = "reads_discordant_dragen",
-        "Paired reads mapped to different chromosomes" = "reads_paired_mapped_diff_chrom_dragen",
-        "Paired reads mapped to different chromosomes (MAPQ>=10)" = "reads_paired_mapped_diff_chrom_mapq10_dragen",
-        "Reads with MAPQ [40:inf)" = "reads_mapq_40_inf_dragen",
-        "Reads with MAPQ [30:40)" = "reads_mapq_30_40_dragen",
-        "Reads with MAPQ [20:30)" = "reads_mapq_20_30_dragen",
-        "Reads with MAPQ [10:20)" = "reads_mapq_10_20_dragen",
-        "Reads with MAPQ [ 0:10)" = "reads_mapq_0_10_dragen",
-        "Reads with MAPQ NA (Unmapped reads)" = "reads_mapq_na_unmapped_dragen",
-        "Reads with indel R1" = "reads_indel_r1_dragen",
-        "Reads with indel R2" = "reads_indel_r2_dragen",
-        "Reads with splice junction" = "reads_splicejunc_dragen",
-        "Total bases" = "bases_tot_dragen",
-        "Total bases R1" = "bases_tot_r1_dragen",
-        "Total bases R2" = "bases_tot_r2_dragen",
-        "Mapped bases" = "bases_mapped_dragen",
-        "Mapped bases R1" = "bases_mapped_r1_dragen",
-        "Mapped bases R2" = "bases_mapped_r2_dragen",
-        "Soft-clipped bases R1" = "bases_softclip_r1_dragen",
-        "Soft-clipped bases R2" = "bases_softclip_r2_dragen",
-        "Mismatched bases R1" = "bases_mismatched_r1_dragen",
-        "Mismatched bases R2" = "bases_mismatched_r2_dragen",
-        "Mismatched bases R1 (excl. indels)" = "bases_mismatched_r1_noindels_dragen",
-        "Mismatched bases R2 (excl. indels)" = "bases_mismatched_r2_noindels_dragen",
-        "Q30 bases" = "bases_q30_dragen",
-        "Q30 bases R1" = "bases_q30_r1_dragen",
-        "Q30 bases R2" = "bases_q30_r2_dragen",
-        "Q30 bases (excl. dups & clipped bases)" = "bases_q30_nodups_noclipped_dragen",
-        "Total alignments" = "alignments_tot_dragen",
-        "Secondary alignments" = "alignments_secondary_dragen",
-        "Supplementary (chimeric) alignments" = "alignments_chimeric_dragen",
-        "Estimated read length" = "read_len_dragen",
-        "Bases in reference genome" = "bases_in_ref_genome_dragen",
-        "Bases in target bed [% of genome]" = "bases_in_target_bed_genome_pct_dragen",
-        "Average sequenced coverage over genome" = "cov_avg_seq_over_genome_dragen",
-        "Insert length: mean" = "insert_len_mean_dragen",
-        "Insert length: median" = "insert_len_median_dragen",
-        "Insert length: standard deviation" = "insert_len_std_dev_dragen",
-        "Provided sex chromosome ploidy" = "ploidy_sex_chrom_provided_dragen",
-        "Estimated sample contamination" = "contamination_est_dragen",
-        "DRAGEN mapping rate [mil. reads/second]" = "mapping_rate_dragen_milreads_per_sec_dragen",
-        "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed_dragen",
-        "Total reads in RG" = "reads_tot_rg_dragen",
-        "Filtered rRNA reads" = "reads_rrna_filtered_dragen"
+        "Total input reads" = "reads_tot_input",
+        "Number of duplicate marked reads" = "reads_num_dupmarked",
+        "Number of unique reads (excl. duplicate marked reads)" = "reads_num_uniq",
+        "Reads with mate sequenced" = "reads_w_mate_seq",
+        "Reads without mate sequenced" = "reads_wo_mate_seq",
+        "QC-failed reads" = "reads_qcfail",
+        "Mapped reads adjusted for excluded mapping" = "reads_mapped_adjexcl",
+        "Mapped reads adjusted for filtered and excluded mapping" = "reads_mapped_adjfiltexcl",
+        "Unmapped reads adjusted for excluded mapping" = "reads_unmapped_adjexcl",
+        "Unmapped reads adjusted for filtered and excluded mapping" = "reads_unmapped_adjfiltexcl",
+        "Reads mapping to multiple locations" = "reads_map_multiloc",
+        "Hard-clipped bases R1" = "bases_hardclip_r1",
+        "Hard-clipped bases R2" = "bases_hardclip_r2",
+        "Soft-clipped bases" = "bases_softclip",
+        "Hard-clipped bases" = "bases_hardclip",
+        "Mapped reads" = "reads_mapped",
+        "Mapped reads adjusted for filtered mapping" = "reads_mapped_adjfilt",
+        "Mapped reads R1" = "reads_mapped_r1",
+        "Mapped reads R2" = "reads_mapped_r2",
+        "Number of unique & mapped reads (excl. duplicate marked reads)" = "reads_num_uniq_mapped",
+        "Unmapped reads" = "reads_unmapped",
+        "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt",
+        "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj",
+        "Adjustment of reads matching filter contigs" = "reads_match_filt_contig_adj",
+        "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton",
+        "Paired reads (itself & mate mapped)" = "reads_paired",
+        "Properly paired reads" = "reads_paired_proper",
+        "Not properly paired reads (discordant)" = "reads_discordant",
+        "Paired reads mapped to different chromosomes" = "reads_paired_mapped_diff_chrom",
+        "Paired reads mapped to different chromosomes (MAPQ>=10)" = "reads_paired_mapped_diff_chrom_mapq10",
+        "Reads with MAPQ [40:inf)" = "reads_mapq_40_inf",
+        "Reads with MAPQ [30:40)" = "reads_mapq_30_40",
+        "Reads with MAPQ [20:30)" = "reads_mapq_20_30",
+        "Reads with MAPQ [10:20)" = "reads_mapq_10_20",
+        "Reads with MAPQ [ 0:10)" = "reads_mapq_0_10",
+        "Reads with MAPQ NA (Unmapped reads)" = "reads_mapq_na_unmapped",
+        "Reads with indel R1" = "reads_indel_r1",
+        "Reads with indel R2" = "reads_indel_r2",
+        "Reads with splice junction" = "reads_splicejunc",
+        "Total bases" = "bases_tot",
+        "Total bases R1" = "bases_tot_r1",
+        "Total bases R2" = "bases_tot_r2",
+        "Mapped bases" = "bases_mapped",
+        "Mapped bases R1" = "bases_mapped_r1",
+        "Mapped bases R2" = "bases_mapped_r2",
+        "Soft-clipped bases R1" = "bases_softclip_r1",
+        "Soft-clipped bases R2" = "bases_softclip_r2",
+        "Mismatched bases R1" = "bases_mismatched_r1",
+        "Mismatched bases R2" = "bases_mismatched_r2",
+        "Mismatched bases R1 (excl. indels)" = "bases_mismatched_r1_noindels",
+        "Mismatched bases R2 (excl. indels)" = "bases_mismatched_r2_noindels",
+        "Q30 bases" = "bases_q30",
+        "Q30 bases R1" = "bases_q30_r1",
+        "Q30 bases R2" = "bases_q30_r2",
+        "Q30 bases (excl. dups & clipped bases)" = "bases_q30_nodups_noclipped",
+        "Total alignments" = "alignments_tot",
+        "Secondary alignments" = "alignments_secondary",
+        "Supplementary (chimeric) alignments" = "alignments_chimeric",
+        "Estimated read length" = "read_len",
+        "Bases in reference genome" = "bases_in_ref_genome",
+        "Bases in target bed [% of genome]" = "bases_in_target_bed_genome_pct",
+        "Average sequenced coverage over genome" = "cov_avg_seq_over_genome",
+        "Insert length: mean" = "insert_len_mean",
+        "Insert length: median" = "insert_len_median",
+        "Insert length: standard deviation" = "insert_len_std_dev",
+        "Provided sex chromosome ploidy" = "ploidy_sex_chrom_provided",
+        "Estimated sample contamination" = "contamination_est",
+        "DRAGEN mapping rate [mil. reads/second]" = "mapping_rate_dragen_milreads_per_sec",
+        "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed",
+        "Total reads in RG" = "reads_tot_rg",
+        "Filtered rRNA reads" = "reads_rrna_filtered"
       )
       x <- self$path
       raw <- readr::read_lines(x)
@@ -1119,34 +1206,34 @@ PloidyEstimationMetricsFile <- R6::R6Class(
       raw <- readr::read_lines(x)
       assertthat::assert_that(grepl("PLOIDY ESTIMATION", raw[1]))
       abbrev_nm <- c(
-        "Autosomal median coverage" = "cov_auto_median_dragen",
-        "X median coverage" = "cov_x_median_dragen",
-        "Y median coverage" = "cov_y_median_dragen",
-        "1 median / Autosomal median" = "cov_1_div_auto_median_dragen",
-        "2 median / Autosomal median" = "cov_2_div_auto_median_dragen",
-        "3 median / Autosomal median" = "cov_3_div_auto_median_dragen",
-        "4 median / Autosomal median" = "cov_4_div_auto_median_dragen",
-        "5 median / Autosomal median" = "cov_5_div_auto_median_dragen",
-        "6 median / Autosomal median" = "cov_6_div_auto_median_dragen",
-        "7 median / Autosomal median" = "cov_7_div_auto_median_dragen",
-        "8 median / Autosomal median" = "cov_8_div_auto_median_dragen",
-        "9 median / Autosomal median" = "cov_9_div_auto_median_dragen",
-        "10 median / Autosomal median" = "cov_10_div_auto_median_dragen",
-        "11 median / Autosomal median" = "cov_11_div_auto_median_dragen",
-        "12 median / Autosomal median" = "cov_12_div_auto_median_dragen",
-        "13 median / Autosomal median" = "cov_13_div_auto_median_dragen",
-        "14 median / Autosomal median" = "cov_14_div_auto_median_dragen",
-        "15 median / Autosomal median" = "cov_15_div_auto_median_dragen",
-        "16 median / Autosomal median" = "cov_16_div_auto_median_dragen",
-        "17 median / Autosomal median" = "cov_17_div_auto_median_dragen",
-        "18 median / Autosomal median" = "cov_18_div_auto_median_dragen",
-        "19 median / Autosomal median" = "cov_19_div_auto_median_dragen",
-        "20 median / Autosomal median" = "cov_20_div_auto_median_dragen",
-        "21 median / Autosomal median" = "cov_21_div_auto_median_dragen",
-        "22 median / Autosomal median" = "cov_22_div_auto_median_dragen",
-        "X median / Autosomal median" = "cov_x_div_auto_median_dragen",
-        "Y median / Autosomal median" = "cov_y_div_auto_median_dragen",
-        "Ploidy estimation" = "ploidy_est_dragen"
+        "Autosomal median coverage" = "cov_auto_median",
+        "X median coverage" = "cov_x_median",
+        "Y median coverage" = "cov_y_median",
+        "1 median / Autosomal median" = "cov_1_div_auto_median",
+        "2 median / Autosomal median" = "cov_2_div_auto_median",
+        "3 median / Autosomal median" = "cov_3_div_auto_median",
+        "4 median / Autosomal median" = "cov_4_div_auto_median",
+        "5 median / Autosomal median" = "cov_5_div_auto_median",
+        "6 median / Autosomal median" = "cov_6_div_auto_median",
+        "7 median / Autosomal median" = "cov_7_div_auto_median",
+        "8 median / Autosomal median" = "cov_8_div_auto_median",
+        "9 median / Autosomal median" = "cov_9_div_auto_median",
+        "10 median / Autosomal median" = "cov_10_div_auto_median",
+        "11 median / Autosomal median" = "cov_11_div_auto_median",
+        "12 median / Autosomal median" = "cov_12_div_auto_median",
+        "13 median / Autosomal median" = "cov_13_div_auto_median",
+        "14 median / Autosomal median" = "cov_14_div_auto_median",
+        "15 median / Autosomal median" = "cov_15_div_auto_median",
+        "16 median / Autosomal median" = "cov_16_div_auto_median",
+        "17 median / Autosomal median" = "cov_17_div_auto_median",
+        "18 median / Autosomal median" = "cov_18_div_auto_median",
+        "19 median / Autosomal median" = "cov_19_div_auto_median",
+        "20 median / Autosomal median" = "cov_20_div_auto_median",
+        "21 median / Autosomal median" = "cov_21_div_auto_median",
+        "22 median / Autosomal median" = "cov_22_div_auto_median",
+        "X median / Autosomal median" = "cov_x_div_auto_median",
+        "Y median / Autosomal median" = "cov_y_div_auto_median",
+        "Ploidy estimation" = "ploidy_est"
       )
 
       d <- raw |>
@@ -1158,7 +1245,7 @@ PloidyEstimationMetricsFile <- R6::R6Class(
         ) |>
         tidyr::pivot_wider(names_from = "var", values_from = "value")
       # now convert all except 'Ploidy estimation' to numeric
-      cols1 <- colnames(d)[colnames(d) != "ploidy_est_dragen"]
+      cols1 <- colnames(d)[colnames(d) != "ploidy_est"]
       d |>
         dplyr::mutate(dplyr::across(dplyr::all_of(cols1), as.numeric))
     },
@@ -1339,31 +1426,31 @@ VCMetricsFile <- R6::R6Class(
     #' @return tibble with one row and metrics spread across individual columns.
     read = function() {
       abbrev_nm <- c(
-        "Total" = "var_tot_dragen",
-        "Biallelic" = "var_biallelic_dragen",
-        "Multiallelic" = "var_multiallelic_dragen",
-        "SNPs" = "var_snp_dragen",
-        "Insertions (Hom)" = "var_ins_hom_dragen",
-        "Insertions (Het)" = "var_ins_het_dragen",
-        "Deletions (Hom)" = "var_del_hom_dragen",
-        "Deletions (Het)" = "var_del_het_dragen",
-        "Indels (Het)" = "var_indel_het_dragen",
-        "Chr X number of SNPs over genome" = "var_snp_x_over_genome_dragen",
-        "Chr Y number of SNPs over genome" = "var_snp_y_over_genome_dragen",
-        "(Chr X SNPs)/(chr Y SNPs) ratio over genome" = "var_x_over_y_snp_ratio_over_genome_dragen",
-        "SNP Transitions" = "var_snp_transitions_dragen",
-        "SNP Transversions" = "var_snp_transversions_dragen",
-        "Ti/Tv ratio" = "var_ti_tv_ratio_dragen",
-        "Heterozygous" = "var_heterozygous_dragen",
-        "Homozygous" = "var_homozygous_dragen",
-        "Het/Hom ratio" = "var_het_hom_ratio_dragen",
-        "In dbSNP" = "var_in_dbsnp_dragen",
-        "Not in dbSNP" = "var_nin_dbsnp_dragen",
-        "Percent Callability" = "callability_pct_dragen",
-        "Percent Autosome Callability" = "callability_auto_pct_dragen",
-        "Number of samples" = "sample_num_dragen",
-        "Reads Processed" = "reads_processed_dragen",
-        "Child Sample" = "sample_child_dragen"
+        "Total" = "var_tot",
+        "Biallelic" = "var_biallelic",
+        "Multiallelic" = "var_multiallelic",
+        "SNPs" = "var_snp",
+        "Insertions (Hom)" = "var_ins_hom",
+        "Insertions (Het)" = "var_ins_het",
+        "Deletions (Hom)" = "var_del_hom",
+        "Deletions (Het)" = "var_del_het",
+        "Indels (Het)" = "var_indel_het",
+        "Chr X number of SNPs over genome" = "var_snp_x_over_genome",
+        "Chr Y number of SNPs over genome" = "var_snp_y_over_genome",
+        "(Chr X SNPs)/(chr Y SNPs) ratio over genome" = "var_x_over_y_snp_ratio_over_genome",
+        "SNP Transitions" = "var_snp_transitions",
+        "SNP Transversions" = "var_snp_transversions",
+        "Ti/Tv ratio" = "var_ti_tv_ratio",
+        "Heterozygous" = "var_heterozygous",
+        "Homozygous" = "var_homozygous",
+        "Het/Hom ratio" = "var_het_hom_ratio",
+        "In dbSNP" = "var_in_dbsnp",
+        "Not in dbSNP" = "var_nin_dbsnp",
+        "Percent Callability" = "callability_pct",
+        "Percent Autosome Callability" = "callability_auto_pct",
+        "Number of samples" = "sample_num",
+        "Reads Processed" = "reads_processed",
+        "Child Sample" = "sample_child"
       )
       x <- self$path
       raw <- readr::read_lines(x)
@@ -1445,28 +1532,28 @@ TrimmerMetricsFile <- R6::R6Class(
       d <- readr::read_lines(x)
       assertthat::assert_that(grepl("TRIMMER STATISTICS", d[1]))
       abbrev_nm <- c(
-        "Total input reads"                              = "reads_tot_input_dragen",
-        "Total input bases"                              = "bases_tot_dragen",
-        "Total input bases R1"                           = "bases_r1_dragen",
-        "Total input bases R2"                           = "bases_r2_dragen",
-        "Average input read length"                      = "read_len_avg_dragen",
-        "Total trimmed reads"                            = "reads_trimmed_tot_dragen",
-        "Total trimmed bases"                            = "bases_trimmed_tot_dragen",
-        "Average bases trimmed per read"                 = "bases_trimmed_avg_per_read_dragen",
-        "Average bases trimmed per trimmed read"         = "bases_trimmed_avg_per_trimmedread_dragen",
-        "Remaining poly-G K-mers R1 3prime"              = "polygkmers3r1_remaining_dragen",
-        "Remaining poly-G K-mers R2 3prime"              = "polygkmers3r2_remaining_dragen",
-        "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trimmed_reads_unfilt_3r1_dragen",
-        "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trimmed_reads_unfilt_3r2_dragen",
-        "Poly-G soft trimmed reads filtered R1 3prime"   = "polyg_soft_trimmed_reads_filt_3r1_dragen",
-        "Poly-G soft trimmed reads filtered R2 3prime"   = "polyg_soft_trimmed_reads_filt_3r2_dragen",
-        "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trimmed_bases_unfilt_3r1_dragen",
-        "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trimmed_bases_unfilt_3r2_dragen",
-        "Poly-G soft trimmed bases filtered R1 3prime"   = "polyg_soft_trimmed_bases_filt_3r1_dragen",
-        "Poly-G soft trimmed bases filtered R2 3prime"   = "polyg_soft_trimmed_bases_filt_3r2_dragen",
-        "Total filtered reads"                           = "reads_tot_filt_dragen",
-        "Reads filtered for minimum read length R1"      = "reads_filt_minreadlenr1_dragen",
-        "Reads filtered for minimum read length R2"      = "reads_filt_minreadlenr2_dragen"
+        "Total input reads"                              = "reads_tot_input",
+        "Total input bases"                              = "bases_tot",
+        "Total input bases R1"                           = "bases_r1",
+        "Total input bases R2"                           = "bases_r2",
+        "Average input read length"                      = "read_len_avg",
+        "Total trimmed reads"                            = "reads_trimmed_tot",
+        "Total trimmed bases"                            = "bases_trimmed_tot",
+        "Average bases trimmed per read"                 = "bases_trimmed_avg_per_read",
+        "Average bases trimmed per trimmed read"         = "bases_trimmed_avg_per_trimmedread",
+        "Remaining poly-G K-mers R1 3prime"              = "polygkmers3r1_remaining",
+        "Remaining poly-G K-mers R2 3prime"              = "polygkmers3r2_remaining",
+        "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trimmed_reads_unfilt_3r1",
+        "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trimmed_reads_unfilt_3r2",
+        "Poly-G soft trimmed reads filtered R1 3prime"   = "polyg_soft_trimmed_reads_filt_3r1",
+        "Poly-G soft trimmed reads filtered R2 3prime"   = "polyg_soft_trimmed_reads_filt_3r2",
+        "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trimmed_bases_unfilt_3r1",
+        "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trimmed_bases_unfilt_3r2",
+        "Poly-G soft trimmed bases filtered R1 3prime"   = "polyg_soft_trimmed_bases_filt_3r1",
+        "Poly-G soft trimmed bases filtered R2 3prime"   = "polyg_soft_trimmed_bases_filt_3r2",
+        "Total filtered reads"                           = "reads_tot_filt",
+        "Reads filtered for minimum read length R1"      = "reads_filt_minreadlenr1",
+        "Reads filtered for minimum read length R2"      = "reads_filt_minreadlenr2"
       )
 
       d |>

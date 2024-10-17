@@ -58,6 +58,7 @@ d_write <- t1$write(
 \item \href{#method-Wf_dragen-read_cnvMetrics}{\code{Wf_dragen$read_cnvMetrics()}}
 \item \href{#method-Wf_dragen-read_fastqcMetrics}{\code{Wf_dragen$read_fastqcMetrics()}}
 \item \href{#method-Wf_dragen-read_gcMetrics}{\code{Wf_dragen$read_gcMetrics()}}
+\item \href{#method-Wf_dragen-read_umiMetrics}{\code{Wf_dragen$read_umiMetrics()}}
 \item \href{#method-Wf_dragen-clone}{\code{Wf_dragen$clone()}}
 }
 }
@@ -339,6 +340,23 @@ Read \code{fastqc_metrics.csv} file.
 Read \code{gc_metrics.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_gcMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_umiMetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_umiMetrics}{}}}
+\subsection{Method \code{read_umiMetrics()}}{
+Read \code{umi_metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_umiMetrics(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

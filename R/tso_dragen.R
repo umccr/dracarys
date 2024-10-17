@@ -69,7 +69,7 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.sv_metrics\\.csv$"), "svMetrics",
         glue("{pref}\\.time_metrics\\.csv$"), "timeMetrics",
         glue("{pref}\\.trimmer_metrics\\.csv$"), "trimmerMetrics",
-        glue("{pref}\\.umi_metrics\\.csv$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.umi_metrics\\.csv$"), "umiMetrics",
         glue("{pref}\\.vc_metrics\\.csv$"), "vcMetrics"
       )
       regexes <- reg1 |>
@@ -247,6 +247,12 @@ Wf_dragen <- R6::R6Class(
     #' @param x Path to file.
     read_gcMetrics = function(x) {
       dat <- dragen_gc_metrics_read(x)
+      dat
+    },
+    #' @description Read `umi_metrics.csv` file.
+    #' @param x Path to file.
+    read_umiMetrics = function(x) {
+      dat <- dragen_umi_metrics_read(x)
       dat
     }
   ) # end public
