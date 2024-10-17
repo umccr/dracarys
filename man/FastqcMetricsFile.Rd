@@ -7,14 +7,6 @@
 Contains methods for reading and displaying contents of
 the \code{fastqc_metrics.csv} file output from DRAGEN.
 }
-\examples{
-x <- system.file("extdata/wgs/SEQC-II.fastqc_metrics.csv.gz", package = "dracarys")
-fq <- FastqcMetricsFile$new(x)
-d <- fq$read()
-fq$write(d, out_dir = tempdir(), prefix = "seqc_fq", out_format = "tsv")
-# fq$plot(d)
-
-}
 \section{Super class}{
 \code{\link[dracarys:File]{dracarys::File}} -> \code{FastqcMetricsFile}
 }

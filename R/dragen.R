@@ -63,7 +63,7 @@ dragen_umi_metrics_read <- function(x) {
       count = gsub("\\{|\\}", "", .data$count),
       count = strsplit(.data$count, "\\|")
     ) |>
-    tidyr::unnest(count) |>
+    tidyr::unnest("count") |>
     dplyr::mutate(count = as.numeric(.data$count)) |>
     tidyr::nest(.by = "name")
   d2 <- d1 |>

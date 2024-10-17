@@ -471,6 +471,13 @@ tso_msi_read <- function(x) {
   if (j[["PercentageUnstableSites"]] == "NaN") {
     j[["PercentageUnstableSites"]] <- NA_real_
   }
+  num_cols <- c(
+    "TotalMicrosatelliteSitesAssessed", "TotalMicrosatelliteSitesUnstable",
+    "PercentageUnstableSites", "SumDistance", "SumJsd"
+  )
   tibble::as_tibble_row(j) |>
-    dplyr::mutate(ResultIsValid = as.character(.data$ResultIsValid))
+    dplyr::mutate(
+      dplyr::across(dplyr::any_of(num_cols), as.numeric),
+      ResultIsValid = as.character(.data$ResultIsValid),
+    )
 }

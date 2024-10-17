@@ -64,8 +64,8 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.gc_metrics\\.csv$"), "gcMetrics",
         glue("{pref}\\.gvcf_metrics\\.csv$"), "vcMetrics",
         glue("{pref}\\.mapping_metrics\\.csv$"), "mappingMetrics",
-        glue("{pref}\\.microsat_diffs\\.txt$"), "DOWNLOAD_ONLY",
-        glue("{pref}\\.microsat_output\\.json$"), "DOWNLOAD_ONLY",
+        glue("{pref}\\.microsat_diffs\\.txt$"), "msiDiffs",
+        glue("{pref}\\.microsat_output\\.json$"), "msi",
         glue("{pref}\\.sv_metrics\\.csv$"), "svMetrics",
         glue("{pref}\\.time_metrics\\.csv$"), "timeMetrics",
         glue("{pref}\\.trimmer_metrics\\.csv$"), "trimmerMetrics",
@@ -254,6 +254,19 @@ Wf_dragen <- R6::R6Class(
     read_umiMetrics = function(x) {
       dat <- dragen_umi_metrics_read(x)
       dat
+    },
+    #' @description Read `microsat_output.json` file.
+    #' @param x Path to file.
+    read_msi = function(x) {
+      dat <- tso_msi_read(x)
+      tibble::tibble(name = "msi", data = list(dat[]))
+    },
+    #' @description Read `microsat_diffs.txt` file.
+    #' @param x Path to file.
+    read_msiDiffs = function(x) {
+      dat <- readr::read_tsv(x, col_types = "cdccddc") |>
+        dplyr::rename(Chromosome = "#Chromosome")
+      tibble::tibble(name = "msidiffs", data = list(dat[]))
     }
   ) # end public
 ) # end Wf_dragen
