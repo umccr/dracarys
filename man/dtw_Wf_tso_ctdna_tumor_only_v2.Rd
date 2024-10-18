@@ -39,6 +39,19 @@ Downloads files from the \code{tso_ctdna_tumor_only_v2} workflow and writes them
 }
 \examples{
 \dontrun{
+#---- Local ----#
+p <- file.path(
+  "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
+  "analysis/cttsov2/20240915ff0295ed"
+)
+prefix <- "L2401290"
+outdir <- file.path(p, "dracarys_tidy")
+d <- dtw_Wf_tso_ctdna_tumor_only_v2(
+  path = p, prefix = prefix, outdir = outdir,
+  format = "tsv",
+  dryrun = F
+)
+
 p <- file.path(
   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
   "analysis/cttsov2/20240915ff0295ed"

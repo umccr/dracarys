@@ -14,11 +14,21 @@
 #' prefix <- "L2401290"
 #' t1 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, prefix = prefix)
 #' t1$list_files(max_files = 100)
+#' t1$dragenObj$list_files(max_files = 100)
 #' t1$list_files_filter_relevant(max_files = 300)
-#' d <- t1$download_files(max_files = 100, dryrun = F)
-#' d_tidy <- t1$tidy_files(d)
-#' d_write <- t1$write(
-#'   d_tidy,
+#' t1$dragenObj$list_files_filter_relevant(max_files = 300)
+#' d1 <- t1$download_files(max_files = 100, dryrun = F)
+#' d2 <- t1$dragenObj$download_files(max_files = 100, dryrun = F)
+#' d1_tidy <- t1$tidy_files(d1)
+#' d2_tidy <- t1$dragenObj$tidy_files(d2)
+#' d_write1 <- t1$write(
+#'   d1_tidy,
+#'   outdir = file.path(p, "dracarys_tidy"),
+#'   prefix = prefix,
+#'   format = "tsv"
+#' )
+#' d_write2 <- t1$dragenObj$write(
+#'   d2_tidy,
 #'   outdir = file.path(p, "dracarys_tidy"),
 #'   prefix = prefix,
 #'   format = "tsv"
@@ -54,6 +64,8 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
   public = list(
     #' @field prefix The LibraryID prefix of the tumor sample (needed for path lookup).
     prefix = NULL,
+    #' @field dragenObj dragen object.
+    dragenObj = NULL,
     #' @description Create a new Wf_tso_ctdna_tumor_only_v2 object.
     #' @param path Path to directory with raw workflow results (from S3 or
     #' local filesystem).
@@ -64,6 +76,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
       res <- glue("Results/{pref}")
       li <- "Logs_Intermediates"
       dc <- glue("{li}/DragenCaller/{pref}")
+      self$dragenObj <- Wf_dragen$new(path = file.path(path, dc), prefix = glue("{dc}/{prefix}"))
       # Results
       reg1 <- tibble::tribble(
         ~regex, ~fun,
@@ -73,7 +86,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
         glue("{res}/{pref}\\.gene_cov_report\\.tsv$"), "cvgrepg",
         glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$"), "hardfilt",
         glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{res}/{pref}\\.microsat_output\\.json$"), "msi",
+        # glue("{res}/{pref}\\.microsat_output\\.json$"), "msi", # in DragenCaller
         glue("{res}/{pref}\\.tmb.trace\\.tsv$"), "tmbt",
         glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
         glue("{res}/{pref}_Fusions\\.csv$"), "fus",
@@ -81,50 +94,11 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
         # glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY",
         glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"), "sar"
       )
-      # DragenCaller
-      reg2 <- tibble::tribble(
-        ~regex, ~fun,
-        glue("{dc}/{pref}\\-replay\\.json$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.cnv_metrics.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.exon_contig_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.exon_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.exon_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.exon_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.exon_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.fastqc_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.fragment_length_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.gc_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.gvcf_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.mapping_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.microsat_diffs\\.txt$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.microsat_output\\.json$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.sv_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.target_bed_contig_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.target_bed_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.target_bed_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.target_bed_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.target_bed_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.time_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.tmb_contig_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.tmb_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.tmb_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.tmb_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.tmb_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.trimmer_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.umi_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.vc_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.wgs_contig_mean_cov\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.wgs_coverage_metrics\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.wgs_fine_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.wgs_hist\\.csv$"), "DOWNLOAD_ONLY",
-        glue("{dc}/{pref}\\.wgs_overall_mean_cov\\.csv$"), "DOWNLOAD_ONLY"
-      )
-      regexes <- dplyr::bind_rows(reg1, reg2) |>
+      regexes <- reg1 |>
         dplyr::mutate(
           fun = paste0("read_", .data$fun),
           fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
         )
-
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$prefix <- prefix
     },
@@ -225,6 +199,19 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
 #'
 #' @examples
 #' \dontrun{
+#' #---- Local ----#
+#' p <- file.path(
+#'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
+#'   "analysis/cttsov2/20240915ff0295ed"
+#' )
+#' prefix <- "L2401290"
+#' outdir <- file.path(p, "dracarys_tidy")
+#' d <- dtw_Wf_tso_ctdna_tumor_only_v2(
+#'   path = p, prefix = prefix, outdir = outdir,
+#'   format = "tsv",
+#'   dryrun = F
+#' )
+#'
 #' p <- file.path(
 #'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
 #'   "analysis/cttsov2/20240915ff0295ed"
@@ -244,18 +231,28 @@ dtw_Wf_tso_ctdna_tumor_only_v2 <- function(path, prefix, outdir,
                                            max_files = 1000,
                                            dryrun = FALSE) {
   obj <- Wf_tso_ctdna_tumor_only_v2$new(path = path, prefix = prefix)
-  d_dl <- obj$download_files(
+  d_dl1 <- obj$download_files(
+    outdir = outdir, max_files = max_files, dryrun = dryrun
+  )
+  d_dl2 <- obj$dragenObj$download_files(
     outdir = outdir, max_files = max_files, dryrun = dryrun
   )
   if (!dryrun) {
-    d_tidy <- obj$tidy_files(d_dl)
-    d_write <- obj$write(
-      d_tidy,
+    d_tidy1 <- obj$tidy_files(d_dl1)
+    d_tidy2 <- obj$dragenObj$tidy_files(d_dl2)
+    d_write1 <- obj$write(
+      d_tidy1,
       outdir = outdir_tidy,
       prefix = prefix,
       format = format
     )
-    return(d_write)
+    d_write2 <- obj$dragenObj$write(
+      d_tidy2,
+      outdir = outdir_tidy,
+      prefix = prefix,
+      format = format
+    )
+    return(dplyr::bind_rows(d_write1, d_write2))
   }
-  return(d_dl)
+  return(dplyr::bind_rows(d_dl1, d_dl2))
 }
