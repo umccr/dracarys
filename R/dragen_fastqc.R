@@ -120,14 +120,14 @@ dragen_fastqc_metrics_read <- function(x) {
     dplyr::select("mate", "seq", "bp", "value")
 
   list(
-    positional_base_content = pos_base_cont,
-    positional_base_mean_quality = pos_base_mean_qual,
-    positional_quality = pos_qual,
-    read_gc_content = gc_cont,
-    read_gc_content_quality = gc_cont_qual,
-    read_lengths = read_len,
-    read_mean_quality = read_mean_qual,
-    sequence_positions = seq_pos
+    fqc_positionalBaseContent = pos_base_cont,
+    fqc_positionalBaseMeanQuality = pos_base_mean_qual,
+    fqc_positionalQuality = pos_qual,
+    fqc_readGCContent = gc_cont,
+    fqc_readGCContentQuality = gc_cont_qual,
+    fqc_readLengths = read_len,
+    fqc_readMeanQuality = read_mean_qual,
+    fqc_sequencePositions = seq_pos
   ) |>
-    tibble::enframe(name = "fastqc_name", value = "fastqc_value")
+    tibble::enframe(name = "name", value = "data")
 }

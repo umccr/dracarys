@@ -15,3 +15,8 @@ Tibble with metrics.
 \description{
 Reads the \code{sv_metrics.csv} file output from DRAGEN.
 }
+\examples{
+\dontrun{
+dragen_sv_metrics_read(x)
+}
+}

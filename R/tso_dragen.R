@@ -241,7 +241,7 @@ Wf_dragen <- R6::R6Class(
     #' @param x Path to file.
     read_fastqcMetrics = function(x) {
       dat <- dragen_fastqc_metrics_read(x)
-      tibble::tibble(name = "fastqcmetrics", data = list(dat[]))
+      dat
     },
     #' @description Read `gc_metrics.csv` file.
     #' @param x Path to file.

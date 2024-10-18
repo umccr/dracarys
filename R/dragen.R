@@ -34,6 +34,10 @@ dragen_fraglenhist_plot <- function(d, min_count = 10) {
 #' @param x Path to file.
 #'
 #' @return Tibble with metrics.
+#' @examples
+#' \dontrun{
+#' dragen_umi_metrics_read(x)
+#' }
 #' @export
 dragen_umi_metrics_read <- function(x) {
   d0 <- readr::read_lines(x)
@@ -85,6 +89,7 @@ dragen_umi_metrics_read <- function(x) {
       var = tolower(.data$var),
       var = dplyr::recode(.data$var, !!!abbrev_nm)
     )
+  dirty_names_cleaned(d1$var, abbrev_nm, x)
   hist <- d1 |>
     dplyr::filter(grepl("histo", .data$var)) |>
     dplyr::select(name = "var", "count") |>
@@ -121,6 +126,11 @@ dragen_umi_metrics_read <- function(x) {
 #' @param x Path to file.
 #'
 #' @return Tibble with metrics.
+#' @examples
+#' \dontrun{
+#' dragen_gc_metrics_read(x)
+#' }
+#'
 #' @export
 dragen_gc_metrics_read <- function(x) {
   d0 <- readr::read_lines(x)
@@ -155,6 +165,7 @@ dragen_gc_metrics_read <- function(x) {
       name = dplyr::recode(.data$name, !!!abbrev_nm)
     ) |>
     tidyr::pivot_wider(names_from = "name", values_from = "value")
+  dirty_names_cleaned(colnames(summary), abbrev_nm, x)
 
   # GC BIAS DETAILS
   details <- d1 |>
@@ -190,6 +201,11 @@ dragen_gc_metrics_read <- function(x) {
 #' @param x Path to file.
 #'
 #' @return Tibble with metrics.
+#' @examples
+#' \dontrun{
+#' dragen_cnv_metrics_read(x)
+#' }
+#'
 #' @export
 dragen_cnv_metrics_read <- function(x) {
   d0 <- readr::read_lines(x)
@@ -230,7 +246,9 @@ dragen_cnv_metrics_read <- function(x) {
       count = as.numeric(.data$count),
       pct = round(as.numeric(.data$pct), 2),
       var = dplyr::recode(.data$var, !!!abbrev_nm)
-    ) |>
+    )
+  dirty_names_cleaned(d2$var, abbrev_nm, x)
+  d2 <- d2 |>
     dplyr::select("var", "count", "pct") |>
     tidyr::pivot_longer(c("count", "pct")) |>
     dplyr::filter(!is.na(.data$value)) |>
@@ -251,6 +269,10 @@ dragen_cnv_metrics_read <- function(x) {
 #' @param x Path to file.
 #'
 #' @return Tibble with metrics.
+#' @examples
+#' \dontrun{
+#' dragen_sv_metrics_read(x)
+#' }
 #' @export
 dragen_sv_metrics_read <- function(x) {
   d <- readr::read_lines(x)
@@ -261,7 +283,7 @@ dragen_sv_metrics_read <- function(x) {
     "Number of duplications (PASS)" = "dup",
     "Number of breakend pairs (PASS)" = "bnd"
   )
-  d |>
+  res <- d |>
     tibble::as_tibble_col(column_name = "value") |>
     dplyr::filter(!grepl("Total number of structural variants", .data$value)) |>
     tidyr::separate_wider_delim(
@@ -275,6 +297,8 @@ dragen_sv_metrics_read <- function(x) {
     ) |>
     dplyr::select("var", "count") |>
     tidyr::pivot_wider(names_from = "var", values_from = "count")
+  dirty_names_cleaned(colnames(res), abbrev_nm, x)
+  res
 }
 
 #' Read DRAGEN Trimmer Metrics
@@ -284,10 +308,14 @@ dragen_sv_metrics_read <- function(x) {
 #' @param x Path to file.
 #'
 #' @return Tibble with metrics.
+#' @examples
+#' \dontrun{
+#' dragen_trimmer_metrics_read(x)
+#' }
 #' @export
 dragen_trimmer_metrics_read <- function(x) {
-  d <- readr::read_lines(x)
-  assertthat::assert_that(grepl("TRIMMER STATISTICS", d[1]))
+  d0 <- readr::read_lines(x)
+  assertthat::assert_that(grepl("TRIMMER STATISTICS", d0[1]))
   abbrev_nm <- c(
     "Total input reads"                              = "reads_tot_input",
     "Total input bases"                              = "bases_tot",
@@ -313,7 +341,7 @@ dragen_trimmer_metrics_read <- function(x) {
     "Reads filtered for minimum read length R2"      = "reads_filt_minreadlenr2"
   )
 
-  d |>
+  d1 <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
     tidyr::separate_wider_delim("value", names = c("category", "extra", "var", "count", "pct"), delim = ",", too_few = "align_start") |>
     dplyr::mutate(
@@ -321,7 +349,9 @@ dragen_trimmer_metrics_read <- function(x) {
       pct = round(as.numeric(.data$pct), 2),
       var = dplyr::recode(.data$var, !!!abbrev_nm)
     ) |>
-    dplyr::select("var", "count", "pct") |>
+    dplyr::select("var", "count", "pct")
+  dirty_names_cleaned(d1$var, abbrev_nm, x)
+  d1 |>
     tidyr::pivot_longer(c("count", "pct")) |>
     dplyr::filter(!is.na(.data$value)) |>
     dplyr::mutate(
@@ -339,6 +369,10 @@ dragen_trimmer_metrics_read <- function(x) {
 #' @param x Path to file.
 #'
 #' @return Tibble with metrics.
+#' @examples
+#' \dontrun{
+#' dragen_vc_metrics_read(x)
+#' }
 #' @export
 dragen_vc_metrics_read <- function(x) {
   abbrev_nm1 <- tibble::tribble(
@@ -367,12 +401,14 @@ dragen_vc_metrics_read <- function(x) {
     "Percent Autosome Callability", "callability_auto_pct", FALSE,
     "Number of samples", "sample_num", FALSE,
     "Reads Processed", "reads_processed", FALSE,
-    "Child Sample", "sample_child", FALSE
+    "Child Sample", "sample_child", FALSE,
+    "Percent QC Region Callability in Region 1", "qc_region_callability_pct_region1", FALSE,
+    "Percent QC Region Callability in Region 2", "qc_region_callability_pct_region2", FALSE
   )
-  raw <- readr::read_lines(x)
-  assertthat::assert_that(grepl("VARIANT CALLER", raw[1]))
+  d0 <- readr::read_lines(x)
+  assertthat::assert_that(grepl("VARIANT CALLER", d0[1]))
   # first detect if this is genome or target region
-  res <- raw |>
+  d1 <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
     tidyr::separate_wider_delim(
       "value",
@@ -381,7 +417,7 @@ dragen_vc_metrics_read <- function(x) {
     )
   reg1 <- NULL
   str1 <- NULL
-  tmp <- res |>
+  tmp <- d1 |>
     dplyr::filter(grepl("Chr X number of SNPs over ", .data$var)) |>
     dplyr::slice_head(n = 1) |>
     dplyr::pull("var")
@@ -406,7 +442,7 @@ dragen_vc_metrics_read <- function(x) {
     dplyr::select("raw", "clean") |>
     tibble::deframe()
 
-  d <- res |>
+  d <- d1 |>
     dplyr::mutate(
       var = dplyr::recode(.data$var, !!!abbrev_nm),
       count = dplyr::na_if(.data$count, "NA"),
@@ -421,6 +457,7 @@ dragen_vc_metrics_read <- function(x) {
     ) |>
     dplyr::filter(.data$category != "summary") |>
     dplyr::select("category", "sample", "var", "count", "pct")
+  dirty_names_cleaned(d$var, abbrev_nm, x)
   # pivot
   d |>
     tidyr::pivot_longer(c("count", "pct")) |>
@@ -440,6 +477,10 @@ dragen_vc_metrics_read <- function(x) {
 #' @param x Path to file.
 #'
 #' @return Tibble with metrics.
+#' @examples
+#' \dontrun{
+#' dragen_mapping_metrics_read(x)
+#' }
 #' @export
 dragen_mapping_metrics_read <- function(x) {
   abbrev_nm <- c(
@@ -516,11 +557,11 @@ dragen_mapping_metrics_read <- function(x) {
     "Average sequenced coverage over genome" = "cov_avg_seq_over_genome",
     "Filtered rRNA reads" = "reads_rrna_filtered"
   )
-  raw <- readr::read_lines(x)
-  assertthat::assert_that(grepl("MAPPING/ALIGNING", raw[1]))
+  d0 <- readr::read_lines(x)
+  assertthat::assert_that(grepl("MAPPING/ALIGNING", d0[1]))
   # split by RG and non-RG
   # tidy
-  d <- raw |>
+  d <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
     tidyr::separate_wider_delim(
       "value",
@@ -535,6 +576,7 @@ dragen_mapping_metrics_read <- function(x) {
       RG = dplyr::if_else(.data$RG == "", "Total", .data$RG)
     ) |>
     dplyr::select("RG", "var", "count", "pct")
+  dirty_names_cleaned(unique(d$var), abbrev_nm, x)
   # pivot
   d |>
     tidyr::pivot_longer(c("count", "pct")) |>
@@ -553,6 +595,10 @@ dragen_mapping_metrics_read <- function(x) {
 #' @param x Path to file.
 #'
 #' @return Tibble with metrics.
+#' @examples
+#' \dontrun{
+#' dragen_coverage_metrics_read(x)
+#' }
 #' @export
 dragen_coverage_metrics_read <- function(x) {
   # all rows except 'Aligned bases' and 'Aligned reads' refer to the region
@@ -572,10 +618,10 @@ dragen_coverage_metrics_read <- function(x) {
     "Mean/Median autosomal coverage ratio over ", "cov_mean_median_auto_ratio_over_", TRUE,
     "Aligned reads in ", "reads_aligned_in_", TRUE
   )
-  raw <- readr::read_lines(x)
-  assertthat::assert_that(grepl("COVERAGE SUMMARY", raw[1]))
+  d0 <- readr::read_lines(x)
+  assertthat::assert_that(grepl("COVERAGE SUMMARY", d0[1]))
   # first detect if this is genome, QC coverage region, or target region
-  res <- raw |>
+  d1 <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
     tidyr::separate_wider_delim(
       "value",
@@ -584,7 +630,7 @@ dragen_coverage_metrics_read <- function(x) {
     )
   reg1 <- NULL
   str1 <- NULL
-  tmp <- res |>
+  tmp <- d1 |>
     dplyr::filter(grepl("PCT of .* with coverage ", .data$var)) |>
     dplyr::slice_head(n = 1) |>
     dplyr::pull("var")
@@ -611,12 +657,13 @@ dragen_coverage_metrics_read <- function(x) {
   # split to rename the
   # "PCT of genome with coverage [100x: inf)" values
   pat <- glue("PCT of {str1} with coverage ")
-  res1 <- res |>
+  res1 <- d1 |>
     # pct just shows % for a couple rows which can be
     # calculated from their above values
     dplyr::filter(!grepl(pat, .data$var)) |>
     dplyr::select("var", "value")
-  res2 <- res |>
+  dirty_names_cleaned(res1$var, names(abbrev_nm), x)
+  res2 <- d1 |>
     dplyr::filter(grepl(pat, .data$var)) |>
     dplyr::mutate(
       var = sub(pat, "", .data$var),

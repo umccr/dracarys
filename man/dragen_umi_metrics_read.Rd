@@ -15,3 +15,8 @@ Tibble with metrics.
 \description{
 Reads the \code{umi_metrics.csv} file output from DRAGEN.
 }
+\examples{
+\dontrun{
+dragen_umi_metrics_read(x)
+}
+}
