@@ -209,6 +209,7 @@ Wf <- R6::R6Class(
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
     write = function(x, outdir = NULL, prefix = NULL, format = "tsv", drid = NULL) {
       assertthat::assert_that(!is.null(prefix))
+      assertthat::assert_that(all(c("name", "data") %in% colnames(x)))
       if (!is.null(outdir)) {
         prefix <- file.path(outdir, prefix)
       }
@@ -219,7 +220,7 @@ Wf <- R6::R6Class(
           out = list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid))
         ) |>
         dplyr::ungroup() |>
-        dplyr::select("name", "data")
+        dplyr::select("name", "data", prefix = "p")
       invisible(d_write)
     }
   ) # end public
