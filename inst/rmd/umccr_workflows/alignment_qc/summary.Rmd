@@ -9,7 +9,7 @@ output:
     highlight: kate
 params:
   title: "UMCCR Alignment QC Summary Report"
-  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-09-27_wgts.rds")
+  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-10-11_wgts.rds")
 description: "UMCCR Alignment QC Summary Report"
 title: "`r params$title`"
 ---
@@ -239,7 +239,14 @@ conf <- list(
   pink_range = c(8, 20)
 )
 d_map |>
-  dt_view() |>
+  left_join(
+    meta |>
+      mutate(umccrid = glue("{.data$SubjectID}_{.data$LibraryID}_LN{.data$lane}")) |>
+      select(umccrid, assay, workflow, project_name, project_owner),
+    by = "umccrid"
+  ) |>
+  select(umccrid, phenotype, type, source, assay, workflow, project_name, project_owner, everything()) |>
+  dt_view(scroll_y = 1500) |>
   DT::formatCurrency(columns = names(d_map)[num_pct_cols], currency = "", digits = 1) |>
   DT::formatCurrency(columns = names(d_map)[no_numpct_cols], currency = "", digits = 0) |>
   DT::formatStyle(
@@ -304,7 +311,14 @@ d_cvg <- dr_unnest("WgsCoverageMetricsFile") |>
   )
 num_cols <- names(d_cvg)[purrr::map_lgl(d_cvg, is.numeric)]
 d_cvg |>
-  dt_view() |>
+  left_join(
+    meta |>
+      mutate(umccrid = glue("{.data$SubjectID}_{.data$LibraryID}_LN{.data$lane}")) |>
+      select(umccrid, assay, workflow, project_name, project_owner),
+    by = "umccrid"
+  ) |>
+  select(umccrid, phenotype, type, source, assay, workflow, project_name, project_owner, everything()) |>
+  dt_view(scroll_y = 1500) |>
   DT::formatCurrency(columns = num_cols, currency = "", digits = 1) |>
   DT::formatStyle(
     "ploidy",
@@ -392,7 +406,7 @@ f1_plot <- ggplot() +
     fill = rep(fqc_colours1$col, length(unique(f1$type))),
     alpha = 0.7
   ) +
-  geom_line(data = f1, aes(x = q, y = prop, colour = umccrid, linetype = mate), linewidth = 1) +
+  geom_line(data = f1, aes(x = q, y = prop, colour = umccrid, linetype = mate), linewidth = 1, show.legend = FALSE) +
   scale_y_continuous(labels = scales::label_comma()) +
   theme(panel.grid.major = element_blank()) +
   facet_wrap(~type, ncol = 1) +
@@ -401,8 +415,8 @@ f1_plot <- ggplot() +
     subtitle = glue("Percentage of reads with average quality scores. Shows if\na subset of reads has poor quality.")
   )
 
-# plotly::ggplotly(f1_plot)
-f1_plot
+plotly::ggplotly(f1_plot)
+# f1_plot
 ```
 
 ### GC Content ('Per-Sequence GC Content')
@@ -427,8 +441,8 @@ gc_data_plot <- gc_data |>
     title = "Read GC Content",
     subtitle = glue("Total number of reads with each GC content\npercentile between 0% and 100%")
   )
-# plotly::ggplotly(gc_data_plot)
-gc_data_plot
+plotly::ggplotly(gc_data_plot)
+# gc_data_plot
 ```
 
 ### GC Content Quality ('GC Content Mean Quality Scores')
@@ -454,15 +468,15 @@ f1_plot <- ggplot() +
     title = "GC Content Quality",
     subtitle = glue("Average Phred-scale read mean quality for reads with\neach GC content percentile between 0% and 100%.")
   )
-# plotly::ggplotly(f1_plot)
-f1_plot
+plotly::ggplotly(f1_plot)
+# f1_plot
 ```
 
 ### Positional Base Content ('Per-Position Sequence Content')
 
 - TODO: create heatmap instead
 
-```{r fqc_pbc, eval=T, fig.height=42}
+```{r fqc_pbc, eval=F, fig.height=42}
 f1 <- dr_unnest("FastqcMetricsFile_positional_base_content")
 f1 |>
   filter(base != "N") |>
@@ -484,7 +498,7 @@ f1 |>
 ### Positional Base Mean Quality ('Per-Position Mean Quality Scores')
 
 
-```{r fqc_bmq, eval=T, fig.height=80}
+```{r fqc_bmq, eval=F, fig.height=80}
 f1 <- dr_unnest("FastqcMetricsFile_positional_base_mean_quality")
 ggplot() +
   geom_rect(
@@ -508,7 +522,7 @@ ggplot() +
 
 ### Positional Quality ('Per-Position Quality Score Ranges')
 
-```{r fqc_pq, eval=T, fig.width=13}
+```{r fqc_pq, eval=F, fig.width=13}
 # TODO: use boxplot instead of point
 f1 <- dr_unnest("FastqcMetricsFile_positional_quality")
 quants <- c(25, 50, 75)
@@ -546,8 +560,8 @@ read_len_plot <- read_len |>
     title = "Read Lengths",
     subtitle = glue("Read percentage with each observed length.")
   )
-# plotly::ggplotly(read_len_plot)
-read_len_plot
+plotly::ggplotly(read_len_plot)
+# read_len_plot
 ```
 
 ### Sequence Positions ('Adapter Content')
@@ -569,7 +583,7 @@ f1 |>
 
 ## Coverage {.tabset .tabset-pills}
 
-```{r contig_cvg, eval=T, results='asis', fig.height=5}
+```{r contig_cvg, eval=F, results='asis', fig.height=5}
 d1 <- dr_unnest("WgsContigMeanCovFile") |>
   arrange(desc("umccrid"))
 for (type1 in sort(unique(d1$type), decreasing = FALSE)) {
@@ -608,13 +622,13 @@ flp <- fl1 |>
   xlab("Fragment Length (bp)") +
   ylab(glue("Read Count (min: {min_count})")) +
   theme(
-    legend.position = c(0.9, 0.9),
+    legend.position.inside = c(0.9, 0.9),
     legend.justification = c(1, 1),
     panel.grid.minor = ggplot2::element_blank(),
     plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
   )
-# plotly::ggplotly(flp)
-flp
+plotly::ggplotly(flp)
+# flp
 ```
 
 ---
@@ -638,8 +652,8 @@ d_pl_plot <- d_pl_plot_data |>
   geom_line(aes(colour = umccrid, group = umccrid), na.rm = TRUE) +
   geom_point(aes(colour = umccrid), na.rm = TRUE) +
   labs(title = "Chromosome Median / Autosomal Median")
-# plotly::ggplotly(d_pl_plot)
-d_pl_plot
+plotly::ggplotly(d_pl_plot)
+# d_pl_plot
 ```
 
 
@@ -671,12 +685,12 @@ d_hist2 <- d_hist |>
     x = "Coverage", y = "PCT Cumsum",
     title = "Percentage of sites in genome with given coverage"
   )
-plotly::subplot(d_hist1, d_hist2, shareY = TRUE, titleY = TRUE, titleX = TRUE, nrows = 2)
+# plotly::subplot(d_hist1, d_hist2, shareY = TRUE, titleY = TRUE, titleX = TRUE, nrows = 2)
 ```
 
 ## FineHist
 
-```{r finehist, eval=T, fig.height=10, fig.width=12}
+```{r finehist, eval=F, fig.height=10, fig.width=12}
 d_fhist <- dr_unnest("WgsFineHistFile")
 d_fhist |>
   dracarys::WgsFineHistFile$public_methods$plot(c(0, 150)) +

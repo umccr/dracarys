@@ -14,8 +14,6 @@ c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION") |>
   stopifnot()
 icav1_token <- Sys.getenv("ICA_ACCESS_TOKEN") |>
   dracarys::ica_token_validate()
-# this helps keep annoying reticulate prompt away
-Sys.setenv(RETICULATE_PYTHON = Sys.getenv("CONDA_PYTHON_EXE"))
 
 query_workflow_alignqc <- function(start_date) {
   wfs <- c("wgs_alignment_qc", "wts_alignment_qc") |>
@@ -37,7 +35,7 @@ query_limsrow_libids <- function(libids) {
 }
 
 # first read in the workflows table, extract metadata, then join with lims
-start_date <- "2024-09-27"
+start_date <- "2024-10-11"
 p_raw <- query_workflow_alignqc(start_date)
 
 wgs <- p_raw |>

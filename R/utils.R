@@ -1,3 +1,18 @@
+dirty_names_cleaned <- function(dirty, clean, fname = NULL) {
+  assertthat::assert_that(
+    rlang::is_atomic(dirty),
+    rlang::is_atomic(clean)
+  )
+  are_dirty <- dirty[!dirty %in% clean]
+  msg <- paste(
+    "Following columns are dirty:",
+    paste(are_dirty, collapse = ", "),
+    ifelse(!is.null(fname), paste("Filename:", fname), ""),
+    sep = "\n"
+  )
+  assertthat::assert_that(length(are_dirty) == 0, msg = msg)
+}
+
 #' Print current timestamp for logging
 #'
 #' @return Current timestamp as character.

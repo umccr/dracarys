@@ -1,59 +1,12 @@
-#' FastqcMetrics R6 Class
+#' DRAGEN FASTQC Metrics
 #'
-#' @description
-#' Contains methods for reading and displaying contents of
-#' the `fastqc_metrics.csv` file output from DRAGEN.
+#' Read DRAGEN `fastqc_metrics.csv` file.
 #'
-#' @examples
-#' x <- system.file("extdata/wgs/SEQC-II.fastqc_metrics.csv.gz", package = "dracarys")
-#' fq <- FastqcMetricsFile$new(x)
-#' d <- fq$read()
-#' fq$write(d, out_dir = tempdir(), prefix = "seqc_fq", out_format = "tsv")
-#' # fq$plot(d)
+#' @param x Path to file.
 #'
+#' @return Tibble with metrics.
 #' @export
-FastqcMetricsFile <- R6::R6Class(
-  "FastqcMetricsFile",
-  inherit = File,
-  public = list(
-    #' @description
-    #' Reads the `fastqc_metrics.csv` file output from DRAGEN.
-    #'
-    #' @return tibble. TODO.
-    read = function() {
-      x <- self$path
-      res <- read_fastqc_metrics(x)
-    },
-    #' @description
-    #' Writes a tidy version of the `fastqc_metrics.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      d_write <- d |>
-        tibble::enframe(name = "section") |>
-        dplyr::rowwise() |>
-        dplyr::mutate(
-          section_low = tolower(.data$section),
-          p = glue("{prefix}_{.data$section_low}"),
-          out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
-        ) |>
-        dplyr::ungroup() |>
-        dplyr::select("section", "value") |>
-        tibble::deframe()
-      invisible(d_write)
-    }
-  )
-)
-
-read_fastqc_metrics <- function(x) {
+dragen_fastqc_metrics_read <- function(x) {
   # 'SEQUENCE POSITIONS' has an extra field for 'Total Sequence Starts' which
   # can be filtered out since that can be computed by the rest of that section.
   raw <- readr::read_lines(x) |>
@@ -69,6 +22,15 @@ read_fastqc_metrics <- function(x) {
       value = dplyr::na_if(.data$value, "NA"),
       value = as.numeric(.data$value)
     )
+
+  # 1 POSITIONAL BASE CONTENT
+  # 2 POSITIONAL BASE MEAN QUALITY
+  # 3 POSITIONAL QUALITY
+  # 4 READ GC CONTENT
+  # 5 READ GC CONTENT QUALITY
+  # 6 READ LENGTHS
+  # 7 READ MEAN QUALITY
+  # 8 SEQUENCE POSITIONS
 
   # there are binned pos e.g. "149-150"
   # the value is an accumulation, so divide by number of grains
@@ -158,13 +120,14 @@ read_fastqc_metrics <- function(x) {
     dplyr::select("mate", "seq", "bp", "value")
 
   list(
-    positional_base_content = pos_base_cont,
-    positional_base_mean_quality = pos_base_mean_qual,
-    positional_quality = pos_qual,
-    read_gc_content = gc_cont,
-    read_gc_content_quality = gc_cont_qual,
-    read_lengths = read_len,
-    read_mean_quality = read_mean_qual,
-    sequence_positions = seq_pos
-  )
+    fqc_positionalBaseContent = pos_base_cont,
+    fqc_positionalBaseMeanQuality = pos_base_mean_qual,
+    fqc_positionalQuality = pos_qual,
+    fqc_readGCContent = gc_cont,
+    fqc_readGCContentQuality = gc_cont_qual,
+    fqc_readLengths = read_len,
+    fqc_readMeanQuality = read_mean_qual,
+    fqc_sequencePositions = seq_pos
+  ) |>
+    tibble::enframe(name = "name", value = "data")
 }

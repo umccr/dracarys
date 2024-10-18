@@ -17,11 +17,21 @@ p <- file.path(
 prefix <- "L2401290"
 t1 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, prefix = prefix)
 t1$list_files(max_files = 100)
+t1$dragenObj$list_files(max_files = 100)
 t1$list_files_filter_relevant(max_files = 300)
-d <- t1$download_files(max_files = 100, dryrun = F)
-d_tidy <- t1$tidy_files(d)
-d_write <- t1$write(
-  d_tidy,
+t1$dragenObj$list_files_filter_relevant(max_files = 300)
+d1 <- t1$download_files(max_files = 100, dryrun = F)
+d2 <- t1$dragenObj$download_files(max_files = 100, dryrun = F)
+d1_tidy <- t1$tidy_files(d1)
+d2_tidy <- t1$dragenObj$tidy_files(d2)
+d_write1 <- t1$write(
+  d1_tidy,
+  outdir = file.path(p, "dracarys_tidy"),
+  prefix = prefix,
+  format = "tsv"
+)
+d_write2 <- t1$dragenObj$write(
+  d2_tidy,
   outdir = file.path(p, "dracarys_tidy"),
   prefix = prefix,
   format = "tsv"
@@ -58,6 +68,8 @@ d_write <- t2$write(
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
 \item{\code{prefix}}{The LibraryID prefix of the tumor sample (needed for path lookup).}
+
+\item{\code{dragenObj}}{dragen object.}
 }
 \if{html}{\out{</div>}}
 }
