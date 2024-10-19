@@ -852,34 +852,3 @@ PloidyEstimationMetricsFile <- R6::R6Class(
     }
   )
 )
-
-#' DRAGEN File Subprefix
-#'
-#' Extracts a file subprefix for better table naming.
-#'
-#' @param x File name.
-#' @param suffix Suffix to remove.
-#'
-#' @return Clean string.
-#'
-#' @examples
-#' x1 <- "L2401290.exon_contig_mean_cov.csv"
-#' x2 <- "L2401290.tmb_contig_mean_cov.csv.gz"
-#' x3 <- "foo.bar.exon_contig_mean_cov.csv.gz"
-#' (s1 <- dragen_subprefix(x1, "_contig_mean_cov"))
-#' (s2 <- dragen_subprefix(x2, "_contig_mean_cov"))
-#' (s3 <- dragen_subprefix(x3, "_contig_mean_cov"))
-#' @testexamples
-#' expect_equal(s1, "exon")
-#' expect_equal(s2, "tmb")
-#' expect_equal(s3, "bar")
-dragen_subprefix <- function(x, suffix) {
-  # L2401290.exon_contig_mean_cov.csv -> exon
-  # L2401290.target_bed_contig_mean_cov.csv -> target_bed
-  # L2401290.tmb_contig_mean_cov.csv -> tmb
-  # L2401290.wgs_contig_mean_cov.csv -> wgs
-  # capture the substring between the first dot and the next dot.
-  bname <- basename(x)
-  s1 <- sub("^.*\\.(.*?)\\..*$", "\\1", bname) # exon_contig_mean_cov
-  sub(suffix, "", s1) # sub("contig_mean_cov", "", s1) -> "exon"
-}

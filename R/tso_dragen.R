@@ -117,7 +117,7 @@ Wf_dragen <- R6::R6Class(
     #' @param x Path to file.
     #' @param keep_alt Keep ALT contigs.
     read_contigMeanCov = function(x, keep_alt = FALSE) {
-      subprefix <- dragen_subprefix(x, "_contig_mean_cov")
+      subprefix <- private$dragen_subprefix(x, "_contig_mean_cov")
       dat <- readr::read_csv(x, col_names = c("chrom", "n_bases", "coverage"), col_types = "cdd") |>
         dplyr::filter(
           if (!keep_alt) {
@@ -131,14 +131,14 @@ Wf_dragen <- R6::R6Class(
     #' @description Read `coverage_metrics.csv` file.
     #' @param x Path to file.
     read_coverageMetrics = function(x) {
-      subprefix <- dragen_subprefix(x, "_coverage_metrics")
+      subprefix <- private$dragen_subprefix(x, "_coverage_metrics")
       dat <- dragen_coverage_metrics_read(x)
       tibble::tibble(name = glue("covmetrics_{subprefix}"), data = list(dat))
     },
     #' @description Read `fine_hist.csv` file.
     #' @param x Path to file.
     read_fineHist = function(x) {
-      subprefix <- dragen_subprefix(x, "_fine_hist")
+      subprefix <- private$dragen_subprefix(x, "_fine_hist")
       d <- readr::read_csv(x, col_types = "cd")
       assertthat::assert_that(all(colnames(d) == c("Depth", "Overall")))
       # there's a max Depth of 2000+, so convert to numeric for easier plotting
@@ -175,7 +175,7 @@ Wf_dragen <- R6::R6Class(
     #' @description Read `hist.csv` (not `fine_hist.csv`!) file.
     #' @param x Path to file.
     read_hist = function(x) {
-      subprefix <- dragen_subprefix(x, "_hist")
+      subprefix <- private$dragen_subprefix(x, "_hist")
       d <- readr::read_csv(x, col_names = c("var", "pct"), col_types = "cd")
       dat <- d |>
         dplyr::mutate(
@@ -197,7 +197,9 @@ Wf_dragen <- R6::R6Class(
     #' @param x Path to file.
     read_timeMetrics = function(x) {
       cn <- c("dummy1", "dummy2", "Step", "time_hrs", "time_sec")
-      ct <- readr::cols(.default = "c", time_hrs = readr::col_time(format = "%T"), time_sec = "d")
+      ct <- readr::cols(
+        .default = "c", time_hrs = readr::col_time(format = "%T"), time_sec = "d"
+      )
       d <- readr::read_csv(x, col_names = cn, col_types = ct)
       assertthat::assert_that(d$dummy1[1] == "RUN TIME", is.na(d$dummy2[1]))
       assertthat::assert_that(inherits(d$time_hrs, "hms"))
@@ -215,7 +217,7 @@ Wf_dragen <- R6::R6Class(
     #' @description Read `vc_metrics.csv`/`gvcf_metrics.csv` file.
     #' @param x Path to file.
     read_vcMetrics = function(x) {
-      subprefix <- dragen_subprefix(x, "_metrics")
+      subprefix <- private$dragen_subprefix(x, "_metrics")
       dat <- dragen_vc_metrics_read(x)
       tibble::tibble(name = glue("vcmetrics_{subprefix}"), data = list(dat[]))
     },
@@ -268,5 +270,12 @@ Wf_dragen <- R6::R6Class(
         dplyr::rename(Chromosome = "#Chromosome")
       tibble::tibble(name = "msidiffs", data = list(dat[]))
     }
-  ) # end public
+  ), # end public
+  private = list(
+    dragen_subprefix = function(x, suffix) {
+      bname <- basename(x)
+      s1 <- sub("^.*\\.(.*?)\\..*$", "\\1", bname) # exon_contig_mean_cov
+      sub(suffix, "", s1) # sub("contig_mean_cov", "", s1) -> "exon"
+    }
+  )
 ) # end Wf_dragen
