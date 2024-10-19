@@ -99,22 +99,8 @@ Wf_sash <- R6::R6Class(
     #' @description Read `pcgr.json.gz` file.
     #' @param x Path to file.
     read_pcgr_json = function(x) {
-      j <- read_jsongz_jsonlite(x)
-      tmb <-
-        j[["content"]][["tmb"]][["variant_statistic"]] %||%
-        j[["content"]][["tmb"]][["v_stat"]] %||%
-        list(tmb_estimate = NA, n_tmb = NA)
-      tmb <- purrr::flatten(tmb) |>
-        tibble::as_tibble_row() |>
-        dplyr::select("tmb_estimate", "n_tmb")
-      msi <- j[["content"]][["msi"]][["prediction"]][["msi_stats"]]
-      # handle nulls
-      msi <- msi %||% list(fracIndels = NA, predicted_class = NA)
-      msi <- purrr::flatten(msi) |>
-        tibble::as_tibble_row() |>
-        dplyr::select("fracIndels", "predicted_class")
-      metrics <- dplyr::bind_cols(msi, tmb)
-      return(metrics)
+      dat <- pcgr_json_read(x)
+      tibble::tibble(name = "pcgrjson", data = list(dat))
     },
     #' @description Read `dragen.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
