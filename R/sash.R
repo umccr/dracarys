@@ -7,11 +7,11 @@
 #' \dontrun{
 #'
 #' #---- Local ----#
-#' p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ05571/sash"
-#' p2 <- "202408270b93455e/L2401308_L2401307"
+#' p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ03324/sash"
+#' p2 <- "202408309698c304/L2300777_L2300776"
 #' p <- normalizePath(file.path(p1, p2))
-#' SubjectID <- "SBJ05571"
-#' SampleID_tumor <- "MDX240307"
+#' SubjectID <- "SBJ03324"
+#' SampleID_tumor <- "PRJ230432"
 #' prefix <- glue("{SubjectID}__{SampleID_tumor}")
 #' s1 <- Wf_sash$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
 #' s1$list_files(max_files = 20)
@@ -69,10 +69,10 @@ Wf_sash <- R6::R6Class(
         glue("{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "hrd_chord",
         glue("{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "hrd_hrdetect",
         glue("{pref}/{crep}/hrd/{pref}-dragen\\.tsv\\.gz$"), "hrd_dragen",
-        glue("{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "sigs_snv2015",
-        glue("{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "sigs_snv2020",
-        glue("{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "sigs_dbs",
-        glue("{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "sigs_indel",
+        glue("{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "sigstsv",
+        glue("{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "sigstsv",
+        glue("{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "sigstsv",
+        glue("{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "sigstsv",
         glue("{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "qcsum",
         glue("{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$"), "pcgr_json"
       ) |>
@@ -100,13 +100,14 @@ Wf_sash <- R6::R6Class(
     #' @param x Path to file.
     read_pcgr_json = function(x) {
       dat <- pcgr_json_read(x)
-      tibble::tibble(name = "pcgrjson", data = list(dat))
+      tibble::tibble(name = "pcgrjson", data = list(dat[]))
     },
     #' @description Read `dragen.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
     read_hrd_dragen = function(x) {
       ct <- readr::cols(.default = "d", Sample = "c")
-      read_tsvgz(x, col_types = ct)
+      dat <- read_tsvgz(x, col_types = ct)
+      tibble::tibble(name = "hrddragen", data = list(dat[]))
     },
     #' @description Read `chord.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
@@ -118,7 +119,8 @@ Wf_sash <- R6::R6Class(
         p_BRCA1 = "d",
         p_BRCA2 = "d"
       )
-      read_tsvgz(x, col_types = ct)
+      dat <- read_tsvgz(x, col_types = ct)
+      tibble::tibble(name = "hrdchord", data = list(dat[]))
     },
     #' @description Read `hrdetect.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
@@ -127,43 +129,26 @@ Wf_sash <- R6::R6Class(
         .default = "d",
         sample = "c"
       )
-      read_tsvgz(x, col_types = ct) |>
+      dat <- read_tsvgz(x, col_types = ct) |>
         dplyr::select(-c("sample"))
+      tibble::tibble(name = "hrdhrdetect", data = list(dat[]))
     },
     #' @description Read signature cancer report file.
     #' @param x Path to file.
     read_sigstsv = function(x) {
+      suffix <- private$sigs_suffix(x)
       ct <- readr::cols(
         .default = "d",
         Signature = "c"
       )
-      read_tsvgz(x, col_types = ct)
-    },
-    #' @description Read `snv_2015.tsv.gz` sigs cancer report file.
-    #' @param x Path to file.
-    read_sigs_snv2015 = function(x) {
-      self$read_sigstsv(x)
-    },
-    #' @description Read `snv_2020.tsv.gz` sigs cancer report file.
-    #' @param x Path to file.
-    read_sigs_snv2020 = function(x) {
-      self$read_sigstsv(x)
-    },
-    #' @description Read `dbs.tsv.gz` sigs cancer report file.
-    #' @param x Path to file.
-    read_sigs_dbs = function(x) {
-      self$read_sigstsv(x)
-    },
-    #' @description Read `indel.tsv.gz` sigs cancer report file.
-    #' @param x Path to file.
-    read_sigs_indel = function(x) {
-      self$read_sigstsv(x)
+      dat <- read_tsvgz(x, col_types = ct)
+      tibble::tibble(name = glue("sigs_{suffix}"), data = list(dat[]))
     },
     #' @description Read `qc_summary.tsv.gz` cancer report file.
     #' @param x Path to file.
     read_qcsum = function(x) {
       d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
-      d |>
+      dat <- d |>
         dplyr::select("variable", "value") |>
         tidyr::pivot_wider(names_from = "variable", values_from = "value") |>
         dplyr::rename(MSI_mb_tmp = "MSI (indels/Mb)") |>
@@ -187,8 +172,21 @@ Wf_sash <- R6::R6Class(
           wgd_hmf = "WGD",
           "hypermutated"
         )
+      tibble::tibble(name = glue("qcsum"), data = list(dat[]))
     }
-  ) # end public
+  ), # end public
+  private = list(
+    sigs_suffix = function(x) {
+      x <- basename(x)
+      dplyr::case_when(
+        grepl("-dbs", x) ~ "dbs",
+        grepl("-indel", x) ~ "ind",
+        grepl("-snv_2015", x) ~ "snv2015",
+        grepl("-snv_2020", x) ~ "snv2020",
+        .default = ""
+      )
+    }
+  )
 )
 
 #' sash Download Tidy and Write

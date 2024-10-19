@@ -10,11 +10,11 @@ Reads and writes tidy versions of files from the \code{sash} workflow
 \dontrun{
 
 #---- Local ----#
-p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ05571/sash"
-p2 <- "202408270b93455e/L2401308_L2401307"
+p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ03324/sash"
+p2 <- "202408309698c304/L2300777_L2300776"
 p <- normalizePath(file.path(p1, p2))
-SubjectID <- "SBJ05571"
-SampleID_tumor <- "MDX240307"
+SubjectID <- "SBJ03324"
+SampleID_tumor <- "PRJ230432"
 prefix <- glue("{SubjectID}__{SampleID_tumor}")
 s1 <- Wf_sash$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
 s1$list_files(max_files = 20)
@@ -72,10 +72,6 @@ d_write <- s1$write(
 \item \href{#method-Wf_sash-read_hrd_chord}{\code{Wf_sash$read_hrd_chord()}}
 \item \href{#method-Wf_sash-read_hrd_hrdetect}{\code{Wf_sash$read_hrd_hrdetect()}}
 \item \href{#method-Wf_sash-read_sigstsv}{\code{Wf_sash$read_sigstsv()}}
-\item \href{#method-Wf_sash-read_sigs_snv2015}{\code{Wf_sash$read_sigs_snv2015()}}
-\item \href{#method-Wf_sash-read_sigs_snv2020}{\code{Wf_sash$read_sigs_snv2020()}}
-\item \href{#method-Wf_sash-read_sigs_dbs}{\code{Wf_sash$read_sigs_dbs()}}
-\item \href{#method-Wf_sash-read_sigs_indel}{\code{Wf_sash$read_sigs_indel()}}
 \item \href{#method-Wf_sash-read_qcsum}{\code{Wf_sash$read_qcsum()}}
 \item \href{#method-Wf_sash-clone}{\code{Wf_sash$clone()}}
 }
@@ -205,74 +201,6 @@ Read \code{hrdetect.tsv.gz} cancer report hrd file.
 Read signature cancer report file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigstsv(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigs_snv2015"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigs_snv2015}{}}}
-\subsection{Method \code{read_sigs_snv2015()}}{
-Read \code{snv_2015.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigs_snv2015(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigs_snv2020"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigs_snv2020}{}}}
-\subsection{Method \code{read_sigs_snv2020()}}{
-Read \code{snv_2020.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigs_snv2020(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigs_dbs"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigs_dbs}{}}}
-\subsection{Method \code{read_sigs_dbs()}}{
-Read \code{dbs.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigs_dbs(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigs_indel"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigs_indel}{}}}
-\subsection{Method \code{read_sigs_indel()}}{
-Read \code{indel.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigs_indel(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
