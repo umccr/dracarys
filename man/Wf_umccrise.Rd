@@ -73,10 +73,6 @@ d_write <- um2$write(
 \item \href{#method-Wf_umccrise-read_hrd_chord}{\code{Wf_umccrise$read_hrd_chord()}}
 \item \href{#method-Wf_umccrise-read_hrd_hrdetect}{\code{Wf_umccrise$read_hrd_hrdetect()}}
 \item \href{#method-Wf_umccrise-read_sigstsv}{\code{Wf_umccrise$read_sigstsv()}}
-\item \href{#method-Wf_umccrise-read_sigs_snv2015}{\code{Wf_umccrise$read_sigs_snv2015()}}
-\item \href{#method-Wf_umccrise-read_sigs_snv2020}{\code{Wf_umccrise$read_sigs_snv2020()}}
-\item \href{#method-Wf_umccrise-read_sigs_dbs}{\code{Wf_umccrise$read_sigs_dbs()}}
-\item \href{#method-Wf_umccrise-read_sigs_indel}{\code{Wf_umccrise$read_sigs_indel()}}
 \item \href{#method-Wf_umccrise-read_qcsum}{\code{Wf_umccrise$read_qcsum()}}
 \item \href{#method-Wf_umccrise-read_conpairmultiqc}{\code{Wf_umccrise$read_conpairmultiqc()}}
 \item \href{#method-Wf_umccrise-clone}{\code{Wf_umccrise$clone()}}
@@ -190,74 +186,6 @@ Read \code{hrdetect.tsv.gz} cancer report file.
 Read signature cancer report file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigstsv(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_sigs_snv2015"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigs_snv2015}{}}}
-\subsection{Method \code{read_sigs_snv2015()}}{
-Read \code{snv_2015.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigs_snv2015(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_sigs_snv2020"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigs_snv2020}{}}}
-\subsection{Method \code{read_sigs_snv2020()}}{
-Read \code{snv_2020.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigs_snv2020(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_sigs_dbs"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigs_dbs}{}}}
-\subsection{Method \code{read_sigs_dbs()}}{
-Read \code{dbs.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigs_dbs(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_sigs_indel"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigs_indel}{}}}
-\subsection{Method \code{read_sigs_indel()}}{
-Read \code{indel.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigs_indel(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
