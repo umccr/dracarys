@@ -68,15 +68,15 @@ Wf_umccrise <- R6::R6Class(
       crep <- "cancer_report_tables"
       regexes <- tibble::tribble(
         ~regex, ~fun,
-        glue("{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "hrd_chord",
-        glue("{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "hrd_hrdetect",
-        glue("{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "sigstsv",
-        glue("{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "sigstsv",
-        glue("{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "sigstsv",
-        glue("{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "sigstsv",
-        glue("{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "qcsum",
-        glue("{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "conpairmultiqc",
-        glue("work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "pcgr_json"
+        glue("{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "hrdChord",
+        glue("{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "hrdHrdetect",
+        glue("{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "sigsTsv",
+        glue("{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "sigsTsv",
+        glue("{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "sigsTsv",
+        glue("{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "sigsTsv",
+        glue("{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "qcSum",
+        glue("{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "conpair",
+        glue("work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "pcgrJson"
       ) |>
         dplyr::mutate(fun = paste0("read_", .data$fun))
 
@@ -100,13 +100,13 @@ Wf_umccrise <- R6::R6Class(
     },
     #' @description Read `pcgr.json.gz` file.
     #' @param x Path to file.
-    read_pcgr_json = function(x) {
+    read_pcgrJson = function(x) {
       dat <- pcgr_json_read(x)
       tibble::tibble(name = "pcgrjson", data = list(dat))
     },
     #' @description Read `chord.tsv.gz` cancer report file.
     #' @param x Path to file.
-    read_hrd_chord = function(x) {
+    read_hrdChord = function(x) {
       ct <- readr::cols_only(
         p_hrd = "d",
         hr_status = "c",
@@ -119,7 +119,7 @@ Wf_umccrise <- R6::R6Class(
     },
     #' @description Read `hrdetect.tsv.gz` cancer report file.
     #' @param x Path to file.
-    read_hrd_hrdetect = function(x) {
+    read_hrdHrdetect = function(x) {
       ct <- readr::cols(
         .default = "d",
         sample = "c"
@@ -130,8 +130,19 @@ Wf_umccrise <- R6::R6Class(
     },
     #' @description Read signature cancer report file.
     #' @param x Path to file.
-    read_sigstsv = function(x) {
-      suffix <- private$sigs_suffix(x)
+    read_sigsTsv = function(x) {
+      .sigsSuffix <- function(x) {
+        x <- basename(x)
+        dplyr::case_when(
+          grepl("-dbs", x) ~ "dbs",
+          grepl("-indel", x) ~ "ind",
+          grepl("-snv_2015", x) ~ "snv2015",
+          grepl("-snv_2020", x) ~ "snv2020",
+          .default = ""
+        )
+      }
+
+      suffix <- .sigsSuffix(x)
       ct <- readr::cols(
         .default = "d",
         Signature = "c"
@@ -141,7 +152,7 @@ Wf_umccrise <- R6::R6Class(
     },
     #' @description Read `qc_summary.tsv.gz` cancer report file.
     #' @param x Path to file.
-    read_qcsum = function(x) {
+    read_qcSum = function(x) {
       d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
       dat <- d |>
         dplyr::select("variable", "value") |>
@@ -176,7 +187,7 @@ Wf_umccrise <- R6::R6Class(
     },
     #' @description Read multiqc_conpair.txt file.
     #' @param x Path to file.
-    read_conpairmultiqc = function(x) {
+    read_conpair = function(x) {
       um_ref_samples <- c("Alice", "Bob", "Chen", "Elon", "Dakota")
       um_ref_samples <- paste0(um_ref_samples, rep(c("_T", "_B", ""), each = length(um_ref_samples)))
       cnames <- list(
@@ -207,19 +218,7 @@ Wf_umccrise <- R6::R6Class(
         rlang::set_names(cnames$new)
       tibble::tibble(name = glue("conpair"), data = list(dat[]))
     }
-  ), # end public
-  private = list(
-    sigs_suffix = function(x) {
-      x <- basename(x)
-      dplyr::case_when(
-        grepl("-dbs", x) ~ "dbs",
-        grepl("-indel", x) ~ "ind",
-        grepl("-snv_2015", x) ~ "snv2015",
-        grepl("-snv_2020", x) ~ "snv2020",
-        .default = ""
-      )
-    }
-  )
+  ) # end public
 )
 
 #' umccrise Download Tidy and Write

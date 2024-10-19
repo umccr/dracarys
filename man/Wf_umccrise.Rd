@@ -69,12 +69,12 @@ d_write <- um2$write(
 \itemize{
 \item \href{#method-Wf_umccrise-new}{\code{Wf_umccrise$new()}}
 \item \href{#method-Wf_umccrise-print}{\code{Wf_umccrise$print()}}
-\item \href{#method-Wf_umccrise-read_pcgr_json}{\code{Wf_umccrise$read_pcgr_json()}}
-\item \href{#method-Wf_umccrise-read_hrd_chord}{\code{Wf_umccrise$read_hrd_chord()}}
-\item \href{#method-Wf_umccrise-read_hrd_hrdetect}{\code{Wf_umccrise$read_hrd_hrdetect()}}
-\item \href{#method-Wf_umccrise-read_sigstsv}{\code{Wf_umccrise$read_sigstsv()}}
-\item \href{#method-Wf_umccrise-read_qcsum}{\code{Wf_umccrise$read_qcsum()}}
-\item \href{#method-Wf_umccrise-read_conpairmultiqc}{\code{Wf_umccrise$read_conpairmultiqc()}}
+\item \href{#method-Wf_umccrise-read_pcgrJson}{\code{Wf_umccrise$read_pcgrJson()}}
+\item \href{#method-Wf_umccrise-read_hrdChord}{\code{Wf_umccrise$read_hrdChord()}}
+\item \href{#method-Wf_umccrise-read_hrdHrdetect}{\code{Wf_umccrise$read_hrdHrdetect()}}
+\item \href{#method-Wf_umccrise-read_sigsTsv}{\code{Wf_umccrise$read_sigsTsv()}}
+\item \href{#method-Wf_umccrise-read_qcSum}{\code{Wf_umccrise$read_qcSum()}}
+\item \href{#method-Wf_umccrise-read_conpair}{\code{Wf_umccrise$read_conpair()}}
 \item \href{#method-Wf_umccrise-clone}{\code{Wf_umccrise$clone()}}
 }
 }
@@ -129,12 +129,12 @@ Print details about the Workflow.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_pcgr_json"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_pcgr_json}{}}}
-\subsection{Method \code{read_pcgr_json()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_pcgrJson"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_pcgrJson}{}}}
+\subsection{Method \code{read_pcgrJson()}}{
 Read \code{pcgr.json.gz} file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_pcgr_json(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_pcgrJson(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -146,12 +146,12 @@ Read \code{pcgr.json.gz} file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_hrd_chord"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_hrd_chord}{}}}
-\subsection{Method \code{read_hrd_chord()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_hrdChord"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_hrdChord}{}}}
+\subsection{Method \code{read_hrdChord()}}{
 Read \code{chord.tsv.gz} cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_hrd_chord(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_hrdChord(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -163,12 +163,12 @@ Read \code{chord.tsv.gz} cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_hrd_hrdetect"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_hrd_hrdetect}{}}}
-\subsection{Method \code{read_hrd_hrdetect()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_hrdHrdetect"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_hrdHrdetect}{}}}
+\subsection{Method \code{read_hrdHrdetect()}}{
 Read \code{hrdetect.tsv.gz} cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_hrd_hrdetect(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_hrdHrdetect(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -180,12 +180,12 @@ Read \code{hrdetect.tsv.gz} cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_sigstsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigstsv}{}}}
-\subsection{Method \code{read_sigstsv()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_sigsTsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_sigsTsv}{}}}
+\subsection{Method \code{read_sigsTsv()}}{
 Read signature cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigstsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_sigsTsv(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -197,12 +197,12 @@ Read signature cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_qcsum"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_qcsum}{}}}
-\subsection{Method \code{read_qcsum()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_qcSum"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_qcSum}{}}}
+\subsection{Method \code{read_qcSum()}}{
 Read \code{qc_summary.tsv.gz} cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_qcsum(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_qcSum(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -214,12 +214,12 @@ Read \code{qc_summary.tsv.gz} cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_umccrise-read_conpairmultiqc"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_conpairmultiqc}{}}}
-\subsection{Method \code{read_conpairmultiqc()}}{
+\if{html}{\out{<a id="method-Wf_umccrise-read_conpair"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_umccrise-read_conpair}{}}}
+\subsection{Method \code{read_conpair()}}{
 Read multiqc_conpair.txt file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_conpairmultiqc(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$read_conpair(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

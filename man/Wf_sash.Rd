@@ -67,12 +67,12 @@ d_write <- s1$write(
 \itemize{
 \item \href{#method-Wf_sash-new}{\code{Wf_sash$new()}}
 \item \href{#method-Wf_sash-print}{\code{Wf_sash$print()}}
-\item \href{#method-Wf_sash-read_pcgr_json}{\code{Wf_sash$read_pcgr_json()}}
-\item \href{#method-Wf_sash-read_hrd_dragen}{\code{Wf_sash$read_hrd_dragen()}}
-\item \href{#method-Wf_sash-read_hrd_chord}{\code{Wf_sash$read_hrd_chord()}}
-\item \href{#method-Wf_sash-read_hrd_hrdetect}{\code{Wf_sash$read_hrd_hrdetect()}}
-\item \href{#method-Wf_sash-read_sigstsv}{\code{Wf_sash$read_sigstsv()}}
-\item \href{#method-Wf_sash-read_qcsum}{\code{Wf_sash$read_qcsum()}}
+\item \href{#method-Wf_sash-read_pcgrJson}{\code{Wf_sash$read_pcgrJson()}}
+\item \href{#method-Wf_sash-read_hrdDragen}{\code{Wf_sash$read_hrdDragen()}}
+\item \href{#method-Wf_sash-read_hrdChord}{\code{Wf_sash$read_hrdChord()}}
+\item \href{#method-Wf_sash-read_hrdHrdetect}{\code{Wf_sash$read_hrdHrdetect()}}
+\item \href{#method-Wf_sash-read_sigsTsv}{\code{Wf_sash$read_sigsTsv()}}
+\item \href{#method-Wf_sash-read_qcSum}{\code{Wf_sash$read_qcSum()}}
 \item \href{#method-Wf_sash-clone}{\code{Wf_sash$clone()}}
 }
 }
@@ -127,12 +127,12 @@ Print details about the Workflow.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_pcgr_json"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_pcgr_json}{}}}
-\subsection{Method \code{read_pcgr_json()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_pcgrJson"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_pcgrJson}{}}}
+\subsection{Method \code{read_pcgrJson()}}{
 Read \code{pcgr.json.gz} file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_pcgr_json(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_pcgrJson(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -144,12 +144,12 @@ Read \code{pcgr.json.gz} file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_hrd_dragen"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrd_dragen}{}}}
-\subsection{Method \code{read_hrd_dragen()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_hrdDragen"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrdDragen}{}}}
+\subsection{Method \code{read_hrdDragen()}}{
 Read \code{dragen.tsv.gz} cancer report hrd file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrd_dragen(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrdDragen(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -161,12 +161,12 @@ Read \code{dragen.tsv.gz} cancer report hrd file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_hrd_chord"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrd_chord}{}}}
-\subsection{Method \code{read_hrd_chord()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_hrdChord"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrdChord}{}}}
+\subsection{Method \code{read_hrdChord()}}{
 Read \code{chord.tsv.gz} cancer report hrd file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrd_chord(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrdChord(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -178,12 +178,12 @@ Read \code{chord.tsv.gz} cancer report hrd file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_hrd_hrdetect"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrd_hrdetect}{}}}
-\subsection{Method \code{read_hrd_hrdetect()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_hrdHrdetect"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrdHrdetect}{}}}
+\subsection{Method \code{read_hrdHrdetect()}}{
 Read \code{hrdetect.tsv.gz} cancer report hrd file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrd_hrdetect(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrdHrdetect(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -195,12 +195,12 @@ Read \code{hrdetect.tsv.gz} cancer report hrd file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigstsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigstsv}{}}}
-\subsection{Method \code{read_sigstsv()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_sigsTsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigsTsv}{}}}
+\subsection{Method \code{read_sigsTsv()}}{
 Read signature cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigstsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigsTsv(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -212,12 +212,12 @@ Read signature cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_qcsum"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_qcsum}{}}}
-\subsection{Method \code{read_qcsum()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_qcSum"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_qcSum}{}}}
+\subsection{Method \code{read_qcSum()}}{
 Read \code{qc_summary.tsv.gz} cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_qcsum(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_qcSum(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

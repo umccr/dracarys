@@ -98,20 +98,20 @@ Wf_sash <- R6::R6Class(
     },
     #' @description Read `pcgr.json.gz` file.
     #' @param x Path to file.
-    read_pcgr_json = function(x) {
+    read_pcgrJson = function(x) {
       dat <- pcgr_json_read(x)
       tibble::tibble(name = "pcgrjson", data = list(dat[]))
     },
     #' @description Read `dragen.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
-    read_hrd_dragen = function(x) {
+    read_hrdDragen = function(x) {
       ct <- readr::cols(.default = "d", Sample = "c")
       dat <- read_tsvgz(x, col_types = ct)
       tibble::tibble(name = "hrddragen", data = list(dat[]))
     },
     #' @description Read `chord.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
-    read_hrd_chord = function(x) {
+    read_hrdChord = function(x) {
       ct <- readr::cols_only(
         p_hrd = "d",
         hr_status = "c",
@@ -124,7 +124,7 @@ Wf_sash <- R6::R6Class(
     },
     #' @description Read `hrdetect.tsv.gz` cancer report hrd file.
     #' @param x Path to file.
-    read_hrd_hrdetect = function(x) {
+    read_hrdHrdetect = function(x) {
       ct <- readr::cols(
         .default = "d",
         sample = "c"
@@ -135,8 +135,18 @@ Wf_sash <- R6::R6Class(
     },
     #' @description Read signature cancer report file.
     #' @param x Path to file.
-    read_sigstsv = function(x) {
-      suffix <- private$sigs_suffix(x)
+    read_sigsTsv = function(x) {
+      .sigsSuffix <- function(x) {
+        x <- basename(x)
+        dplyr::case_when(
+          grepl("-dbs", x) ~ "dbs",
+          grepl("-indel", x) ~ "ind",
+          grepl("-snv_2015", x) ~ "snv2015",
+          grepl("-snv_2020", x) ~ "snv2020",
+          .default = ""
+        )
+      }
+      suffix <- .sigsSuffix(x)
       ct <- readr::cols(
         .default = "d",
         Signature = "c"
@@ -146,7 +156,7 @@ Wf_sash <- R6::R6Class(
     },
     #' @description Read `qc_summary.tsv.gz` cancer report file.
     #' @param x Path to file.
-    read_qcsum = function(x) {
+    read_qcSum = function(x) {
       d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
       dat <- d |>
         dplyr::select("variable", "value") |>
@@ -174,19 +184,7 @@ Wf_sash <- R6::R6Class(
         )
       tibble::tibble(name = glue("qcsum"), data = list(dat[]))
     }
-  ), # end public
-  private = list(
-    sigs_suffix = function(x) {
-      x <- basename(x)
-      dplyr::case_when(
-        grepl("-dbs", x) ~ "dbs",
-        grepl("-indel", x) ~ "ind",
-        grepl("-snv_2015", x) ~ "snv2015",
-        grepl("-snv_2020", x) ~ "snv2020",
-        .default = ""
-      )
-    }
-  )
+  ) # end public
 )
 
 #' sash Download Tidy and Write

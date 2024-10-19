@@ -199,7 +199,8 @@ Wf <- R6::R6Class(
     #' @param x Tibble with `localpath` to file and the function `type` to parse it.
     tidy_files = function(x) {
       # awesomeness
-      tidy_files(x, envir = self)
+      tidy_files(x, envir = self) |>
+        dplyr::arrange(.data$name)
     },
     #' @description Write tidy data.
     #' @param x Tibble with tidy `data` list-column.
