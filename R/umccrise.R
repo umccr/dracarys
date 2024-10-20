@@ -25,14 +25,18 @@
 #' )
 #'
 #' #---- GDS ----#
-#' SubjectID <- "SBJ03043"
-#' SampleID_tumor <- "PRJ230004"
+#' SubjectID <- "SBJ03606"
+#' SampleID_tumor <- "PRJ230726"
+#' SampleID_normal <- "PRJ230725"
 #' prefix <- glue("{SubjectID}__{SampleID_tumor}")
 #' p1_gds <- "gds://production/analysis_data"
-#' p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
+#' p <- file.path(p1_gds, "SBJ03606/umccrise/20240829d11e13b0/L2300828__L2300827")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 #' token <- Sys.getenv("ICA_ACCESS_TOKEN")
-#' um2 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+#' um2 <- Wf_umccrise$new(
+#'   path = p, SubjectID = SubjectID,
+#'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+#' )
 #' um2$list_files(max_files = 8)
 #' um2$list_files_filter_relevant(ica_token = token, max_files = 500)
 #' d <- um2$download_files(
@@ -53,36 +57,51 @@ Wf_umccrise <- R6::R6Class(
   "Wf_umccrise",
   inherit = Wf,
   public = list(
-    #' @field SubjectID The SubjectID of the sample (needed for path lookup).
-    #' @field SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
+    #' @field SubjectID The SubjectID of the sample.
+    #' @field SampleID_tumor The SampleID of the tumor sample.
+    #' @field SampleID_normal The SampleID of the normal sample.
     SubjectID = NULL,
     SampleID_tumor = NULL,
+    SampleID_normal = NULL,
     #' @description Create a new Wf_umccrise object.
     #' @param path Path to directory with raw workflow results (from GDS, S3, or
     #' local filesystem).
-    #' @param SubjectID The SubjectID of the sample (needed for path lookup).
-    #' @param SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
-    initialize = function(path = NULL, SubjectID = NULL, SampleID_tumor = NULL) {
+    #' @param SubjectID The SubjectID of the sample.
+    #' @param SampleID_tumor The SampleID of the tumor sample.
+    #' @field SampleID_normal The SampleID of the normal sample.
+    initialize = function(path = NULL, SubjectID = NULL,
+                          SampleID_tumor = NULL, SampleID_normal = NULL) {
       wname <- "umccrise"
       pref <- glue("{SubjectID}__{SampleID_tumor}")
+      pref_norm <- glue("{SubjectID}__{SampleID_normal}")
       crep <- "cancer_report_tables"
+      smallv <- "small_variants"
       regexes <- tibble::tribble(
         ~regex, ~fun,
-        glue("{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "hrdChord",
-        glue("{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "hrdHrdetect",
-        glue("{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "sigsTsv",
-        glue("{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "sigsTsv",
-        glue("{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "sigsTsv",
-        glue("{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "sigsTsv",
-        glue("{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "qcSum",
-        glue("{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "conpair",
-        glue("work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "pcgrJson"
+        glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "hrdChord",
+        glue("{path}/{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "hrdHrdetect",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "sigsTsv",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "sigsTsv",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "sigsTsv",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "sigsTsv",
+        glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "qcSum",
+        glue("{path}/{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "conpair",
+        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "pcgrJson",
+        glue("{path}/{pref}/{smallv}/{pref}-somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY",
+        glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
+        glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.somatic\\.tsv$"), "DOWNLOAD_ONLY",
+        glue("{path}/{pref}/{smallv}/{pref_norm}-germline\\.predispose_genes\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
+        glue("{path}/{pref}/{smallv}/{pref_norm}-germline\\.predispose_genes\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY"
       ) |>
-        dplyr::mutate(fun = paste0("read_", .data$fun))
-
+        dplyr::mutate(
+          fun = paste0("read_", .data$fun),
+          fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
+        )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$SubjectID <- SubjectID
       self$SampleID_tumor <- SampleID_tumor
+      self$SampleID_normal <- SampleID_normal
     },
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
@@ -93,7 +112,8 @@ Wf_umccrise <- R6::R6Class(
         "wname", self$wname,
         "filesystem", self$filesystem,
         "SubjectID", self$SubjectID,
-        "SampleID_tumor", self$SampleID_tumor
+        "SampleID_tumor", self$SampleID_tumor,
+        "SampleID_normal", self$SampleID_normal
       )
       print(res)
       invisible(self)
@@ -141,7 +161,6 @@ Wf_umccrise <- R6::R6Class(
           .default = ""
         )
       }
-
       suffix <- .sigsSuffix(x)
       ct <- readr::cols(
         .default = "d",
