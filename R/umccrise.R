@@ -68,7 +68,7 @@ Wf_umccrise <- R6::R6Class(
     #' local filesystem).
     #' @param SubjectID The SubjectID of the sample.
     #' @param SampleID_tumor The SampleID of the tumor sample.
-    #' @field SampleID_normal The SampleID of the normal sample.
+    #' @param SampleID_normal The SampleID of the normal sample.
     initialize = function(path = NULL, SubjectID = NULL,
                           SampleID_tumor = NULL, SampleID_normal = NULL) {
       wname <- "umccrise"
@@ -90,7 +90,7 @@ Wf_umccrise <- R6::R6Class(
         glue("{path}/{pref}/{smallv}/{pref}-somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY",
         glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
         glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.somatic\\.tsv$"), "DOWNLOAD_ONLY",
+        glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY",
         glue("{path}/{pref}/{smallv}/{pref_norm}-germline\\.predispose_genes\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
         glue("{path}/{pref}/{smallv}/{pref_norm}-germline\\.predispose_genes\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY"
       ) |>

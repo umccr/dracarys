@@ -68,6 +68,8 @@ Wf <- R6::R6Class(
     .filesystem = NULL
   ),
   active = list(
+    #' @field regexes Get/Set regexes. Tibble with file `regex` and `fun`ction
+    #' to parse it.
     regexes = function(value) {
       if (missing(value)) {
         private$.regexes
