@@ -68,17 +68,11 @@ d <- um3$download_files(outdir = outdir, regexes = regexes, max_files = 50, dryr
 }
 
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
-local filesystem).}
-
-\item{\code{wname}}{Name of workflow (e.g. umccrise, sash).}
-
-\item{\code{filesystem}}{Filesystem of \code{path} (gds/s3/local).}
-
-\item{\code{regexes}}{Tibble with file \code{regex} and \code{fun}ction to parse it.}
+\item{\code{regexes}}{Get/Set regexes. Tibble with file \code{regex} and \code{fun}ction
+to parse it.}
 }
 \if{html}{\out{</div>}}
 }
@@ -140,7 +134,7 @@ Print details about the Workflow.
 List all files under given path.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$list_files(
-  path = self$path,
+  path = private$.path,
   max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   ...
@@ -168,7 +162,7 @@ List all files under given path.
 List dracarys files under given path
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$list_files_filter_relevant(
-  path = self$path,
+  path = private$.path,
   max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   ...
@@ -197,7 +191,7 @@ the \code{s3_list_files_filter_relevant} function.}
 Download files from GDS/S3 to local filesystem.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$download_files(
-  path = self$path,
+  path = private$.path,
   outdir,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   max_files = 1000,

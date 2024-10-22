@@ -10,13 +10,27 @@ Reads and writes tidy versions of files from the \code{sash} workflow
 \dontrun{
 
 #---- Local ----#
-p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ03324/sash"
-p2 <- "202408309698c304/L2300777_L2300776"
+p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ02862/sash"
+p2 <- "20240830ece6b0b7/L2201449_L2201450"
 p <- normalizePath(file.path(p1, p2))
-SubjectID <- "SBJ03324"
-SampleID_tumor <- "PRJ230432"
-prefix <- glue("{SubjectID}__{SampleID_tumor}")
-s1 <- Wf_sash$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+SubjectID <- "SBJ02862"
+SampleID_tumor <- "PRJ222112"
+SampleID_normal <- "PRJ222114"
+prefix <- glue("{SubjectID}_{SampleID_tumor}")
+s1 <- Wf_sash$new(
+  path = p, SubjectID = SubjectID,
+  SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+)
+#-- test regexes active binding
+counts1 <- glue(
+  "{p}/{prefix}/smlv_somatic/report/",
+  "{SampleID_tumor}\\\\.somatic\\\\.variant_counts_process\\\\.json$"
+)
+regexes1 <- tibble::tribble(
+      ~regex, ~fun,
+      counts1, "read_smlvSomCounts"
+)
+s1$regexes <- regexes1
 s1$list_files(max_files = 20)
 s1$list_files_filter_relevant(max_files = 300)
 d <- s1$download_files(max_files = 1000, dryrun = F)
@@ -29,13 +43,17 @@ d_write <- s1$write(
 )
 
 #---- S3 ----#
-p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05571/sash"
-p2 <- "202408270b93455e/L2401308_L2401307"
+p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ02862/sash"
+p2 <- "20240830ece6b0b7/L2201449_L2201450"
 p <- file.path(p1, p2)
-SubjectID <- "SBJ05571"
-SampleID_tumor <- "MDX240307"
+SubjectID <- "SBJ02862"
+SampleID_tumor <- "PRJ222112"
+SampleID_normal <- "PRJ222114"
 prefix <- glue("{SubjectID}__{SampleID_tumor}")
-s1 <- Wf_sash$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+s1 <- Wf_sash$new(
+  path = p, SubjectID = SubjectID,
+  SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+)
 s1$list_files(max_files = 20)
 s1$list_files_filter_relevant()
 outdir <- sub("s3:/", "~/s3", p)
@@ -56,9 +74,11 @@ d_write <- s1$write(
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{SubjectID}}{The SubjectID of the sample (needed for path lookup).}
+\item{\code{SubjectID}}{The SubjectID of the sample.}
 
-\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (needed for path lookup).}
+\item{\code{SampleID_tumor}}{The SampleID of the tumor sample.}
+
+\item{\code{SampleID_normal}}{The SampleID of the normal sample.}
 }
 \if{html}{\out{</div>}}
 }
@@ -67,6 +87,7 @@ d_write <- s1$write(
 \itemize{
 \item \href{#method-Wf_sash-new}{\code{Wf_sash$new()}}
 \item \href{#method-Wf_sash-print}{\code{Wf_sash$print()}}
+\item \href{#method-Wf_sash-read_smlvSomCounts}{\code{Wf_sash$read_smlvSomCounts()}}
 \item \href{#method-Wf_sash-read_pcgrJson}{\code{Wf_sash$read_pcgrJson()}}
 \item \href{#method-Wf_sash-read_hrdDragen}{\code{Wf_sash$read_hrdDragen()}}
 \item \href{#method-Wf_sash-read_hrdChord}{\code{Wf_sash$read_hrdChord()}}
@@ -93,7 +114,12 @@ d_write <- s1$write(
 \subsection{Method \code{new()}}{
 Create a new Wf_sash object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$new(path = NULL, SubjectID = NULL, SampleID_tumor = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$new(
+  path = NULL,
+  SubjectID = NULL,
+  SampleID_tumor = NULL,
+  SampleID_normal = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -102,9 +128,11 @@ Create a new Wf_sash object.
 \item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
 local filesystem).}
 
-\item{\code{SubjectID}}{The SubjectID of the sample (needed for path lookup).}
+\item{\code{SubjectID}}{The SubjectID of the sample.}
 
-\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (needed for path lookup).}
+\item{\code{SampleID_tumor}}{The SampleID of the tumor sample.}
+
+\item{\code{SampleID_normal}}{The SampleID of the tumor sample.}
 }
 \if{html}{\out{</div>}}
 }
@@ -122,6 +150,23 @@ Print details about the Workflow.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_sash-read_smlvSomCounts"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_smlvSomCounts}{}}}
+\subsection{Method \code{read_smlvSomCounts()}}{
+Read \code{somatic.variant_counts_process.json} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_smlvSomCounts(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }

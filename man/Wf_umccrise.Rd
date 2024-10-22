@@ -28,14 +28,18 @@ d_write <- um1$write(
 )
 
 #---- GDS ----#
-SubjectID <- "SBJ03043"
-SampleID_tumor <- "PRJ230004"
+SubjectID <- "SBJ03606"
+SampleID_tumor <- "PRJ230726"
+SampleID_normal <- "PRJ230725"
 prefix <- glue("{SubjectID}__{SampleID_tumor}")
 p1_gds <- "gds://production/analysis_data"
-p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
+p <- file.path(p1_gds, "SBJ03606/umccrise/20240829d11e13b0/L2300828__L2300827")
 outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 token <- Sys.getenv("ICA_ACCESS_TOKEN")
-um2 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+um2 <- Wf_umccrise$new(
+  path = p, SubjectID = SubjectID,
+  SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+)
 um2$list_files(max_files = 8)
 um2$list_files_filter_relevant(ica_token = token, max_files = 500)
 d <- um2$download_files(
@@ -58,9 +62,11 @@ d_write <- um2$write(
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{SubjectID}}{The SubjectID of the sample (needed for path lookup).}
+\item{\code{SubjectID}}{The SubjectID of the sample.}
 
-\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (needed for path lookup).}
+\item{\code{SampleID_tumor}}{The SampleID of the tumor sample.}
+
+\item{\code{SampleID_normal}}{The SampleID of the normal sample.}
 }
 \if{html}{\out{</div>}}
 }
@@ -95,7 +101,12 @@ d_write <- um2$write(
 \subsection{Method \code{new()}}{
 Create a new Wf_umccrise object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$new(path = NULL, SubjectID = NULL, SampleID_tumor = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_umccrise$new(
+  path = NULL,
+  SubjectID = NULL,
+  SampleID_tumor = NULL,
+  SampleID_normal = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -104,9 +115,11 @@ Create a new Wf_umccrise object.
 \item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
 local filesystem).}
 
-\item{\code{SubjectID}}{The SubjectID of the sample (needed for path lookup).}
+\item{\code{SubjectID}}{The SubjectID of the sample.}
 
-\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (needed for path lookup).}
+\item{\code{SampleID_tumor}}{The SampleID of the tumor sample.}
+
+\item{\code{SampleID_normal}}{The SampleID of the normal sample.}
 }
 \if{html}{\out{</div>}}
 }
