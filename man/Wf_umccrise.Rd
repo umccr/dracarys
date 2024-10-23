@@ -28,12 +28,11 @@ d_write <- um1$write(
 )
 
 #---- GDS ----#
-SubjectID <- "SBJ03606"
-SampleID_tumor <- "PRJ230726"
-SampleID_normal <- "PRJ230725"
-prefix <- glue("{SubjectID}__{SampleID_tumor}")
+SubjectID <- "SBJ04662"
+SampleID_tumor <- "PRJ240647"
+SampleID_normal <- "PRJ240646"
 p1_gds <- "gds://production/analysis_data"
-p <- file.path(p1_gds, "SBJ03606/umccrise/20240829d11e13b0/L2300828__L2300827")
+p <- file.path(p1_gds, "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
 outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 token <- Sys.getenv("ICA_ACCESS_TOKEN")
 um2 <- Wf_umccrise$new(
@@ -41,7 +40,7 @@ um2 <- Wf_umccrise$new(
   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
 )
 um2$list_files(max_files = 8)
-um2$list_files_filter_relevant(ica_token = token, max_files = 500)
+um2$list_files_filter_relevant(ica_token = token, max_files = 1000)
 d <- um2$download_files(
   outdir = outdir, ica_token = token,
   max_files = 1000, dryrun = F

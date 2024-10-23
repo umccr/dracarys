@@ -35,7 +35,8 @@ local filesystem).}
 
 \item{ica_token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
-\item{regexes}{Tibble with file \code{regex} and \code{fun}ction to parse it.}
+\item{regexes}{Tibble with file \code{regex} and \code{fun}ction to parse it. Use only
+if you want to override the default regexes used for this workflow.}
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}

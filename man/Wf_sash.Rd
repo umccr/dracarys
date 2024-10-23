@@ -27,8 +27,8 @@ counts1 <- glue(
   "{SampleID_tumor}\\\\.somatic\\\\.variant_counts_process\\\\.json$"
 )
 regexes1 <- tibble::tribble(
-      ~regex, ~fun,
-      counts1, "read_smlvSomCounts"
+  ~regex, ~fun,
+  counts1, "read_smlvSomCounts"
 )
 s1$regexes <- regexes1
 s1$list_files(max_files = 20)
@@ -49,7 +49,6 @@ p <- file.path(p1, p2)
 SubjectID <- "SBJ02862"
 SampleID_tumor <- "PRJ222112"
 SampleID_normal <- "PRJ222114"
-prefix <- glue("{SubjectID}__{SampleID_tumor}")
 s1 <- Wf_sash$new(
   path = p, SubjectID = SubjectID,
   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal

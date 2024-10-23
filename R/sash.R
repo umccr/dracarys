@@ -46,7 +46,6 @@
 #' SubjectID <- "SBJ02862"
 #' SampleID_tumor <- "PRJ222112"
 #' SampleID_normal <- "PRJ222114"
-#' prefix <- glue("{SubjectID}__{SampleID_tumor}")
 #' s1 <- Wf_sash$new(
 #'   path = p, SubjectID = SubjectID,
 #'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
@@ -100,9 +99,9 @@ Wf_sash <- R6::R6Class(
         glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$"), "pcgrJson",
         glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
         glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{path}/{pref}/smlv_somatic/report/{SampleID_tumor}\\.somatic\\.variant_counts_process\\.json$"), "smlvSomCounts",
-        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz"), "DOWNLOAD_ONLY",
-        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz\\.tbi"), "DOWNLOAD_ONLY",
+        # glue("{path}/{pref}/smlv_somatic/report/{SampleID_tumor}\\.somatic\\.variant_counts_process\\.json$"), "smlvSomCounts",
+        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
+        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
       ) |>
         dplyr::mutate(
           fun = paste0("read_", .data$fun),
@@ -243,7 +242,9 @@ Wf_sash <- R6::R6Class(
 #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
-#' @param regexes Tibble with file `regex` and `fun`ction to parse it.
+#' @param regexes Tibble with file `regex` and `fun`ction to parse it. Use only
+#' if you want to override the default regexes used for this workflow.
+#'
 #'
 #' @return List where each element is a tidy tibble of a sash file.
 #'

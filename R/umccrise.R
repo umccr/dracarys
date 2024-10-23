@@ -25,12 +25,11 @@
 #' )
 #'
 #' #---- GDS ----#
-#' SubjectID <- "SBJ03606"
-#' SampleID_tumor <- "PRJ230726"
-#' SampleID_normal <- "PRJ230725"
-#' prefix <- glue("{SubjectID}__{SampleID_tumor}")
+#' SubjectID <- "SBJ04662"
+#' SampleID_tumor <- "PRJ240647"
+#' SampleID_normal <- "PRJ240646"
 #' p1_gds <- "gds://production/analysis_data"
-#' p <- file.path(p1_gds, "SBJ03606/umccrise/20240829d11e13b0/L2300828__L2300827")
+#' p <- file.path(p1_gds, "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 #' token <- Sys.getenv("ICA_ACCESS_TOKEN")
 #' um2 <- Wf_umccrise$new(
@@ -38,7 +37,7 @@
 #'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
 #' )
 #' um2$list_files(max_files = 8)
-#' um2$list_files_filter_relevant(ica_token = token, max_files = 500)
+#' um2$list_files_filter_relevant(ica_token = token, max_files = 1000)
 #' d <- um2$download_files(
 #'   outdir = outdir, ica_token = token,
 #'   max_files = 1000, dryrun = F
@@ -73,7 +72,6 @@ Wf_umccrise <- R6::R6Class(
                           SampleID_tumor = NULL, SampleID_normal = NULL) {
       wname <- "umccrise"
       pref <- glue("{SubjectID}__{SampleID_tumor}")
-      pref_norm <- glue("{SubjectID}__{SampleID_normal}")
       crep <- "cancer_report_tables"
       smallv <- "small_variants"
       regexes <- tibble::tribble(
@@ -91,8 +89,8 @@ Wf_umccrise <- R6::R6Class(
         glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
         glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
         glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY",
-        glue("{path}/{pref}/{smallv}/{pref_norm}-germline\\.predispose_genes\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
-        glue("{path}/{pref}/{smallv}/{pref_norm}-germline\\.predispose_genes\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY"
+        glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
+        glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
       ) |>
         dplyr::mutate(
           fun = paste0("read_", .data$fun),
@@ -108,9 +106,10 @@ Wf_umccrise <- R6::R6Class(
     print = function(...) {
       res <- tibble::tribble(
         ~var, ~value,
-        "path", self$path,
-        "wname", self$wname,
-        "filesystem", self$filesystem,
+        "path", private$.path,
+        "wname", private$.wname,
+        "filesystem", private$.filesystem,
+        "nregexes", as.character(nrow(private$.regexes)),
         "SubjectID", self$SubjectID,
         "SampleID_tumor", self$SampleID_tumor,
         "SampleID_normal", self$SampleID_normal
