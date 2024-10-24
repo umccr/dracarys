@@ -10,12 +10,15 @@ Reads and writes tidy versions of files from the \code{umccrise} workflow
 \dontrun{
 
 #---- LOCAL ----#
-SubjectID <- "SBJ03043"
-SampleID_tumor <- "PRJ230004"
-prefix <- glue("{SubjectID}__{SampleID_tumor}")
+SubjectID <- "SBJ04662"
+SampleID_tumor <- "PRJ240647"
+SampleID_normal <- "PRJ240646"
 p1_local <- "~/icav1/g/production/analysis_data"
-p <- file.path(p1_local, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
-um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+p <- file.path(normalizePath(p1_local), "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
+um1 <- Wf_umccrise$new(
+  path = p, SubjectID = SubjectID,
+  SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+)
 um1$list_files(max_files = 10)
 um1$list_files_filter_relevant()
 d <- um1$download_files(max_files = 1000, dryrun = F)

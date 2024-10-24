@@ -238,8 +238,16 @@ Wf <- R6::R6Class(
       d_write <- x |>
         dplyr::rowwise() |>
         dplyr::mutate(
-          p = glue("{prefix}_{.data$name}"),
-          out = list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid))
+          p = ifelse(
+            .data$name != "DOWNLOAD_ONLY",
+            as.character(glue("{prefix}_{.data$name}")),
+            as.character(.data$data |> dplyr::pull("input_path"))
+          ),
+          out = ifelse(
+            .data$name != "DOWNLOAD_ONLY",
+            list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid)),
+            list(.data$data)
+          )
         ) |>
         dplyr::ungroup() |>
         dplyr::select("name", "data", prefix = "p")

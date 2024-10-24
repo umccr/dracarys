@@ -27,13 +27,15 @@ p2 <- "L2101566__L2101565/SBJ01155__PRJ211091/cancer_report_tables"
 p <- file.path(p1, p2, "SBJ01155__PRJ211091-qc_summary.tsv.gz")
 p_dl <- file.path(
   p1, "L2101566__L2101565/SBJ01155__PRJ211091/small_variants",
-  "SBJ01155__PRJ211091-somatic-PASS.vcf.gz")
+  "SBJ01155__PRJ211091-somatic-PASS.vcf.gz"
+)
 fun <- function(x) {
   d <- readr::read_tsv(x)
   tibble::tibble(name = "table1", data = list(d[]))
 }
 x <- tibble::tibble(
-  type = c("fun", "DOWNLOAD_ONLY"), localpath = c(p, p_dl))
+  type = c("fun", "DOWNLOAD_ONLY"), localpath = c(p, p_dl)
+)
 tidy_files(x)
 }
 
