@@ -175,6 +175,11 @@ Wf <- R6::R6Class(
       }
       d
     },
+    #' @description For DOWNLOAD_ONLY files, just return the input path.
+    #' @param x Path with raw results.
+    DOWNLOAD_ONLY = function(x) {
+      tibble::tibble(name = glue("DOWNLOAD_ONLY"), data = list(tibble::tibble(input_path = x)))
+    },
     #' @description Download files from GDS/S3 to local filesystem.
     #' @param path Path with raw results.
     #' @param outdir Path to output directory.

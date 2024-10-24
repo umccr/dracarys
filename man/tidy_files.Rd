@@ -25,11 +25,15 @@ Tidies files into a tibble with parsed data.
 p1 <- "~/icav1/g/production/analysis_data/SBJ01155/umccrise/202408300c218043"
 p2 <- "L2101566__L2101565/SBJ01155__PRJ211091/cancer_report_tables"
 p <- file.path(p1, p2, "SBJ01155__PRJ211091-qc_summary.tsv.gz")
+p_dl <- file.path(
+  p1, "L2101566__L2101565/SBJ01155__PRJ211091/small_variants",
+  "SBJ01155__PRJ211091-somatic-PASS.vcf.gz")
 fun <- function(x) {
   d <- readr::read_tsv(x)
   tibble::tibble(name = "table1", data = list(d[]))
 }
-x <- tibble::tibble(type = "fun", localpath = p)
+x <- tibble::tibble(
+  type = c("fun", "DOWNLOAD_ONLY"), localpath = c(p, p_dl))
 tidy_files(x)
 }
 

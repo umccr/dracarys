@@ -83,6 +83,7 @@ to parse it.}
 \item \href{#method-Wf-print}{\code{Wf$print()}}
 \item \href{#method-Wf-list_files}{\code{Wf$list_files()}}
 \item \href{#method-Wf-list_files_filter_relevant}{\code{Wf$list_files_filter_relevant()}}
+\item \href{#method-Wf-DOWNLOAD_ONLY}{\code{Wf$DOWNLOAD_ONLY()}}
 \item \href{#method-Wf-download_files}{\code{Wf$download_files()}}
 \item \href{#method-Wf-tidy_files}{\code{Wf$tidy_files()}}
 \item \href{#method-Wf-write}{\code{Wf$write()}}
@@ -180,6 +181,23 @@ List dracarys files under given path
 
 \item{\code{...}}{Passed on to the \code{gds_list_files_filter_relevant} or
 the \code{s3_list_files_filter_relevant} function.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-DOWNLOAD_ONLY"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-DOWNLOAD_ONLY}{}}}
+\subsection{Method \code{DOWNLOAD_ONLY()}}{
+For DOWNLOAD_ONLY files, just return the input path.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$DOWNLOAD_ONLY(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path with raw results.}
 }
 \if{html}{\out{</div>}}
 }
