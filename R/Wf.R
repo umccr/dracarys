@@ -177,8 +177,11 @@ Wf <- R6::R6Class(
     },
     #' @description For DOWNLOAD_ONLY files, just return the input path.
     #' @param x Path with raw results.
-    DOWNLOAD_ONLY = function(x) {
-      tibble::tibble(name = glue("DOWNLOAD_ONLY"), data = list(tibble::tibble(input_path = x)))
+    DOWNLOAD_ONLY = function(x, suffix = "") {
+      tibble::tibble(
+        name = glue("DOWNLOAD_ONLY{suffix}"),
+        data = list(tibble::tibble(input_path = x))
+      )
     },
     #' @description Download files from GDS/S3 to local filesystem.
     #' @param path Path with raw results.
@@ -239,12 +242,12 @@ Wf <- R6::R6Class(
         dplyr::rowwise() |>
         dplyr::mutate(
           p = ifelse(
-            .data$name != "DOWNLOAD_ONLY",
+            !grepl("DOWNLOAD_ONLY", .data$name),
             as.character(glue("{prefix}_{.data$name}")),
             as.character(.data$data |> dplyr::pull("input_path"))
           ),
           out = ifelse(
-            .data$name != "DOWNLOAD_ONLY",
+            !grepl("DOWNLOAD_ONLY", .data$name),
             list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid)),
             list(.data$data)
           )

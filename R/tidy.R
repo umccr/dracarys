@@ -23,7 +23,7 @@
 #'   tibble::tibble(name = "table1", data = list(d[]))
 #' }
 #' x <- tibble::tibble(
-#'   type = c("fun", "DOWNLOAD_ONLY"), localpath = c(p, p_dl)
+#'   type = c("fun", "DOWNLOAD_ONLY_foobar"), localpath = c(p, p_dl)
 #' )
 #' tidy_files(x)
 #' }
@@ -32,10 +32,27 @@
 tidy_files <- function(x, envir = parent.frame()) {
   assertthat::assert_that(is.data.frame(x))
   assertthat::assert_that(all(c("type", "localpath") %in% colnames(x)))
+  # if there's a DOWNLOAD_ONLY_suffix, extract that suffix and call
+  # the DOWNLOAD_ONLY function
+  extract_download_suffix <- function(s) {
+    sub("DOWNLOAD_ONLY(.*)", "\\1", s)
+  }
   x |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      data = list(dr_func_eval(f = .data$type, v = .data$type, envir = envir)(.data$localpath))
+      data = ifelse(
+        !grepl("DOWNLOAD_ONLY", .data$type),
+        list(
+          dr_func_eval(
+            f = .data$type, v = .data$type, envir = envir
+          )(.data$localpath)
+        ),
+        list(
+          dr_func_eval(
+            f = "DOWNLOAD_ONLY", v = "DOWNLOAD_ONLY", envir = envir
+          )(.data$localpath, extract_download_suffix(.data$type))
+        )
+      )
     ) |>
     dplyr::ungroup() |>
     dplyr::select("data") |>

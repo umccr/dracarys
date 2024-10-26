@@ -79,26 +79,22 @@ Wf_umccrise <- R6::R6Class(
       smallv <- "small_variants"
       regexes <- tibble::tribble(
         ~regex, ~fun,
-        glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "hrdChord",
-        glue("{path}/{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "hrdHrdetect",
-        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "sigsTsv",
-        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "sigsTsv",
-        glue("{path}/{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "sigsTsv",
-        glue("{path}/{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "sigsTsv",
-        glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "qcSum",
-        glue("{path}/{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "conpair",
-        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "pcgrJson",
-        glue("{path}/{pref}/{smallv}/{pref}-somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY",
-        glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
-        glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY",
-        glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
-        glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-      ) |>
-        dplyr::mutate(
-          fun = paste0("read_", .data$fun),
-          fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
-        )
+        glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "read_hrdChord",
+        glue("{path}/{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "read_hrdHrdetect",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "read_sigsTsv",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "read_sigsTsv",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "read_sigsTsv",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "read_sigsTsv",
+        glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "read_qcSum",
+        glue("{path}/{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "read_conpair",
+        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "read_pcgrJson",
+        glue("{path}/{pref}/{smallv}/{pref}-somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY-pcgrtiers",
+        glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz$"), "DOWNLOAD_ONLY-smallvpassvcf",
+        glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-smallvpassvcfi",
+        glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY-purplegene",
+        glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz$"), "DOWNLOAD_ONLY-cpsrvcf",
+        glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-cpsrvcfi"
+      )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$SubjectID <- SubjectID
       self$SampleID_tumor <- SampleID_tumor
