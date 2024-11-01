@@ -191,7 +191,7 @@ the \code{s3_list_files_filter_relevant} function.}
 \subsection{Method \code{DOWNLOAD_ONLY()}}{
 For DOWNLOAD_ONLY files, just return the input path.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$DOWNLOAD_ONLY(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$DOWNLOAD_ONLY(x, suffix = "")}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

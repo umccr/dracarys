@@ -87,11 +87,11 @@ Wf_umccrise <- R6::R6Class(
         glue("{path}/{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "read_sigsTsv",
         glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "read_qcSum",
         glue("{path}/{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "read_conpair",
+        glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY-purplegene",
         glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "read_pcgrJson",
         glue("{path}/{pref}/{smallv}/{pref}-somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY-pcgrtiers",
         glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz$"), "DOWNLOAD_ONLY-smallvpassvcf",
         glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-smallvpassvcfi",
-        glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY-purplegene",
         glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz$"), "DOWNLOAD_ONLY-cpsrvcf",
         glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-cpsrvcfi"
       )

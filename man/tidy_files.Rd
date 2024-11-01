@@ -34,7 +34,7 @@ fun <- function(x) {
   tibble::tibble(name = "table1", data = list(d[]))
 }
 x <- tibble::tibble(
-  type = c("fun", "DOWNLOAD_ONLY"), localpath = c(p, p_dl)
+  type = c("fun", "DOWNLOAD_ONLY_foobar"), localpath = c(p, p_dl)
 )
 tidy_files(x)
 }
