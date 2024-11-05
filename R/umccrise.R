@@ -76,7 +76,6 @@ Wf_umccrise <- R6::R6Class(
       wname <- "umccrise"
       pref <- glue("{SubjectID}__{SampleID_tumor}")
       crep <- "cancer_report_tables"
-      smallv <- "small_variants"
       regexes <- tibble::tribble(
         ~regex, ~fun,
         glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "read_hrdChord",
@@ -88,10 +87,12 @@ Wf_umccrise <- R6::R6Class(
         glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "read_qcSum",
         glue("{path}/{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "read_conpair",
         glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY-purplegene",
+        glue("{path}/{pref}/small_variants/{pref}-somatic-PASS\\.vcf\\.gz$"), "DOWNLOAD_ONLY-smlvfiltvcf",
+        glue("{path}/{pref}/small_variants/{pref}-somatic-PASS\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-smlvfiltvcfi",
         glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "read_pcgrJson",
-        glue("{path}/{pref}/{smallv}/{pref}-somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY-pcgrtiers",
-        glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz$"), "DOWNLOAD_ONLY-smallvpassvcf",
-        glue("{path}/{pref}/{smallv}/{pref}-somatic-PASS\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-smallvpassvcfi",
+        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.pass\\.vcf\\.gz$"), "DOWNLOAD_ONLY-pcgrvcf",
+        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.pass\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-pcgrvcfi",
+        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY-pcgrtiers",
         glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz$"), "DOWNLOAD_ONLY-cpsrvcf",
         glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-cpsrvcfi"
       )

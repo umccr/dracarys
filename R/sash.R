@@ -96,19 +96,16 @@ Wf_sash <- R6::R6Class(
         glue("{path}/{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "read_sigsTsv",
         glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "read_qcSum",
         glue("{path}/{pref}/purple/{SampleID_tumor}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY-purplegene",
+        glue("{path}/{pref}/smlv_somatic/filter/{SampleID_tumor}\\.pass\\.vcf\\.gz$"), "DOWNLOAD_ONLY-smlvfiltvcf",
+        glue("{path}/{pref}/smlv_somatic/filter/{SampleID_tumor}\\.pass\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-smlvfiltvcfi",
         glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$"), "read_pcgrJson",
-        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY-pcgrtiers",
         glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz$"), "DOWNLOAD_ONLY-pcgrvcf",
         glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-pcgrvcfi",
+        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY-pcgrtiers",
         # glue("{path}/{pref}/smlv_somatic/report/{SampleID_tumor}\\.somatic\\.variant_counts_process\\.json$"), "smlvSomCounts",
         glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz$"), "DOWNLOAD_ONLY-cpsrvcf",
         glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-cpsrvcfi",
-      ) |>
-        dplyr::mutate(
-          fun = paste0("read_", .data$fun),
-          fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
-        )
-
+      )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$SubjectID <- SubjectID
       self$SampleID_tumor <- SampleID_tumor

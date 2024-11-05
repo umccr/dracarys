@@ -32,7 +32,7 @@ s3_list_files_dir <- function(s3dir, max_objects = 1000) {
     purrr::map(\(x) tibble::tibble(
       Key = x[["Key"]],
       Size = x[["Size"]],
-      lastmodified = x[["LastModified"]]
+      lastmodified = as.character(x[["LastModified"]])
     )) |>
     dplyr::bind_rows() |>
     dplyr::mutate(
