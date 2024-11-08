@@ -86,9 +86,9 @@ Wf_dragen <- R6::R6Class(
     print = function(...) {
       res <- tibble::tribble(
         ~var, ~value,
-        "path", self$path,
-        "wname", self$wname,
-        "filesystem", self$filesystem,
+        "path", private$.path,
+        "wname", private$.wname,
+        "filesystem", private$.filesystem,
         "prefix", self$prefix
       )
       print(res)

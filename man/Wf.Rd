@@ -198,6 +198,8 @@ For DOWNLOAD_ONLY files, just return the input path.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{x}}{Path with raw results.}
+
+\item{\code{suffix}}{Suffix.}
 }
 \if{html}{\out{</div>}}
 }

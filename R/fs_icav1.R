@@ -179,6 +179,12 @@ dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN
     no_recurse = FALSE, page_token = NULL,
     recursive = recursive
   )
+  msg <- glue(
+    "GDS input path is: {gdsdir}",
+    "\nNo relevant files found under there.",
+    "\nPlease check that path with `ica files list`, and try to adjust page size."
+  )
+  assertthat::assert_that(nrow(d) > 0, msg = msg)
   d <- d |>
     dplyr::mutate(
       gdspath_minus_gdsdir = sub(glue("{gdsdir}/"), "", .data$path),
@@ -206,6 +212,7 @@ dr_gds_download <- function(gdsdir, outdir, token = Sys.getenv("ICA_ACCESS_TOKEN
         ),
         localpath = normalizePath(.data$localpath)
       ) |>
+      dplyr::ungroup() |>
       dplyr::select("type", "bname", "size", "lastmodified", "localpath", "gdspath", "file_id")
     return(res)
   } else {

@@ -47,7 +47,7 @@
 #' d <- t2$download_files(
 #'   outdir = outdir,
 #'   max_files = 500,
-#'   dryrun = F
+#'   dryrun = FALSE
 #' )
 #' d_tidy <- t2$tidy_files(d)
 #' d_write <- t2$write(
@@ -76,29 +76,25 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
       res <- glue("Results/{pref}")
       li <- "Logs_Intermediates"
       dc <- glue("{li}/DragenCaller/{pref}")
+      path <- sub("/$", "", path) # remove potential trailing slash
       self$dragenObj <- Wf_dragen$new(path = file.path(path, dc), prefix = glue("{dc}/{prefix}"))
       # Results
-      reg1 <- tibble::tribble(
+      regexes <- tibble::tribble(
         ~regex, ~fun,
-        glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"), "cnv",
-        glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{res}/{pref}\\.exon_cov_report\\.tsv$"), "cvgrepe",
-        glue("{res}/{pref}\\.gene_cov_report\\.tsv$"), "cvgrepg",
-        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$"), "hardfilt",
-        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"), "read_cnv",
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-cnvvcfi",
+        glue("{res}/{pref}\\.exon_cov_report\\.tsv$"), "read_cvgrepe",
+        glue("{res}/{pref}\\.gene_cov_report\\.tsv$"), "read_cvgrepg",
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$"), "read_hardfilt",
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-hardfiltvcfi",
         # glue("{res}/{pref}\\.microsat_output\\.json$"), "msi", # in DragenCaller
-        glue("{res}/{pref}\\.tmb.trace\\.tsv$"), "tmbt",
-        glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
-        glue("{res}/{pref}_Fusions\\.csv$"), "fus",
-        glue("{res}/{pref}_MetricsOutput\\.tsv$"), "DOWNLOAD_ONLY",
-        # glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY",
-        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"), "sar"
+        glue("{res}/{pref}\\.tmb.trace\\.tsv$"), "read_tmbt",
+        glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"), "read_cvo",
+        glue("{res}/{pref}_Fusions\\.csv$"), "read_fus",
+        glue("{res}/{pref}_MetricsOutput\\.tsv$"), "DOWNLOAD_ONLY-metricsoutput",
+        # glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY-smallvannjson",
+        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"), "read_sar"
       )
-      regexes <- reg1 |>
-        dplyr::mutate(
-          fun = paste0("read_", .data$fun),
-          fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
-        )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$prefix <- prefix
     },
@@ -107,9 +103,9 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
     print = function(...) {
       res <- tibble::tribble(
         ~var, ~value,
-        "path", self$path,
-        "wname", self$wname,
-        "filesystem", self$filesystem,
+        "path", private$.path,
+        "wname", private$.wname,
+        "filesystem", private$.filesystem,
         "prefix", self$prefix
       )
       print(res)

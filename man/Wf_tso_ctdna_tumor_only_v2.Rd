@@ -50,7 +50,7 @@ t2$list_files_filter_relevant(max_files = 500)
 d <- t2$download_files(
   outdir = outdir,
   max_files = 500,
-  dryrun = F
+  dryrun = FALSE
 )
 d_tidy <- t2$tidy_files(d)
 d_write <- t2$write(

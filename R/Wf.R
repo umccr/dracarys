@@ -106,7 +106,8 @@ Wf <- R6::R6Class(
       )
       subwnames <- c("dragen")
       assertthat::assert_that(wname %in% c(wnames, subwnames))
-      private$.path <- sub("/$", "", path) # remove potential trailing slash
+      path <- sub("/$", "", path) # remove potential trailing slash
+      private$.path <- path
       private$.wname <- wname
       private$.filesystem <- dplyr::case_when(
         grepl("^gds://", path) ~ "gds",
@@ -177,6 +178,7 @@ Wf <- R6::R6Class(
     },
     #' @description For DOWNLOAD_ONLY files, just return the input path.
     #' @param x Path with raw results.
+    #' @param suffix Suffix.
     DOWNLOAD_ONLY = function(x, suffix = "") {
       tibble::tibble(
         name = glue("DOWNLOAD_ONLY{suffix}"),
