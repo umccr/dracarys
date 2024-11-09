@@ -16,7 +16,25 @@
 #' d1 <- Wf_dragen$new(path = p, prefix = prefix)
 #' d1$list_files(max_files = 100)
 #' d1$list_files_filter_relevant(max_files = 300)
-#' d <- d1$download_files(max_files = 100, dryrun = F)
+#' d <- d1$download_files(max_files = 100, outdir = outdir, dryrun = F)
+#' d_tidy <- d1$tidy_files(d)
+#' d_write <- t1$write(
+#'   d_tidy,
+#'   outdir = file.path(p, "dracarys_tidy"),
+#'   prefix = prefix,
+#'   format = "tsv"
+#' )
+#' #---- GDS ----#
+#' prefix <- "PRJ222358"
+#' p <- file.path(
+#'   "gds://production/analysis_data/SBJ03001/wgs_tumor_normal",
+#'   "20241108fc293a38/L2201805_L2201797_dragen_somatic"
+#' )
+#' outdir <- file.path(sub("gds:/", normalizePath("~/icav1/g"), p)) # for GDS case
+#' d1 <- Wf_dragen$new(path = p, prefix = prefix)
+#' d1$list_files(max_files = 100)
+#' d1$list_files_filter_relevant(max_files = 300)
+#' d <- d1$download_files(max_files = 100, outdir = outdir, dryrun = F)
 #' d_tidy <- d1$tidy_files(d)
 #' d_write <- t1$write(
 #'   d_tidy,
@@ -39,44 +57,40 @@ Wf_dragen <- R6::R6Class(
     initialize = function(path = NULL, prefix = NULL) {
       wname <- "dragen"
       pref <- prefix
-      reg1 <- tibble::tribble(
+      tn1 <- "(|_tumor|_normal)"
+      regexes <- tibble::tribble(
         ~regex, ~fun,
-        glue("{pref}\\-replay\\.json$"), "replay",
-        glue("{pref}\\.cnv_metrics.csv$"), "cnvMetrics",
-        glue("{pref}\\.exon_contig_mean_cov\\.csv$"), "contigMeanCov",
-        glue("{pref}\\.target_bed_contig_mean_cov\\.csv$"), "contigMeanCov",
-        glue("{pref}\\.tmb_contig_mean_cov\\.csv$"), "contigMeanCov",
-        glue("{pref}\\.wgs_contig_mean_cov\\.csv$"), "contigMeanCov",
-        glue("{pref}\\.exon_coverage_metrics\\.csv$"), "coverageMetrics",
-        glue("{pref}\\.target_bed_coverage_metrics\\.csv$"), "coverageMetrics",
-        glue("{pref}\\.tmb_coverage_metrics\\.csv$"), "coverageMetrics",
-        glue("{pref}\\.wgs_coverage_metrics\\.csv$"), "coverageMetrics",
-        glue("{pref}\\.exon_fine_hist\\.csv$"), "fineHist",
-        glue("{pref}\\.target_bed_fine_hist\\.csv$"), "fineHist",
-        glue("{pref}\\.tmb_fine_hist\\.csv$"), "fineHist",
-        glue("{pref}\\.wgs_fine_hist\\.csv$"), "fineHist",
-        glue("{pref}\\.exon_hist\\.csv$"), "hist",
-        glue("{pref}\\.target_bed_hist\\.csv$"), "hist",
-        glue("{pref}\\.tmb_hist\\.csv$"), "hist",
-        glue("{pref}\\.wgs_hist\\.csv$"), "hist",
-        glue("{pref}\\.fastqc_metrics\\.csv$"), "fastqcMetrics",
-        glue("{pref}\\.fragment_length_hist\\.csv$"), "fragmentLengthHist",
-        glue("{pref}\\.gc_metrics\\.csv$"), "gcMetrics",
-        glue("{pref}\\.gvcf_metrics\\.csv$"), "vcMetrics",
-        glue("{pref}\\.mapping_metrics\\.csv$"), "mappingMetrics",
-        glue("{pref}\\.microsat_diffs\\.txt$"), "msiDiffs",
-        glue("{pref}\\.microsat_output\\.json$"), "msi",
-        glue("{pref}\\.sv_metrics\\.csv$"), "svMetrics",
-        glue("{pref}\\.time_metrics\\.csv$"), "timeMetrics",
-        glue("{pref}\\.trimmer_metrics\\.csv$"), "trimmerMetrics",
-        glue("{pref}\\.umi_metrics\\.csv$"), "umiMetrics",
-        glue("{pref}\\.vc_metrics\\.csv$"), "vcMetrics"
+        glue("{pref}\\-replay\\.json$"), "read_replay",
+        glue("{pref}\\.cnv_metrics.csv$"), "read_cnvMetrics",
+        glue("{pref}\\.exon_contig_mean_cov\\.csv$"), "read_contigMeanCov",
+        glue("{pref}\\.target_bed_contig_mean_cov\\.csv$"), "read_contigMeanCov",
+        glue("{pref}\\.tmb_contig_mean_cov\\.csv$"), "read_contigMeanCov",
+        glue("{pref}\\.wgs_contig_mean_cov{tn1}\\.csv$"), "read_contigMeanCov",
+        glue("{pref}\\.exon_coverage_metrics\\.csv$"), "read_coverageMetrics",
+        glue("{pref}\\.target_bed_coverage_metrics\\.csv$"), "read_coverageMetrics",
+        glue("{pref}\\.tmb_coverage_metrics\\.csv$"), "read_coverageMetrics",
+        glue("{pref}\\.wgs_coverage_metrics{tn1}\\.csv$"), "read_coverageMetrics",
+        glue("{pref}\\.exon_fine_hist\\.csv$"), "read_fineHist",
+        glue("{pref}\\.target_bed_fine_hist\\.csv$"), "read_fineHist",
+        glue("{pref}\\.tmb_fine_hist\\.csv$"), "read_fineHist",
+        glue("{pref}\\.wgs_fine_hist{tn1}\\.csv$"), "read_fineHist",
+        glue("{pref}\\.exon_hist\\.csv$"), "read_hist",
+        glue("{pref}\\.target_bed_hist\\.csv$"), "read_hist",
+        glue("{pref}\\.tmb_hist\\.csv$"), "read_hist",
+        glue("{pref}\\.wgs_hist{tn1}\\.csv$"), "read_hist",
+        glue("{pref}\\.fastqc_metrics\\.csv$"), "read_fastqcMetrics",
+        glue("{pref}\\.fragment_length_hist\\.csv$"), "read_fragmentLengthHist",
+        glue("{pref}\\.gc_metrics\\.csv$"), "read_gcMetrics",
+        glue("{pref}\\.gvcf_metrics\\.csv$"), "read_vcMetrics",
+        glue("{pref}\\.mapping_metrics\\.csv$"), "read_mappingMetrics",
+        glue("{pref}\\.microsat_diffs\\.txt$"), "read_msiDiffs",
+        glue("{pref}\\.microsat_output\\.json$"), "read_msi",
+        glue("{pref}\\.sv_metrics\\.csv$"), "read_svMetrics",
+        glue("{pref}\\.time_metrics\\.csv$"), "read_timeMetrics",
+        glue("{pref}\\.trimmer_metrics\\.csv$"), "read_trimmerMetrics",
+        glue("{pref}\\.umi_metrics\\.csv$"), "read_umiMetrics",
+        glue("{pref}\\.vc_metrics\\.csv$"), "read_vcMetrics"
       )
-      regexes <- reg1 |>
-        dplyr::mutate(
-          fun = paste0("read_", .data$fun),
-          fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
-        )
 
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$prefix <- prefix
