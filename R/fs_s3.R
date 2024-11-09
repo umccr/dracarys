@@ -141,9 +141,9 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
   d <- d |>
     dplyr::mutate(
       s3path_minus_s3dir = sub(glue("{s3dir}/"), "", .data$path),
-      s3path_minus_s3dir_outdir = fs::dir_create(
-        file.path(outdir, dirname(.data$s3path_minus_s3dir))
-      ),
+      s3path_minus_s3dir_outdir = file.path(outdir, dirname(.data$s3path_minus_s3dir)) |>
+        fs::dir_create() |>
+        normalizePath(),
       localpath = file.path(.data$s3path_minus_s3dir_outdir, .data$bname),
       s3path = .data$path
     ) |>
