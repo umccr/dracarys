@@ -209,7 +209,8 @@ dragen_gc_metrics_read <- function(x) {
 #' @export
 dragen_cnv_metrics_read <- function(x) {
   d0 <- readr::read_lines(x)
-  assertthat::assert_that(grepl("SEX GENOTYPER", d0[1]))
+  # first row is sometimes SEX GENOTYPER, others CNV SUMMARY
+  assertthat::assert_that(grepl("CNV SUMMARY", d0[2]))
   abbrev_nm <- c(
     "Bases in reference genome" = "bases_in_ref_genome",
     "Average alignment coverage over genome" = "cov_alignment_avg_over_genome",
@@ -227,7 +228,10 @@ dragen_cnv_metrics_read <- function(x) {
     "Number of amplifications" = "n_amp",
     "Number of deletions" = "n_del",
     "Number of passing amplifications" = "n_amp_pass",
-    "Number of passing deletions" = "n_del_pass"
+    "Number of passing deletions" = "n_del_pass",
+    "Estimated tumor purity" = "purity_tumor",
+    "Diploid coverage" = "cov_diploid",
+    "Overall ploidy" = "ploidy_overall"
   )
   d1 <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
@@ -236,10 +240,10 @@ dragen_cnv_metrics_read <- function(x) {
       names = c("category", "extra", "var", "count", "pct"),
       delim = ",", too_few = "align_start"
     )
+  # in cttso
   sexgt <- d1 |>
     dplyr::filter(.data$category == "SEX GENOTYPER") |>
     dplyr::select(sexgt = "count", sexgt_pct = "pct")
-
   d2 <- d1 |>
     dplyr::filter(!.data$category == "SEX GENOTYPER") |>
     dplyr::mutate(
@@ -258,8 +262,10 @@ dragen_cnv_metrics_read <- function(x) {
     ) |>
     dplyr::select("var", "value") |>
     tidyr::pivot_wider(names_from = "var", values_from = "value")
-  res <- dplyr::bind_cols(sexgt, d2)
-  return(res)
+  if (nrow(sexgt) == 0) {
+    return(d2)
+  }
+  dplyr::bind_cols(sexgt, d2)
 }
 
 #' Read DRAGEN SV Metrics
@@ -485,6 +491,7 @@ dragen_vc_metrics_read <- function(x) {
 dragen_mapping_metrics_read <- function(x) {
   abbrev_nm <- c(
     "Total input reads" = "reads_tot_input",
+    "Total reads removed by downsampling" = "reads_removed_downsamp",
     "Number of duplicate marked reads" = "reads_num_dupmarked",
     "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed",
     "Number of unique reads (excl. duplicate marked reads)" = "reads_num_uniq",
@@ -499,6 +506,7 @@ dragen_mapping_metrics_read <- function(x) {
     "Unmapped reads" = "reads_unmapped",
     "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt",
     "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj",
+    "Adjustment of reads matching exclude contigs" = "reads_match_excl_contigs",
     "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton",
     "Paired reads (itself & mate mapped)" = "reads_paired",
     "Properly paired reads" = "reads_paired_proper",
@@ -514,6 +522,7 @@ dragen_mapping_metrics_read <- function(x) {
     "Reads with indel R1" = "reads_indel_r1",
     "Reads with indel R2" = "reads_indel_r2",
     "Total bases" = "bases_tot",
+    "Total bases removed by downsampling" = "bases_removed_downsamp",
     "Total bases R1" = "bases_tot_r1",
     "Total bases R2" = "bases_tot_r2",
     "Mapped bases" = "bases_mapped",
@@ -555,17 +564,21 @@ dragen_mapping_metrics_read <- function(x) {
     "Adjustment of reads matching filter contigs" = "reads_match_filt_contig_adj",
     "Reads with splice junction" = "reads_splicejunc",
     "Average sequenced coverage over genome" = "cov_avg_seq_over_genome",
-    "Filtered rRNA reads" = "reads_rrna_filtered"
+    "Filtered rRNA reads" = "reads_rrna_filtered",
+    "Mitochondrial reads excluded" = "reads_mito_excl"
   )
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("MAPPING/ALIGNING", d0[1]))
-  # split by RG and non-RG
-  # tidy
+  # File is separated into two sections, the SUMMARY and the PER RG.
+  # Based on what I've seen so far, we can have single samples (where
+  # the first column just has MAPPING/ALIGNING) or TUMOR/NORMAL samples (where
+  # the first column will have a TUMOR or NORMAL prefix).
+  reg1 <- paste0("MAPPING/ALIGNING ", c("SUMMARY", "PER RG"), collapse = "|")
   d <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
     tidyr::separate_wider_delim(
       "value",
-      names = c("category", "RG", "var", "count", "pct"),
+      names = c("dragen_sample", "RG", "var", "count", "pct"),
       delim = ",", too_few = "align_start"
     ) |>
     dplyr::mutate(
@@ -573,9 +586,11 @@ dragen_mapping_metrics_read <- function(x) {
       count = as.numeric(.data$count),
       pct = as.numeric(.data$pct),
       var = dplyr::recode(.data$var, !!!abbrev_nm),
-      RG = dplyr::if_else(.data$RG == "", "Total", .data$RG)
+      RG = dplyr::if_else(.data$RG == "", "Total", .data$RG),
+      dragen_sample = sub(reg1, "", .data$dragen_sample) |> trimws(),
+      dragen_sample = dplyr::if_else(.data$dragen_sample == "", "SINGLE", .data$dragen_sample)
     ) |>
-    dplyr::select("RG", "var", "count", "pct")
+    dplyr::select("dragen_sample", "RG", "var", "count", "pct")
   dirty_names_cleaned(unique(d$var), abbrev_nm, x)
   # pivot
   d |>
@@ -584,7 +599,7 @@ dragen_mapping_metrics_read <- function(x) {
       name = dplyr::if_else(.data$name == "count", "", "_pct"),
       var = glue("{.data$var}{.data$name}")
     ) |>
-    dplyr::select("RG", "var", "value") |>
+    dplyr::select("dragen_sample", "RG", "var", "value") |>
     dplyr::filter(!is.na(.data$value)) |>
     tidyr::pivot_wider(names_from = "var", values_from = "value")
 }
