@@ -89,7 +89,8 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.time_metrics\\.csv$"), "read_timeMetrics",
         glue("{pref}\\.trimmer_metrics\\.csv$"), "read_trimmerMetrics",
         glue("{pref}\\.umi_metrics\\.csv$"), "read_umiMetrics",
-        glue("{pref}\\.vc_metrics\\.csv$"), "read_vcMetrics"
+        glue("{pref}\\.vc_metrics\\.csv$"), "read_vcMetrics",
+        glue("{pref}\\.ploidy_estimation_metrics\\.csv$"), "read_ploidyMetrics"
       )
 
       super$initialize(path = path, wname = wname, regexes = regexes)
@@ -270,6 +271,12 @@ Wf_dragen <- R6::R6Class(
     read_umiMetrics = function(x) {
       dat <- dragen_umi_metrics_read(x)
       dat
+    },
+    #' @description Read `ploidy_estimation_metrics.csv` file.
+    #' @param x Path to file.
+    read_ploidyMetrics = function(x) {
+      dat <- dragen_ploidy_estimation_metrics_read(x)
+      tibble::tibble(name = "ploidymetrics", data = list(dat))
     },
     #' @description Read `microsat_output.json` file.
     #' @param x Path to file.

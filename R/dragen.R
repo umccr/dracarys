@@ -792,18 +792,21 @@ dragen_ploidy_estimation_metrics_read <- function(x) {
   assertthat::assert_that(grepl("PLOIDY ESTIMATION", raw[1]))
   fun1 <- function(x) {
     setNames(
-      as.character(glue("cov_{x}_div_auto_median")),
+      as.character(glue("cov_{tolower(x)}_div_auto_median")),
       as.character(glue("{x} median / Autosomal median"))
     )
   }
+  fun2 <- function(x) {
+    setNames(
+      as.character(glue("cov_{tolower(x)}_median")),
+      as.character(glue("{x} median coverage"))
+    )
+  }
   abbrev_nm <- c(
-    "Autosomal median coverage" = "cov_auto_median",
-    "X median coverage" = "cov_x_median",
-    "Y median coverage" = "cov_y_median",
     "Ploidy estimation" = "ploidy_est",
+    fun2(c("X", "Y", "Autosomal")),
     fun1(c(1:22, "X", "Y"))
   )
-
   d <- raw |>
     tibble::as_tibble_col(column_name = "value") |>
     tidyr::separate_wider_delim("value", names = c("dummy1", "dummy2", "var", "value"), delim = ",") |>
@@ -812,6 +815,7 @@ dragen_ploidy_estimation_metrics_read <- function(x) {
       var = dplyr::recode(.data$var, !!!abbrev_nm)
     ) |>
     tidyr::pivot_wider(names_from = "var", values_from = "value")
+  dirty_names_cleaned(unique(colnames(d)), abbrev_nm, x)
   # now convert all except 'Ploidy estimation' to numeric
   cols1 <- colnames(d)[colnames(d) != "ploidy_est"]
   d |>
