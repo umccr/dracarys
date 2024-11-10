@@ -29,7 +29,8 @@ d_write <- t1$write(
 )
 #---- GDS ----#
 prefix <- "PRJ222358"
-p <- file.path("gds://production/analysis_data/SBJ03001/wgs_tumor_normal",
+p <- file.path(
+  "gds://production/analysis_data/SBJ03001/wgs_tumor_normal",
   "20241108fc293a38/L2201805_L2201797_dragen_somatic"
 )
 outdir <- file.path(sub("gds:/", normalizePath("~/icav1/g"), p)) # for GDS case
