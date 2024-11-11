@@ -132,7 +132,7 @@ local filesystem).}
 
 \item{\code{SampleID_tumor}}{The SampleID of the tumor sample.}
 
-\item{\code{SampleID_normal}}{The SampleID of the tumor sample.}
+\item{\code{SampleID_normal}}{The SampleID of the normal sample.}
 }
 \if{html}{\out{</div>}}
 }

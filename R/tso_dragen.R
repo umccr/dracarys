@@ -18,7 +18,7 @@
 #' d1$list_files_filter_relevant(max_files = 300)
 #' d <- d1$download_files(max_files = 100, outdir = outdir, dryrun = F)
 #' d_tidy <- d1$tidy_files(d)
-#' d_write <- t1$write(
+#' d_write <- d1$write(
 #'   d_tidy,
 #'   outdir = file.path(p, "dracarys_tidy"),
 #'   prefix = prefix,
@@ -36,7 +36,7 @@
 #' d1$list_files_filter_relevant(max_files = 300)
 #' d <- d1$download_files(max_files = 100, outdir = outdir, dryrun = F)
 #' d_tidy <- d1$tidy_files(d)
-#' d_write <- t1$write(
+#' d_write <- d1$write(
 #'   d_tidy,
 #'   outdir = file.path(p, "dracarys_tidy"),
 #'   prefix = prefix,

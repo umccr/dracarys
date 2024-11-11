@@ -79,7 +79,7 @@ Wf_sash <- R6::R6Class(
     #' local filesystem).
     #' @param SubjectID The SubjectID of the sample.
     #' @param SampleID_tumor The SampleID of the tumor sample.
-    #' @param SampleID_normal The SampleID of the tumor sample.
+    #' @param SampleID_normal The SampleID of the normal sample.
     initialize = function(path = NULL, SubjectID = NULL, SampleID_tumor = NULL,
                           SampleID_normal = NULL) {
       wname <- "sash"
