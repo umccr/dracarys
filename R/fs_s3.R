@@ -196,7 +196,7 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
 #' }
 #'
 #' @export
-s3_file_presignedurl <- function(client, s3path, expiry_seconds = 3600) {
+s3_file_presignedurl <- function(client, s3path, expiry_seconds = 604800) {
   bucket <- sub("s3://(.*?)/.*", "\\1", s3path)
   prefix <- sub("s3://(.*?)/(.*)", "\\2", s3path)
   client$generate_presigned_url(
