@@ -5,26 +5,38 @@
   require(dracarys, include.only = "umccr_tidy")
   require(glue, include.only = "glue")
   require(here, include.only = "here")
-  require(rportal, include.only = c("portaldb_query_workflow"))
+  require(rportal, include.only = c("orca_workflow_list"))
+  require(stringr, include.only = "str_remove_all")
+  require(tidyr, include.only = "unnest")
+  require(fs, include.only = "dir_create")
 }
 
-# make sure you have logged into AWS and ICA
+# make sure you have logged into AWS
 c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION") |>
   rportal::envvar_defined() |>
   stopifnot()
-icav1_token <- Sys.getenv("ICA_ACCESS_TOKEN") |>
-  dracarys::ica_token_validate()
-
-query_workflow_alignqc <- function(start_date) {
-  wfs <- c("wgs_alignment_qc", "wts_alignment_qc") |>
-    shQuote() |>
-    paste(collapse = ", ")
-  q1 <- glue(
-    "WHERE \"type_name\" IN ({wfs}) AND  \"start\" > date(\'{start_date}\') ",
-    "ORDER BY \"start\" DESC;"
-  )
-  rportal::portaldb_query_workflow(q1)
-}
+token <- rportal::orca_jwt() |>
+  rportal::jwt_validate()
+dates <- c(
+  "2024-11-23",
+  "2024-11-24"
+) |>
+  stringr::str_remove_all("-") |>
+  paste(collapse = "|")
+wf0 <- rportal::orca_workflow_list(wf_name = "wgts-qc", token = token, page_size = 500)
+# get pld
+wf1 <- wf0 |>
+  filter(grepl(dates, .data$portalRunId)) |>
+  rowwise() |>
+  mutate(pld = list(rportal::orca_wfrid2payload(wfrid = .data$orcabusId, token = token))) |>
+  ungroup()
+# tidy pld
+wf2 <- wf1 |>
+  rowwise() |>
+  mutate(pld_tidy = list(rportal::pld_wgtsqc(.data$pld))) |>
+  ungroup() |>
+  select(workflowRunId = "orcabusId", portalRunId, currentStateTimestamp, pld_tidy) |>
+  tidyr::unnest(pld_tidy)
 
 query_limsrow_libids <- function(libids) {
   assertthat::assert_that(!is.null(libids), all(grepl("^L", libids)))
@@ -34,61 +46,82 @@ query_limsrow_libids <- function(libids) {
   rportal::portaldb_query_limsrow(q1)
 }
 
-# first read in the workflows table, extract metadata, then join with lims
-start_date <- "2024-10-11"
-p_raw <- query_workflow_alignqc(start_date)
+lims0 <- query_limsrow_libids(wf2$libraryId)
 
-wgs <- p_raw |>
-  rportal::meta_wgs_alignment_qc(status = "Succeeded")
-wts <- p_raw |>
-  rportal::meta_wts_alignment_qc(status = "Succeeded")
-p <- bind_rows(wgs, wts)
-lims_raw <- query_limsrow_libids(p$LibraryID)
-
-lims <- lims_raw |>
+lims1 <- lims0 |>
   tidyr::separate_wider_delim(
     library_id,
     delim = "_", names = c("library_id", "topup_or_rerun"), too_few = "align_start"
   ) |>
   select(
-    subject_id, library_id, sample_id, sample_name,
-    external_subject_id, external_sample_id,
-    project_name, project_owner, phenotype, type,
-    source, assay, quality, workflow
+    individualId = "subject_id",
+    libraryId = "library_id",
+    sampleId = "sample_id",
+    sampleName = "sample_name",
+    subjectId = "external_subject_id",
+    externalSampleId = "external_sample_id",
+    projectName = "project_name",
+    projectOwner = "project_owner",
+    phenotype, type, source, assay, quality, workflow
   ) |>
   distinct()
 
-d <- p |>
-  left_join(lims, by = c("SubjectID" = "subject_id", "LibraryID" = "library_id")) |>
+wf_lims <- wf2 |>
+  left_join(lims1, by = "libraryId") |>
   select(
-    "SubjectID", "LibraryID", "SampleID", "lane", "phenotype", "type", "source",
-    "assay", "workflow", "external_subject_id", "project_name", "project_owner",
-    "start", "end", "portal_run_id", "gds_outdir_dragen", "fq1", "fq2"
+    "libraryId", "individualId", "sampleId", "sampleName", "subjectId",
+    "externalSampleId", "projectName", "projectOwner",
+    lane = "input_lane",
+    "phenotype", "sampleType",
+    date = "currentStateTimestamp",
+    "source", "assay", "quality", "workflow",
+    "portalRunId", "output_dragenAlignmentOutputUri",
+    "input_read1FileUri", "input_read2FileUri",
   ) |>
-  mutate(rownum = row_number())
+  mutate(rownum = row_number()) |>
+  relocate("rownum")
 
-tidy_script <- system.file("cli/dracarys.R", package = "dracarys")
+# set up progress bar for the dtw function
+nticks <- nrow(wf_lims)
+bar_width <- 50
+pb <- progress::progress_bar$new(
+  format = "[:bar] :current/:total (:percent) elapsed :elapsedfull eta :eta",
+  total = nticks, clear = FALSE,
+  show_after = 0, width = bar_width
+)
+# wrapping the dtw function to use the progress bar
+fun1 <- function(path, prefix, outdir) {
+  pb$tick(0)
+  res <- dracarys::dtw_Wf_dragen(
+    path = path, prefix = prefix,
+    outdir = outdir, format = "rds",
+    max_files = 1000,
+    dryrun = FALSE
+  )
+  pb$tick()
+  return(res)
+}
 
-
-meta <- d |>
-  relocate(rownum) |>
+data_tidy <- wf_lims |>
   rowwise() |>
   mutate(
-    indir = gds_outdir_dragen,
-    outdir = file.path(sub("gds://", "", .data$indir)),
-    outdir = file.path(normalizePath("~/icav1/g"), .data$outdir),
-    # indir = file.path(outdir, "dracarys_gds_sync"), # for when debugging locally
-    cmd = system(
-      glue(
-        "echo ---{.data$rownum}--- && ",
-        "{tidy_script} tidy --in_dir {.data$indir} ",
-        "--out_dir {.data$outdir} --prefix {.data$SampleID} ",
-        "--token {icav1_token} ",
-        "--format rds"
+    indir = .data$output_dragenAlignmentOutputUri,
+    outdir = file.path(sub("s3://", "", .data$indir)),
+    outdir = file.path(normalizePath("~/s3"), .data$outdir)
+    # indir = file.path(outdir, "dracarys_s3_sync"), # for when debugging locally
+  ) |>
+  mutate(
+    data_tidy = list(
+      fun1(
+        path = .data$indir,
+        prefix = .data$libraryId,
+        outdir = .data$outdir
       )
     )
   ) |>
   ungroup()
 
-meta |>
-  saveRDS(here(glue("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/{start_date}_wgts.rds")))
+outdir1 <- fs::dir_create("inst/rmd/umccr_workflows/alignment_qc/nogit/tidy_data_rds")
+date1 <- "2024-11-24"
+data_tidy |>
+  saveRDS(here(glue("{outdir1}/{date1}_wgts.rds")))
