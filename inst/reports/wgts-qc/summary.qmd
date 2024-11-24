@@ -1,36 +1,37 @@
 ---
-author: "University of Melbourne Centre for Cancer Research"
-date: "`r Sys.time()`"
-output:
-  html_document:
-    toc: true
-    theme: cosmo
-  rmdformats::material:
-    highlight: kate
+title: "WGTS Alignment QC Summary"
+author: "CCGCM - Genomics Platform Group"
+date: now
+date-format: "YYYY-MM-DD HH:mm Z"
+execute:
+  echo: false
+format:
+  html:
+    toc: false
+    toc-expand: 1
+    toc-title: Contents
+    toc-location: body
+    highlight-style: github
+    number-sections: false
+    link-external-icon: true
+    link-external-newwindow: true
+    embed-resources: true
+    code-copy: true
+    code-link: true
+    code-fold: true
+    code-block-border-left: true
+    smooth-scroll: true
+    grid:
+      body-width: 1300px
 params:
-  title: "UMCCR Alignment QC Summary Report"
-  meta: !r here::here("inst/rmd/umccr_workflows/alignment_qc/nogit/meta/2024-10-11_wgts.rds")
-description: "UMCCR Alignment QC Summary Report"
-title: "`r params$title`"
+  tidy_data: "~/projects/dracarys/inst/rmd/umccr_workflows/alignment_qc/nogit/tidy_data_rds/2024-11-24_wgts.rds"
 ---
 
-```{r knitr_opts, include=F}
-knitr::opts_chunk$set(
-  collapse = TRUE, echo = FALSE,
-  warning = FALSE, message = FALSE,
-  fig.width = 10, fig.height = 15
-)
-```
+```{r}
+#| label: pkgs
+#| message: false
+#| warning: false
 
-```{css}
-.main-container {
-  max-width: 1400px !important;
-  margin-left: auto;
-  margin-right: auto;
-}
-```
-
-```{r load_pkgs}
 {
   require(dplyr)
   require(dracarys, include.only = "session_info_kable")
@@ -49,92 +50,103 @@ knitr::opts_chunk$set(
 }
 ```
 
-```{r data_setup}
-ggplot2::theme_set(ggplot2::theme_bw())
-meta <- params[["meta"]] |>
+```{r}
+#| label: data_import
+tidy_data_path <- params[["tidy_data"]]
+d0 <- tidy_data_path |>
   readr::read_rds() |>
-  mutate(topup_or_rerun = stringr::str_extract(fq1, "topup|rerun(2)?"))
+  slice(1:4) |>
+  mutate(
+    umccrId = glue("{.data$individualId}_{.data$libraryId}_{.data$lane}"),
+    umccrId = factor(.data$umccrId),
+    projectOwnerName = glue("{.data$projectOwner}_{.data$projectName}")
+  ) |>
+  select(
+    "umccrId",
+    "subjectId",
+    "libraryId",
+    "projectOwnerName",
+    "sampleType",
+    "phenotype",
+    "source",
+    "quality",
+    "assay",
+    "workflow",
+    "portalRunId",
+    "date",
+    "data_tidy"
+  )
+```
+
+```{r}
+#| label: data_setup
+ggplot2::theme_set(ggplot2::theme_bw())
 stopifnot(all(dir.exists(meta$outdir)))
 options(scipen = 999) # disable scientific notation
 options(width = 150)
-filepaths <- function(indir, sampleid, suffix = "rds") {
-  tibble::tibble(
-    ftype = c(
-      paste0(
-        "FastqcMetricsFile_",
-        c(
-          "positional_base_content", "positional_base_mean_quality",
-          "positional_quality", "read_gc_content", "read_gc_content_quality",
-          "read_lengths", "read_mean_quality", "sequence_positions"
-        )
-      ),
-      "FragmentLengthHistFile",
-      "MappingMetricsFile",
-      "PloidyEstimationMetricsFile",
-      "ReplayFile",
-      "TimeMetricsFile",
-      "TrimmerMetricsFile",
-      "WgsContigMeanCovFile",
-      "WgsCoverageMetricsFile",
-      "WgsFineHistFile",
-      "WgsHistFile"
-    )
-  ) |>
-    mutate(
-      fpath = file.path(indir, glue("{sampleid}_{.data$ftype}.{suffix}")),
-      file_exists = file.exists(.data$fpath)
-    )
-}
 
-dat <- meta |>
-  rowwise() |>
-  mutate(
-    fpaths = list(filepaths(indir = .data$outdir, sampleid = .data$SampleID)),
-    umccrid = glue("{.data$SubjectID}_{.data$LibraryID}_LN{.data$lane}"),
-    umccrid = if_else(is.na(.data$topup_or_rerun), .data$umccrid, glue("{umccrid}_{.data$topup_or_rerun}"))
+d_unnest <- d0 |>
+  select(
+    "umccrId", "libraryId", "subjectId",
+    type = "sampleType", "phenotype", "source",
+    "quality", "assay", "workflow", "projectOwnerName", "portalRunId", tidy = "data_tidy"
   ) |>
-  select("umccrid", "phenotype", "type", "source", "fpaths") |>
-  tidyr::unnest(fpaths) |>
-  filter(.data$file_exists) |>
-  rowwise() |>
-  mutate(
-    dat = list(readr::read_rds(.data$fpath))
-  ) |>
-  ungroup()
+  tidyr::unnest("tidy", names_sep = "_")
+# tablename-specific access
+# columns: tidy_name, data
+# rows: 1 per tidy_table name
+d_name <- d_unnest |>
+  tidyr::nest(.by = "tidy_name", .key = "data")
 
-eval <- dat |>
-  group_by(ftype) |>
-  count(file_exists, name = "nf") |>
-  mutate(eval = nf > 0) |>
-  select("ftype", "eval") |>
-  tibble::deframe() |>
-  as.list()
-
-# filetype-specific access
-d <- dat |>
-  select("umccrid", "phenotype", "type", "source", "ftype", "dat") |>
-  tidyr::nest(data = c("umccrid", "phenotype", "type", "source", "dat"))
+## A tibble: 18 × 2
+#   tidy_name                     data
+#   <glue>                        <list>
+# 1 contigmeancov_wgs             <tibble [4 × 4]>
+# 2 covmetrics_wgs                <tibble [4 × 4]>
+# 3 finehist_wgs                  <tibble [4 × 4]>
+# 4 fqc_positionalBaseContent     <tibble [4 × 4]>
+# 5 fqc_positionalBaseMeanQuality <tibble [4 × 4]>
+# 6 fqc_positionalQuality         <tibble [4 × 4]>
+# 7 fqc_readGCContent             <tibble [4 × 4]>
+# 8 fqc_readGCContentQuality      <tibble [4 × 4]>
+# 9 fqc_readLengths               <tibble [4 × 4]>
+# 10 fqc_readMeanQuality           <tibble [4 × 4]>
+# 11 fqc_sequencePositions         <tibble [4 × 4]>
+# 12 fraglen                       <tibble [3 × 4]>
+# 13 hist_wgs                      <tibble [4 × 4]>
+# 14 mapmetrics                    <tibble [4 × 4]>
+# 15 ploidymetrics                 <tibble [3 × 4]>
+# 16 replay                        <tibble [4 × 4]>
+# 17 timemetrics                   <tibble [4 × 4]>
+# 18 trimmermetrics                <tibble [4 × 4]>
 
 # sample-specific access
-# d_samp <- dat |>
-#   select("umccrid", "phenotype", "type", "ftype", "dat") |>
-#   tidyr::nest(data = c("phenotype", "type", "ftype", "dat")) |>
-#   arrange(desc("umccrid"))
+# columns: umccrId, data
+# rows: 1 per umccrId
+d_samp <- d_unnest |>
+  tidyr::nest(.by = "umccrId", .key = "data") |>
+  arrange(desc(.data$umccrId))
+## A tibble: 4 × 2
+#  umccrId           data
+#  <fct>             <list>
+# 1 SBJ05890_L2401624 <tibble [18 × 4]>
+# 2 SBJ05889_L2401644 <tibble [16 × 4]>
+# 3 SBJ05888_L2401621 <tibble [18 × 4]>
+# 4 SBJ05856_L2401572 <tibble [18 × 4]>
+
+dr_unnest <- function(x1, ...) {
+  d_name |>
+    dplyr::filter(.data$tidy_name == x1) |>
+    tidyr::unnest("data") |>
+    dplyr::mutate(nrows = purrr::map_int(.data$tidy_data, nrow)) |>
+    dplyr::filter(.data$nrows > 0) |>
+    dplyr::select(dplyr::everything(), -c("tidy_name", "nrows")) |>
+    dplyr::relocate("tidy_data", .after = dplyr::last_col()) |>
+    tidyr::unnest("tidy_data")
+}
 ```
 
 ```{r funcs}
-dr_unnest <- function(x1) {
-  d |>
-    filter(.data$ftype == x1) |>
-    tidyr::unnest(data) |>
-    rowwise() |>
-    mutate(nrows = nrow(.data$dat)) |>
-    ungroup() |>
-    filter(nrows > 0) |>
-    tidyr::unnest(dat) |>
-    select("umccrid", "phenotype", "type", "source", everything(), -c("ftype", "nrows"))
-}
-
 dt_view <- function(x, caption = NULL, scroll_y = 10 + min(nrow(x) * 35, 570), ...) {
   x |>
     DT::datatable(
@@ -155,15 +167,12 @@ blank_lines <- function(n = 10) {
   cat(rep("&nbsp;  ", n), sep = "\n")
 }
 
-get_sbj_url <- function(x, colour = NULL, account = "pro") {
-  assertthat::assert_that(account %in% c("pro", "stg", "dev"))
-  account <- ifelse(account == "pro", "", account)
-  sbj_url <- glue("https://portal{account}.umccr.org/subjects/{x}/overview")
+get_lib_url <- function(lid, text, colour = NULL) {
+  url <- glue("https://orcaui.umccr.org/lab?tab=library&search={lid}")
   if (!is.null(colour)) {
-    return(glue("<a href={sbj_url} style='background-color:{colour}'>{x}</a>"))
+    return(glue("<a href={url} style='background-color:{colour}'>{text}</a>"))
   }
-  sbj_url <- glue("<a href={sbj_url}>{x}</a>")
-  sbj_url
+  return(glue("<a href={url}>{text}</a>"))
 }
 
 type_col <- list(
@@ -175,17 +184,13 @@ type_col <- list(
 ## Sample Metadata
 
 ```{r meta}
-meta |>
-  arrange(desc(SubjectID), type, LibraryID, lane) |>
+d0 |>
+  arrange(desc(.data$umccrId), libraryId, sampleType) |>
   mutate(
-    SubjectID = get_sbj_url(.data$SubjectID),
-    durationMin = round(end - start)
+    umccrId = get_lib_url(lid = .data$libraryId, text = .data$umccrId),
+    date_analysis_end = lubridate::ymd_hms(.data$date)
   ) |>
-  select(
-    SubjectID, type, LibraryID, lane, durationMin, topup_or_rerun,
-    everything(),
-    -c("rownum", "indir", "outdir", "cmd", "fq1", "fq2")
-  ) |>
+  select(umccrId, type = "sampleType", everything(), -data_tidy) |>
   dt_view(escape = FALSE) |>
   DT::formatStyle(
     "type",
@@ -200,33 +205,39 @@ meta |>
 ### Mapping
 
 ```{r mm, eval=eval$MappingMetricsFile}
-d_map <- dr_unnest("MappingMetricsFile") |>
-  arrange(desc(umccrid), type) |>
+d_map <- dr_unnest("mapmetrics") |>
+  arrange(desc(umccrId), type) |>
+  mutate(
+    umccrId = get_lib_url(lid = .data$libraryId, text = .data$umccrId),
+    RG = ifelse(.data$RG == "Total", "Total", "RG")
+  ) |>
   select(
-    umccrid, phenotype, type,
-    source,
-    tot = reads_tot_rg_dragen,
-    dup = reads_num_dupmarked_dragen,
-    `dup%` = reads_num_dupmarked_dragen_pct,
-    `map%` = reads_mapped_dragen_pct,
-    `unmap%` = reads_unmapped_dragen_pct,
-    `uniq%` = reads_num_uniq_dragen_pct,
-    `uniq_map%` = reads_num_uniq_mapped_dragen_pct,
-    `paired%` = reads_paired_dragen_pct,
-    `paired_proper%` = reads_paired_proper_dragen_pct,
-    `singleton%` = reads_singleton_dragen_pct,
-    `discordant%` = reads_discordant_dragen_pct,
-    `rrna_filt%` = reads_rrna_filtered_dragen_pct,
-    `splicejunc%` = reads_splicejunc_dragen_pct,
-    `mapq_0-10%` = reads_mapq_0_10_dragen_pct,
-    `mapq_10-20%` = reads_mapq_10_20_dragen_pct,
-    `mapq_20-30%` = reads_mapq_20_30_dragen_pct,
-    `mapq_30-40%` = reads_mapq_30_40_dragen_pct,
-    `mapq_40-Inf%` = reads_mapq_40_inf_dragen_pct,
-    read_len = read_len_dragen,
-    insert_len_med = insert_len_median_dragen,
-    insert_len_mean = insert_len_mean_dragen,
-    everything()
+    umccrId, subjectId,
+    phenotype, type,
+    source, quality, assay, workflow, projectOwnerName, portalRunId, RG,
+    tot_reads = reads_tot_rg,
+    dup_reads = reads_num_dupmarked,
+    `dup%` = reads_num_dupmarked_pct,
+    `map%` = reads_mapped_pct,
+    `unmap%` = reads_unmapped_pct,
+    `uniq%` = reads_num_uniq_pct,
+    `uniq_map%` = reads_num_uniq_mapped_pct,
+    `paired%` = reads_paired_pct,
+    `paired_proper%` = reads_paired_proper_pct,
+    `singleton%` = reads_singleton_pct,
+    `discordant%` = reads_discordant_pct,
+    `rrna_filt%` = reads_rrna_filtered_pct,
+    `splicejunc%` = reads_splicejunc_pct,
+    `mapq_0-10%` = reads_mapq_0_10_pct,
+    `mapq_10-20%` = reads_mapq_10_20_pct,
+    `mapq_20-30%` = reads_mapq_20_30_pct,
+    `mapq_30-40%` = reads_mapq_30_40_pct,
+    `mapq_40-Inf%` = reads_mapq_40_inf_pct,
+    read_len = read_len,
+    insert_len_med = insert_len_median,
+    insert_len_mean = insert_len_mean,
+    everything(),
+    -c("libraryId", "tidy_prefix", "dragen_sample")
   )
 num_cols <- purrr::map_lgl(d_map, is.numeric)
 num_pct_cols <- grepl("%", names(d_map)) & num_cols
@@ -239,14 +250,7 @@ conf <- list(
   pink_range = c(8, 20)
 )
 d_map |>
-  left_join(
-    meta |>
-      mutate(umccrid = glue("{.data$SubjectID}_{.data$LibraryID}_LN{.data$lane}")) |>
-      select(umccrid, assay, workflow, project_name, project_owner),
-    by = "umccrid"
-  ) |>
-  select(umccrid, phenotype, type, source, assay, workflow, project_name, project_owner, everything()) |>
-  dt_view(scroll_y = 1500) |>
+  dt_view(scroll_y = 1500, escape = FALSE) |>
   DT::formatCurrency(columns = names(d_map)[num_pct_cols], currency = "", digits = 1) |>
   DT::formatCurrency(columns = names(d_map)[no_numpct_cols], currency = "", digits = 0) |>
   DT::formatStyle(
@@ -276,49 +280,52 @@ d_map |>
 - Ploidy metrics only for **WGS**.
 
 ```{r covm, eval=eval$WgsCoverageMetricsFile}
-d_pl <- dr_unnest("PloidyEstimationMetricsFile") |>
-  arrange(desc(umccrid))
+d_pl <- dr_unnest("ploidymetrics") |>
+  arrange(desc(umccrId))
 d_pl_metrics <- d_pl |>
   select(
-    umccrid, phenotype, type, source,
-    ploidy = ploidy_est_dragen,
-    cvg_auto_med_ploidy = cov_auto_median_dragen,
-    cvg_x_med_ploidy = cov_x_median_dragen,
-    cvg_y_med_ploidy = cov_y_median_dragen
+    umccrId, subjectId,
+    phenotype, type,
+    source, quality, assay, workflow, projectOwnerName, portalRunId,
+    ploidy = ploidy_est,
+    cvg_auto_med_ploidy = cov_autosomal_median,
+    cvg_x_med_ploidy = cov_x_median,
+    cvg_y_med_ploidy = cov_y_median
   )
 # cov_genome_pct_* metrics are in the Hist data, so filter out here
-d_cvg <- dr_unnest("WgsCoverageMetricsFile") |>
-  arrange(desc(umccrid)) |>
-  left_join(d_pl_metrics, by = c("umccrid", "phenotype", "type", "source")) |>
+d_cvg <- dr_unnest("covmetrics_wgs") |>
+  arrange(desc(umccrId)) |>
+  left_join(d_pl_metrics, by = c(
+    "umccrId", "subjectId", "phenotype", "type", "source",
+    "quality", "assay",
+    "workflow", "projectOwnerName", "portalRunId"
+  )) |>
+  mutate(umccrId = get_lib_url(lid = .data$libraryId, text = .data$umccrId)) |>
   select(
-    umccrid, phenotype, type, source,
+    "umccrId", "phenotype", "type", "source",
+    "quality", "assay",
+    "workflow", "projectOwnerName", "portalRunId",
     ploidy,
-    cvg_auto_avg = cov_avg_auto_over_genome_dragen,
-    cvg_auto_med = cov_median_auto_over_genome_dragen,
-    cvg_x_avg = cov_avg_x_over_genome_dragen,
-    cvg_y_avg = cov_avg_y_over_genome_dragen,
-    cvg_uniq = cov_alignment_avg_over_genome_dragen,
-    cvg_mito_avg = cov_avg_mt_over_genome_dragen,
+    cvg_auto_avg = cov_avg_auto_over_genome,
+    cvg_auto_med = cov_median_auto_over_genome,
+    cvg_x_avg = cov_avg_x_over_genome,
+    cvg_y_avg = cov_avg_y_over_genome,
+    cvg_uniq = cov_alignment_avg_over_genome,
+    cvg_mito_avg = cov_avg_mt_over_genome,
     cvg_auto_med_ploidy,
     cvg_x_med_ploidy,
     cvg_y_med_ploidy,
-    reads_aligned_dragen,
-    bases_aligned_dragen,
-    cvg_gt02 = cov_uniformity_over_genome_pct_gt02mean_dragen,
-    cvg_gt04 = cov_uniformity_over_genome_pct_gt04mean_dragen,
+    reads_aligned_tot,
+    bases_aligned_tot,
+    cvg_gt02 = cov_uniformity_pct_gt02mean_genome,
+    cvg_gt04 = cov_uniformity_pct_gt04mean_genome, ,
     everything(),
-    -contains("cov_genome_pct_")
+    -contains("cov_pct_"),
+    -c("libraryId", "tidy_prefix")
   )
 num_cols <- names(d_cvg)[purrr::map_lgl(d_cvg, is.numeric)]
 d_cvg |>
-  left_join(
-    meta |>
-      mutate(umccrid = glue("{.data$SubjectID}_{.data$LibraryID}_LN{.data$lane}")) |>
-      select(umccrid, assay, workflow, project_name, project_owner),
-    by = "umccrid"
-  ) |>
-  select(umccrid, phenotype, type, source, assay, workflow, project_name, project_owner, everything()) |>
-  dt_view(scroll_y = 1500) |>
+  dt_view(scroll_y = 1500, escape = FALSE) |>
   DT::formatCurrency(columns = num_cols, currency = "", digits = 1) |>
   DT::formatStyle(
     "ploidy",
@@ -337,7 +344,7 @@ d_cvg |>
 ### Trimmer
 
 ```{r trim, eval=eval$TrimmerMetricsFile}
-d_tr <- dr_unnest("TrimmerMetricsFile") |>
+d_tr <- dr_unnest("trimmermetrics") |>
   arrange(desc(umccrid)) |>
   select(
     umccrid, phenotype, type, source,
