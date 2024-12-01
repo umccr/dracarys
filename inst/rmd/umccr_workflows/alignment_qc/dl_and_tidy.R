@@ -39,7 +39,7 @@ wf2 <- wf1 |>
   tidyr::unnest(pld_tidy)
 
 query_limsrow_libids <- function(libids) {
-  assertthat::assert_that(!is.null(libids), all(grepl("^L", libids)))
+  stopifnot(!is.null(libids), all(grepl("^L", libids)))
   libids <- unique(libids) |>
     paste(collapse = "|")
   q1 <- glue("WHERE REGEXP_LIKE(\"library_id\", '{libids}');")
@@ -107,7 +107,7 @@ data_tidy <- wf_lims |>
   mutate(
     indir = .data$output_dragenAlignmentOutputUri,
     outdir = file.path(sub("s3://", "", .data$indir)),
-    outdir = file.path(normalizePath("~/s3"), .data$outdir)
+    outdir = fs::as_fs_path(file.path(normalizePath("~/s3"), .data$outdir))
     # indir = file.path(outdir, "dracarys_s3_sync"), # for when debugging locally
   ) |>
   mutate(
