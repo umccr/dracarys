@@ -791,13 +791,13 @@ dragen_ploidy_estimation_metrics_read <- function(x) {
   raw <- readr::read_lines(x)
   assertthat::assert_that(grepl("PLOIDY ESTIMATION", raw[1]))
   fun1 <- function(x) {
-    setNames(
+    purrr::set_names(
       as.character(glue("cov_{tolower(x)}_div_auto_median")),
       as.character(glue("{x} median / Autosomal median"))
     )
   }
   fun2 <- function(x) {
-    setNames(
+    purrr::set_names(
       as.character(glue("cov_{tolower(x)}_median")),
       as.character(glue("{x} median coverage"))
     )
