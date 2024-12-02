@@ -320,7 +320,7 @@ d_cvg <- dr_unnest("covmetrics_wgs") |>
     reads_aligned_tot,
     bases_aligned_tot,
     cvg_gt02 = cov_uniformity_pct_gt02mean_genome,
-    cvg_gt04 = cov_uniformity_pct_gt04mean_genome, ,
+    cvg_gt04 = cov_uniformity_pct_gt04mean_genome,
     everything(),
     -contains("cov_pct_"),
     -c("libraryId", "tidy_prefix")
