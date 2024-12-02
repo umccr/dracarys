@@ -68,17 +68,11 @@ d <- um3$download_files(outdir = outdir, regexes = regexes, max_files = 50, dryr
 }
 
 }
-\section{Public fields}{
-\if{html}{\out{<div class="r6-fields">}}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
 \describe{
-\item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
-local filesystem).}
-
-\item{\code{wname}}{Name of workflow (e.g. umccrise, sash).}
-
-\item{\code{filesystem}}{Filesystem of \code{path} (gds/s3/local).}
-
-\item{\code{regexes}}{Tibble with file \code{regex} and \code{fun}ction to parse it.}
+\item{\code{regexes}}{Get/Set regexes. Tibble with file \code{regex} and \code{fun}ction
+to parse it.}
 }
 \if{html}{\out{</div>}}
 }
@@ -89,6 +83,7 @@ local filesystem).}
 \item \href{#method-Wf-print}{\code{Wf$print()}}
 \item \href{#method-Wf-list_files}{\code{Wf$list_files()}}
 \item \href{#method-Wf-list_files_filter_relevant}{\code{Wf$list_files_filter_relevant()}}
+\item \href{#method-Wf-DOWNLOAD_ONLY}{\code{Wf$DOWNLOAD_ONLY()}}
 \item \href{#method-Wf-download_files}{\code{Wf$download_files()}}
 \item \href{#method-Wf-tidy_files}{\code{Wf$tidy_files()}}
 \item \href{#method-Wf-write}{\code{Wf$write()}}
@@ -140,7 +135,7 @@ Print details about the Workflow.
 List all files under given path.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$list_files(
-  path = self$path,
+  path = private$.path,
   max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   ...
@@ -168,7 +163,7 @@ List all files under given path.
 List dracarys files under given path
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$list_files_filter_relevant(
-  path = self$path,
+  path = private$.path,
   max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   ...
@@ -191,13 +186,32 @@ the \code{s3_list_files_filter_relevant} function.}
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf-DOWNLOAD_ONLY"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf-DOWNLOAD_ONLY}{}}}
+\subsection{Method \code{DOWNLOAD_ONLY()}}{
+For DOWNLOAD_ONLY files, just return the input path.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf$DOWNLOAD_ONLY(x, suffix = "")}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path with raw results.}
+
+\item{\code{suffix}}{Suffix.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf-download_files"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf-download_files}{}}}
 \subsection{Method \code{download_files()}}{
 Download files from GDS/S3 to local filesystem.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$download_files(
-  path = self$path,
+  path = private$.path,
   outdir,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   max_files = 1000,

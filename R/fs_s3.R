@@ -32,7 +32,7 @@ s3_list_files_dir <- function(s3dir, max_objects = 1000) {
     purrr::map(\(x) tibble::tibble(
       Key = x[["Key"]],
       Size = x[["Size"]],
-      lastmodified = x[["LastModified"]]
+      lastmodified = as.character(x[["LastModified"]])
     )) |>
     dplyr::bind_rows() |>
     dplyr::mutate(
@@ -132,12 +132,18 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
     s3dir = s3dir, pattern = NULL, regexes = regexes,
     max_objects = max_objects, presign = FALSE
   )
+  msg <- glue(
+    "S3 input path is: {s3dir}",
+    "\nNo relevant files found under there.",
+    "\nPlease check that path with `aws s3 ls`, and try to adjust page size."
+  )
+  assertthat::assert_that(nrow(d) > 0, msg = msg)
   d <- d |>
     dplyr::mutate(
       s3path_minus_s3dir = sub(glue("{s3dir}/"), "", .data$path),
-      s3path_minus_s3dir_outdir = fs::dir_create(
-        file.path(outdir, dirname(.data$s3path_minus_s3dir))
-      ),
+      s3path_minus_s3dir_outdir = file.path(outdir, dirname(.data$s3path_minus_s3dir)) |>
+        fs::dir_create() |>
+        normalizePath(),
       localpath = file.path(.data$s3path_minus_s3dir_outdir, .data$bname),
       s3path = .data$path
     ) |>
@@ -163,6 +169,7 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
         ),
         localpath = normalizePath(.data$localpath)
       ) |>
+      dplyr::ungroup() |>
       dplyr::select("type", "bname", "size", "lastmodified", "localpath", "s3path")
     return(res)
   } else {
@@ -189,7 +196,7 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
 #' }
 #'
 #' @export
-s3_file_presignedurl <- function(client, s3path, expiry_seconds = 3600) {
+s3_file_presignedurl <- function(client, s3path, expiry_seconds = 604800) {
   bucket <- sub("s3://(.*?)/.*", "\\1", s3path)
   prefix <- sub("s3://(.*?)/(.*)", "\\2", s3path)
   client$generate_presigned_url(

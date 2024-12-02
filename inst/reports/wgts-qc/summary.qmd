@@ -1,0 +1,755 @@
+---
+title: "WGTS Alignment QC Summary"
+author: "CCGCM - Genomics Platform Group"
+date: now
+date-format: "YYYY-MM-DD HH:mm Z"
+execute:
+  echo: false
+format:
+  html:
+    toc: false
+    toc-expand: 1
+    toc-title: Contents
+    toc-location: body
+    highlight-style: github
+    number-sections: false
+    link-external-icon: false
+    link-external-newwindow: true
+    embed-resources: true
+    code-copy: true
+    code-link: true
+    code-fold: true
+    code-block-border-left: true
+    smooth-scroll: true
+    grid:
+      body-width: 1300px
+params:
+  tidy_data: "~/projects/dracarys/inst/rmd/umccr_workflows/alignment_qc/nogit/tidy_data_rds/2024-11-24_wgts.rds"
+---
+
+```{r}
+#| label: pkgs
+#| message: false
+#| warning: false
+
+{
+  require(dplyr)
+  require(dracarys, include.only = "session_info_kable")
+  require(DT, include.only = "datatable")
+  require(forcats, include.only = "fct_rev")
+  require(glue, include.only = "glue")
+  require(here, include.only = "here")
+  require(plotly, include.only = "ggplotly")
+  require(purrr, include.only = "map")
+  require(readr, include.only = "read_rds")
+  require(stringr, include.only = "str_extract")
+  require(tibble, include.only = "tibble")
+  require(knitr, include.only = "kable")
+  require(ggplot2)
+  require(tidyr, include.only = "unnest")
+}
+```
+
+```{r}
+#| label: data_import
+tidy_data_path <- params[["tidy_data"]]
+d0 <- tidy_data_path |>
+  readr::read_rds() |>
+  mutate(
+    umccrId = glue("{.data$individualId}_{.data$libraryId}_{.data$lane}"),
+    umccrId = factor(.data$umccrId),
+    projectOwnerName = glue("{.data$projectOwner}_{.data$projectName}")
+  ) |>
+  select(
+    "umccrId",
+    "subjectId",
+    "libraryId",
+    "projectOwnerName",
+    "sampleType",
+    "phenotype",
+    "source",
+    "quality",
+    "assay",
+    "workflow",
+    "portalRunId",
+    "date",
+    "data_tidy"
+  )
+```
+
+```{r}
+#| label: data_setup
+ggplot2::theme_set(ggplot2::theme_bw())
+options(scipen = 999) # disable scientific notation
+options(width = 150)
+
+d_unnest <- d0 |>
+  select(
+    "umccrId", "libraryId", "subjectId",
+    type = "sampleType", "phenotype", "source",
+    "quality", "assay", "workflow", "projectOwnerName", "portalRunId", tidy = "data_tidy"
+  ) |>
+  tidyr::unnest("tidy", names_sep = "_")
+# tablename-specific access
+# columns: tidy_name, data
+# rows: 1 per tidy_table name
+d_name <- d_unnest |>
+  tidyr::nest(.by = "tidy_name", .key = "data")
+
+## A tibble: 18 × 2
+#   tidy_name                     data
+#   <glue>                        <list>
+# 1 contigmeancov_wgs             <tibble [4 × 4]>
+# 2 covmetrics_wgs                <tibble [4 × 4]>
+# 3 finehist_wgs                  <tibble [4 × 4]>
+# 4 fqc_positionalBaseContent     <tibble [4 × 4]>
+# 5 fqc_positionalBaseMeanQuality <tibble [4 × 4]>
+# 6 fqc_positionalQuality         <tibble [4 × 4]>
+# 7 fqc_readGCContent             <tibble [4 × 4]>
+# 8 fqc_readGCContentQuality      <tibble [4 × 4]>
+# 9 fqc_readLengths               <tibble [4 × 4]>
+# 10 fqc_readMeanQuality           <tibble [4 × 4]>
+# 11 fqc_sequencePositions         <tibble [4 × 4]>
+# 12 fraglen                       <tibble [3 × 4]>
+# 13 hist_wgs                      <tibble [4 × 4]>
+# 14 mapmetrics                    <tibble [4 × 4]>
+# 15 ploidymetrics                 <tibble [3 × 4]>
+# 16 replay                        <tibble [4 × 4]>
+# 17 timemetrics                   <tibble [4 × 4]>
+# 18 trimmermetrics                <tibble [4 × 4]>
+
+# sample-specific access
+# columns: umccrId, data
+# rows: 1 per umccrId
+d_samp <- d_unnest |>
+  tidyr::nest(.by = "umccrId", .key = "data") |>
+  arrange(desc(.data$umccrId))
+## A tibble: 4 × 2
+#  umccrId           data
+#  <fct>             <list>
+# 1 SBJ05890_L2401624 <tibble [18 × 4]>
+# 2 SBJ05889_L2401644 <tibble [16 × 4]>
+# 3 SBJ05888_L2401621 <tibble [18 × 4]>
+# 4 SBJ05856_L2401572 <tibble [18 × 4]>
+
+dr_unnest <- function(x1, ...) {
+  d_name |>
+    dplyr::filter(.data$tidy_name == x1) |>
+    tidyr::unnest("data") |>
+    dplyr::mutate(nrows = purrr::map_int(.data$tidy_data, nrow)) |>
+    dplyr::filter(.data$nrows > 0) |>
+    dplyr::select(dplyr::everything(), -c("tidy_name", "nrows")) |>
+    dplyr::relocate("tidy_data", .after = dplyr::last_col()) |>
+    tidyr::unnest("tidy_data")
+}
+```
+
+```{r}
+#| label: funcs
+dt_view <- function(x, caption = NULL, scroll_y = 10 + min(nrow(x) * 35, 570), ...) {
+  x |>
+    DT::datatable(
+      filter = list(position = "top", clear = FALSE, plain = TRUE),
+      class = "cell-border display compact",
+      rownames = FALSE,
+      extensions = c("Scroller", "Buttons", "KeyTable"),
+      options = list(
+        scroller = TRUE, scrollY = scroll_y, scrollX = TRUE,
+        autoWidth = FALSE, keys = TRUE,
+        buttons = c("csv"), dom = "Blfrtip"
+      ),
+      ...
+    )
+}
+
+blank_lines <- function(n = 10) {
+  cat(rep("&nbsp;  ", n), sep = "\n")
+}
+
+get_lib_url <- function(lid, text, colour = NULL) {
+  url <- glue("https://orcaui.umccr.org/lab?tab=library&search={lid}")
+  if (!is.null(colour)) {
+    return(glue("<a href={url} style='background-color:{colour}'>{text}</a>"))
+  }
+  return(glue("<a href={url}>{text}</a>"))
+}
+
+type_col <- list(
+  wgs = "magenta",
+  wts = "purple"
+)
+```
+
+## Sample Metadata
+
+```{r}
+#| label: meta
+d0 |>
+  arrange(desc(.data$umccrId), libraryId, sampleType) |>
+  mutate(
+    umccrId = get_lib_url(lid = .data$libraryId, text = .data$umccrId),
+    date_analysis_end = lubridate::ymd_hms(.data$date)
+  ) |>
+  select(umccrId, type = "sampleType", everything(), -data_tidy, -date) |>
+  dt_view(escape = FALSE) |>
+  DT::formatStyle(
+    "type",
+    color = DT::styleEqual(
+      c("WGS", "WTS"), with(type_col, c(wgs, wts))
+    )
+  )
+```
+
+## QC Metrics
+
+### Mapping
+
+```{r}
+#| label: mapmetrics
+d_map <- dr_unnest("mapmetrics") |>
+  arrange(desc(umccrId), type) |>
+  mutate(
+    umccrId = get_lib_url(lid = .data$libraryId, text = .data$umccrId),
+    RG = ifelse(.data$RG == "Total", "Total", "RG")
+  ) |>
+  select(
+    umccrId, subjectId,
+    phenotype, type,
+    source, quality, assay, workflow, projectOwnerName, portalRunId, RG,
+    tot_reads = reads_tot_rg,
+    dup_reads = reads_num_dupmarked,
+    `dup%` = reads_num_dupmarked_pct,
+    `map%` = reads_mapped_pct,
+    `unmap%` = reads_unmapped_pct,
+    `uniq%` = reads_num_uniq_pct,
+    `uniq_map%` = reads_num_uniq_mapped_pct,
+    `paired%` = reads_paired_pct,
+    `paired_proper%` = reads_paired_proper_pct,
+    `singleton%` = reads_singleton_pct,
+    `discordant%` = reads_discordant_pct,
+    `rrna_filt%` = reads_rrna_filtered_pct,
+    `splicejunc%` = reads_splicejunc_pct,
+    `mapq_0-10%` = reads_mapq_0_10_pct,
+    `mapq_10-20%` = reads_mapq_10_20_pct,
+    `mapq_20-30%` = reads_mapq_20_30_pct,
+    `mapq_30-40%` = reads_mapq_30_40_pct,
+    `mapq_40-Inf%` = reads_mapq_40_inf_pct,
+    read_len = read_len,
+    insert_len_med = insert_len_median,
+    insert_len_mean = insert_len_mean,
+    everything(),
+    -c("libraryId", "tidy_prefix", "dragen_sample")
+  )
+num_cols <- purrr::map_lgl(d_map, is.numeric)
+num_pct_cols <- grepl("%", names(d_map)) & num_cols
+no_numpct_cols <- !grepl("%", names(d_map)) & num_cols
+conf <- list(
+  bg_size = "95% 90%",
+  bg_repeat = "no-repeat",
+  bg_pos = "center",
+  green_range = c(80, 100),
+  pink_range = c(8, 20)
+)
+d_map |>
+  dt_view(scroll_y = 1500, escape = FALSE) |>
+  DT::formatCurrency(columns = names(d_map)[num_pct_cols], currency = "", digits = 1) |>
+  DT::formatCurrency(columns = names(d_map)[no_numpct_cols], currency = "", digits = 0) |>
+  DT::formatStyle(
+    columns = c("map%", "uniq%", "uniq_map%", "paired%", "paired_proper%"),
+    background = DT::styleColorBar(conf$green_range, color = "lightgreen"),
+    backgroundSize = conf$bg_size,
+    backgroundRepeat = conf$bg_repeat,
+    backgroundPosition = conf$bg_pos
+  ) |>
+  DT::formatStyle(
+    columns = c("dup%", "unmap%", "singleton%", "discordant%"),
+    background = DT::styleColorBar(conf$pink_range, color = "pink"),
+    backgroundSize = conf$bg_size,
+    backgroundRepeat = conf$bg_repeat,
+    backgroundPosition = conf$bg_pos
+  ) |>
+  DT::formatStyle(
+    "type",
+    color = DT::styleEqual(
+      c("WGS", "WTS"), with(type_col, c(wgs, wts))
+    )
+  )
+```
+
+### Coverage + Ploidy
+
+- Ploidy metrics only for **WGS**.
+
+```{r}
+#| label: covmetrics
+d_pl <- dr_unnest("ploidymetrics") |>
+  arrange(desc(umccrId))
+d_pl_metrics <- d_pl |>
+  select(
+    umccrId, subjectId,
+    phenotype, type,
+    source, quality, assay, workflow, projectOwnerName, portalRunId,
+    ploidy = ploidy_est,
+    cvg_auto_med_ploidy = cov_autosomal_median,
+    cvg_x_med_ploidy = cov_x_median,
+    cvg_y_med_ploidy = cov_y_median
+  )
+# cov_genome_pct_* metrics are in the Hist data, so filter out here
+d_cvg <- dr_unnest("covmetrics_wgs") |>
+  arrange(desc(umccrId)) |>
+  left_join(d_pl_metrics, by = c(
+    "umccrId", "subjectId", "phenotype", "type", "source",
+    "quality", "assay",
+    "workflow", "projectOwnerName", "portalRunId"
+  )) |>
+  mutate(umccrId = get_lib_url(lid = .data$libraryId, text = .data$umccrId)) |>
+  select(
+    "umccrId", "phenotype", "type", "source",
+    "quality", "assay",
+    "workflow", "projectOwnerName", "portalRunId",
+    ploidy,
+    cvg_auto_avg = cov_avg_auto_over_genome,
+    cvg_auto_med = cov_median_auto_over_genome,
+    cvg_x_avg = cov_avg_x_over_genome,
+    cvg_y_avg = cov_avg_y_over_genome,
+    cvg_uniq = cov_alignment_avg_over_genome,
+    cvg_mito_avg = cov_avg_mt_over_genome,
+    cvg_auto_med_ploidy,
+    cvg_x_med_ploidy,
+    cvg_y_med_ploidy,
+    reads_aligned_tot,
+    bases_aligned_tot,
+    cvg_gt02 = cov_uniformity_pct_gt02mean_genome,
+    cvg_gt04 = cov_uniformity_pct_gt04mean_genome,
+    everything(),
+    -contains("cov_pct_"),
+    -c("libraryId", "tidy_prefix")
+  )
+num_cols <- names(d_cvg)[purrr::map_lgl(d_cvg, is.numeric)]
+d_cvg |>
+  dt_view(scroll_y = 1500, escape = FALSE) |>
+  DT::formatCurrency(columns = num_cols, currency = "", digits = 1) |>
+  DT::formatStyle(
+    "ploidy",
+    backgroundColor = DT::styleEqual(
+      c("XY", "XX"), c("lightblue", "lightpink")
+    )
+  ) |>
+  DT::formatStyle(
+    "type",
+    color = DT::styleEqual(
+      c("WGS", "WTS"), with(type_col, c(wgs, wts))
+    )
+  )
+```
+
+### Trimmer
+
+```{r}
+#| label: trimmermetrics
+d_tr <- dr_unnest("trimmermetrics") |>
+  arrange(desc(umccrId), type) |>
+  mutate(
+    umccrId = get_lib_url(lid = .data$libraryId, text = .data$umccrId)
+  ) |>
+  select(
+    umccrId, subjectId,
+    phenotype, type,
+    source, quality, assay, workflow, projectOwnerName, portalRunId,
+    reads_tot = reads_tot_input,
+    read_len_avg = read_len_avg,
+    `polygkmers3r1_remain%` = polygkmers3r1_remaining_pct,
+    `polygkmers3r2_remain%` = polygkmers3r2_remaining_pct,
+    `polyg_soft_trimmed_reads_unfilt_3r1%` = polyg_soft_trimmed_reads_unfilt_3r1_pct,
+    `polyg_soft_trimmed_reads_unfilt_3r2%` = polyg_soft_trimmed_reads_unfilt_3r2_pct,
+    `polyg_soft_trimmed_bases_unfilt_3r1%` = polyg_soft_trimmed_bases_unfilt_3r1_pct,
+    `polyg_soft_trimmed_bases_unfilt_3r2%` = polyg_soft_trimmed_bases_unfilt_3r2_pct,
+    polygkmers3r1_remaining = polygkmers3r1_remaining,
+    polygkmers3r2_remaining = polygkmers3r2_remaining,
+    polyg_soft_trimmed_reads_unfilt_3r1 = polyg_soft_trimmed_reads_unfilt_3r1,
+    polyg_soft_trimmed_reads_unfilt_3r2 = polyg_soft_trimmed_reads_unfilt_3r2,
+    polyg_soft_trimmed_bases_unfilt_3r1 = polyg_soft_trimmed_bases_unfilt_3r1,
+    polyg_soft_trimmed_bases_unfilt_3r2 = polyg_soft_trimmed_bases_unfilt_3r2,
+    bases_tot = bases_tot,
+    bases_r1 = bases_r1,
+    bases_r2 = bases_r2,
+    reads_trimmed_tot = reads_trimmed_tot,
+    `reads_trimmed_tot%` = reads_trimmed_tot_pct,
+    bases_trimmed_tot = bases_trimmed_tot,
+    `bases_trimmed_tot%` = bases_trimmed_tot_pct,
+    reads_tot_filt = reads_tot_filt,
+    `reads_tot_filt%` = reads_tot_filt_pct,
+    everything(),
+    -c("libraryId", "tidy_prefix")
+  )
+d_tr |>
+  dt_view(escape = FALSE) |>
+  DT::formatStyle(
+    "type",
+    color = DT::styleEqual(
+      c("WGS", "WTS"), with(type_col, c(wgs, wts))
+    )
+  )
+```
+
+## FastQC {.tabset .tabset-pills}
+
+- Plot names used in MultiQC report are shown in **parentheses** for easier comparison.
+- For interactive plots, focus on a specific sample by **double-clicking** its label
+in the legend.
+
+### Read Mean Quality ('Per-Sequence Quality Scores')
+
+```{r}
+#| label: fqc_readMeanQuality
+#| fig-height: 10
+f1 <- dr_unnest("fqc_readMeanQuality") |>
+  group_by(umccrId, mate) |>
+  mutate(
+    tot = sum(.data$value),
+    prop = round(.data$value / .data$tot, 3),
+    prop = 100 * prop
+  ) |>
+  ungroup()
+
+fqc_colours1 <- tibble::tibble(
+  start = c(0, 20, 28),
+  end = c(20, 28, max(f1$q) + 2),
+  col = c("#e6c3c3", "#e6dcc3", "#c3e6c3")
+)
+f1_plot <- ggplot() +
+  geom_rect(
+    data = fqc_colours1,
+    mapping = aes(xmin = start, xmax = end, ymin = 0, ymax = max(f1$prop) + 2),
+    fill = rep(fqc_colours1$col, length(unique(f1$type))),
+    alpha = 0.7
+  ) +
+  geom_line(data = f1, aes(x = q, y = prop, colour = umccrId, linetype = mate), linewidth = 1, show.legend = FALSE) +
+  scale_y_continuous(labels = scales::label_comma()) +
+  theme(panel.grid.major = element_blank()) +
+  facet_wrap(~type, ncol = 1) +
+  labs(
+    title = "Read Mean Quality",
+    subtitle = glue("Percentage of reads with average quality scores. Shows if\na subset of reads has poor quality.")
+  )
+
+# plotly::ggplotly(f1_plot)
+f1_plot
+```
+
+### GC Content ('Per-Sequence GC Content')
+
+```{r}
+#| label: fqc_readGCContent
+#| fig-height: 10
+gc_data <- dr_unnest("fqc_readGCContent") |>
+  group_by(umccrId, mate) |>
+  mutate(
+    tot = sum(.data$value),
+    prop = round(.data$value / .data$tot, 3),
+    prop = 100 * prop
+  ) |>
+  ungroup()
+
+gc_data_plot <- gc_data |>
+  ggplot(aes(x = pct, y = prop, colour = umccrId)) +
+  geom_line(aes(linetype = mate), alpha = 0.4, linewidth = 1) +
+  facet_wrap(~type, ncol = 1) +
+  labs(
+    x = "GC content",
+    y = "Percentage of Reads",
+    title = "Read GC Content",
+    subtitle = glue("Total number of reads with each GC content\npercentile between 0% and 100%")
+  )
+# plotly::ggplotly(gc_data_plot)
+gc_data_plot
+```
+
+### GC Content Quality ('GC Content Mean Quality Scores')
+
+```{r}
+#| label: fqc_readGCContentQuality
+f1 <- dr_unnest("fqc_readGCContentQuality") |>
+  filter(!is.na(.data$value))
+fqc_colours2 <- tibble::tibble(
+  start = c(0, 20, 28),
+  end = c(20, 28, max(f1$value) + 2),
+  col = c("#e6c3c3", "#e6dcc3", "#c3e6c3")
+)
+f1_plot <- ggplot() +
+  geom_rect(
+    data = fqc_colours2,
+    mapping = aes(ymin = start, ymax = end, xmin = 0, xmax = 100),
+    fill = rep(fqc_colours2$col, length(unique(f1$type))),
+    alpha = 0.7
+  ) +
+  geom_line(data = f1, aes(x = pct, y = value, colour = umccrId, linetype = mate), linewidth = 1) +
+  facet_wrap(~type, ncol = 1) +
+  labs(
+    title = "GC Content Quality",
+    subtitle = glue("Average Phred-scale read mean quality for reads with\neach GC content percentile between 0% and 100%.")
+  )
+# plotly::ggplotly(f1_plot)
+f1_plot
+```
+
+### Positional Base Content ('Per-Position Sequence Content')
+
+- TODO: create heatmap instead
+
+```{r}
+#| label: fqc_pbc
+#| fig-height: 42
+#| eval: false
+f1 <- dr_unnest("fqc_positionalBaseContent")
+f1 |>
+  filter(base != "N") |>
+  mutate(prop = prop * 100) |>
+  ggplot(aes(x = pos, y = prop, colour = base, group = base)) +
+  geom_line() +
+  facet_grid(forcats::fct_rev(umccrId) ~ mate) +
+  labs(
+    x = "Position in Read (bp)",
+    y = "Proportion of Bases",
+    title = "Positional Base Content",
+    subtitle = glue(
+      "Proportion of bases of each specific nucleotide",
+      "\nat given locations in the read."
+    )
+  )
+```
+
+### Positional Base Mean Quality ('Per-Position Mean Quality Scores')
+
+
+```{r}
+#| label: fqc_bmq
+#| fig-height: 80
+#| eval: false
+f1 <- dr_unnest("fqc_positionalBaseMeanQuality")
+ggplot() +
+  geom_rect(
+    data = fqc_colours2,
+    mapping = aes(ymin = start, ymax = end, xmin = -Inf, xmax = Inf),
+    fill = rep(fqc_colours2$col, length(unique(f1$umccrId)) * length(unique(f1$mate))),
+    alpha = 0.7
+  ) +
+  geom_line(data = f1, aes(x = pos, y = value, colour = base)) +
+  facet_grid(forcats::fct_rev(umccrId) ~ mate) +
+  labs(
+    x = "Position in Read (bp)",
+    y = "Quality Score",
+    title = "Positional Base Mean Quality",
+    subtitle = glue(
+      "Average Phred-scale quality value of bases with a specific",
+      "\nnucleotide and at a given location in the read."
+    )
+  )
+```
+
+### Positional Quality ('Per-Position Quality Score Ranges')
+
+```{r}
+#| label: fqc_pq
+#| fig-width: 13
+#| eval: false
+
+# TODO: use boxplot instead of point
+f1 <- dr_unnest("fqc_positionalQuality")
+quants <- c(25, 50, 75)
+f1 |>
+  mutate(pos = as.integer(.data$pos)) |>
+  filter(pct %in% quants) |>
+  ggplot(aes(x = pos, y = value, colour = pct)) +
+  geom_point() +
+  facet_wrap(~ forcats::fct_rev(umccrId)) +
+  labs(
+    title = "Positional Quality",
+    subtitle = glue("Phred-scale quality value for bases at a given location and a\ngiven quantile of the distribution ({paste(quants, collapse = ', ')})")
+  )
+```
+
+### Read Lengths ('Sequence Length Distribution')
+
+```{r}
+#| label: fqc_readLengths
+#| fig-height: 8
+read_len <- dr_unnest("fqc_readLengths")
+read_len_plot <- read_len |>
+  group_by(umccrId, mate) |>
+  mutate(
+    tot = sum(.data$value),
+    prop = round(.data$value / .data$tot, 3),
+    prop = 100 * prop
+  ) |>
+  ungroup() |>
+  select(umccrId, type, mate, bp, value, tot, prop) |>
+  ggplot(aes(x = bp, y = prop, colour = umccrId)) +
+  geom_line(aes(linetype = mate), linewidth = 1) +
+  theme(
+    panel.grid.major = element_blank()
+  ) +
+  facet_wrap(~type, ncol = 1) +
+  labs(
+    title = "Read Lengths",
+    subtitle = glue("Read percentage with each observed length.")
+  )
+# plotly::ggplotly(read_len_plot)
+read_len_plot
+```
+
+### Sequence Positions ('Adapter Content')
+
+```{r}
+#| label: fqc_sequencePositions
+#| fig-height: 42
+f1 <- dr_unnest("fqc_sequencePositions")
+f1 |>
+  ggplot(aes(x = bp, y = value, colour = seq)) +
+  geom_line() +
+  facet_grid(forcats::fct_rev(umccrId) ~ mate, scales = "free_y") +
+  labs(title = glue(
+    "Number of times an adapter or other kmer sequence is found,\n",
+    "starting at a given position in the input reads."
+  ))
+```
+
+---
+
+## Coverage {.tabset .tabset-pills}
+
+```{r}
+#| label: contig_cvg
+#| fig-height: 5
+#| eval: false
+#| results: asis
+# TODO: FIXME
+d1 <- dr_unnest("contigmeancov_wgs") |>
+  arrange(desc("umccrId"))
+for (type1 in sort(unique(d1$type), decreasing = FALSE)) {
+  cat(glue("\n\n### {type1} {{.tabset .tabset-pills}}"), "\n\n")
+  d1_type <- d1 |>
+    filter(type == type1)
+  for (s in sort(unique(d1_type$umccrId), decreasing = TRUE)) {
+    p1 <- d1_type |>
+      filter(umccrId == s) |>
+      dracarys::WgsContigMeanCovFile$public_methods$plot() +
+      ggplot2::labs(subtitle = s)
+    cat(glue("\n#### {s}"), "\n")
+    blank_lines(2)
+    print(p1)
+    blank_lines(2)
+    cat("\n\n\n")
+  }
+  cat("\n\n\n")
+}
+```
+
+-----
+
+## Fragment Length
+
+- Only for WGS.
+
+```{r}
+#| label: fraglenhist_plot
+#| fig-height: 8
+
+fl1 <- dr_unnest("fraglen")
+min_count <- 10
+flp <- fl1 |>
+  filter(.data$count >= min_count) |>
+  ggplot(aes(x = .data$fragmentLength, y = .data$count)) +
+  geom_line(aes(colour = umccrId)) +
+  labs(title = "Fragment Length Distribution") +
+  xlab("Fragment Length (bp)") +
+  ylab(glue("Read Count (min: {min_count})")) +
+  theme(
+    legend.position.inside = c(0.9, 0.9),
+    legend.justification = c(1, 1),
+    panel.grid.minor = ggplot2::element_blank(),
+    plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
+  )
+plotly::ggplotly(flp)
+# flp
+```
+
+---
+
+- Only for WGS.
+
+```{r pe, eval=T, fig.height=5}
+#| label: pe
+#| eval: FALSE
+#| fig-height: 5
+
+chrom_levels <- c(1:22, "x", "y")
+d_pl_plot_data <- d_pl |>
+  select(
+    umccrId, phenotype, type,
+    contains("div_auto_median")
+  ) |>
+  tidyr::pivot_longer(-c("umccrId", "phenotype", "type")) |>
+  tidyr::separate_wider_delim("name", delim = "_", names = c("cov", "chrom", "rest"), too_many = "merge") |>
+  mutate(chrom = factor(chrom, levels = chrom_levels)) |>
+  select(umccrId, phenotype, type, chrom, value)
+
+d_pl_plot <- d_pl_plot_data |>
+  ggplot(aes(x = chrom, y = value)) +
+  geom_line(aes(colour = umccrId, group = umccrId), na.rm = TRUE) +
+  geom_point(aes(colour = umccrId), na.rm = TRUE) +
+  labs(title = "Chromosome Median / Autosomal Median")
+plotly::ggplotly(d_pl_plot)
+# d_pl_plot
+```
+
+
+---
+
+## Hist
+
+```{r}
+#| label: cvgm
+#| eval: false
+#| fig-height: 8
+#| fig-width: 12
+d_hist <- dr_unnest("hist_wgs")
+d_hist1 <- d_hist |>
+  ggplot(aes(x = start, y = pct, colour = umccrId)) +
+  geom_point() +
+  geom_linerange(aes(xmin = start, xmax = end)) +
+  scale_y_continuous(n.breaks = 10) +
+  scale_x_continuous(n.breaks = 10) +
+  facet_wrap(~type, nrow = 1) +
+  labs(
+    x = "Coverage range", y = "PCT",
+    title = "PCT of bases with coverage in the given range",
+    subtitle = "e.g. X PCT of bases have coverage between 100 and 500."
+  )
+d_hist2 <- d_hist |>
+  ggplot(aes(x = start, y = cumsum, colour = umccrId)) +
+  geom_point() +
+  geom_line() +
+  scale_x_continuous(n.breaks = 10) +
+  facet_wrap(~type, nrow = 1) +
+  labs(
+    x = "Coverage", y = "PCT Cumsum",
+    title = "Percentage of sites in genome with given coverage"
+  )
+# plotly::subplot(d_hist1, d_hist2, shareY = TRUE, titleY = TRUE, titleX = TRUE, nrows = 2)
+```
+
+## FineHist
+
+```{r}
+#| label: finehist
+#| eval: false
+#| fig-height: 10
+#| fig-width: 12
+d_fhist <- dr_unnest("finehist_wgs")
+d_fhist |>
+  dracarys::WgsFineHistFile$public_methods$plot(c(0, 150)) +
+  facet_wrap(~ forcats::fct_rev(umccrId), scales = "free_y")
+```
+
+---

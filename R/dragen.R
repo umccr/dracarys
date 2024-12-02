@@ -209,7 +209,8 @@ dragen_gc_metrics_read <- function(x) {
 #' @export
 dragen_cnv_metrics_read <- function(x) {
   d0 <- readr::read_lines(x)
-  assertthat::assert_that(grepl("SEX GENOTYPER", d0[1]))
+  # first row is sometimes SEX GENOTYPER, others CNV SUMMARY
+  assertthat::assert_that(grepl("CNV SUMMARY", d0[2]))
   abbrev_nm <- c(
     "Bases in reference genome" = "bases_in_ref_genome",
     "Average alignment coverage over genome" = "cov_alignment_avg_over_genome",
@@ -227,7 +228,10 @@ dragen_cnv_metrics_read <- function(x) {
     "Number of amplifications" = "n_amp",
     "Number of deletions" = "n_del",
     "Number of passing amplifications" = "n_amp_pass",
-    "Number of passing deletions" = "n_del_pass"
+    "Number of passing deletions" = "n_del_pass",
+    "Estimated tumor purity" = "purity_tumor",
+    "Diploid coverage" = "cov_diploid",
+    "Overall ploidy" = "ploidy_overall"
   )
   d1 <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
@@ -236,10 +240,10 @@ dragen_cnv_metrics_read <- function(x) {
       names = c("category", "extra", "var", "count", "pct"),
       delim = ",", too_few = "align_start"
     )
+  # in cttso
   sexgt <- d1 |>
     dplyr::filter(.data$category == "SEX GENOTYPER") |>
     dplyr::select(sexgt = "count", sexgt_pct = "pct")
-
   d2 <- d1 |>
     dplyr::filter(!.data$category == "SEX GENOTYPER") |>
     dplyr::mutate(
@@ -258,8 +262,10 @@ dragen_cnv_metrics_read <- function(x) {
     ) |>
     dplyr::select("var", "value") |>
     tidyr::pivot_wider(names_from = "var", values_from = "value")
-  res <- dplyr::bind_cols(sexgt, d2)
-  return(res)
+  if (nrow(sexgt) == 0) {
+    return(d2)
+  }
+  dplyr::bind_cols(sexgt, d2)
 }
 
 #' Read DRAGEN SV Metrics
@@ -485,6 +491,7 @@ dragen_vc_metrics_read <- function(x) {
 dragen_mapping_metrics_read <- function(x) {
   abbrev_nm <- c(
     "Total input reads" = "reads_tot_input",
+    "Total reads removed by downsampling" = "reads_removed_downsamp",
     "Number of duplicate marked reads" = "reads_num_dupmarked",
     "Number of duplicate marked and mate reads removed" = "reads_num_dupmarked_mate_reads_removed",
     "Number of unique reads (excl. duplicate marked reads)" = "reads_num_uniq",
@@ -499,6 +506,7 @@ dragen_mapping_metrics_read <- function(x) {
     "Unmapped reads" = "reads_unmapped",
     "Unmapped reads adjusted for filtered mapping" = "reads_unmapped_adjfilt",
     "Adjustment of reads matching non-reference decoys" = "reads_match_nonref_decoys_adj",
+    "Adjustment of reads matching exclude contigs" = "reads_match_excl_contigs",
     "Singleton reads (itself mapped; mate unmapped)" = "reads_singleton",
     "Paired reads (itself & mate mapped)" = "reads_paired",
     "Properly paired reads" = "reads_paired_proper",
@@ -514,6 +522,7 @@ dragen_mapping_metrics_read <- function(x) {
     "Reads with indel R1" = "reads_indel_r1",
     "Reads with indel R2" = "reads_indel_r2",
     "Total bases" = "bases_tot",
+    "Total bases removed by downsampling" = "bases_removed_downsamp",
     "Total bases R1" = "bases_tot_r1",
     "Total bases R2" = "bases_tot_r2",
     "Mapped bases" = "bases_mapped",
@@ -555,17 +564,21 @@ dragen_mapping_metrics_read <- function(x) {
     "Adjustment of reads matching filter contigs" = "reads_match_filt_contig_adj",
     "Reads with splice junction" = "reads_splicejunc",
     "Average sequenced coverage over genome" = "cov_avg_seq_over_genome",
-    "Filtered rRNA reads" = "reads_rrna_filtered"
+    "Filtered rRNA reads" = "reads_rrna_filtered",
+    "Mitochondrial reads excluded" = "reads_mito_excl"
   )
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("MAPPING/ALIGNING", d0[1]))
-  # split by RG and non-RG
-  # tidy
+  # File is separated into two sections, the SUMMARY and the PER RG.
+  # Based on what I've seen so far, we can have single samples (where
+  # the first column just has MAPPING/ALIGNING) or TUMOR/NORMAL samples (where
+  # the first column will have a TUMOR or NORMAL prefix).
+  reg1 <- paste0("MAPPING/ALIGNING ", c("SUMMARY", "PER RG"), collapse = "|")
   d <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
     tidyr::separate_wider_delim(
       "value",
-      names = c("category", "RG", "var", "count", "pct"),
+      names = c("dragen_sample", "RG", "var", "count", "pct"),
       delim = ",", too_few = "align_start"
     ) |>
     dplyr::mutate(
@@ -573,9 +586,11 @@ dragen_mapping_metrics_read <- function(x) {
       count = as.numeric(.data$count),
       pct = as.numeric(.data$pct),
       var = dplyr::recode(.data$var, !!!abbrev_nm),
-      RG = dplyr::if_else(.data$RG == "", "Total", .data$RG)
+      RG = dplyr::if_else(.data$RG == "", "Total", .data$RG),
+      dragen_sample = sub(reg1, "", .data$dragen_sample) |> trimws(),
+      dragen_sample = dplyr::if_else(.data$dragen_sample == "", "SINGLE", .data$dragen_sample)
     ) |>
-    dplyr::select("RG", "var", "count", "pct")
+    dplyr::select("dragen_sample", "RG", "var", "count", "pct")
   dirty_names_cleaned(unique(d$var), abbrev_nm, x)
   # pivot
   d |>
@@ -584,7 +599,7 @@ dragen_mapping_metrics_read <- function(x) {
       name = dplyr::if_else(.data$name == "count", "", "_pct"),
       var = glue("{.data$var}{.data$name}")
     ) |>
-    dplyr::select("RG", "var", "value") |>
+    dplyr::select("dragen_sample", "RG", "var", "value") |>
     dplyr::filter(!is.na(.data$value)) |>
     tidyr::pivot_wider(names_from = "var", values_from = "value")
 }
@@ -766,100 +781,400 @@ dragen_contig_mean_coverage_plot <- function(d, top_alt_n = 15) {
     ggplot2::facet_wrap(ggplot2::vars(.data$panel), nrow = 2, scales = "free")
 }
 
-#' PloidyEstimationMetricsFile R6 Class
+#' Read DRAGEN Ploidy Estimation Metrics
 #'
-#' @description
-#' Contains methods for reading contents of
-#' the `ploidy_estimation_metrics.csv` file output from DRAGEN.
+#' Reads the `ploidy_estimation_metrics.csv` file generated by DRAGEN.
+#' @param x Path to file.
+#'
+#' @return Tibble with metrics.
+dragen_ploidy_estimation_metrics_read <- function(x) {
+  raw <- readr::read_lines(x)
+  assertthat::assert_that(grepl("PLOIDY ESTIMATION", raw[1]))
+  fun1 <- function(x) {
+    purrr::set_names(
+      as.character(glue("cov_{tolower(x)}_div_auto_median")),
+      as.character(glue("{x} median / Autosomal median"))
+    )
+  }
+  fun2 <- function(x) {
+    purrr::set_names(
+      as.character(glue("cov_{tolower(x)}_median")),
+      as.character(glue("{x} median coverage"))
+    )
+  }
+  abbrev_nm <- c(
+    "Ploidy estimation" = "ploidy_est",
+    fun2(c("X", "Y", "Autosomal")),
+    fun1(c(1:22, "X", "Y"))
+  )
+  d <- raw |>
+    tibble::as_tibble_col(column_name = "value") |>
+    tidyr::separate_wider_delim("value", names = c("dummy1", "dummy2", "var", "value"), delim = ",") |>
+    dplyr::select("var", "value") |>
+    dplyr::mutate(
+      var = dplyr::recode(.data$var, !!!abbrev_nm)
+    ) |>
+    tidyr::pivot_wider(names_from = "var", values_from = "value")
+  dirty_names_cleaned(unique(colnames(d)), abbrev_nm, x)
+  # now convert all except 'Ploidy estimation' to numeric
+  cols1 <- colnames(d)[colnames(d) != "ploidy_est"]
+  d |>
+    dplyr::mutate(dplyr::across(dplyr::all_of(cols1), as.numeric))
+}
+
+#' Wf_dragen Download Tidy and Write
+#'
+#' Downloads files from the `dragen` workflow and writes them in a tidy format.
+#'
+#' @param path Path to directory with raw workflow results (S3 or local filesystem).
+#' @param prefix The LibraryID prefix of the sample.
+#' @param outdir Path to output directory with raw files.
+#' @param outdir_tidy Path to output directory with tidy files.
+#' @param format Format of output files.
+#' @param max_files Max number of files to list.
+#' @param dryrun If TRUE, just list the files that will be downloaded (don't
+#' download them).
+#' @return Tibble of tidy tibbles.
 #'
 #' @examples
-#' x <- system.file("extdata/wgs/SEQC-II.ploidy_estimation_metrics.csv.gz", package = "dracarys")
-#' pem <- PloidyEstimationMetricsFile$new(x)
-#' d <- pem$read() # or read(pem)
-#' pem$write(d, out_dir = tempdir(), prefix = "seqc_ploidy", out_format = "tsv")
+#' \dontrun{
+#' #---- Local ----#
 #'
+#' #---- S3 ----#
+#' path <- file.path(
+#'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
+#'   "analysis/wgts-qc/20241123ffa837c4/L2401621_dragen_alignment"
+#' )
+#' prefix <- "L2401621"
+#' outdir <- sub("s3:/", "~/s3", path)
+#' dragen_tidy <- dtw_Wf_dragen(
+#'   path = path, prefix = prefix, outdir = outdir,
+#'   format = "tsv",
+#'   dryrun = F
+#' )
+#' }
 #' @export
-PloidyEstimationMetricsFile <- R6::R6Class(
-  "PloidyEstimationMetricsFile",
-  inherit = File,
+dtw_Wf_dragen <- function(path, prefix, outdir,
+                          outdir_tidy = file.path(outdir, "dracarys_tidy"),
+                          format = "rds",
+                          max_files = 1000,
+                          dryrun = FALSE) {
+  obj <- Wf_dragen$new(path = path, prefix = prefix)
+  d_dl <- obj$download_files(
+    outdir = outdir, max_files = max_files, dryrun = dryrun
+  )
+  if (!dryrun) {
+    d_tidy <- obj$tidy_files(d_dl)
+    d_write <- obj$write(
+      d_tidy,
+      outdir = outdir_tidy,
+      prefix = prefix,
+      format = format
+    )
+    return(d_write)
+  }
+  return(d_dl)
+}
+
+#' Wf_dragen R6 Class
+#'
+#' @description
+#' Reads and writes tidy versions of files from the `dragen` workflow.
+#'
+#' @examples
+#' \dontrun{
+#'
+#' #---- Local ----#
+#' prefix <- "L2401290"
+#' p <- file.path(
+#'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
+#'   "analysis/cttsov2/20240915ff0295ed/Logs_Intermediates/DragenCaller",
+#'   prefix
+#' )
+#' d1 <- Wf_dragen$new(path = p, prefix = prefix)
+#' d1$list_files(max_files = 100)
+#' d1$list_files_filter_relevant(max_files = 300)
+#' d <- d1$download_files(max_files = 100, outdir = outdir, dryrun = F)
+#' d_tidy <- d1$tidy_files(d)
+#' d_write <- d1$write(
+#'   d_tidy,
+#'   outdir = file.path(p, "dracarys_tidy"),
+#'   prefix = prefix,
+#'   format = "tsv"
+#' )
+#' #---- GDS ----#
+#' prefix <- "PRJ222358"
+#' p <- file.path(
+#'   "gds://production/analysis_data/SBJ03001/wgs_tumor_normal",
+#'   "20241108fc293a38/L2201805_L2201797_dragen_somatic"
+#' )
+#' outdir <- file.path(sub("gds:/", normalizePath("~/icav1/g"), p)) # for GDS case
+#' d1 <- Wf_dragen$new(path = p, prefix = prefix)
+#' d1$list_files(max_files = 100)
+#' d1$list_files_filter_relevant(max_files = 300)
+#' d <- d1$download_files(max_files = 100, outdir = outdir, dryrun = F)
+#' d_tidy <- d1$tidy_files(d)
+#' d_write <- d1$write(
+#'   d_tidy,
+#'   outdir = file.path(p, "dracarys_tidy"),
+#'   prefix = prefix,
+#'   format = "tsv"
+#' )
+#' }
+#' @export
+Wf_dragen <- R6::R6Class(
+  "Wf_dragen",
+  inherit = Wf,
   public = list(
-    #' @description
-    #' Reads the `ploidy_estimation_metrics.csv` file output from DRAGEN.
-    #'
-    #' @return tibble with one row and metrics spread across individual columns.
-    read = function() {
-      x <- self$path
-      raw <- readr::read_lines(x)
-      assertthat::assert_that(grepl("PLOIDY ESTIMATION", raw[1]))
-      abbrev_nm <- c(
-        "Autosomal median coverage" = "cov_auto_median",
-        "X median coverage" = "cov_x_median",
-        "Y median coverage" = "cov_y_median",
-        "1 median / Autosomal median" = "cov_1_div_auto_median",
-        "2 median / Autosomal median" = "cov_2_div_auto_median",
-        "3 median / Autosomal median" = "cov_3_div_auto_median",
-        "4 median / Autosomal median" = "cov_4_div_auto_median",
-        "5 median / Autosomal median" = "cov_5_div_auto_median",
-        "6 median / Autosomal median" = "cov_6_div_auto_median",
-        "7 median / Autosomal median" = "cov_7_div_auto_median",
-        "8 median / Autosomal median" = "cov_8_div_auto_median",
-        "9 median / Autosomal median" = "cov_9_div_auto_median",
-        "10 median / Autosomal median" = "cov_10_div_auto_median",
-        "11 median / Autosomal median" = "cov_11_div_auto_median",
-        "12 median / Autosomal median" = "cov_12_div_auto_median",
-        "13 median / Autosomal median" = "cov_13_div_auto_median",
-        "14 median / Autosomal median" = "cov_14_div_auto_median",
-        "15 median / Autosomal median" = "cov_15_div_auto_median",
-        "16 median / Autosomal median" = "cov_16_div_auto_median",
-        "17 median / Autosomal median" = "cov_17_div_auto_median",
-        "18 median / Autosomal median" = "cov_18_div_auto_median",
-        "19 median / Autosomal median" = "cov_19_div_auto_median",
-        "20 median / Autosomal median" = "cov_20_div_auto_median",
-        "21 median / Autosomal median" = "cov_21_div_auto_median",
-        "22 median / Autosomal median" = "cov_22_div_auto_median",
-        "X median / Autosomal median" = "cov_x_div_auto_median",
-        "Y median / Autosomal median" = "cov_y_div_auto_median",
-        "Ploidy estimation" = "ploidy_est"
+    #' @field prefix The LibraryID prefix of the sample (needed for path lookup).
+    prefix = NULL,
+    #' @description Create a new Wf_dragen object.
+    #' @param path Path to directory with raw workflow results (from S3 or
+    #' local filesystem).
+    #' @param prefix The LibraryID prefix of the sample (needed for path lookup).
+    initialize = function(path = NULL, prefix = NULL) {
+      wname <- "dragen"
+      pref <- prefix
+      tn1 <- "(|_tumor|_normal)"
+      regexes <- tibble::tribble(
+        ~regex, ~fun,
+        glue("{pref}\\-replay\\.json$"), "read_replay",
+        glue("{pref}\\.cnv_metrics.csv$"), "read_cnvMetrics",
+        glue("{pref}\\.exon_contig_mean_cov\\.csv$"), "read_contigMeanCov",
+        glue("{pref}\\.target_bed_contig_mean_cov\\.csv$"), "read_contigMeanCov",
+        glue("{pref}\\.tmb_contig_mean_cov\\.csv$"), "read_contigMeanCov",
+        glue("{pref}\\.wgs_contig_mean_cov{tn1}\\.csv$"), "read_contigMeanCov",
+        glue("{pref}\\.exon_coverage_metrics\\.csv$"), "read_coverageMetrics",
+        glue("{pref}\\.target_bed_coverage_metrics\\.csv$"), "read_coverageMetrics",
+        glue("{pref}\\.tmb_coverage_metrics\\.csv$"), "read_coverageMetrics",
+        glue("{pref}\\.wgs_coverage_metrics{tn1}\\.csv$"), "read_coverageMetrics",
+        glue("{pref}\\.exon_fine_hist\\.csv$"), "read_fineHist",
+        glue("{pref}\\.target_bed_fine_hist\\.csv$"), "read_fineHist",
+        glue("{pref}\\.tmb_fine_hist\\.csv$"), "read_fineHist",
+        glue("{pref}\\.wgs_fine_hist{tn1}\\.csv$"), "read_fineHist",
+        glue("{pref}\\.exon_hist\\.csv$"), "read_hist",
+        glue("{pref}\\.target_bed_hist\\.csv$"), "read_hist",
+        glue("{pref}\\.tmb_hist\\.csv$"), "read_hist",
+        glue("{pref}\\.wgs_hist{tn1}\\.csv$"), "read_hist",
+        glue("{pref}\\.fastqc_metrics\\.csv$"), "read_fastqcMetrics",
+        glue("{pref}\\.fragment_length_hist\\.csv$"), "read_fragmentLengthHist",
+        glue("{pref}\\.gc_metrics\\.csv$"), "read_gcMetrics",
+        glue("{pref}\\.gvcf_metrics\\.csv$"), "read_vcMetrics",
+        glue("{pref}\\.mapping_metrics\\.csv$"), "read_mappingMetrics",
+        glue("{pref}\\.microsat_diffs\\.txt$"), "read_msiDiffs",
+        glue("{pref}\\.microsat_output\\.json$"), "read_msi",
+        glue("{pref}\\.sv_metrics\\.csv$"), "read_svMetrics",
+        glue("{pref}\\.time_metrics\\.csv$"), "read_timeMetrics",
+        glue("{pref}\\.trimmer_metrics\\.csv$"), "read_trimmerMetrics",
+        glue("{pref}\\.umi_metrics\\.csv$"), "read_umiMetrics",
+        glue("{pref}\\.vc_metrics\\.csv$"), "read_vcMetrics",
+        glue("{pref}\\.ploidy_estimation_metrics\\.csv$"), "read_ploidyMetrics"
       )
 
-      d <- raw |>
-        tibble::as_tibble_col(column_name = "value") |>
-        tidyr::separate_wider_delim("value", names = c("dummy1", "dummy2", "var", "value"), delim = ",") |>
-        dplyr::select("var", "value") |>
-        dplyr::mutate(
-          var = dplyr::recode(.data$var, !!!abbrev_nm)
-        ) |>
-        tidyr::pivot_wider(names_from = "var", values_from = "value")
-      # now convert all except 'Ploidy estimation' to numeric
-      cols1 <- colnames(d)[colnames(d) != "ploidy_est"]
-      d |>
-        dplyr::mutate(dplyr::across(dplyr::all_of(cols1), as.numeric))
+      super$initialize(path = path, wname = wname, regexes = regexes)
+      self$prefix <- prefix
     },
-    #' @description
-    #' Writes a tidy version of the `ploidy_estimation_metrics.csv` file output
-    #' from DRAGEN.
-    #'
-    #' @param d Parsed object from `self$read()`.
-    #' @param prefix Prefix of output file(s).
-    #' @param out_dir Output directory.
-    #' @param out_format Format of output file(s).
-    #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
-      if (!is.null(out_dir)) {
-        prefix <- file.path(out_dir, prefix)
-      }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
+    #' @description Print details about the Workflow.
+    #' @param ... (ignored).
+    print = function(...) {
+      res <- tibble::tribble(
+        ~var, ~value,
+        "path", private$.path,
+        "wname", private$.wname,
+        "filesystem", private$.filesystem,
+        "prefix", self$prefix
+      )
+      print(res)
+      invisible(self)
+    },
+    #' @description Read `replay.json` file.
+    #' @param x Path to file.
+    read_replay = function(x) {
+      res <- x |>
+        jsonlite::read_json(simplifyVector = TRUE) |>
+        purrr::map_if(is.data.frame, tibble::as_tibble)
+      req_elements <- c("command_line", "hash_table_build", "dragen_config", "system")
+      assertthat::assert_that(all(names(res) %in% req_elements))
+      res[["system"]] <- res[["system"]] |>
+        tibble::as_tibble_row()
+      res[["hash_table_build"]] <- res[["hash_table_build"]] |>
+        tibble::as_tibble_row()
+      # we don't care if the columns are characters, no analysis likely to be done on dragen options
+      # (though never say never!)
+      res[["dragen_config"]] <- res[["dragen_config"]] |>
+        tidyr::pivot_wider(names_from = "name", values_from = "value")
+      dat <- dplyr::bind_cols(res)
+      tibble::tibble(name = "replay", data = list(dat))
+    },
+    #' @description Read `contig_mean_cov.csv` file.
+    #' @param x Path to file.
+    #' @param keep_alt Keep ALT contigs.
+    read_contigMeanCov = function(x, keep_alt = FALSE) {
+      subprefix <- private$dragen_subprefix(x, "_contig_mean_cov")
+      dat <- readr::read_csv(x, col_names = c("chrom", "n_bases", "coverage"), col_types = "cdd") |>
+        dplyr::filter(
+          if (!keep_alt) {
+            !grepl("chrM|MT|_|Autosomal|HLA-|EBV|GL|hs37d5", .data$chrom)
+          } else {
+            TRUE
+          }
+        )
+      tibble::tibble(name = glue("contigmeancov_{subprefix}"), data = list(dat[]))
+    },
+    #' @description Read `coverage_metrics.csv` file.
+    #' @param x Path to file.
+    read_coverageMetrics = function(x) {
+      subprefix <- private$dragen_subprefix(x, "_coverage_metrics")
+      dat <- dragen_coverage_metrics_read(x)
+      tibble::tibble(name = glue("covmetrics_{subprefix}"), data = list(dat))
+    },
+    #' @description Read `fine_hist.csv` file.
+    #' @param x Path to file.
+    read_fineHist = function(x) {
+      subprefix <- private$dragen_subprefix(x, "_fine_hist")
+      d <- readr::read_csv(x, col_types = "cd")
+      assertthat::assert_that(all(colnames(d) == c("Depth", "Overall")))
+      # there's a max Depth of 2000+, so convert to numeric for easier plotting
+      dat <- d |>
+        dplyr::mutate(
+          Depth = ifelse(grepl("+", .data$Depth), sub("(\\d*)\\+", "\\1", .data$Depth), .data$Depth),
+          Depth = as.integer(.data$Depth)
+        ) |>
+        dplyr::select(depth = "Depth", n_loci = "Overall")
+      tibble::tibble(name = glue("finehist_{subprefix}"), data = list(dat))
+    },
+    #' @description Read `fragment_length_hist.csv` file.
+    #' @param x Path to file.
+    read_fragmentLengthHist = function(x) {
+      d <- readr::read_lines(x)
+      assertthat::assert_that(grepl("#Sample", d[1]))
+      dat <- d |>
+        tibble::enframe(name = "name", value = "value") |>
+        dplyr::filter(!grepl("#Sample: |FragmentLength,Count", .data$value)) |>
+        tidyr::separate_wider_delim(cols = "value", names = c("fragmentLength", "count"), delim = ",") |>
+        dplyr::mutate(
+          count = as.numeric(.data$count),
+          fragmentLength = as.numeric(.data$fragmentLength)
+        ) |>
+        dplyr::select("fragmentLength", "count")
+      tibble::tibble(name = "fraglen", data = list(dat))
+    },
+    #' @description Read `mapping_metrics.csv` file.
+    #' @param x Path to file.
+    read_mappingMetrics = function(x) {
+      dat <- dragen_mapping_metrics_read(x)
+      tibble::tibble(name = "mapmetrics", data = list(dat))
+    },
+    #' @description Read `hist.csv` (not `fine_hist.csv`!) file.
+    #' @param x Path to file.
+    read_hist = function(x) {
+      subprefix <- private$dragen_subprefix(x, "_hist")
+      d <- readr::read_csv(x, col_names = c("var", "pct"), col_types = "cd")
+      dat <- d |>
+        dplyr::mutate(
+          var = sub("PCT of bases in .* with coverage ", "", .data$var),
+          var = gsub("\\[|\\]|\\(|\\)", "", .data$var),
+          var = gsub("x", "", .data$var),
+          var = gsub("inf", "Inf", .data$var)
+        ) |>
+        tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
+        dplyr::mutate(
+          start = as.numeric(.data$start),
+          end = as.numeric(.data$end),
+          pct = round(.data$pct, 2),
+          cumsum = cumsum(.data$pct)
+        )
+      tibble::tibble(name = glue("hist_{subprefix}"), data = list(dat))
+    },
+    #' @description Read `time_metrics.csv` file.
+    #' @param x Path to file.
+    read_timeMetrics = function(x) {
+      cn <- c("dummy1", "dummy2", "Step", "time_hrs", "time_sec")
+      ct <- readr::cols(
+        .default = "c", time_hrs = readr::col_time(format = "%T"), time_sec = "d"
+      )
+      d <- readr::read_csv(x, col_names = cn, col_types = ct)
+      assertthat::assert_that(d$dummy1[1] == "RUN TIME", is.na(d$dummy2[1]))
+      assertthat::assert_that(inherits(d$time_hrs, "hms"))
+      dat <- d |>
+        dplyr::mutate(
+          Step = tools::toTitleCase(sub("Time ", "", .data$Step)),
+          Step = gsub(" |/", "", .data$Step),
+          Time = substr(.data$time_hrs, 1, 5)
+        ) |>
+        dplyr::select("Step", "Time") |>
+        tidyr::pivot_wider(names_from = "Step", values_from = "Time") |>
+        dplyr::relocate("TotalRuntime")
+      tibble::tibble(name = "timemetrics", data = list(dat))
+    },
+    #' @description Read `vc_metrics.csv`/`gvcf_metrics.csv` file.
+    #' @param x Path to file.
+    read_vcMetrics = function(x) {
+      subprefix <- private$dragen_subprefix(x, "_metrics")
+      dat <- dragen_vc_metrics_read(x)
+      tibble::tibble(name = glue("vcmetrics_{subprefix}"), data = list(dat[]))
+    },
+    #' @description Read `trimmer_metrics.csv` file.
+    #' @param x Path to file.
+    read_trimmerMetrics = function(x) {
+      dat <- dragen_trimmer_metrics_read(x)
+      tibble::tibble(name = "trimmermetrics", data = list(dat[]))
+    },
+    #' @description Read `sv_metrics.csv` file.
+    #' @param x Path to file.
+    read_svMetrics = function(x) {
+      dat <- dragen_sv_metrics_read(x)
+      tibble::tibble(name = "svmetrics", data = list(dat[]))
+    },
+    #' @description Read `cnv_metrics.csv` file.
+    #' @param x Path to file.
+    read_cnvMetrics = function(x) {
+      dat <- dragen_cnv_metrics_read(x)
+      tibble::tibble(name = "cnvmetrics", data = list(dat[]))
+    },
+    #' @description Read `fastqc_metrics.csv` file.
+    #' @param x Path to file.
+    read_fastqcMetrics = function(x) {
+      dat <- dragen_fastqc_metrics_read(x)
+      dat
+    },
+    #' @description Read `gc_metrics.csv` file.
+    #' @param x Path to file.
+    read_gcMetrics = function(x) {
+      dat <- dragen_gc_metrics_read(x)
+      dat
+    },
+    #' @description Read `umi_metrics.csv` file.
+    #' @param x Path to file.
+    read_umiMetrics = function(x) {
+      dat <- dragen_umi_metrics_read(x)
+      dat
+    },
+    #' @description Read `ploidy_estimation_metrics.csv` file.
+    #' @param x Path to file.
+    read_ploidyMetrics = function(x) {
+      dat <- dragen_ploidy_estimation_metrics_read(x)
+      tibble::tibble(name = "ploidymetrics", data = list(dat))
+    },
+    #' @description Read `microsat_output.json` file.
+    #' @param x Path to file.
+    read_msi = function(x) {
+      dat <- tso_msi_read(x)
+      tibble::tibble(name = "msi", data = list(dat[]))
+    },
+    #' @description Read `microsat_diffs.txt` file.
+    #' @param x Path to file.
+    read_msiDiffs = function(x) {
+      dat <- readr::read_tsv(x, col_types = "cdccddc") |>
+        dplyr::rename(Chromosome = "#Chromosome")
+      tibble::tibble(name = "msidiffs", data = list(dat[]))
+    }
+  ), # end public
+  private = list(
+    dragen_subprefix = function(x, suffix) {
+      bname <- basename(x)
+      s1 <- sub("^.*\\.(.*?)\\..*$", "\\1", bname) # exon_contig_mean_cov
+      sub(suffix, "", s1) # sub("contig_mean_cov", "", s1) -> "exon"
     }
   )
-)
-
-dragen_subprefix <- function(x, suffix) {
-  # L2401290.exon_contig_mean_cov.csv -> exon
-  # L2401290.target_bed_contig_mean_cov.csv -> target_bed
-  # L2401290.tmb_contig_mean_cov.csv -> tmb
-  # L2401290.wgs_contig_mean_cov.csv -> wgs
-  bname <- basename(x)
-  s1 <- tools::file_path_sans_ext(bname)
-  s2 <- sub(".*\\.(.*)", "\\1", s1)
-  sub(suffix, "", s2)
-}
+) # end Wf_dragen

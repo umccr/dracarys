@@ -7,12 +7,15 @@
 #' \dontrun{
 #'
 #' #---- LOCAL ----#
-#' SubjectID <- "SBJ03043"
-#' SampleID_tumor <- "PRJ230004"
-#' prefix <- glue("{SubjectID}__{SampleID_tumor}")
+#' SubjectID <- "SBJ04662"
+#' SampleID_tumor <- "PRJ240647"
+#' SampleID_normal <- "PRJ240646"
 #' p1_local <- "~/icav1/g/production/analysis_data"
-#' p <- file.path(p1_local, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
-#' um1 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+#' p <- file.path(normalizePath(p1_local), "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
+#' um1 <- Wf_umccrise$new(
+#'   path = p, SubjectID = SubjectID,
+#'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+#' )
 #' um1$list_files(max_files = 10)
 #' um1$list_files_filter_relevant()
 #' d <- um1$download_files(max_files = 1000, dryrun = F)
@@ -25,16 +28,19 @@
 #' )
 #'
 #' #---- GDS ----#
-#' SubjectID <- "SBJ03043"
-#' SampleID_tumor <- "PRJ230004"
-#' prefix <- glue("{SubjectID}__{SampleID_tumor}")
+#' SubjectID <- "SBJ04662"
+#' SampleID_tumor <- "PRJ240647"
+#' SampleID_normal <- "PRJ240646"
 #' p1_gds <- "gds://production/analysis_data"
-#' p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
+#' p <- file.path(p1_gds, "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 #' token <- Sys.getenv("ICA_ACCESS_TOKEN")
-#' um2 <- Wf_umccrise$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+#' um2 <- Wf_umccrise$new(
+#'   path = p, SubjectID = SubjectID,
+#'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+#' )
 #' um2$list_files(max_files = 8)
-#' um2$list_files_filter_relevant(ica_token = token, max_files = 500)
+#' um2$list_files_filter_relevant(ica_token = token, max_files = 1000)
 #' d <- um2$download_files(
 #'   outdir = outdir, ica_token = token,
 #'   max_files = 1000, dryrun = F
@@ -53,74 +59,73 @@ Wf_umccrise <- R6::R6Class(
   "Wf_umccrise",
   inherit = Wf,
   public = list(
-    #' @field SubjectID The SubjectID of the sample (needed for path lookup).
-    #' @field SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
+    #' @field SubjectID The SubjectID of the sample.
+    #' @field SampleID_tumor The SampleID of the tumor sample.
+    #' @field SampleID_normal The SampleID of the normal sample.
     SubjectID = NULL,
     SampleID_tumor = NULL,
+    SampleID_normal = NULL,
     #' @description Create a new Wf_umccrise object.
     #' @param path Path to directory with raw workflow results (from GDS, S3, or
     #' local filesystem).
-    #' @param SubjectID The SubjectID of the sample (needed for path lookup).
-    #' @param SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
-    initialize = function(path = NULL, SubjectID = NULL, SampleID_tumor = NULL) {
+    #' @param SubjectID The SubjectID of the sample.
+    #' @param SampleID_tumor The SampleID of the tumor sample.
+    #' @param SampleID_normal The SampleID of the normal sample.
+    initialize = function(path = NULL, SubjectID = NULL,
+                          SampleID_tumor = NULL, SampleID_normal = NULL) {
       wname <- "umccrise"
       pref <- glue("{SubjectID}__{SampleID_tumor}")
       crep <- "cancer_report_tables"
       regexes <- tibble::tribble(
         ~regex, ~fun,
-        glue("{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "hrd_chord",
-        glue("{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "hrd_hrdetect",
-        glue("{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "sigs_snv2015",
-        glue("{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "sigs_snv2020",
-        glue("{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "sigs_dbs",
-        glue("{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "sigs_indel",
-        glue("{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "qcsum",
-        glue("{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "conpairmultiqc",
-        glue("work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "pcgr_json"
-      ) |>
-        dplyr::mutate(fun = paste0("read_", .data$fun))
-
+        glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "read_hrdChord",
+        glue("{path}/{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "read_hrdHrdetect",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "read_sigsTsv",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "read_sigsTsv",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "read_sigsTsv",
+        glue("{path}/{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "read_sigsTsv",
+        glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "read_qcSum",
+        glue("{path}/{pref}/{pref}-multiqc_report_data/multiqc_conpair\\.txt$"), "read_conpair",
+        glue("{path}/{pref}/purple/{pref}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY-purplegene",
+        glue("{path}/{pref}/small_variants/{pref}-somatic-PASS\\.vcf\\.gz$"), "DOWNLOAD_ONLY-smlvfiltvcf",
+        glue("{path}/{pref}/small_variants/{pref}-somatic-PASS\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-smlvfiltvcfi",
+        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.json\\.gz$"), "read_pcgrJson",
+        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.pass\\.vcf\\.gz$"), "DOWNLOAD_ONLY-pcgrvcf",
+        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.pass\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-pcgrvcfi",
+        glue("{path}/work/{pref}/pcgr/{pref}-somatic\\.pcgr\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY-pcgrtiers",
+        glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz$"), "DOWNLOAD_ONLY-cpsrvcf",
+        glue("{path}/work/{pref}/cpsr/{pref}-normal\\.cpsr\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-cpsrvcfi"
+      )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$SubjectID <- SubjectID
       self$SampleID_tumor <- SampleID_tumor
+      self$SampleID_normal <- SampleID_normal
     },
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
       res <- tibble::tribble(
         ~var, ~value,
-        "path", self$path,
-        "wname", self$wname,
-        "filesystem", self$filesystem,
+        "path", private$.path,
+        "wname", private$.wname,
+        "filesystem", private$.filesystem,
+        "nregexes", as.character(nrow(private$.regexes)),
         "SubjectID", self$SubjectID,
-        "SampleID_tumor", self$SampleID_tumor
+        "SampleID_tumor", self$SampleID_tumor,
+        "SampleID_normal", self$SampleID_normal
       )
       print(res)
       invisible(self)
     },
     #' @description Read `pcgr.json.gz` file.
     #' @param x Path to file.
-    read_pcgr_json = function(x) {
-      j <- read_jsongz_jsonlite(x)
-      tmb <-
-        j[["content"]][["tmb"]][["variant_statistic"]] %||%
-        j[["content"]][["tmb"]][["v_stat"]] %||%
-        list(tmb_estimate = NA, n_tmb = NA)
-      tmb <- purrr::flatten(tmb) |>
-        tibble::as_tibble_row() |>
-        dplyr::select("tmb_estimate", "n_tmb")
-      msi <- j[["content"]][["msi"]][["prediction"]][["msi_stats"]]
-      # handle nulls
-      msi <- msi %||% list(fracIndels = NA, predicted_class = NA)
-      msi <- purrr::flatten(msi) |>
-        tibble::as_tibble_row() |>
-        dplyr::select("fracIndels", "predicted_class")
-      metrics <- dplyr::bind_cols(msi, tmb)
-      return(metrics)
+    read_pcgrJson = function(x) {
+      dat <- pcgr_json_read(x)
+      tibble::tibble(name = "pcgrjson", data = list(dat))
     },
     #' @description Read `chord.tsv.gz` cancer report file.
     #' @param x Path to file.
-    read_hrd_chord = function(x) {
+    read_hrdChord = function(x) {
       ct <- readr::cols_only(
         p_hrd = "d",
         hr_status = "c",
@@ -128,52 +133,46 @@ Wf_umccrise <- R6::R6Class(
         p_BRCA1 = "d",
         p_BRCA2 = "d"
       )
-      read_tsvgz(x, col_types = ct)
+      dat <- read_tsvgz(x, col_types = ct)
+      tibble::tibble(name = "hrdchord", data = list(dat[]))
     },
     #' @description Read `hrdetect.tsv.gz` cancer report file.
     #' @param x Path to file.
-    read_hrd_hrdetect = function(x) {
+    read_hrdHrdetect = function(x) {
       ct <- readr::cols(
         .default = "d",
         sample = "c"
       )
-      read_tsvgz(x, col_types = ct) |>
+      dat <- read_tsvgz(x, col_types = ct) |>
         dplyr::select(-c("sample"))
+      tibble::tibble(name = "hrdhrdetect", data = list(dat[]))
     },
     #' @description Read signature cancer report file.
     #' @param x Path to file.
-    read_sigstsv = function(x) {
+    read_sigsTsv = function(x) {
+      .sigsSuffix <- function(x) {
+        x <- basename(x)
+        dplyr::case_when(
+          grepl("-dbs", x) ~ "dbs",
+          grepl("-indel", x) ~ "ind",
+          grepl("-snv_2015", x) ~ "snv2015",
+          grepl("-snv_2020", x) ~ "snv2020",
+          .default = ""
+        )
+      }
+      suffix <- .sigsSuffix(x)
       ct <- readr::cols(
         .default = "d",
         Signature = "c"
       )
-      read_tsvgz(x, col_types = ct)
-    },
-    #' @description Read `snv_2015.tsv.gz` sigs cancer report file.
-    #' @param x Path to file.
-    read_sigs_snv2015 = function(x) {
-      self$read_sigstsv(x)
-    },
-    #' @description Read `snv_2020.tsv.gz` sigs cancer report file.
-    #' @param x Path to file.
-    read_sigs_snv2020 = function(x) {
-      self$read_sigstsv(x)
-    },
-    #' @description Read `dbs.tsv.gz` sigs cancer report file.
-    #' @param x Path to file.
-    read_sigs_dbs = function(x) {
-      self$read_sigstsv(x)
-    },
-    #' @description Read `indel.tsv.gz` sigs cancer report file.
-    #' @param x Path to file.
-    read_sigs_indel = function(x) {
-      self$read_sigstsv(x)
+      dat <- read_tsvgz(x, col_types = ct)
+      tibble::tibble(name = glue("sigs_{suffix}"), data = list(dat[]))
     },
     #' @description Read `qc_summary.tsv.gz` cancer report file.
     #' @param x Path to file.
-    read_qcsum = function(x) {
+    read_qcSum = function(x) {
       d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
-      d |>
+      dat <- d |>
         dplyr::select("variable", "value") |>
         tidyr::pivot_wider(names_from = "variable", values_from = "value") |>
         dplyr::rename(MSI_mb_tmp = "MSI (indels/Mb)") |>
@@ -202,10 +201,11 @@ Wf_umccrise <- R6::R6Class(
           wgd_hmf = "WGD",
           "hypermutated", "bpi_enabled"
         )
+      tibble::tibble(name = glue("qcsum"), data = list(dat[]))
     },
     #' @description Read multiqc_conpair.txt file.
     #' @param x Path to file.
-    read_conpairmultiqc = function(x) {
+    read_conpair = function(x) {
       um_ref_samples <- c("Alice", "Bob", "Chen", "Elon", "Dakota")
       um_ref_samples <- paste0(um_ref_samples, rep(c("_T", "_B", ""), each = length(um_ref_samples)))
       cnames <- list(
@@ -230,10 +230,11 @@ Wf_umccrise <- R6::R6Class(
       }
       d1 <- readr::read_tsv(x, col_types = readr::cols(.default = "d", Sample = "c"))
       assertthat::assert_that(all(colnames(d1) == cnames$old))
-      d1 |>
+      dat <- d1 |>
         dplyr::filter(!.data$Sample %in% um_ref_samples) |>
         dplyr::relocate("contamination", .after = "Sample") |>
         rlang::set_names(cnames$new)
+      tibble::tibble(name = glue("conpair"), data = list(dat[]))
     }
   ) # end public
 )
@@ -244,37 +245,42 @@ Wf_umccrise <- R6::R6Class(
 #'
 #' @param path Path to directory with raw workflow results (from GDS, S3, or
 #' local filesystem).
-#' @param SubjectID The SubjectID of the sample (needed for path lookup).
-#' @param SampleID_tumor The SampleID of the tumor sample (needed for path lookup).
+#' @param SubjectID The SubjectID of the sample.
+#' @param SampleID_tumor The SampleID of the tumor sample.
+#' @param SampleID_normal The SampleID of the normal sample.
 #' @param outdir Path to output directory.
 #' @param format Format of output files.
 #' @param max_files Max number of files to list.
 #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
-#' @return List where each element is a tidy tibble of a umccrise file.
+#' @return Tibble of tidy data as list-cols.
 #'
 #' @examples
 #' \dontrun{
-#' SubjectID <- "SBJ03043"
-#' SampleID_tumor <- "PRJ230004"
-#' p1_gds <- glue("gds://production/analysis_data/{SubjectID}/umccrise")
-#' p <- file.path(p1_gds, "20240830ec648f40/L2300064__L2300063")
+#' SubjectID <- "SBJ04662"
+#' SampleID_tumor <- "PRJ240647"
+#' SampleID_normal <- "PRJ240646"
+#' p1_gds <- "gds://production/analysis_data"
+#' p <- file.path(p1_gds, "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 #' token <- Sys.getenv("ICA_ACCESS_TOKEN")
 #' d <- Wf_umccrise_download_tidy_write(
-#'   path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor,
+#'   path = p, SubjectID = SubjectID,
+#'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal,
 #'   outdir = outdir,
 #'   dryrun = F
 #' )
 #' }
 #' @export
-Wf_umccrise_download_tidy_write <- function(path, SubjectID, SampleID_tumor,
+Wf_umccrise_download_tidy_write <- function(path, SubjectID,
+                                            SampleID_tumor, SampleID_normal,
                                             outdir, format = "rds", max_files = 1000,
                                             ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
                                             dryrun = FALSE) {
   um <- Wf_umccrise$new(
-    path = path, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor
+    path = path, SubjectID = SubjectID,
+    SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
   )
   d_dl <- um$download_files(
     outdir = outdir, ica_token = ica_token,

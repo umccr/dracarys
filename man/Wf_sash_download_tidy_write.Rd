@@ -8,10 +8,12 @@ Wf_sash_download_tidy_write(
   path,
   SubjectID,
   SampleID_tumor,
+  SampleID_normal,
   outdir,
   format = "rds",
   max_files = 1000,
   ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+  regexes = NULL,
   dryrun = FALSE
 )
 }
@@ -19,9 +21,11 @@ Wf_sash_download_tidy_write(
 \item{path}{Path to directory with raw workflow results (from GDS, S3, or
 local filesystem).}
 
-\item{SubjectID}{The SubjectID of the sample (needed for path lookup).}
+\item{SubjectID}{The SubjectID of the sample.}
 
-\item{SampleID_tumor}{The SampleID of the tumor sample (needed for path lookup).}
+\item{SampleID_tumor}{The SampleID of the tumor sample.}
+
+\item{SampleID_normal}{The SampleID of the normal sample.}
 
 \item{outdir}{Path to output directory.}
 
@@ -30,6 +34,9 @@ local filesystem).}
 \item{max_files}{Max number of files to list.}
 
 \item{ica_token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
+
+\item{regexes}{Tibble with file \code{regex} and \code{fun}ction to parse it. Use only
+if you want to override the default regexes used for this workflow.}
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}

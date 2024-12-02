@@ -10,13 +10,27 @@ Reads and writes tidy versions of files from the \code{sash} workflow
 \dontrun{
 
 #---- Local ----#
-p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ05571/sash"
-p2 <- "202408270b93455e/L2401308_L2401307"
+p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ02862/sash"
+p2 <- "20240830ece6b0b7/L2201449_L2201450"
 p <- normalizePath(file.path(p1, p2))
-SubjectID <- "SBJ05571"
-SampleID_tumor <- "MDX240307"
-prefix <- glue("{SubjectID}__{SampleID_tumor}")
-s1 <- Wf_sash$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+SubjectID <- "SBJ02862"
+SampleID_tumor <- "PRJ222112"
+SampleID_normal <- "PRJ222114"
+prefix <- glue("{SubjectID}_{SampleID_tumor}")
+s1 <- Wf_sash$new(
+  path = p, SubjectID = SubjectID,
+  SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+)
+#-- test regexes active binding
+counts1 <- glue(
+  "{p}/{prefix}/smlv_somatic/report/",
+  "{SampleID_tumor}\\\\.somatic\\\\.variant_counts_process\\\\.json$"
+)
+regexes1 <- tibble::tribble(
+  ~regex, ~fun,
+  counts1, "read_smlvSomCounts"
+)
+s1$regexes <- regexes1
 s1$list_files(max_files = 20)
 s1$list_files_filter_relevant(max_files = 300)
 d <- s1$download_files(max_files = 1000, dryrun = F)
@@ -29,13 +43,16 @@ d_write <- s1$write(
 )
 
 #---- S3 ----#
-p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05571/sash"
-p2 <- "202408270b93455e/L2401308_L2401307"
+p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ02862/sash"
+p2 <- "20240830ece6b0b7/L2201449_L2201450"
 p <- file.path(p1, p2)
-SubjectID <- "SBJ05571"
-SampleID_tumor <- "MDX240307"
-prefix <- glue("{SubjectID}__{SampleID_tumor}")
-s1 <- Wf_sash$new(path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor)
+SubjectID <- "SBJ02862"
+SampleID_tumor <- "PRJ222112"
+SampleID_normal <- "PRJ222114"
+s1 <- Wf_sash$new(
+  path = p, SubjectID = SubjectID,
+  SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+)
 s1$list_files(max_files = 20)
 s1$list_files_filter_relevant()
 outdir <- sub("s3:/", "~/s3", p)
@@ -56,9 +73,11 @@ d_write <- s1$write(
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{SubjectID}}{The SubjectID of the sample (needed for path lookup).}
+\item{\code{SubjectID}}{The SubjectID of the sample.}
 
-\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (needed for path lookup).}
+\item{\code{SampleID_tumor}}{The SampleID of the tumor sample.}
+
+\item{\code{SampleID_normal}}{The SampleID of the normal sample.}
 }
 \if{html}{\out{</div>}}
 }
@@ -67,22 +86,20 @@ d_write <- s1$write(
 \itemize{
 \item \href{#method-Wf_sash-new}{\code{Wf_sash$new()}}
 \item \href{#method-Wf_sash-print}{\code{Wf_sash$print()}}
-\item \href{#method-Wf_sash-read_pcgr_json}{\code{Wf_sash$read_pcgr_json()}}
-\item \href{#method-Wf_sash-read_hrd_dragen}{\code{Wf_sash$read_hrd_dragen()}}
-\item \href{#method-Wf_sash-read_hrd_chord}{\code{Wf_sash$read_hrd_chord()}}
-\item \href{#method-Wf_sash-read_hrd_hrdetect}{\code{Wf_sash$read_hrd_hrdetect()}}
-\item \href{#method-Wf_sash-read_sigstsv}{\code{Wf_sash$read_sigstsv()}}
-\item \href{#method-Wf_sash-read_sigs_snv2015}{\code{Wf_sash$read_sigs_snv2015()}}
-\item \href{#method-Wf_sash-read_sigs_snv2020}{\code{Wf_sash$read_sigs_snv2020()}}
-\item \href{#method-Wf_sash-read_sigs_dbs}{\code{Wf_sash$read_sigs_dbs()}}
-\item \href{#method-Wf_sash-read_sigs_indel}{\code{Wf_sash$read_sigs_indel()}}
-\item \href{#method-Wf_sash-read_qcsum}{\code{Wf_sash$read_qcsum()}}
+\item \href{#method-Wf_sash-read_smlvSomCounts}{\code{Wf_sash$read_smlvSomCounts()}}
+\item \href{#method-Wf_sash-read_pcgrJson}{\code{Wf_sash$read_pcgrJson()}}
+\item \href{#method-Wf_sash-read_hrdDragen}{\code{Wf_sash$read_hrdDragen()}}
+\item \href{#method-Wf_sash-read_hrdChord}{\code{Wf_sash$read_hrdChord()}}
+\item \href{#method-Wf_sash-read_hrdHrdetect}{\code{Wf_sash$read_hrdHrdetect()}}
+\item \href{#method-Wf_sash-read_sigsTsv}{\code{Wf_sash$read_sigsTsv()}}
+\item \href{#method-Wf_sash-read_qcSum}{\code{Wf_sash$read_qcSum()}}
 \item \href{#method-Wf_sash-clone}{\code{Wf_sash$clone()}}
 }
 }
 \if{html}{\out{
-<details open><summary>Inherited methods</summary>
+<details><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="DOWNLOAD_ONLY"><a href='../../dracarys/html/Wf.html#method-Wf-DOWNLOAD_ONLY'><code>dracarys::Wf$DOWNLOAD_ONLY()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="download_files"><a href='../../dracarys/html/Wf.html#method-Wf-download_files'><code>dracarys::Wf$download_files()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files"><a href='../../dracarys/html/Wf.html#method-Wf-list_files'><code>dracarys::Wf$list_files()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files_filter_relevant"><a href='../../dracarys/html/Wf.html#method-Wf-list_files_filter_relevant'><code>dracarys::Wf$list_files_filter_relevant()</code></a></span></li>
@@ -97,7 +114,12 @@ d_write <- s1$write(
 \subsection{Method \code{new()}}{
 Create a new Wf_sash object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$new(path = NULL, SubjectID = NULL, SampleID_tumor = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$new(
+  path = NULL,
+  SubjectID = NULL,
+  SampleID_tumor = NULL,
+  SampleID_normal = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -106,9 +128,11 @@ Create a new Wf_sash object.
 \item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
 local filesystem).}
 
-\item{\code{SubjectID}}{The SubjectID of the sample (needed for path lookup).}
+\item{\code{SubjectID}}{The SubjectID of the sample.}
 
-\item{\code{SampleID_tumor}}{The SampleID of the tumor sample (needed for path lookup).}
+\item{\code{SampleID_tumor}}{The SampleID of the tumor sample.}
+
+\item{\code{SampleID_normal}}{The SampleID of the normal sample.}
 }
 \if{html}{\out{</div>}}
 }
@@ -131,12 +155,29 @@ Print details about the Workflow.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_pcgr_json"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_pcgr_json}{}}}
-\subsection{Method \code{read_pcgr_json()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_smlvSomCounts"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_smlvSomCounts}{}}}
+\subsection{Method \code{read_smlvSomCounts()}}{
+Read \code{somatic.variant_counts_process.json} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_smlvSomCounts(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_sash-read_pcgrJson"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_pcgrJson}{}}}
+\subsection{Method \code{read_pcgrJson()}}{
 Read \code{pcgr.json.gz} file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_pcgr_json(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_pcgrJson(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -148,12 +189,12 @@ Read \code{pcgr.json.gz} file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_hrd_dragen"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrd_dragen}{}}}
-\subsection{Method \code{read_hrd_dragen()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_hrdDragen"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrdDragen}{}}}
+\subsection{Method \code{read_hrdDragen()}}{
 Read \code{dragen.tsv.gz} cancer report hrd file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrd_dragen(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrdDragen(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -165,12 +206,12 @@ Read \code{dragen.tsv.gz} cancer report hrd file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_hrd_chord"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrd_chord}{}}}
-\subsection{Method \code{read_hrd_chord()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_hrdChord"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrdChord}{}}}
+\subsection{Method \code{read_hrdChord()}}{
 Read \code{chord.tsv.gz} cancer report hrd file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrd_chord(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrdChord(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -182,12 +223,12 @@ Read \code{chord.tsv.gz} cancer report hrd file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_hrd_hrdetect"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrd_hrdetect}{}}}
-\subsection{Method \code{read_hrd_hrdetect()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_hrdHrdetect"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_hrdHrdetect}{}}}
+\subsection{Method \code{read_hrdHrdetect()}}{
 Read \code{hrdetect.tsv.gz} cancer report hrd file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrd_hrdetect(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_hrdHrdetect(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -199,12 +240,12 @@ Read \code{hrdetect.tsv.gz} cancer report hrd file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigstsv"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigstsv}{}}}
-\subsection{Method \code{read_sigstsv()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_sigsTsv"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigsTsv}{}}}
+\subsection{Method \code{read_sigsTsv()}}{
 Read signature cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigstsv(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigsTsv(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -216,80 +257,12 @@ Read signature cancer report file.
 }
 }
 \if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigs_snv2015"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigs_snv2015}{}}}
-\subsection{Method \code{read_sigs_snv2015()}}{
-Read \code{snv_2015.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigs_snv2015(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigs_snv2020"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigs_snv2020}{}}}
-\subsection{Method \code{read_sigs_snv2020()}}{
-Read \code{snv_2020.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigs_snv2020(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigs_dbs"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigs_dbs}{}}}
-\subsection{Method \code{read_sigs_dbs()}}{
-Read \code{dbs.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigs_dbs(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_sigs_indel"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_sigs_indel}{}}}
-\subsection{Method \code{read_sigs_indel()}}{
-Read \code{indel.tsv.gz} sigs cancer report file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_sigs_indel(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_sash-read_qcsum"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_sash-read_qcsum}{}}}
-\subsection{Method \code{read_qcsum()}}{
+\if{html}{\out{<a id="method-Wf_sash-read_qcSum"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_qcSum}{}}}
+\subsection{Method \code{read_qcSum()}}{
 Read \code{qc_summary.tsv.gz} cancer report file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_qcsum(x)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_qcSum(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

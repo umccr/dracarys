@@ -50,7 +50,7 @@ t2$list_files_filter_relevant(max_files = 500)
 d <- t2$download_files(
   outdir = outdir,
   max_files = 500,
-  dryrun = F
+  dryrun = FALSE
 )
 d_tidy <- t2$tidy_files(d)
 d_write <- t2$write(
@@ -91,8 +91,9 @@ d_write <- t2$write(
 }
 }
 \if{html}{\out{
-<details open><summary>Inherited methods</summary>
+<details><summary>Inherited methods</summary>
 <ul>
+<li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="DOWNLOAD_ONLY"><a href='../../dracarys/html/Wf.html#method-Wf-DOWNLOAD_ONLY'><code>dracarys::Wf$DOWNLOAD_ONLY()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="download_files"><a href='../../dracarys/html/Wf.html#method-Wf-download_files'><code>dracarys::Wf$download_files()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files"><a href='../../dracarys/html/Wf.html#method-Wf-list_files'><code>dracarys::Wf$list_files()</code></a></span></li>
 <li><span class="pkg-link" data-pkg="dracarys" data-topic="Wf" data-id="list_files_filter_relevant"><a href='../../dracarys/html/Wf.html#method-Wf-list_files_filter_relevant'><code>dracarys::Wf$list_files_filter_relevant()</code></a></span></li>

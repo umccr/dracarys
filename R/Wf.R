@@ -61,16 +61,28 @@
 #' @export
 Wf <- R6::R6Class(
   "Wf",
+  private = list(
+    .path = NULL,
+    .wname = NULL,
+    .regexes = NULL,
+    .filesystem = NULL
+  ),
+  active = list(
+    #' @field regexes Get/Set regexes. Tibble with file `regex` and `fun`ction
+    #' to parse it.
+    regexes = function(value) {
+      if (missing(value)) {
+        private$.regexes
+      } else {
+        assertthat::assert_that(
+          tibble::is_tibble(value),
+          all(c("regex", "fun") %in% colnames(value))
+        )
+        private$.regexes <- value
+      }
+    }
+  ),
   public = list(
-    #' @field path Path to directory with raw workflow results (from GDS, S3, or
-    #' local filesystem).
-    #' @field wname Name of workflow (e.g. umccrise, sash).
-    #' @field filesystem  Filesystem of `path` (gds/s3/local).
-    #' @field regexes Tibble with file `regex` and `fun`ction to parse it.
-    path = NULL,
-    wname = NULL,
-    filesystem = NULL,
-    regexes = NULL,
     #' @description Create a new Workflow object.
     #' @param path Path to directory with raw workflow results.
     #' @param wname Name of workflow.
@@ -94,23 +106,29 @@ Wf <- R6::R6Class(
       )
       subwnames <- c("dragen")
       assertthat::assert_that(wname %in% c(wnames, subwnames))
-      self$path <- sub("/$", "", path) # remove potential trailing slash
-      self$wname <- wname
-      self$filesystem <- dplyr::case_when(
+      path <- sub("/$", "", path) # remove potential trailing slash
+      private$.path <- path
+      private$.wname <- wname
+      private$.filesystem <- dplyr::case_when(
         grepl("^gds://", path) ~ "gds",
         grepl("^s3://", path) ~ "s3",
         .default = "local"
       )
-      self$regexes <- regexes
+      assertthat::assert_that(
+        tibble::is_tibble(regexes),
+        all(c("regex", "fun") %in% colnames(regexes))
+      )
+      private$.regexes <- regexes
     },
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
       res <- tibble::tribble(
         ~var, ~value,
-        "path", self$path,
-        "wname", self$wname,
-        "filesystem", self$filesystem
+        "path", private$.path,
+        "wname", private$.wname,
+        "filesystem", private$.filesystem,
+        "nregexes", as.character(nrow(private$.regexes))
       )
       print(res)
       invisible(self)
@@ -120,13 +138,13 @@ Wf <- R6::R6Class(
     #' @param max_files Max number of files to list (for gds/s3 only).
     #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
     #' @param ... Passed on to `gds_list_files_dir` function.
-    list_files = function(path = self$path, max_files = 1000,
+    list_files = function(path = private$.path, max_files = 1000,
                           ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
-      if (self$filesystem == "gds") {
+      if (private$.filesystem == "gds") {
         d <- gds_list_files_dir(
           gdsdir = path, token = ica_token, page_size = max_files, ...
         )
-      } else if (self$filesystem == "s3") {
+      } else if (private$.filesystem == "s3") {
         d <- s3_list_files_dir(s3dir = path, max_objects = max_files)
       } else {
         d <- local_list_files_dir(localdir = path, max_files = max_files)
@@ -139,15 +157,15 @@ Wf <- R6::R6Class(
     #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
     #' @param ... Passed on to the `gds_list_files_filter_relevant` or
     #' the `s3_list_files_filter_relevant` function.
-    list_files_filter_relevant = function(path = self$path, max_files = 1000,
+    list_files_filter_relevant = function(path = private$.path, max_files = 1000,
                                           ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
-      regexes <- self$regexes
+      regexes <- private$.regexes
       assertthat::assert_that(!is.null(regexes))
-      if (self$filesystem == "gds") {
+      if (private$.filesystem == "gds") {
         d <- gds_list_files_filter_relevant(
           gdsdir = path, regexes = regexes, token = ica_token, page_size = max_files, ...
         )
-      } else if (self$filesystem == "s3") {
+      } else if (private$.filesystem == "s3") {
         d <- s3_list_files_filter_relevant(
           s3dir = path, regexes = regexes, max_objects = max_files, ...
         )
@@ -158,6 +176,15 @@ Wf <- R6::R6Class(
       }
       d
     },
+    #' @description For DOWNLOAD_ONLY files, just return the input path.
+    #' @param x Path with raw results.
+    #' @param suffix Suffix.
+    DOWNLOAD_ONLY = function(x, suffix = "") {
+      tibble::tibble(
+        name = glue("DOWNLOAD_ONLY{suffix}"),
+        data = list(tibble::tibble(input_path = x))
+      )
+    },
     #' @description Download files from GDS/S3 to local filesystem.
     #' @param path Path with raw results.
     #' @param outdir Path to output directory.
@@ -167,28 +194,27 @@ Wf <- R6::R6Class(
     #' download them).
     #' @param recursive Should files be returned recursively _in and under_ the specified
     #' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE via ICA API).
-    download_files = function(path = self$path, outdir, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
+    download_files = function(path = private$.path, outdir, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
                               max_files = 1000, dryrun = FALSE, recursive = NULL) {
-      # TODO: add envvar checker
-      regexes <- self$regexes
+      regexes <- private$.regexes
       assertthat::assert_that(!is.null(regexes))
-      if (self$filesystem == "gds") {
+      if (private$.filesystem == "gds") {
         d <- dr_gds_download(
           gdsdir = path, outdir = outdir, regexes = regexes, token = ica_token,
           page_size = max_files, dryrun = dryrun, recursive = recursive
         )
         if (!dryrun) {
-          self$filesystem <- "local"
-          self$path <- outdir
+          private$.filesystem <- "local"
+          private$.path <- outdir
         }
-      } else if (self$filesystem == "s3") {
+      } else if (private$.filesystem == "s3") {
         d <- dr_s3_download(
           s3dir = path, outdir = outdir, regexes = regexes,
           max_objects = max_files, dryrun = dryrun
         )
         if (!dryrun) {
-          self$filesystem <- "local"
-          self$path <- outdir
+          private$.filesystem <- "local"
+          private$.path <- outdir
         }
       } else {
         d <- self$list_files_filter_relevant(regexes = regexes, max_files = max_files)
@@ -199,7 +225,8 @@ Wf <- R6::R6Class(
     #' @param x Tibble with `localpath` to file and the function `type` to parse it.
     tidy_files = function(x) {
       # awesomeness
-      tidy_files(x, envir = self)
+      tidy_files(x, envir = self) |>
+        dplyr::arrange(.data$name)
     },
     #' @description Write tidy data.
     #' @param x Tibble with tidy `data` list-column.
@@ -216,8 +243,16 @@ Wf <- R6::R6Class(
       d_write <- x |>
         dplyr::rowwise() |>
         dplyr::mutate(
-          p = glue("{prefix}_{.data$name}"),
-          out = list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid))
+          p = ifelse(
+            !grepl("DOWNLOAD_ONLY", .data$name),
+            as.character(glue("{prefix}_{.data$name}")),
+            as.character(.data$data |> dplyr::pull("input_path"))
+          ),
+          out = ifelse(
+            !grepl("DOWNLOAD_ONLY", .data$name),
+            list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid)),
+            list(.data$data)
+          )
         ) |>
         dplyr::ungroup() |>
         dplyr::select("name", "data", prefix = "p")

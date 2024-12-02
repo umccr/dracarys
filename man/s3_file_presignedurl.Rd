@@ -4,7 +4,7 @@
 \alias{s3_file_presignedurl}
 \title{S3 Generate Presigned URL}
 \usage{
-s3_file_presignedurl(client, s3path, expiry_seconds = 3600)
+s3_file_presignedurl(client, s3path, expiry_seconds = 604800)
 }
 \arguments{
 \item{client}{S3 client. Make sure you use \code{signature_version = "s3v4"} (see example).}
