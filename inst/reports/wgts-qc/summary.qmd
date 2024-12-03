@@ -24,7 +24,7 @@ format:
     grid:
       body-width: 1300px
 params:
-  tidy_data: "~/projects/dracarys/inst/rmd/umccr_workflows/alignment_qc/nogit/tidy_data_rds/2024-11-24_wgts.rds"
+  tidy_data: "~/projects/dracarys/inst/reports/wgts-qc/nogit/tidy_data_rds/2024-12-03_wgts.rds"
 ---
 
 ```{r}
@@ -207,6 +207,7 @@ d0 |>
 ```{r}
 #| label: mapmetrics
 d_map <- dr_unnest("mapmetrics") |>
+  filter(RG == "Total") |>
   arrange(desc(umccrId), type) |>
   mutate(
     umccrId = get_lib_url(lid = .data$libraryId, text = .data$umccrId),
@@ -461,8 +462,8 @@ gc_data_plot <- gc_data |>
     title = "Read GC Content",
     subtitle = glue("Total number of reads with each GC content\npercentile between 0% and 100%")
   )
-# plotly::ggplotly(gc_data_plot)
-gc_data_plot
+plotly::ggplotly(gc_data_plot)
+# gc_data_plot
 ```
 
 ### GC Content Quality ('GC Content Mean Quality Scores')
@@ -489,8 +490,8 @@ f1_plot <- ggplot() +
     title = "GC Content Quality",
     subtitle = glue("Average Phred-scale read mean quality for reads with\neach GC content percentile between 0% and 100%.")
   )
-# plotly::ggplotly(f1_plot)
-f1_plot
+plotly::ggplotly(f1_plot)
+# f1_plot
 ```
 
 ### Positional Base Content ('Per-Position Sequence Content')
@@ -602,7 +603,7 @@ read_len_plot
 
 ```{r}
 #| label: fqc_sequencePositions
-#| fig-height: 42
+#| fig-height: 80
 f1 <- dr_unnest("fqc_sequencePositions")
 f1 |>
   ggplot(aes(x = bp, y = value, colour = seq)) +

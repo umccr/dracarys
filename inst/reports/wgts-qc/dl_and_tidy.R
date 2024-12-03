@@ -18,12 +18,11 @@ c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION") |>
 token <- rportal::orca_jwt() |>
   rportal::jwt_validate()
 dates <- c(
-  "2024-11-23",
-  "2024-11-24"
+  "2024-12-01"
 ) |>
   stringr::str_remove_all("-") |>
   paste(collapse = "|")
-wf0 <- rportal::orca_workflow_list(wf_name = "wgts-qc", token = token, page_size = 500)
+wf0 <- rportal::orca_workflow_list(wf_name = "wgts-qc", token = token, page_size = 50)
 # get pld
 wf1 <- wf0 |>
   filter(grepl(dates, .data$portalRunId)) |>
@@ -121,7 +120,7 @@ data_tidy <- wf_lims |>
   ) |>
   ungroup()
 
-outdir1 <- fs::dir_create("inst/rmd/umccr_workflows/alignment_qc/nogit/tidy_data_rds")
-date1 <- "2024-11-24"
+outdir1 <- fs::dir_create("inst/reports/wgts-qc/nogit/tidy_data_rds")
+date1 <- "2024-12-03"
 data_tidy |>
   saveRDS(here(glue("{outdir1}/{date1}_wgts.rds")))
