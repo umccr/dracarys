@@ -70,7 +70,6 @@ tidy_files <- function(x, envir = parent.frame()) {
 #' @param local_dir If `indir` is a S3 directory, 'recognisable' files
 #' will be first downloaded to this directory (def: <out_dir>/dracarys_s3_sync).
 #' @param dryrun Just list the files that will be downloaded (def: FALSE).
-#' @param token ICA access token (by default uses $ICA_ACCESS_TOKEN env var).
 #' @param out_format Format of output (tsv, parquet, both) (def: tsv).
 #' @param pattern Pattern to further filter the returned file type tibble (see
 #' `name` column in the `DR_FILE_REGEX` tibble).

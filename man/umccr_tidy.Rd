@@ -33,8 +33,6 @@ will be first downloaded to this directory (def: <out_dir>/dracarys_s3_sync).}
 \code{name} column in the \code{DR_FILE_REGEX} tibble).}
 
 \item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
-
-\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 }
 \value{
 Tibble with path to input file and the resultant tidy object.

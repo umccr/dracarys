@@ -31,8 +31,6 @@ Imports:
     ggrepel,
     glue,
     here,
-    httr,
-    jose,
     jsonlite,
     knitr,
     lubridate,
