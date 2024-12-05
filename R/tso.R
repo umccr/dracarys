@@ -23,29 +23,6 @@
 #'   prefix = prefix,
 #'   format = "tsv"
 #' )
-#'
-#' #---- GDS ----#
-#' p <- file.path(
-#'   "gds://production/analysis_data/SBJ05563/tso_ctdna_tumor_only",
-#'   "20240914d41300cd/L2401388/Results"
-#' )
-#' prefix <- "PRJ241446_L2401388"
-#' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
-#' t2 <- Wf_tso_ctdna_tumor_only$new(path = p, prefix = prefix)
-#' t2$list_files(max_files = 100, ica_token = token)
-#' t2$list_files_filter_relevant(max_files = 100, ica_token = token)
-#' d <- t2$download_files(
-#'   outdir = outdir, ica_token = token,
-#'   max_files = 100, dryrun = F
-#' )
-#' d_tidy <- t2$tidy_files(d)
-#' d_write <- t2$write(
-#'   d_tidy,
-#'   outdir = file.path(outdir, "dracarys_tidy"),
-#'   prefix = prefix,
-#'   format = "tsv"
-#' )
 #' }
 #' @export
 Wf_tso_ctdna_tumor_only <- R6::R6Class(
@@ -55,7 +32,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @field prefix The SampleID_LibraryID prefix of the tumor sample (needed for path lookup).
     prefix = NULL,
     #' @description Create a new Wf_tso_ctdna_tumor_only object.
-    #' @param path Path to directory with raw workflow results (from GDS, S3, or
+    #' @param path Path to directory with raw workflow results (from S3 or
     #' local filesystem).
     #' @param prefix The SampleID_LibraryID prefix of the tumor sample (needed for path lookup).
     initialize = function(path = NULL, prefix = NULL) {
@@ -194,14 +171,13 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
 #'
 #' Downloads files from the `tso_ctdna_tumor_only` workflow and writes them in a tidy format.
 #'
-#' @param path Path to directory with raw workflow results (from GDS, S3, or
+#' @param path Path to directory with raw workflow results (from S3 or
 #' local filesystem).
 #' @param prefix The SubjectID_LibraryID prefix of the sample (needed for path lookup).
 #' @param outdir Path to output directory with raw files.
 #' @param outdir_tidy Path to output directory with tidy files.
 #' @param format Format of output files.
 #' @param max_files Max number of files to list.
-#' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
 #' @return Tibble of tidy tibbles.
@@ -214,7 +190,6 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
 #' )
 #' prefix <- "PRJ241446_L2401388"
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
 #' d <- dtw_Wf_tso_ctdna_tumor_only(
 #'   path = p, prefix = prefix, outdir = outdir,
 #'   format = "tsv",
@@ -226,11 +201,10 @@ dtw_Wf_tso_ctdna_tumor_only <- function(path, prefix, outdir,
                                         outdir_tidy = file.path(outdir, "dracarys_tidy"),
                                         format = "rds",
                                         max_files = 1000,
-                                        ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
                                         dryrun = FALSE) {
   obj <- Wf_tso_ctdna_tumor_only$new(path = path, prefix = prefix)
   d_dl <- obj$download_files(
-    outdir = outdir, ica_token = ica_token,
+    outdir = outdir,
     max_files = max_files, dryrun = dryrun
   )
   if (!dryrun) {

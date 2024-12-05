@@ -75,7 +75,7 @@ Wf_sash <- R6::R6Class(
     SampleID_tumor = NULL,
     SampleID_normal = NULL,
     #' @description Create a new Wf_sash object.
-    #' @param path Path to directory with raw workflow results (from GDS, S3, or
+    #' @param path Path to directory with raw workflow results (from S3 or
     #' local filesystem).
     #' @param SubjectID The SubjectID of the sample.
     #' @param SampleID_tumor The SampleID of the tumor sample.
@@ -229,7 +229,7 @@ Wf_sash <- R6::R6Class(
 #'
 #' Downloads files from the `sash` workflow and writes them in a tidy format.
 #'
-#' @param path Path to directory with raw workflow results (from GDS, S3, or
+#' @param path Path to directory with raw workflow results (from S3 or
 #' local filesystem).
 #' @param SubjectID The SubjectID of the sample.
 #' @param SampleID_tumor The SampleID of the tumor sample.
@@ -237,7 +237,6 @@ Wf_sash <- R6::R6Class(
 #' @param outdir Path to output directory.
 #' @param format Format of output files.
 #' @param max_files Max number of files to list.
-#' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
 #' @param regexes Tibble with file `regex` and `fun`ction to parse it. Use only
@@ -253,7 +252,6 @@ Wf_sash <- R6::R6Class(
 #' p1_gds <- glue("gds://production/analysis_data/{SubjectID}/umccrise")
 #' p <- file.path(p1_gds, "20240830ec648f40/L2300064__L2300063")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
 #' d <- Wf_sash_download_tidy_write(
 #'   path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor,
 #'   outdir = outdir,
@@ -263,7 +261,6 @@ Wf_sash <- R6::R6Class(
 #' @export
 Wf_sash_download_tidy_write <- function(path, SubjectID, SampleID_tumor, SampleID_normal,
                                         outdir, format = "rds", max_files = 1000,
-                                        ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
                                         regexes = NULL, dryrun = FALSE) {
   s <- Wf_sash$new(
     path = path, SubjectID = SubjectID,
@@ -273,7 +270,7 @@ Wf_sash_download_tidy_write <- function(path, SubjectID, SampleID_tumor, SampleI
     s$regexes <- regexes
   }
   d_dl <- s$download_files(
-    outdir = outdir, ica_token = ica_token,
+    outdir = outdir,
     max_files = max_files, dryrun = dryrun
   )
   if (!dryrun) {
