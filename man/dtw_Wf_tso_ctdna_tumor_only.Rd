@@ -11,12 +11,11 @@ dtw_Wf_tso_ctdna_tumor_only(
   outdir_tidy = file.path(outdir, "dracarys_tidy"),
   format = "rds",
   max_files = 1000,
-  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   dryrun = FALSE
 )
 }
 \arguments{
-\item{path}{Path to directory with raw workflow results (from GDS, S3, or
+\item{path}{Path to directory with raw workflow results (from S3 or
 local filesystem).}
 
 \item{prefix}{The SubjectID_LibraryID prefix of the sample (needed for path lookup).}
@@ -28,8 +27,6 @@ local filesystem).}
 \item{format}{Format of output files.}
 
 \item{max_files}{Max number of files to list.}
-
-\item{ica_token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}
@@ -48,7 +45,6 @@ p <- file.path(
 )
 prefix <- "PRJ241446_L2401388"
 outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-token <- Sys.getenv("ICA_ACCESS_TOKEN")
 d <- dtw_Wf_tso_ctdna_tumor_only(
   path = p, prefix = prefix, outdir = outdir,
   format = "tsv",

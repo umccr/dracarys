@@ -9,7 +9,7 @@ workflow run from a UMCCR workflow manager.
 
 A workflow has:
 \itemize{
-\item a directory path with all the raw output files (either on GDS, S3 or
+\item a directory path with all the raw output files (either on S3 or
 local filesystem)
 \item a subset of files that are of interest for ingestion
 \itemize{
@@ -41,20 +41,6 @@ p <- file.path(p1_local, "SBJ01155/umccrise/202408300c218043/L2101566__L2101565"
 um1 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
 um1$list_files(max_files = 10)
 um1$list_files_filter_relevant(max_files = 10)
-
-#---- GDS ----#
-p1_gds <- "gds://production/analysis_data"
-p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
-outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-token <- Sys.getenv("ICA_ACCESS_TOKEN")
-um2 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
-um2$list_files(max_files = 10)
-um2$list_files_filter_relevant(ica_token = token, max_files = 500)
-d <- um2$download_files(
-  outdir = outdir, ica_token = token,
-  max_files = 1000, dryrun = T
-)
-d_tidy <- um2$tidy_files(d)
 
 #---- S3 ----#
 p1_s3 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05570/sash/202408275fce06c3"
@@ -134,12 +120,7 @@ Print details about the Workflow.
 \subsection{Method \code{list_files()}}{
 List all files under given path.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files(
-  path = private$.path,
-  max_files = 1000,
-  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
-  ...
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files(path = private$.path, max_files = 1000)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -147,11 +128,7 @@ List all files under given path.
 \describe{
 \item{\code{path}}{Path with raw results.}
 
-\item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
-
-\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
-
-\item{\code{...}}{Passed on to \code{gds_list_files_dir} function.}
+\item{\code{max_files}}{Max number of files to list.}
 }
 \if{html}{\out{</div>}}
 }
@@ -162,12 +139,7 @@ List all files under given path.
 \subsection{Method \code{list_files_filter_relevant()}}{
 List dracarys files under given path
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files_filter_relevant(
-  path = private$.path,
-  max_files = 1000,
-  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
-  ...
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$list_files_filter_relevant(path = private$.path, max_files = 1000, ...)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -175,12 +147,9 @@ List dracarys files under given path
 \describe{
 \item{\code{path}}{Path with raw results.}
 
-\item{\code{max_files}}{Max number of files to list (for gds/s3 only).}
+\item{\code{max_files}}{Max number of files to list.}
 
-\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
-
-\item{\code{...}}{Passed on to the \code{gds_list_files_filter_relevant} or
-the \code{s3_list_files_filter_relevant} function.}
+\item{\code{...}}{Passed on to \code{s3_list_files_filter_relevant}.}
 }
 \if{html}{\out{</div>}}
 }
@@ -208,15 +177,13 @@ For DOWNLOAD_ONLY files, just return the input path.
 \if{html}{\out{<a id="method-Wf-download_files"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf-download_files}{}}}
 \subsection{Method \code{download_files()}}{
-Download files from GDS/S3 to local filesystem.
+Download files from S3 to local filesystem.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf$download_files(
   path = private$.path,
   outdir,
-  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   max_files = 1000,
-  dryrun = FALSE,
-  recursive = NULL
+  dryrun = FALSE
 )}\if{html}{\out{</div>}}
 }
 
@@ -227,15 +194,10 @@ Download files from GDS/S3 to local filesystem.
 
 \item{\code{outdir}}{Path to output directory.}
 
-\item{\code{ica_token}}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
-
 \item{\code{max_files}}{Max number of files to list.}
 
 \item{\code{dryrun}}{If TRUE, just list the files that will be downloaded (don't
 download them).}
-
-\item{\code{recursive}}{Should files be returned recursively \emph{in and under} the specified
-GDS directory, or \emph{only directly in} the specified GDS directory (def: TRUE via ICA API).}
 }
 \if{html}{\out{</div>}}
 }

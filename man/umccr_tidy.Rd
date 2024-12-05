@@ -11,31 +11,30 @@ umccr_tidy(
   local_dir = NULL,
   out_format = "tsv",
   dryrun = FALSE,
-  token = Sys.getenv("ICA_ACCESS_TOKEN"),
   pattern = NULL,
   regexes = DR_FILE_REGEX
 )
 }
 \arguments{
-\item{in_dir}{Directory path to UMCCR workflow results (can be GDS, S3 or local).}
+\item{in_dir}{Directory path to UMCCR workflow results (can be S3 or local).}
 
 \item{out_dir}{Output directory.}
 
 \item{prefix}{Prefix of output file(s).}
 
-\item{local_dir}{If \code{indir} is a GDS or S3 directory, 'recognisable' files
-will be first downloaded to this directory (def: <out_dir>/dracarys_<s3_or_gds>_sync).}
+\item{local_dir}{If \code{indir} is a S3 directory, 'recognisable' files
+will be first downloaded to this directory (def: <out_dir>/dracarys_s3_sync).}
 
 \item{out_format}{Format of output (tsv, parquet, both) (def: tsv).}
 
 \item{dryrun}{Just list the files that will be downloaded (def: FALSE).}
 
-\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
-
 \item{pattern}{Pattern to further filter the returned file type tibble (see
 \code{name} column in the \code{DR_FILE_REGEX} tibble).}
 
 \item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
+
+\item{token}{ICA access token (by default uses $ICA_ACCESS_TOKEN env var).}
 }
 \value{
 Tibble with path to input file and the resultant tidy object.
@@ -50,15 +49,9 @@ in_dir <- file.path(
   "s3://umccr-primary-data-prod/UMCCR-Validation/SBJ00596",
   "ctTSO/2021-03-17/PTC_SSqCMM05pc_L2100067"
 )
-in_dir <- paste0(
-  "gds://production/analysis_data/SBJ01639/tso_ctdna_tumor_only/",
-  "202204045ad5743c/L2200214/Results/PRJ220425_L2200214"
-)
-o1 <- sub("^gds://", "", in_dir)
 o1 <- sub("s3:/", "~/s3", in_dir)
 out_dir <- o1
 out_dir <- file.path(fs::path_home(), "icav1/g", o1)
-# in_dir <- file.path(out_dir, "dracarys_gds_sync")
 prefix <- "SBJ01639"
 prefix <- "PTC_SSqCMM05pc_L2100067"
 out_format <- "rds"
@@ -66,7 +59,6 @@ umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix, out_format = out
 
 in_dir <- here::here(glue("nogit/tso/2022-12-13/SBJ02858/dracarys_gds_sync"))
 out_dir <- file.path(in_dir, "../out")
-gds_local_dir <- NULL
 prefix <- "SBJ02858"
 dryrun <- F
 umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix, dryrun = F)

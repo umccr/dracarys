@@ -26,29 +26,6 @@ d_write <- t1$write(
   prefix = prefix,
   format = "tsv"
 )
-
-#---- GDS ----#
-p <- file.path(
-  "gds://production/analysis_data/SBJ05563/tso_ctdna_tumor_only",
-  "20240914d41300cd/L2401388/Results"
-)
-prefix <- "PRJ241446_L2401388"
-outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-token <- Sys.getenv("ICA_ACCESS_TOKEN")
-t2 <- Wf_tso_ctdna_tumor_only$new(path = p, prefix = prefix)
-t2$list_files(max_files = 100, ica_token = token)
-t2$list_files_filter_relevant(max_files = 100, ica_token = token)
-d <- t2$download_files(
-  outdir = outdir, ica_token = token,
-  max_files = 100, dryrun = F
-)
-d_tidy <- t2$tidy_files(d)
-d_write <- t2$write(
-  d_tidy,
-  outdir = file.path(outdir, "dracarys_tidy"),
-  prefix = prefix,
-  format = "tsv"
-)
 }
 }
 \section{Super class}{
@@ -105,7 +82,7 @@ Create a new Wf_tso_ctdna_tumor_only object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
+\item{\code{path}}{Path to directory with raw workflow results (from S3 or
 local filesystem).}
 
 \item{\code{prefix}}{The SampleID_LibraryID prefix of the tumor sample (needed for path lookup).}
