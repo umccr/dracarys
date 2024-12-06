@@ -12,12 +12,11 @@ Wf_umccrise_download_tidy_write(
   outdir,
   format = "rds",
   max_files = 1000,
-  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   dryrun = FALSE
 )
 }
 \arguments{
-\item{path}{Path to directory with raw workflow results (from GDS, S3, or
+\item{path}{Path to directory with raw workflow results (from S3 or
 local filesystem).}
 
 \item{SubjectID}{The SubjectID of the sample.}
@@ -31,8 +30,6 @@ local filesystem).}
 \item{format}{Format of output files.}
 
 \item{max_files}{Max number of files to list.}
-
-\item{ica_token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}
@@ -51,7 +48,6 @@ SampleID_normal <- "PRJ240646"
 p1_gds <- "gds://production/analysis_data"
 p <- file.path(p1_gds, "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
 outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-token <- Sys.getenv("ICA_ACCESS_TOKEN")
 d <- Wf_umccrise_download_tidy_write(
   path = p, SubjectID = SubjectID,
   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal,

@@ -29,32 +29,6 @@ d_write <- um1$write(
   prefix = glue("{SubjectID}__{SampleID_tumor}"),
   format = "tsv"
 )
-
-#---- GDS ----#
-SubjectID <- "SBJ04662"
-SampleID_tumor <- "PRJ240647"
-SampleID_normal <- "PRJ240646"
-p1_gds <- "gds://production/analysis_data"
-p <- file.path(p1_gds, "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
-outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-token <- Sys.getenv("ICA_ACCESS_TOKEN")
-um2 <- Wf_umccrise$new(
-  path = p, SubjectID = SubjectID,
-  SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
-)
-um2$list_files(max_files = 8)
-um2$list_files_filter_relevant(ica_token = token, max_files = 1000)
-d <- um2$download_files(
-  outdir = outdir, ica_token = token,
-  max_files = 1000, dryrun = F
-)
-d_tidy <- um2$tidy_files(d)
-d_write <- um2$write(
-  d_tidy,
-  outdir = file.path(outdir, "dracarys_tidy"),
-  prefix = glue("{SubjectID}__{SampleID_tumor}"),
-  format = "tsv"
-)
 }
 
 }
@@ -115,7 +89,7 @@ Create a new Wf_umccrise object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
+\item{\code{path}}{Path to directory with raw workflow results (from S3 or
 local filesystem).}
 
 \item{\code{SubjectID}}{The SubjectID of the sample.}

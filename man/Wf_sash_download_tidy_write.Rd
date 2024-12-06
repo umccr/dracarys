@@ -12,13 +12,12 @@ Wf_sash_download_tidy_write(
   outdir,
   format = "rds",
   max_files = 1000,
-  ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
   regexes = NULL,
   dryrun = FALSE
 )
 }
 \arguments{
-\item{path}{Path to directory with raw workflow results (from GDS, S3, or
+\item{path}{Path to directory with raw workflow results (from S3 or
 local filesystem).}
 
 \item{SubjectID}{The SubjectID of the sample.}
@@ -32,8 +31,6 @@ local filesystem).}
 \item{format}{Format of output files.}
 
 \item{max_files}{Max number of files to list.}
-
-\item{ica_token}{ICA access token (def: $ICA_ACCESS_TOKEN env var).}
 
 \item{regexes}{Tibble with file \code{regex} and \code{fun}ction to parse it. Use only
 if you want to override the default regexes used for this workflow.}
@@ -54,7 +51,6 @@ SampleID_tumor <- "PRJ230004"
 p1_gds <- glue("gds://production/analysis_data/{SubjectID}/umccrise")
 p <- file.path(p1_gds, "20240830ec648f40/L2300064__L2300063")
 outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-token <- Sys.getenv("ICA_ACCESS_TOKEN")
 d <- Wf_sash_download_tidy_write(
   path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor,
   outdir = outdir,

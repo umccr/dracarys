@@ -29,8 +29,6 @@ requirements:
     - r-ggrepel
     - r-glue
     - r-here
-    - r-httr
-    - r-jose
     - r-jsonlite
     - r-knitr
     - r-lubridate
@@ -61,8 +59,6 @@ requirements:
     - r-ggrepel
     - r-glue
     - r-here
-    - r-httr
-    - r-jose
     - r-jsonlite
     - r-knitr
     - r-lubridate

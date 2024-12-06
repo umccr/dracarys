@@ -23,6 +23,7 @@
 ^setup\.cfg$
 ^setup\.py$
 ^vignettes$
+inst/reports/wgts-qc/nogit
 inst/rmd/umccr_portal/html
 inst/rmd/umccr_workflows/alignment_qc/nogit
 inst/rmd/umccr_workflows/bcl_convert/html

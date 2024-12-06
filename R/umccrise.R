@@ -26,32 +26,6 @@
 #'   prefix = glue("{SubjectID}__{SampleID_tumor}"),
 #'   format = "tsv"
 #' )
-#'
-#' #---- GDS ----#
-#' SubjectID <- "SBJ04662"
-#' SampleID_tumor <- "PRJ240647"
-#' SampleID_normal <- "PRJ240646"
-#' p1_gds <- "gds://production/analysis_data"
-#' p <- file.path(p1_gds, "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
-#' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
-#' um2 <- Wf_umccrise$new(
-#'   path = p, SubjectID = SubjectID,
-#'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
-#' )
-#' um2$list_files(max_files = 8)
-#' um2$list_files_filter_relevant(ica_token = token, max_files = 1000)
-#' d <- um2$download_files(
-#'   outdir = outdir, ica_token = token,
-#'   max_files = 1000, dryrun = F
-#' )
-#' d_tidy <- um2$tidy_files(d)
-#' d_write <- um2$write(
-#'   d_tidy,
-#'   outdir = file.path(outdir, "dracarys_tidy"),
-#'   prefix = glue("{SubjectID}__{SampleID_tumor}"),
-#'   format = "tsv"
-#' )
 #' }
 #'
 #' @export
@@ -66,7 +40,7 @@ Wf_umccrise <- R6::R6Class(
     SampleID_tumor = NULL,
     SampleID_normal = NULL,
     #' @description Create a new Wf_umccrise object.
-    #' @param path Path to directory with raw workflow results (from GDS, S3, or
+    #' @param path Path to directory with raw workflow results (from S3 or
     #' local filesystem).
     #' @param SubjectID The SubjectID of the sample.
     #' @param SampleID_tumor The SampleID of the tumor sample.
@@ -243,7 +217,7 @@ Wf_umccrise <- R6::R6Class(
 #'
 #' Downloads files from the `umccrise` workflow and writes them in a tidy format.
 #'
-#' @param path Path to directory with raw workflow results (from GDS, S3, or
+#' @param path Path to directory with raw workflow results (from S3 or
 #' local filesystem).
 #' @param SubjectID The SubjectID of the sample.
 #' @param SampleID_tumor The SampleID of the tumor sample.
@@ -251,7 +225,6 @@ Wf_umccrise <- R6::R6Class(
 #' @param outdir Path to output directory.
 #' @param format Format of output files.
 #' @param max_files Max number of files to list.
-#' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
 #' @return Tibble of tidy data as list-cols.
@@ -264,7 +237,6 @@ Wf_umccrise <- R6::R6Class(
 #' p1_gds <- "gds://production/analysis_data"
 #' p <- file.path(p1_gds, "SBJ04662/umccrise/20240302e66750fe/L2400240__L2400239")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
 #' d <- Wf_umccrise_download_tidy_write(
 #'   path = p, SubjectID = SubjectID,
 #'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal,
@@ -276,15 +248,13 @@ Wf_umccrise <- R6::R6Class(
 Wf_umccrise_download_tidy_write <- function(path, SubjectID,
                                             SampleID_tumor, SampleID_normal,
                                             outdir, format = "rds", max_files = 1000,
-                                            ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
                                             dryrun = FALSE) {
   um <- Wf_umccrise$new(
     path = path, SubjectID = SubjectID,
     SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
   )
   d_dl <- um$download_files(
-    outdir = outdir, ica_token = ica_token,
-    max_files = max_files, dryrun = dryrun
+    outdir = outdir, max_files = max_files, dryrun = dryrun
   )
   if (!dryrun) {
     d_tidy <- um$tidy_files(d_dl)

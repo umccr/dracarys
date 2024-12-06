@@ -5,7 +5,7 @@
 #'
 #' A workflow has:
 #'
-#' - a directory path with all the raw output files (either on GDS, S3 or
+#' - a directory path with all the raw output files (either on S3 or
 #' local filesystem)
 #' - a subset of files that are of interest for ingestion
 #'   - tibble with full path and basename columns
@@ -32,20 +32,6 @@
 #' um1 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
 #' um1$list_files(max_files = 10)
 #' um1$list_files_filter_relevant(max_files = 10)
-#'
-#' #---- GDS ----#
-#' p1_gds <- "gds://production/analysis_data"
-#' p <- file.path(p1_gds, "SBJ03043/umccrise/20240830ec648f40/L2300064__L2300063")
-#' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
-#' token <- Sys.getenv("ICA_ACCESS_TOKEN")
-#' um2 <- Wf$new(path = p, wname = "umccrise", regexes = regexes)
-#' um2$list_files(max_files = 10)
-#' um2$list_files_filter_relevant(ica_token = token, max_files = 500)
-#' d <- um2$download_files(
-#'   outdir = outdir, ica_token = token,
-#'   max_files = 1000, dryrun = T
-#' )
-#' d_tidy <- um2$tidy_files(d)
 #'
 #' #---- S3 ----#
 #' p1_s3 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05570/sash/202408275fce06c3"
@@ -110,7 +96,6 @@ Wf <- R6::R6Class(
       private$.path <- path
       private$.wname <- wname
       private$.filesystem <- dplyr::case_when(
-        grepl("^gds://", path) ~ "gds",
         grepl("^s3://", path) ~ "s3",
         .default = "local"
       )
@@ -135,16 +120,9 @@ Wf <- R6::R6Class(
     },
     #' @description List all files under given path.
     #' @param path Path with raw results.
-    #' @param max_files Max number of files to list (for gds/s3 only).
-    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
-    #' @param ... Passed on to `gds_list_files_dir` function.
-    list_files = function(path = private$.path, max_files = 1000,
-                          ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
-      if (private$.filesystem == "gds") {
-        d <- gds_list_files_dir(
-          gdsdir = path, token = ica_token, page_size = max_files, ...
-        )
-      } else if (private$.filesystem == "s3") {
+    #' @param max_files Max number of files to list.
+    list_files = function(path = private$.path, max_files = 1000) {
+      if (private$.filesystem == "s3") {
         d <- s3_list_files_dir(s3dir = path, max_objects = max_files)
       } else {
         d <- local_list_files_dir(localdir = path, max_files = max_files)
@@ -153,19 +131,12 @@ Wf <- R6::R6Class(
     },
     #' @description List dracarys files under given path
     #' @param path Path with raw results.
-    #' @param max_files Max number of files to list (for gds/s3 only).
-    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
-    #' @param ... Passed on to the `gds_list_files_filter_relevant` or
-    #' the `s3_list_files_filter_relevant` function.
-    list_files_filter_relevant = function(path = private$.path, max_files = 1000,
-                                          ica_token = Sys.getenv("ICA_ACCESS_TOKEN"), ...) {
+    #' @param max_files Max number of files to list.
+    #' @param ... Passed on to `s3_list_files_filter_relevant`.
+    list_files_filter_relevant = function(path = private$.path, max_files = 1000, ...) {
       regexes <- private$.regexes
       assertthat::assert_that(!is.null(regexes))
-      if (private$.filesystem == "gds") {
-        d <- gds_list_files_filter_relevant(
-          gdsdir = path, regexes = regexes, token = ica_token, page_size = max_files, ...
-        )
-      } else if (private$.filesystem == "s3") {
+      if (private$.filesystem == "s3") {
         d <- s3_list_files_filter_relevant(
           s3dir = path, regexes = regexes, max_objects = max_files, ...
         )
@@ -185,29 +156,16 @@ Wf <- R6::R6Class(
         data = list(tibble::tibble(input_path = x))
       )
     },
-    #' @description Download files from GDS/S3 to local filesystem.
+    #' @description Download files from S3 to local filesystem.
     #' @param path Path with raw results.
     #' @param outdir Path to output directory.
-    #' @param ica_token ICA access token (def: $ICA_ACCESS_TOKEN env var).
     #' @param max_files Max number of files to list.
     #' @param dryrun If TRUE, just list the files that will be downloaded (don't
     #' download them).
-    #' @param recursive Should files be returned recursively _in and under_ the specified
-    #' GDS directory, or _only directly in_ the specified GDS directory (def: TRUE via ICA API).
-    download_files = function(path = private$.path, outdir, ica_token = Sys.getenv("ICA_ACCESS_TOKEN"),
-                              max_files = 1000, dryrun = FALSE, recursive = NULL) {
+    download_files = function(path = private$.path, outdir, max_files = 1000, dryrun = FALSE) {
       regexes <- private$.regexes
       assertthat::assert_that(!is.null(regexes))
-      if (private$.filesystem == "gds") {
-        d <- dr_gds_download(
-          gdsdir = path, outdir = outdir, regexes = regexes, token = ica_token,
-          page_size = max_files, dryrun = dryrun, recursive = recursive
-        )
-        if (!dryrun) {
-          private$.filesystem <- "local"
-          private$.path <- outdir
-        }
-      } else if (private$.filesystem == "s3") {
+      if (private$.filesystem == "s3") {
         d <- dr_s3_download(
           s3dir = path, outdir = outdir, regexes = regexes,
           max_objects = max_files, dryrun = dryrun

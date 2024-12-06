@@ -125,7 +125,7 @@ Create a new Wf_sash object.
 \subsection{Arguments}{
 \if{html}{\out{<div class="arguments">}}
 \describe{
-\item{\code{path}}{Path to directory with raw workflow results (from GDS, S3, or
+\item{\code{path}}{Path to directory with raw workflow results (from S3 or
 local filesystem).}
 
 \item{\code{SubjectID}}{The SubjectID of the sample.}
