@@ -1,6 +1,6 @@
 tidy_add_args <- function(subp) {
   tidy <- subp$add_parser("tidy", help = "Tidy UMCCR Workflow Outputs")
-  tidy$add_argument("-i", "--in_dir", help = glue("{emoji('snowman')} Directory with untidy UMCCR workflow results. Can be GDS, S3 or local."), required = TRUE)
+  tidy$add_argument("-i", "--in_dir", help = glue("{emoji('snowman')} Directory with untidy UMCCR workflow results. Can be S3 or local."), required = TRUE)
   tidy$add_argument("-o", "--out_dir", help = glue("{emoji('fire')} Directory to output tidy results."), required = TRUE)
   tidy$add_argument("-p", "--prefix", help = glue("{emoji('violin')} Prefix string used for all results."), required = TRUE)
   # tidy$add_argument("-t", "--token", help = glue("{emoji('see_no_evil')} ICA access token. Default: ICA_ACCESS_TOKEN env var."), default = Sys.getenv("ICA_ACCESS_TOKEN"))
