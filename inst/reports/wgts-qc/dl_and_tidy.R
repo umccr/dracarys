@@ -18,7 +18,7 @@ c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION") |>
 token <- rportal::orca_jwt() |>
   rportal::jwt_validate()
 dates <- c(
-  "2024-12-01"
+  "2024-12-1"
 ) |>
   stringr::str_remove_all("-") |>
   paste(collapse = "|")
@@ -107,7 +107,7 @@ data_tidy <- wf_lims |>
     indir = .data$output_dragenAlignmentOutputUri,
     outdir = file.path(sub("s3://", "", .data$indir)),
     outdir = fs::as_fs_path(file.path(normalizePath("~/s3"), .data$outdir))
-    # indir = file.path(outdir, "dracarys_s3_sync"), # for when debugging locally
+    # indir = outdir # for when debugging locally
   ) |>
   mutate(
     data_tidy = list(
@@ -121,6 +121,33 @@ data_tidy <- wf_lims |>
   ungroup()
 
 outdir1 <- fs::dir_create("inst/reports/wgts-qc/nogit/tidy_data_rds")
-date1 <- "2024-12-03"
+date1 <- "2024-12-17"
 data_tidy |>
+  saveRDS(here(glue("{outdir1}/{date1}_wgts.rds")))
+
+#---- for debugging/changing parsers ----#
+data_tidy <- readRDS(here(glue("{outdir1}/{date1}_wgts.rds")))
+data_tidy2 <- data_tidy |>
+  select(-c(indir, outdir, data_tidy)) |>
+  rowwise() |>
+  mutate(
+    indir = .data$output_dragenAlignmentOutputUri,
+    outdir = file.path(sub("s3://", "", .data$indir)),
+    outdir = fs::as_fs_path(file.path(normalizePath("~/s3"), .data$outdir)),
+    indir = outdir, # for when debugging locally
+  ) |>
+  mutate(
+    data_tidy = list(
+      dracarys::dtw_Wf_dragen(
+        path = .data$indir,
+        prefix = .data$libraryId,
+        outdir = .data$outdir,
+        format = "rds",
+        max_files = 1000,
+        dryrun = FALSE
+      )
+    )
+  ) |>
+  ungroup()
+data_tidy2 |>
   saveRDS(here(glue("{outdir1}/{date1}_wgts.rds")))
