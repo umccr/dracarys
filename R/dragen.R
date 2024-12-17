@@ -1081,10 +1081,10 @@ Wf_dragen <- R6::R6Class(
       dat <- d |>
         dplyr::mutate(
           Step = tools::toTitleCase(sub("Time ", "", .data$Step)),
-          Step = gsub(" |/", "", .data$Step),
-          Time = substr(.data$time_hrs, 1, 5)
+          Step = gsub(" |/", "", .data$Step)
+          # Time = substr(.data$time_hrs, 1, 5)
         ) |>
-        dplyr::select("Step", "Time") |>
+        dplyr::select("Step", Time = "time_sec") |>
         tidyr::pivot_wider(names_from = "Step", values_from = "Time") |>
         dplyr::relocate("TotalRuntime")
       tibble::tibble(name = "timemetrics", data = list(dat))

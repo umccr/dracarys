@@ -22,9 +22,9 @@ format:
     code-block-border-left: true
     smooth-scroll: true
     grid:
-      body-width: 1300px
+      body-width: 1700px
 params:
-  tidy_data: "~/projects/dracarys/inst/reports/wgts-qc/nogit/tidy_data_rds/2024-12-03_wgts.rds"
+  tidy_data: "~/projects/dracarys/inst/reports/wgts-qc/nogit/tidy_data_rds/2024-12-17_wgts.rds"
 ---
 
 ```{r}
@@ -146,17 +146,18 @@ dr_unnest <- function(x1, ...) {
 
 ```{r}
 #| label: funcs
-dt_view <- function(x, caption = NULL, scroll_y = 10 + min(nrow(x) * 35, 570), ...) {
+dt_view <- function(x, caption = NULL, scroll_y = 10 + min(nrow(x) * 35, 570), fixedcols = 2, ...) {
   x |>
     DT::datatable(
       filter = list(position = "top", clear = FALSE, plain = TRUE),
       class = "cell-border display compact",
       rownames = FALSE,
-      extensions = c("Scroller", "Buttons", "KeyTable"),
+      extensions = c("Scroller", "Buttons", "KeyTable", "FixedColumns"),
       options = list(
         scroller = TRUE, scrollY = scroll_y, scrollX = TRUE,
         autoWidth = FALSE, keys = TRUE,
-        buttons = c("csv"), dom = "Blfrtip"
+        buttons = c("csv"), dom = "Blfrtip",
+        fixedColumns = list(leftColumns = fixedcols)
       ),
       ...
     )
@@ -252,7 +253,7 @@ conf <- list(
   pink_range = c(8, 20)
 )
 d_map |>
-  dt_view(scroll_y = 1500, escape = FALSE) |>
+  dt_view(fixedcols = 4, scroll_y = 1500, escape = FALSE) |>
   DT::formatCurrency(columns = names(d_map)[num_pct_cols], currency = "", digits = 1) |>
   DT::formatCurrency(columns = names(d_map)[no_numpct_cols], currency = "", digits = 0) |>
   DT::formatStyle(
@@ -305,7 +306,7 @@ d_cvg <- dr_unnest("covmetrics_wgs") |>
   )) |>
   mutate(umccrId = get_lib_url(lid = .data$libraryId, text = .data$umccrId)) |>
   select(
-    "umccrId", "phenotype", "type", "source",
+    "umccrId", "subjectId", "phenotype", "type", "source",
     "quality", "assay",
     "workflow", "projectOwnerName", "portalRunId",
     ploidy,
@@ -328,7 +329,7 @@ d_cvg <- dr_unnest("covmetrics_wgs") |>
   )
 num_cols <- names(d_cvg)[purrr::map_lgl(d_cvg, is.numeric)]
 d_cvg |>
-  dt_view(scroll_y = 1500, escape = FALSE) |>
+  dt_view(fixedcols = 4, scroll_y = 1500, escape = FALSE) |>
   DT::formatCurrency(columns = num_cols, currency = "", digits = 1) |>
   DT::formatStyle(
     "ploidy",
@@ -384,7 +385,7 @@ d_tr <- dr_unnest("trimmermetrics") |>
     -c("libraryId", "tidy_prefix")
   )
 d_tr |>
-  dt_view(escape = FALSE) |>
+  dt_view(fixedcols = 4, escape = FALSE) |>
   DT::formatStyle(
     "type",
     color = DT::styleEqual(
@@ -392,6 +393,24 @@ d_tr |>
     )
   )
 ```
+
+### RunTime Metrics
+
+```{r}
+#| label: timemetrics
+#| fig-height: 13
+d_time <- dr_unnest("timemetrics")
+d_time_plot <- d_time |>
+  select(umccrId, type, phenotype, TotalRuntime:dplyr::last_col()) |>
+  tidyr::pivot_longer(TotalRuntime:dplyr::last_col(), names_to = "STEP", values_to = "RUNTIME_SEC") |>
+  filter(!is.na(.data$RUNTIME_SEC)) |>
+  ggplot(aes(x = RUNTIME_SEC, y = STEP, colour = umccrId)) +
+  geom_point() +
+  facet_wrap(~type, ncol = 1, scales = "free")
+
+plotly::ggplotly(d_time_plot)
+```
+
 
 ## FastQC {.tabset .tabset-pills}
 
@@ -574,7 +593,7 @@ f1 |>
 
 ```{r}
 #| label: fqc_readLengths
-#| fig-height: 8
+#| fig-height: 10
 read_len <- dr_unnest("fqc_readLengths")
 read_len_plot <- read_len |>
   group_by(umccrId, mate) |>
@@ -585,8 +604,9 @@ read_len_plot <- read_len |>
   ) |>
   ungroup() |>
   select(umccrId, type, mate, bp, value, tot, prop) |>
-  ggplot(aes(x = bp, y = prop, colour = umccrId)) +
-  geom_line(aes(linetype = mate), linewidth = 1) +
+  ggplot(aes(x = bp, y = prop, colour = umccrId, shape = mate)) +
+  geom_jitter(width = 0.1, height = 0.1) +
+  # geom_line(aes(linetype = mate), linewidth = 1) +
   theme(
     panel.grid.major = element_blank()
   ) +
@@ -595,8 +615,8 @@ read_len_plot <- read_len |>
     title = "Read Lengths",
     subtitle = glue("Read percentage with each observed length.")
   )
-# plotly::ggplotly(read_len_plot)
-read_len_plot
+plotly::ggplotly(read_len_plot)
+# read_len_plot
 ```
 
 ### Sequence Positions ('Adapter Content')
@@ -604,6 +624,7 @@ read_len_plot
 ```{r}
 #| label: fqc_sequencePositions
 #| fig-height: 80
+#| eval: false
 f1 <- dr_unnest("fqc_sequencePositions")
 f1 |>
   ggplot(aes(x = bp, y = value, colour = seq)) +
@@ -635,7 +656,7 @@ for (type1 in sort(unique(d1$type), decreasing = FALSE)) {
     p1 <- d1_type |>
       filter(umccrId == s) |>
       dracarys::WgsContigMeanCovFile$public_methods$plot() +
-      ggplot2::labs(subtitle = s)
+      labs(subtitle = s)
     cat(glue("\n#### {s}"), "\n")
     blank_lines(2)
     print(p1)
