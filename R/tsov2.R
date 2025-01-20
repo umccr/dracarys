@@ -1,7 +1,7 @@
-#' Wf_tso_ctdna_tumor_only_v2 R6 Class
+#' Wf_cttsov2 R6 Class
 #'
 #' @description
-#' Reads and writes tidy versions of files from the `tso_ctdna_tumor_only_v2` workflow.
+#' Reads and writes tidy versions of files from the `cttsov2` workflow.
 #'
 #' @examples
 #' \dontrun{
@@ -12,7 +12,7 @@
 #'   "analysis/cttsov2/20240915ff0295ed"
 #' )
 #' prefix <- "L2401290"
-#' t1 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, prefix = prefix)
+#' t1 <- Wf_cttsov2$new(path = p, prefix = prefix)
 #' t1$list_files(max_files = 100)
 #' t1$dragenObj$list_files(max_files = 100)
 #' t1$list_files_filter_relevant(max_files = 300)
@@ -37,11 +37,11 @@
 #' #---- S3 ----#
 #' p <- file.path(
 #'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20240915ff0295ed"
+#'   "analysis/cttsov2/20250117c5b9baa8"
 #' )
-#' prefix <- "L2401290"
+#' prefix <- "L2500039"
 #' outdir <- sub("s3:/", "~/s3", p)
-#' t2 <- Wf_tso_ctdna_tumor_only_v2$new(path = p, prefix = prefix)
+#' t2 <- Wf_cttsov2$new(path = p, prefix = prefix)
 #' t2$list_files(max_files = 500)
 #' t2$list_files_filter_relevant(max_files = 500)
 #' d <- t2$download_files(
@@ -58,20 +58,20 @@
 #' )
 #' }
 #' @export
-Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
-  "Wf_tso_ctdna_tumor_only_v2",
+Wf_cttsov2 <- R6::R6Class(
+  "Wf_cttsov2",
   inherit = Wf,
   public = list(
     #' @field prefix The LibraryID prefix of the tumor sample (needed for path lookup).
     prefix = NULL,
     #' @field dragenObj dragen object.
     dragenObj = NULL,
-    #' @description Create a new Wf_tso_ctdna_tumor_only_v2 object.
+    #' @description Create a new Wf_cttsov2 object.
     #' @param path Path to directory with raw workflow results (from S3 or
     #' local filesystem).
     #' @param prefix The LibraryID prefix of the tumor sample (needed for path lookup).
     initialize = function(path = NULL, prefix = NULL) {
-      wname <- "tso_ctdna_tumor_only_v2"
+      wname <- "cttsov2"
       pref <- prefix
       res <- glue("Results/{pref}")
       li <- "Logs_Intermediates"
@@ -178,9 +178,9 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
   ) # end public
 )
 
-#' Wf_tso_ctdna_tumor_only_v2 Download Tidy and Write
+#' Wf_cttsov2 Download Tidy and Write
 #'
-#' Downloads files from the `tso_ctdna_tumor_only_v2` workflow and writes them in a tidy format.
+#' Downloads files from the `cttsov2` workflow and writes them in a tidy format.
 #'
 #' @param path Path to directory with raw workflow results (S3 or
 #' local filesystem).
@@ -202,7 +202,7 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
 #' )
 #' prefix <- "L2401290"
 #' outdir <- file.path(p, "dracarys_tidy")
-#' d <- dtw_Wf_tso_ctdna_tumor_only_v2(
+#' d <- dtw_Wf_cttsov2(
 #'   path = p, prefix = prefix, outdir = outdir,
 #'   format = "tsv",
 #'   dryrun = F
@@ -214,19 +214,19 @@ Wf_tso_ctdna_tumor_only_v2 <- R6::R6Class(
 #' )
 #' prefix <- "L2401290"
 #' outdir <- sub("s3:/", "~/s3", p)
-#' d <- dtw_Wf_tso_ctdna_tumor_only_v2(
+#' d <- dtw_Wf_cttsov2(
 #'   path = p, prefix = prefix, outdir = outdir,
 #'   format = "tsv",
 #'   dryrun = F
 #' )
 #' }
 #' @export
-dtw_Wf_tso_ctdna_tumor_only_v2 <- function(path, prefix, outdir,
-                                           outdir_tidy = file.path(outdir, "dracarys_tidy"),
-                                           format = "rds",
-                                           max_files = 1000,
-                                           dryrun = FALSE) {
-  obj <- Wf_tso_ctdna_tumor_only_v2$new(path = path, prefix = prefix)
+dtw_Wf_cttsov2 <- function(path, prefix, outdir,
+                           outdir_tidy = file.path(outdir, "dracarys_tidy"),
+                           format = "rds",
+                           max_files = 1000,
+                           dryrun = FALSE) {
+  obj <- Wf_cttsov2$new(path = path, prefix = prefix)
   d_dl1 <- obj$download_files(
     outdir = outdir, max_files = max_files, dryrun = dryrun
   )
