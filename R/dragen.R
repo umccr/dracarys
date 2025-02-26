@@ -115,7 +115,7 @@ dragen_umi_metrics_read <- function(x) {
   res <- list(metrics = d2) |>
     tibble::enframe(name = "name", value = "data") |>
     dplyr::bind_rows(hist) |>
-    dplyr::mutate(name = glue("umi_{.data$name}"))
+    dplyr::mutate(name = glue("dragen_umi{.data$name}"))
   res
 }
 
@@ -187,9 +187,9 @@ dragen_gc_metrics_read <- function(x) {
     dplyr::select("gc", "value")
 
   list(
-    gcmetrics_summary = summary,
-    gcmetrics_windows = details_wind,
-    gcmetrics_coverage = details_cov
+    dragen_gc_summary = summary,
+    dragen_gc_windows = details_wind,
+    dragen_gc_coverage = details_cov
   ) |>
     tibble::enframe(name = "name", value = "data")
 }
@@ -599,7 +599,7 @@ dragen_mapping_metrics_read <- function(x) {
       name = dplyr::if_else(.data$name == "count", "", "_pct"),
       var = glue("{.data$var}{.data$name}")
     ) |>
-    dplyr::select("dragen_sample", "RG", "var", "value") |>
+    dplyr::select("dragen_sample", rg = "RG", "var", "value") |>
     dplyr::filter(!is.na(.data$value)) |>
     tidyr::pivot_wider(names_from = "var", values_from = "value")
 }
@@ -683,8 +683,7 @@ dragen_coverage_metrics_read <- function(x) {
     dplyr::mutate(
       var = sub(pat, "", .data$var),
       var = gsub("\\[|\\]|\\(|\\)| ", "", .data$var),
-      var = gsub("x", "", .data$var),
-      var = gsub("inf", "Inf", .data$var)
+      var = gsub("x", "", .data$var)
     ) |>
     tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
     dplyr::mutate(var = as.character(glue("cov_pct_{start}_{end}_{reg1}"))) |>
@@ -839,6 +838,12 @@ dragen_ploidy_estimation_metrics_read <- function(x) {
 #' @examples
 #' \dontrun{
 #' #---- Local ----#
+#' path <- file.path(
+#'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
+#'   "analysis/wgts-qc/20241123ffa837c4/L2401621_dragen_alignment"
+#' )
+#' prefix <- "L2401621"
+#' outdir <- path
 #'
 #' #---- S3 ----#
 #' path <- file.path(
@@ -986,7 +991,7 @@ Wf_dragen <- R6::R6Class(
       res[["dragen_config"]] <- res[["dragen_config"]] |>
         tidyr::pivot_wider(names_from = "name", values_from = "value")
       dat <- dplyr::bind_cols(res)
-      tibble::tibble(name = "replay", data = list(dat))
+      tibble::tibble(name = "dragen_replay", data = list(dat))
     },
     #' @description Read `contig_mean_cov.csv` file.
     #' @param x Path to file.
@@ -1001,14 +1006,14 @@ Wf_dragen <- R6::R6Class(
             TRUE
           }
         )
-      tibble::tibble(name = glue("contigmeancov_{subprefix}"), data = list(dat[]))
+      tibble::tibble(name = glue("dragen_contigmeancov_{subprefix}"), data = list(dat[]))
     },
     #' @description Read `coverage_metrics.csv` file.
     #' @param x Path to file.
     read_coverageMetrics = function(x) {
       subprefix <- private$dragen_subprefix(x, "_coverage_metrics")
       dat <- dragen_coverage_metrics_read(x)
-      tibble::tibble(name = glue("covmetrics_{subprefix}"), data = list(dat))
+      tibble::tibble(name = glue("dragen_covmetrics_{subprefix}"), data = list(dat))
     },
     #' @description Read `fine_hist.csv` file.
     #' @param x Path to file.
@@ -1023,7 +1028,7 @@ Wf_dragen <- R6::R6Class(
           Depth = as.integer(.data$Depth)
         ) |>
         dplyr::select(depth = "Depth", n_loci = "Overall")
-      tibble::tibble(name = glue("finehist_{subprefix}"), data = list(dat))
+      tibble::tibble(name = glue("dragen_finehist_{subprefix}"), data = list(dat))
     },
     #' @description Read `fragment_length_hist.csv` file.
     #' @param x Path to file.
@@ -1033,19 +1038,19 @@ Wf_dragen <- R6::R6Class(
       dat <- d |>
         tibble::enframe(name = "name", value = "value") |>
         dplyr::filter(!grepl("#Sample: |FragmentLength,Count", .data$value)) |>
-        tidyr::separate_wider_delim(cols = "value", names = c("fragmentLength", "count"), delim = ",") |>
+        tidyr::separate_wider_delim(cols = "value", names = c("fragment_length", "count"), delim = ",") |>
         dplyr::mutate(
           count = as.numeric(.data$count),
-          fragmentLength = as.numeric(.data$fragmentLength)
+          fragmentLength = as.numeric(.data$fragment_length)
         ) |>
-        dplyr::select("fragmentLength", "count")
-      tibble::tibble(name = "fraglen", data = list(dat))
+        dplyr::select("fragment_length", "count")
+      tibble::tibble(name = "dragen_fraglen", data = list(dat))
     },
     #' @description Read `mapping_metrics.csv` file.
     #' @param x Path to file.
     read_mappingMetrics = function(x) {
       dat <- dragen_mapping_metrics_read(x)
-      tibble::tibble(name = "mapmetrics", data = list(dat))
+      tibble::tibble(name = "dragen_mapmetrics", data = list(dat))
     },
     #' @description Read `hist.csv` (not `fine_hist.csv`!) file.
     #' @param x Path to file.
@@ -1066,7 +1071,7 @@ Wf_dragen <- R6::R6Class(
           pct = round(.data$pct, 2),
           cumsum = cumsum(.data$pct)
         )
-      tibble::tibble(name = glue("hist_{subprefix}"), data = list(dat))
+      tibble::tibble(name = glue("dragen_hist_{subprefix}"), data = list(dat))
     },
     #' @description Read `time_metrics.csv` file.
     #' @param x Path to file.
@@ -1080,39 +1085,39 @@ Wf_dragen <- R6::R6Class(
       assertthat::assert_that(inherits(d$time_hrs, "hms"))
       dat <- d |>
         dplyr::mutate(
-          Step = tools::toTitleCase(sub("Time ", "", .data$Step)),
-          Step = gsub(" |/", "", .data$Step)
-          # Time = substr(.data$time_hrs, 1, 5)
+          Step = stringr::str_remove(.data$Step, "Time "),
+          Step = stringr::str_replace_all(.data$Step, " |/", "_"),
+          Step = tolower(.data$Step)
         ) |>
         dplyr::select("Step", Time = "time_sec") |>
         tidyr::pivot_wider(names_from = "Step", values_from = "Time") |>
-        dplyr::relocate("TotalRuntime")
-      tibble::tibble(name = "timemetrics", data = list(dat))
+        dplyr::relocate("total_runtime")
+      tibble::tibble(name = "dragen_timemetrics", data = list(dat))
     },
     #' @description Read `vc_metrics.csv`/`gvcf_metrics.csv` file.
     #' @param x Path to file.
     read_vcMetrics = function(x) {
       subprefix <- private$dragen_subprefix(x, "_metrics")
       dat <- dragen_vc_metrics_read(x)
-      tibble::tibble(name = glue("vcmetrics_{subprefix}"), data = list(dat[]))
+      tibble::tibble(name = glue("dragen_vcmetrics_{subprefix}"), data = list(dat[]))
     },
     #' @description Read `trimmer_metrics.csv` file.
     #' @param x Path to file.
     read_trimmerMetrics = function(x) {
       dat <- dragen_trimmer_metrics_read(x)
-      tibble::tibble(name = "trimmermetrics", data = list(dat[]))
+      tibble::tibble(name = "dragen_trimmermetrics", data = list(dat[]))
     },
     #' @description Read `sv_metrics.csv` file.
     #' @param x Path to file.
     read_svMetrics = function(x) {
       dat <- dragen_sv_metrics_read(x)
-      tibble::tibble(name = "svmetrics", data = list(dat[]))
+      tibble::tibble(name = "dragen_svmetrics", data = list(dat[]))
     },
     #' @description Read `cnv_metrics.csv` file.
     #' @param x Path to file.
     read_cnvMetrics = function(x) {
       dat <- dragen_cnv_metrics_read(x)
-      tibble::tibble(name = "cnvmetrics", data = list(dat[]))
+      tibble::tibble(name = "dragen_cnvmetrics", data = list(dat[]))
     },
     #' @description Read `fastqc_metrics.csv` file.
     #' @param x Path to file.
@@ -1136,27 +1141,28 @@ Wf_dragen <- R6::R6Class(
     #' @param x Path to file.
     read_ploidyMetrics = function(x) {
       dat <- dragen_ploidy_estimation_metrics_read(x)
-      tibble::tibble(name = "ploidymetrics", data = list(dat))
+      tibble::tibble(name = "dragen_ploidymetrics", data = list(dat))
     },
     #' @description Read `microsat_output.json` file.
     #' @param x Path to file.
     read_msi = function(x) {
       dat <- tso_msi_read(x)
-      tibble::tibble(name = "msi", data = list(dat[]))
+      tibble::tibble(name = "dragen_msi", data = list(dat[]))
     },
     #' @description Read `microsat_diffs.txt` file.
     #' @param x Path to file.
     read_msiDiffs = function(x) {
       dat <- readr::read_tsv(x, col_types = "cdccddc") |>
         dplyr::rename(Chromosome = "#Chromosome")
-      tibble::tibble(name = "msidiffs", data = list(dat[]))
+      tibble::tibble(name = "dragen_msidiffs", data = list(dat[]))
     }
   ), # end public
   private = list(
     dragen_subprefix = function(x, suffix) {
       bname <- basename(x)
       s1 <- sub("^.*\\.(.*?)\\..*$", "\\1", bname) # exon_contig_mean_cov
-      sub(suffix, "", s1) # sub("contig_mean_cov", "", s1) -> "exon"
+      s2 <- sub(suffix, "", s1) # sub("contig_mean_cov", "", s1) -> "exon"
+      s2
     }
   )
 ) # end Wf_dragen
