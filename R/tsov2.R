@@ -9,9 +9,9 @@
 #' #---- Local ----#
 #' p <- file.path(
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20240915ff0295ed"
+#'   "analysis/cttsov2/20250117c5b9baa8"
 #' )
-#' prefix <- "L2401290"
+#' prefix <- "L2500039"
 #' t1 <- Wf_cttsov2$new(path = p, prefix = prefix)
 #' t1$list_files(max_files = 100)
 #' t1$dragenObj$list_files(max_files = 100)
@@ -44,12 +44,19 @@
 #' t2 <- Wf_cttsov2$new(path = p, prefix = prefix)
 #' t2$list_files(max_files = 500)
 #' t2$list_files_filter_relevant(max_files = 500)
-#' d <- t2$download_files(
+#' t2$dragenObj$list_files_filter_relevant(max_files = 300)
+#' d1 <- t2$download_files(
 #'   outdir = outdir,
 #'   max_files = 500,
 #'   dryrun = FALSE
 #' )
-#' d_tidy <- t2$tidy_files(d)
+#' d2 <- t2$dragenObj$download_files(
+#'   outdir = outdir,
+#'   max_files = 500,
+#'   dryrun = FALSE
+#' )
+#' d_tidy1 <- t2$tidy_files(d1)
+#' d_tidy2 <- t2$dragenObj$tidy_files(d2)
 #' d_write <- t2$write(
 #'   d_tidy,
 #'   outdir = file.path(outdir, "dracarys_tidy"),

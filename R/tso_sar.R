@@ -145,12 +145,12 @@ tso_sar_read <- function(x) {
   }
 
   list(
-    sar_sampleinfo = sampleinfo,
-    sar_qc = qc,
-    sar_swconfds = sw[["data_sources"]],
-    sar_swconfother = sw[["other"]],
-    sar_snv = snvs,
-    sar_cnv = cnvs
+    tso_sar_sampleinfo = sampleinfo,
+    tso_sar_qc = qc,
+    tso_sar_swconfds = sw[["data_sources"]],
+    tso_sar_swconfother = sw[["other"]],
+    tso_sar_snv = snvs,
+    tso_sar_cnv = cnvs
   ) |>
     tibble::enframe(name = "name", value = "data")
 }

@@ -4,7 +4,15 @@
 \alias{db_test}
 \title{Test DB}
 \usage{
-db_test(path, prefix, portalRunId)
+db_test(
+  path,
+  prefix,
+  outdir,
+  prid,
+  max_files,
+  dbname = "nemo",
+  dbuser = "orcabus"
+)
 }
 \description{
 Test DB
@@ -15,10 +23,23 @@ path <- file.path(
   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
   "analysis/wgts-qc/20241123ffa837c4/L2401621_dragen_alignment"
 )
-prefix <-  "L2401621"
+path <- file.path(
+  "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
+  "analysis/cttsov2/20250117c5b9baa8"
+)
+prefix <- "L2500039" # tsov2
+prefix <- "L2401621"
 outdir <- path
 max_files <- 1000
-portalRunId <- "abcd1234"
+prid <- "abcd1234"
+prid <- "efgh5678"
+dbname <- "nemo"
+dbuser <- "orcabus"
+d <- db_test(
+  path = path, prefix = prefix, outdir = outdir,
+  prid = prid, max_files = max_files,
+  dbname = dbname, dbuser = dbuser
+)
 }
 
 }

@@ -6,43 +6,62 @@
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
 #'   "analysis/wgts-qc/20241123ffa837c4/L2401621_dragen_alignment"
 #' )
+#' path <- file.path(
+#'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
+#'   "analysis/cttsov2/20250117c5b9baa8"
+#' )
+#' prefix <- "L2500039" # tsov2
 #' prefix <- "L2401621"
 #' outdir <- path
 #' max_files <- 1000
-#' portalRunId <- "abcd1234"
+#' prid <- "abcd1234"
+#' prid <- "efgh5678"
+#' dbname <- "nemo"
+#' dbuser <- "orcabus"
+#' d <- db_test(
+#'   path = path, prefix = prefix, outdir = outdir,
+#'   prid = prid, max_files = max_files,
+#'   dbname = dbname, dbuser = dbuser
+#' )
 #' }
 #'
 #' @export
-db_test <- function(path, prefix, portalRunId) {
+db_test <- function(path, prefix, outdir, prid, max_files, dbname = "nemo", dbuser = "orcabus") {
+  # TODO: add workflow type dispatcher
   obj <- Wf_dragen$new(path = path, prefix = prefix)
   d_dl <- obj$download_files(
     outdir = outdir, max_files = max_files
   )
-  d_tidy <- obj$tidy_files(d_dl)
-  # add ID column at the beginning
-  d_tidy2 <- d_tidy |>
+  d_tidy <- obj$tidy_files(d_dl) |>
+    # add ID column at the beginning
     dplyr::mutate(
       data = purrr::map(
         .data$data,
         \(x) tibble::add_column(
           x,
-          dracarysId = as.character(portalRunId),
+          dracarys_id = as.character(prid),
           .before = 1
         )
       )
     )
   con <- DBI::dbConnect(
     drv = RPostgres::Postgres(),
-    dbname = "test1",
-    user = "pdiakumis"
+    dbname = dbname,
+    user = dbuser
   )
   # now write each table to db
-  fin <- d_tidy2 |>
+  fin <- d_tidy |>
     dplyr::rowwise() |>
     dplyr::mutate(
-      write_tbl = list(DBI::dbWriteTable(conn = con, name = .data$name, value = .data$data, append = F, overwrite = TRUE))
+      write_tbl = list(
+        DBI::dbWriteTable(
+          conn = con, name = .data$name, value = .data$data, append = T, overwrite = F
+        )
+      )
     ) |>
     dplyr::ungroup()
+  DBI::dbDisconnect(con)
+  return(fin)
 }
 
 #' Generate Django Models from a Schema Tibble

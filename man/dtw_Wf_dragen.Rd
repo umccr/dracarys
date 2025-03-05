@@ -43,7 +43,7 @@ path <- file.path(
   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
   "analysis/wgts-qc/20241123ffa837c4/L2401621_dragen_alignment"
 )
-prefix <-  "L2401621"
+prefix <- "L2401621"
 outdir <- path
 
 #---- S3 ----#
