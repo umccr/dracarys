@@ -1,3 +1,4 @@
+# fmt: skip file
 tidy_add_args <- function(subp) {
   tidy <- subp$add_parser("tidy", help = "Tidy UMCCR Workflow Outputs")
   tidy$add_argument("-i", "--in_dir", help = glue("{emoji('snowman')} Directory with untidy UMCCR workflow results. Can be S3 or local."), required = TRUE)

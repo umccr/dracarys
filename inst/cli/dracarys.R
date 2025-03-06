@@ -1,5 +1,6 @@
 #!/usr/bin/env Rscript
 
+# fmt: skip file
 suppressPackageStartupMessages(require(argparse, include.only = "ArgumentParser"))
 suppressPackageStartupMessages(require(arrow, include.only = "write_parquet"))
 suppressPackageStartupMessages(require(assertthat, include.only = "assert_that"))
