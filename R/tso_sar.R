@@ -37,7 +37,12 @@ tso_sar_read <- function(x) {
     # edge case
     sw_nl_data_sources <- c("name", "version", "description", "releaseDate") |>
       empty_tbl()
-    sw_nl_rest <- c("instanceName", "nirvanaSoftwareVersion", "genomeAssembly", "refseqVersion") |>
+    sw_nl_rest <- c(
+      "instanceName",
+      "nirvanaSoftwareVersion",
+      "genomeAssembly",
+      "refseqVersion"
+    ) |>
       empty_tbl()
   }
   sw_conf[["nirvanaVersionList"]] <- NULL
@@ -74,11 +79,15 @@ tso_sar_read <- function(x) {
       tidyr::pivot_wider(names_from = "name", values_from = "value") |>
       as.list()
     assertthat::assert_that(
-      all(c("CodingRegionSizeMb", "SomaticCodingVariantsCount") %in% names(amet))
+      all(
+        c("CodingRegionSizeMb", "SomaticCodingVariantsCount") %in% names(amet)
+      )
     )
     biom_list[["tmb_per_mb"]] <- tmb[["tumorMutationalBurdenPerMegabase"]]
     biom_list[["tmb_coding_region_sizemb"]] <- amet[["CodingRegionSizeMb"]]
-    biom_list[["tmb_somatic_coding_variants_count"]] <- amet[["SomaticCodingVariantsCount"]]
+    biom_list[["tmb_somatic_coding_variants_count"]] <- amet[[
+      "SomaticCodingVariantsCount"
+    ]]
   }
   biom_tbl <- tibble::as_tibble_row(biom_list)
   empty_tbl2 <- function(cnames) {
@@ -125,11 +134,35 @@ tso_sar_read <- function(x) {
   snvs <- tso_sar_snv(dat[["variants"]][["smallVariants"]])
   if (nrow(snvs) == 0) {
     snvs <- c(
-      "chrom", "pos", "ref", "alt", "af", "qual", "dp_tot", "dp_alt",
-      "transcript", "source", "bioType", "aminoAcids", "cdnaPos", "codons",
-      "cdsPos", "exons", "geneId", "hgnc", "hgvsc", "hgvsp", "isCanonical",
-      "polyPhenScore", "polyPhenPrediction", "proteinId", "proteinPos",
-      "siftScore", "siftPrediction", "consequence", "introns"
+      "chrom",
+      "pos",
+      "ref",
+      "alt",
+      "af",
+      "qual",
+      "dp_tot",
+      "dp_alt",
+      "transcript",
+      "source",
+      "bioType",
+      "aminoAcids",
+      "cdnaPos",
+      "codons",
+      "cdsPos",
+      "exons",
+      "geneId",
+      "hgnc",
+      "hgvsc",
+      "hgvsp",
+      "isCanonical",
+      "polyPhenScore",
+      "polyPhenPrediction",
+      "proteinId",
+      "proteinPos",
+      "siftScore",
+      "siftPrediction",
+      "consequence",
+      "introns"
     ) |>
       empty_tbl2()
   }
@@ -138,8 +171,13 @@ tso_sar_read <- function(x) {
     dplyr::bind_rows()
   if (nrow(cnvs) == 0) {
     cnvs <- c(
-      "foldChange", "qual", "copyNumberType", "gene", "chromosome",
-      "startPosition", "endPosition"
+      "foldChange",
+      "qual",
+      "copyNumberType",
+      "gene",
+      "chromosome",
+      "startPosition",
+      "endPosition"
     ) |>
       empty_tbl2()
   }

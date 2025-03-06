@@ -84,8 +84,12 @@ Wf_cttsov2 <- R6::R6Class(
       li <- "Logs_Intermediates"
       dc <- glue("{li}/DragenCaller/{pref}")
       path <- sub("/$", "", path) # remove potential trailing slash
-      self$dragenObj <- Wf_dragen$new(path = file.path(path, dc), prefix = glue("{dc}/{prefix}"))
+      self$dragenObj <- Wf_dragen$new(
+        path = file.path(path, dc),
+        prefix = glue("{dc}/{prefix}")
+      )
       # Results
+      # fmt: skip
       regexes <- tibble::tribble(
         ~regex, ~fun,
         glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"), "read_cnv",
@@ -108,6 +112,7 @@ Wf_cttsov2 <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
+      # fmt: skip
       res <- tibble::tribble(
         ~var, ~value,
         "path", private$.path,
@@ -145,9 +150,14 @@ Wf_cttsov2 <- R6::R6Class(
     #' @param x Path to file.
     read_cvgrepe = function(x) {
       ctypes <- list(
-        chr = "c", start = "d", end = "d", gene = "c",
-        mean_coverage = "d", median_coverage = "d",
-        min_coverage = "d", max_coverage = "d"
+        chr = "c",
+        start = "d",
+        end = "d",
+        gene = "c",
+        mean_coverage = "d",
+        median_coverage = "d",
+        min_coverage = "d",
+        max_coverage = "d"
       )
       dat <- x |>
         readr::read_tsv(col_types = ctypes)
@@ -157,8 +167,13 @@ Wf_cttsov2 <- R6::R6Class(
     #' @param x Path to file.
     read_cvgrepg = function(x) {
       ctypes <- list(
-        chr = "c", start = "d", end = "d", gene = "c",
-        mean_coverage = "d", min_coverage = "d", max_coverage = "d"
+        chr = "c",
+        start = "d",
+        end = "d",
+        gene = "c",
+        mean_coverage = "d",
+        min_coverage = "d",
+        max_coverage = "d"
       )
       dat <- x |>
         readr::read_tsv(col_types = ctypes)
@@ -228,17 +243,25 @@ Wf_cttsov2 <- R6::R6Class(
 #' )
 #' }
 #' @export
-dtw_Wf_cttsov2 <- function(path, prefix, outdir,
-                           outdir_tidy = file.path(outdir, "dracarys_tidy"),
-                           format = "rds",
-                           max_files = 1000,
-                           dryrun = FALSE) {
+dtw_Wf_cttsov2 <- function(
+  path,
+  prefix,
+  outdir,
+  outdir_tidy = file.path(outdir, "dracarys_tidy"),
+  format = "rds",
+  max_files = 1000,
+  dryrun = FALSE
+) {
   obj <- Wf_cttsov2$new(path = path, prefix = prefix)
   d_dl1 <- obj$download_files(
-    outdir = outdir, max_files = max_files, dryrun = dryrun
+    outdir = outdir,
+    max_files = max_files,
+    dryrun = dryrun
   )
   d_dl2 <- obj$dragenObj$download_files(
-    outdir = outdir, max_files = max_files, dryrun = dryrun
+    outdir = outdir,
+    max_files = max_files,
+    dryrun = dryrun
   )
   if (!dryrun) {
     d_tidy1 <- obj$tidy_files(d_dl1)

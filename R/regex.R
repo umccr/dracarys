@@ -28,6 +28,7 @@ match_regex <- function(x, regexes = DR_FILE_REGEX) {
   return(NA_character_)
 }
 
+# fmt: skip
 DR_FILE_REGEX <- tibble::tribble(
   ~regex, ~fun,
   "AlignCollapseFusionCaller_metrics\\.json\\.gz$", "TsoAlignCollapseFusionCallerMetricsFile",

@@ -50,7 +50,9 @@ session_info_tbls <- function(pkgs = NULL) {
     dplyr::as_tibble() |>
     dplyr::select(
       "package",
-      version = "ondiskversion", datestamp = "date", "source"
+      version = "ondiskversion",
+      datestamp = "date",
+      "source"
     )
   if (!is.null(pkgs)) {
     si_pkg <- si_pkg |>
@@ -73,7 +75,8 @@ dr_output_format_valid <- function(x) {
     is.null(x) | all(x %in% format_choices),
     msg = paste0(
       "Output format should be one or more of ",
-      paste(format_choices, collapse = ", "), ", or _only_ NULL."
+      paste(format_choices, collapse = ", "),
+      ", or _only_ NULL."
     )
   )
 }
@@ -142,7 +145,13 @@ write_dracarys <- function(obj, prefix, out_format, drid = NULL) {
 #'
 #' @return Tibble with nested objects that have been written to the output directory.
 #' @export
-write_dracarys_list_of_tbls <- function(list_of_tbls, out_dir = NULL, prefix = NULL, out_format = "tsv", drid = NULL) {
+write_dracarys_list_of_tbls <- function(
+  list_of_tbls,
+  out_dir = NULL,
+  prefix = NULL,
+  out_format = "tsv",
+  drid = NULL
+) {
   assertthat::assert_that(!is.null(prefix))
   if (!is.null(out_dir)) {
     prefix <- file.path(out_dir, prefix)
@@ -153,7 +162,12 @@ write_dracarys_list_of_tbls <- function(list_of_tbls, out_dir = NULL, prefix = N
     dplyr::mutate(
       section_low = tolower(.data$section),
       p = glue("{prefix}_{.data$section_low}"),
-      out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
+      out = list(write_dracarys(
+        obj = .data$value,
+        prefix = .data$p,
+        out_format = out_format,
+        drid = drid
+      ))
     ) |>
     dplyr::ungroup() |>
     dplyr::select("section", "value") |>

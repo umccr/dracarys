@@ -44,7 +44,11 @@ local_list_files_dir <- function(localdir, max_files = NULL) {
 #' @testexamples
 #' expect_equal(nrow(x), 1)
 #' @export
-local_list_files_filter_relevant <- function(localdir, regexes = DR_FILE_REGEX, max_files = NULL) {
+local_list_files_filter_relevant <- function(
+  localdir,
+  regexes = DR_FILE_REGEX,
+  max_files = NULL
+) {
   local_list_files_dir(localdir = localdir, max_files = max_files) |>
     dplyr::mutate(
       type = purrr::map_chr(.data$path, \(x) match_regex(x, regexes = regexes))

@@ -80,11 +80,16 @@ Wf_sash <- R6::R6Class(
     #' @param SubjectID The SubjectID of the sample.
     #' @param SampleID_tumor The SampleID of the tumor sample.
     #' @param SampleID_normal The SampleID of the normal sample.
-    initialize = function(path = NULL, SubjectID = NULL, SampleID_tumor = NULL,
-                          SampleID_normal = NULL) {
+    initialize = function(
+      path = NULL,
+      SubjectID = NULL,
+      SampleID_tumor = NULL,
+      SampleID_normal = NULL
+    ) {
       wname <- "sash"
       pref <- glue("{SubjectID}_{SampleID_tumor}")
       crep <- "cancer_report/cancer_report_tables"
+      # fmt: skip
       regexes <- tibble::tribble(
         ~regex, ~fun,
         glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "read_hrdChord",
@@ -114,6 +119,7 @@ Wf_sash <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
+      # fmt: skip
       res <- tibble::tribble(
         ~var, ~value,
         "path", private$.path,
@@ -201,22 +207,35 @@ Wf_sash <- R6::R6Class(
         tidyr::pivot_wider(names_from = "variable", values_from = "value") |>
         dplyr::rename(MSI_mb_tmp = "MSI (indels/Mb)") |>
         dplyr::mutate(
-          purity_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Purity) |> as.numeric(),
-          ploidy_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Ploidy) |> as.numeric(),
-          msi_mb_hmf = sub(".* \\((.*)\\)", "\\1", .data$MSI_mb_tmp) |> as.numeric(),
+          purity_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Purity) |>
+            as.numeric(),
+          ploidy_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Ploidy) |>
+            as.numeric(),
+          msi_mb_hmf = sub(".* \\((.*)\\)", "\\1", .data$MSI_mb_tmp) |>
+            as.numeric(),
           contamination_hmf = as.numeric(.data$Contamination),
           deleted_genes_hmf = as.numeric(.data$DeletedGenes),
           msi_hmf = sub("(.*) \\(.*\\)", "\\1", .data$MSI_mb_tmp),
           tmb_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TMB) |> as.numeric(),
           tml_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TML) |> as.numeric(),
-          hypermutated = ifelse("Hypermutated" %in% d$variable, .data[["Hypermutated"]], NA) |> as.character()
+          hypermutated = ifelse(
+            "Hypermutated" %in% d$variable,
+            .data[["Hypermutated"]],
+            NA
+          ) |>
+            as.character()
         ) |>
         dplyr::select(
           qc_status_hmf = "QC_Status",
           sex_hmf = "Gender",
-          "purity_hmf", "ploidy_hmf", "msi_hmf", "msi_mb_hmf",
+          "purity_hmf",
+          "ploidy_hmf",
+          "msi_hmf",
+          "msi_mb_hmf",
           "contamination_hmf",
-          "deleted_genes_hmf", "tmb_hmf", "tml_hmf",
+          "deleted_genes_hmf",
+          "tmb_hmf",
+          "tml_hmf",
           wgd_hmf = "WGD",
           "hypermutated"
         )
@@ -259,19 +278,30 @@ Wf_sash <- R6::R6Class(
 #' )
 #' }
 #' @export
-Wf_sash_download_tidy_write <- function(path, SubjectID, SampleID_tumor, SampleID_normal,
-                                        outdir, format = "rds", max_files = 1000,
-                                        regexes = NULL, dryrun = FALSE) {
+Wf_sash_download_tidy_write <- function(
+  path,
+  SubjectID,
+  SampleID_tumor,
+  SampleID_normal,
+  outdir,
+  format = "rds",
+  max_files = 1000,
+  regexes = NULL,
+  dryrun = FALSE
+) {
   s <- Wf_sash$new(
-    path = path, SubjectID = SubjectID,
-    SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+    path = path,
+    SubjectID = SubjectID,
+    SampleID_tumor = SampleID_tumor,
+    SampleID_normal = SampleID_normal
   )
   if (!is.null(regexes)) {
     s$regexes <- regexes
   }
   d_dl <- s$download_files(
     outdir = outdir,
-    max_files = max_files, dryrun = dryrun
+    max_files = max_files,
+    dryrun = dryrun
   )
   if (!dryrun) {
     d_tidy <- s$tidy_files(d_dl)

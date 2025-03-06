@@ -22,19 +22,33 @@ date_end <- "2025-01-15"
 dates <- seq(from = as.Date(date_start), to = as.Date(date_end), by = "day") |>
   stringr::str_remove_all("-") |>
   paste(collapse = "|")
-wf0 <- rportal::orca_workflow_list(wf_name = "wgts-qc", token = token, page_size = 50)
+wf0 <- rportal::orca_workflow_list(
+  wf_name = "wgts-qc",
+  token = token,
+  page_size = 50
+)
 # get pld
 wf1 <- wf0 |>
   filter(grepl(dates, .data$portalRunId)) |>
   rowwise() |>
-  mutate(pld = list(rportal::orca_wfrid2payload(wfrid = .data$orcabusId, token = token))) |>
+  mutate(
+    pld = list(rportal::orca_wfrid2payload(
+      wfrid = .data$orcabusId,
+      token = token
+    ))
+  ) |>
   ungroup()
 # tidy pld
 wf2 <- wf1 |>
   rowwise() |>
   mutate(pld_tidy = list(rportal::pld_wgtsqc(.data$pld))) |>
   ungroup() |>
-  select(workflowRunId = "orcabusId", portalRunId, currentStateTimestamp, pld_tidy) |>
+  select(
+    workflowRunId = "orcabusId",
+    portalRunId,
+    currentStateTimestamp,
+    pld_tidy
+  ) |>
   tidyr::unnest(pld_tidy)
 
 query_limsrow_libids <- function(libids) {
@@ -50,7 +64,9 @@ lims0 <- query_limsrow_libids(wf2$libraryId)
 lims1 <- lims0 |>
   tidyr::separate_wider_delim(
     library_id,
-    delim = "_", names = c("library_id", "topup_or_rerun"), too_few = "align_start"
+    delim = "_",
+    names = c("library_id", "topup_or_rerun"),
+    too_few = "align_start"
   ) |>
   select(
     individualId = "subject_id",
@@ -61,21 +77,38 @@ lims1 <- lims0 |>
     externalSampleId = "external_sample_id",
     projectName = "project_name",
     projectOwner = "project_owner",
-    phenotype, type, source, assay, quality, workflow
+    phenotype,
+    type,
+    source,
+    assay,
+    quality,
+    workflow
   ) |>
   distinct()
 
 wf_lims <- wf2 |>
   left_join(lims1, by = "libraryId") |>
   select(
-    "libraryId", "individualId", "sampleId", "sampleName", "subjectId",
-    "externalSampleId", "projectName", "projectOwner",
+    "libraryId",
+    "individualId",
+    "sampleId",
+    "sampleName",
+    "subjectId",
+    "externalSampleId",
+    "projectName",
+    "projectOwner",
     lane = "input_lane",
-    "phenotype", "sampleType",
+    "phenotype",
+    "sampleType",
     date = "currentStateTimestamp",
-    "source", "assay", "quality", "workflow",
-    "portalRunId", "output_dragenAlignmentOutputUri",
-    "input_read1FileUri", "input_read2FileUri",
+    "source",
+    "assay",
+    "quality",
+    "workflow",
+    "portalRunId",
+    "output_dragenAlignmentOutputUri",
+    "input_read1FileUri",
+    "input_read2FileUri",
   ) |>
   mutate(rownum = row_number()) |>
   relocate("rownum")
@@ -85,15 +118,19 @@ nticks <- nrow(wf_lims)
 bar_width <- 50
 pb <- progress::progress_bar$new(
   format = "[:bar] :current/:total (:percent) elapsed :elapsedfull eta :eta",
-  total = nticks, clear = FALSE,
-  show_after = 0, width = bar_width
+  total = nticks,
+  clear = FALSE,
+  show_after = 0,
+  width = bar_width
 )
 # wrapping the dtw function to use the progress bar
 fun1 <- function(path, prefix, outdir) {
   pb$tick(0)
   res <- dracarys::dtw_Wf_dragen(
-    path = path, prefix = prefix,
-    outdir = outdir, format = "rds",
+    path = path,
+    prefix = prefix,
+    outdir = outdir,
+    format = "rds",
     max_files = 1000,
     dryrun = FALSE
   )

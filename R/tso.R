@@ -38,6 +38,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     initialize = function(path = NULL, prefix = NULL) {
       wname <- "tso_ctdna_tumor_only"
       pref <- prefix
+      # fmt: skip
       regexes <- tibble::tribble(
         ~regex, ~fun,
         glue("{pref}/{pref}.SampleAnalysisResults\\.json\\.gz$"), "sar",
@@ -67,6 +68,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
+      # fmt: skip
       res <- tibble::tribble(
         ~var, ~value,
         "path", self$path,
@@ -197,15 +199,20 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
 #' )
 #' }
 #' @export
-dtw_Wf_tso_ctdna_tumor_only <- function(path, prefix, outdir,
-                                        outdir_tidy = file.path(outdir, "dracarys_tidy"),
-                                        format = "rds",
-                                        max_files = 1000,
-                                        dryrun = FALSE) {
+dtw_Wf_tso_ctdna_tumor_only <- function(
+  path,
+  prefix,
+  outdir,
+  outdir_tidy = file.path(outdir, "dracarys_tidy"),
+  format = "rds",
+  max_files = 1000,
+  dryrun = FALSE
+) {
   obj <- Wf_tso_ctdna_tumor_only$new(path = path, prefix = prefix)
   d_dl <- obj$download_files(
     outdir = outdir,
-    max_files = max_files, dryrun = dryrun
+    max_files = max_files,
+    dryrun = dryrun
   )
   if (!dryrun) {
     d_tidy <- obj$tidy_files(d_dl)
@@ -230,11 +237,17 @@ dtw_Wf_tso_ctdna_tumor_only <- function(path, prefix, outdir,
 #' @export
 tso_combinedvaro_smallv_read <- function(x) {
   nm_map <- c(
-    gene = "Gene", chrom = "Chromosome", pos = "Genomic Position",
-    ref = "Reference Call", alt = "Alternative Call",
-    vaf = "Allele Frequency", dp = "Depth",
-    pdot = "P-Dot Notation", cdot = "C-Dot Notation",
-    csq = "Consequence(s)", exons = "Affected Exon(s)"
+    gene = "Gene",
+    chrom = "Chromosome",
+    pos = "Genomic Position",
+    ref = "Reference Call",
+    alt = "Alternative Call",
+    vaf = "Allele Frequency",
+    dp = "Depth",
+    pdot = "P-Dot Notation",
+    cdot = "C-Dot Notation",
+    csq = "Consequence(s)",
+    exons = "Affected Exon(s)"
   )
   # read full file
   ln <- readr::read_lines(x, skip_empty_rows = TRUE)
@@ -247,7 +260,8 @@ tso_combinedvaro_smallv_read <- function(x) {
   d <- ln[(smallv + 1):length(ln)] |>
     I() |> # read parsed data as-is
     readr::read_tsv(
-      col_names = TRUE, col_types = readr::cols(
+      col_names = TRUE,
+      col_types = readr::cols(
         .default = "c",
         "Genomic Position" = "i",
         "Allele Frequency" = "d",
@@ -270,26 +284,56 @@ tso_combinedvaro_smallv_read <- function(x) {
 #' @export
 tso_tmbt_read <- function(x) {
   ct <- list(
-    Chromosome = "c", Position = "d", RefCall = "c", AltCall = "c",
-    VAF = "d", Depth = "d", CytoBand = "c", GeneName = "c",
-    VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
-    AlleleCountsGnomadExome = "d", AlleleCountsGnomadGenome = "d",
-    AlleleCounts1000Genomes = "d", MaxDatabaseAlleleCounts = "d",
-    GermlineFilterDatabase = "c", GermlineFilterProxi = "c",
-    CodingVariant = "c", Nonsynonymous = "c", IncludedInTMBNumerator = "c"
+    Chromosome = "c",
+    Position = "d",
+    RefCall = "c",
+    AltCall = "c",
+    VAF = "d",
+    Depth = "d",
+    CytoBand = "c",
+    GeneName = "c",
+    VariantType = "c",
+    CosmicIDs = "c",
+    MaxCosmicCount = "d",
+    AlleleCountsGnomadExome = "d",
+    AlleleCountsGnomadGenome = "d",
+    AlleleCounts1000Genomes = "d",
+    MaxDatabaseAlleleCounts = "d",
+    GermlineFilterDatabase = "c",
+    GermlineFilterProxi = "c",
+    CodingVariant = "c",
+    Nonsynonymous = "c",
+    IncludedInTMBNumerator = "c"
   )
   # cttso v2 has introduced a few extra columns
   ct2 <- list(
-    Chromosome = "c", Position = "d", RefCall = "c", AltCall = "c",
-    VAF = "d", Depth = "d", CytoBand = "c", GeneName = "c",
-    VariantType = "c", CosmicIDs = "c", MaxCosmicCount = "d",
-    ClinVarIDs = "c", ClinVarSignificance = "c",
-    AlleleCountsGnomadExome = "d", AlleleCountsGnomadGenome = "d",
-    AlleleCounts1000Genomes = "d", MaxDatabaseAlleleCounts = "d",
-    GermlineFilterDatabase = "c", GermlineFilterProxi = "c",
-    Nonsynonymous = "c", withinValidTmbRegion = "c",
-    IncludedInTMBNumerator = "c", Status = "c", ProteinChange = "c",
-    CDSChange = "c", Exons = "c", Consequence = "c"
+    Chromosome = "c",
+    Position = "d",
+    RefCall = "c",
+    AltCall = "c",
+    VAF = "d",
+    Depth = "d",
+    CytoBand = "c",
+    GeneName = "c",
+    VariantType = "c",
+    CosmicIDs = "c",
+    MaxCosmicCount = "d",
+    ClinVarIDs = "c",
+    ClinVarSignificance = "c",
+    AlleleCountsGnomadExome = "d",
+    AlleleCountsGnomadGenome = "d",
+    AlleleCounts1000Genomes = "d",
+    MaxDatabaseAlleleCounts = "d",
+    GermlineFilterDatabase = "c",
+    GermlineFilterProxi = "c",
+    Nonsynonymous = "c",
+    withinValidTmbRegion = "c",
+    IncludedInTMBNumerator = "c",
+    Status = "c",
+    ProteinChange = "c",
+    CDSChange = "c",
+    Exons = "c",
+    Consequence = "c"
   )
   hdr <- readr::read_tsv(x, n_max = 0, show_col_types = FALSE)
   if (all(names(ct2) %in% colnames(hdr))) {
@@ -353,11 +397,17 @@ tso_targetregcvg_plot <- function(d, min_pct = 2) {
     dplyr::select(dp = "ConsensusReadDepth", pct = "Percentage") |>
     dplyr::mutate(dp = as.numeric(sub("X", "", .data$dp)))
   d |>
-    ggplot2::ggplot(ggplot2::aes(x = .data$dp, y = .data$pct, label = .data$dp)) +
+    ggplot2::ggplot(ggplot2::aes(
+      x = .data$dp,
+      y = .data$pct,
+      label = .data$dp
+    )) +
     ggplot2::geom_point() +
     ggplot2::geom_line() +
     ggrepel::geom_text_repel() +
-    ggplot2::labs(title = "Percentage of Target Region Covered by Given Read Depth") +
+    ggplot2::labs(
+      title = "Percentage of Target Region Covered by Given Read Depth"
+    ) +
     ggplot2::xlab("Depth") +
     ggplot2::ylab("Percentage") +
     ggplot2::theme_minimal() +
@@ -365,7 +415,11 @@ tso_targetregcvg_plot <- function(d, min_pct = 2) {
       legend.position = c(0.9, 0.9),
       legend.justification = c(1, 1),
       panel.grid.minor = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
+      plot.title = ggplot2::element_text(
+        colour = "#2c3e50",
+        size = 14,
+        face = "bold"
+      )
     )
 }
 
@@ -382,10 +436,23 @@ tso_targetregcvg_plot <- function(d, min_pct = 2) {
 tso_fusions_read <- function(x) {
   # extra column (at the end) in v2
   ct <- list(
-    Sample = "c", Name = "c", Chr1 = "c", Pos1 = "d", Chr2 = "c",
-    Pos2 = "d", Direction = "c", Alt_Depth = "d", BP1_Depth = "d",
-    BP2_Depth = "d", Total_Depth = "d", VAF = "d", Gene1 = "c", Gene2 = "c",
-    Contig = "c", Filter = "c", Is_Cosmic_GenePair = "l"
+    Sample = "c",
+    Name = "c",
+    Chr1 = "c",
+    Pos1 = "d",
+    Chr2 = "c",
+    Pos2 = "d",
+    Direction = "c",
+    Alt_Depth = "d",
+    BP1_Depth = "d",
+    BP2_Depth = "d",
+    Total_Depth = "d",
+    VAF = "d",
+    Gene1 = "c",
+    Gene2 = "c",
+    Contig = "c",
+    Filter = "c",
+    Is_Cosmic_GenePair = "l"
   )
   ct2 <- list("Fusion Directionality Known" = "c")
   hdr <- readr::read_csv(x, n_max = 0, comment = "#", show_col_types = FALSE)
@@ -418,8 +485,11 @@ tso_msi_read <- function(x) {
     j[["PercentageUnstableSites"]] <- NA_real_
   }
   num_cols <- c(
-    "TotalMicrosatelliteSitesAssessed", "TotalMicrosatelliteSitesUnstable",
-    "PercentageUnstableSites", "SumDistance", "SumJsd"
+    "TotalMicrosatelliteSitesAssessed",
+    "TotalMicrosatelliteSitesUnstable",
+    "PercentageUnstableSites",
+    "SumDistance",
+    "SumJsd"
   )
   tibble::as_tibble_row(j) |>
     dplyr::mutate(

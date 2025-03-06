@@ -21,7 +21,11 @@ s3_list_files_dir <- function(s3dir, max_objects = 1000) {
   bucket <- sub("s3://(.*?)/.*", "\\1", s3dir)
   prefix <- sub("s3://(.*?)/(.*)", "\\2", s3dir)
   s3 <- paws.storage::s3()
-  l <- s3$list_objects_v2(Bucket = bucket, Prefix = prefix, MaxKeys = max_objects)
+  l <- s3$list_objects_v2(
+    Bucket = bucket,
+    Prefix = prefix,
+    MaxKeys = max_objects
+  )
   assertthat::assert_that(all(c("Contents", "KeyCount") %in% names(l)))
   cols_sel <- c("bname", "size", "lastmodified", "path")
   # handle no results
@@ -29,11 +33,14 @@ s3_list_files_dir <- function(s3dir, max_objects = 1000) {
     return(empty_tbl(cnames = cols_sel, ctypes = "cccc"))
   }
   d <- l[["Contents"]] |>
-    purrr::map(\(x) tibble::tibble(
-      Key = x[["Key"]],
-      Size = x[["Size"]],
-      lastmodified = as.character(x[["LastModified"]])
-    )) |>
+    purrr::map(
+      \(x)
+        tibble::tibble(
+          Key = x[["Key"]],
+          Size = x[["Size"]],
+          lastmodified = as.character(x[["LastModified"]])
+        )
+    ) |>
     dplyr::bind_rows() |>
     dplyr::mutate(
       path = glue("s3://{bucket}/{.data$Key}"),
@@ -65,9 +72,14 @@ s3_list_files_dir <- function(s3dir, max_objects = 1000) {
 #' s3_list_files_filter_relevant(s3dir = s3dir, regexes = regexes, max_objects = 300)
 #' }
 #' @export
-s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
-                                          regexes = DR_FILE_REGEX, max_objects = 100,
-                                          presign = FALSE, expiry_sec = 3600) {
+s3_list_files_filter_relevant <- function(
+  s3dir,
+  pattern = NULL,
+  regexes = DR_FILE_REGEX,
+  max_objects = 100,
+  presign = FALSE,
+  expiry_sec = 3600
+) {
   assertthat::assert_that(rlang::is_logical(presign), max_objects <= 1000)
   d_all <- s3_list_files_dir(s3dir = s3dir, max_objects = max_objects)
   if (nrow(d_all) == 0) {
@@ -88,12 +100,18 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
     if (nrow(d) == 0) {
       return(d)
     }
-    s3_client <- paws.storage::s3(paws.storage::config(signature_version = "s3v4"))
+    s3_client <- paws.storage::s3(paws.storage::config(
+      signature_version = "s3v4"
+    ))
     d <- d |>
       dplyr::rowwise() |>
-      dplyr::mutate(presigned_url = s3_file_presignedurl(
-        client = s3_client, s3path = .data$path, expiry_seconds = expiry_sec
-      )) |>
+      dplyr::mutate(
+        presigned_url = s3_file_presignedurl(
+          client = s3_client,
+          s3path = .data$path,
+          expiry_seconds = expiry_sec
+        )
+      ) |>
       dplyr::ungroup() |>
       dplyr::select(dplyr::all_of(c(cols_sel, "presigned_url")))
   }
@@ -123,14 +141,23 @@ s3_list_files_filter_relevant <- function(s3dir, pattern = NULL,
 #' dr_s3_download(s3dir = s3dir, outdir = outdir, max_objects = 500, regexes = regexes, dryrun = F)
 #' }
 #' @export
-dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
-                           regexes = DR_FILE_REGEX, dryrun = FALSE) {
+dr_s3_download <- function(
+  s3dir,
+  outdir,
+  max_objects = 100,
+  pattern = NULL,
+  regexes = DR_FILE_REGEX,
+  dryrun = FALSE
+) {
   s3 <- paws.storage::s3()
   e <- emojifont::emoji
   fs::dir_create(outdir)
   d <- s3_list_files_filter_relevant(
-    s3dir = s3dir, pattern = NULL, regexes = regexes,
-    max_objects = max_objects, presign = FALSE
+    s3dir = s3dir,
+    pattern = NULL,
+    regexes = regexes,
+    max_objects = max_objects,
+    presign = FALSE
   )
   msg <- glue(
     "S3 input path is: {s3dir}",
@@ -141,13 +168,23 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
   d <- d |>
     dplyr::mutate(
       s3path_minus_s3dir = sub(glue("{s3dir}/"), "", .data$path),
-      s3path_minus_s3dir_outdir = file.path(outdir, dirname(.data$s3path_minus_s3dir)) |>
+      s3path_minus_s3dir_outdir = file.path(
+        outdir,
+        dirname(.data$s3path_minus_s3dir)
+      ) |>
         fs::dir_create() |>
         normalizePath(),
       localpath = file.path(.data$s3path_minus_s3dir_outdir, .data$bname),
       s3path = .data$path
     ) |>
-    dplyr::select("type", "bname", "size", "lastmodified", "localpath", "s3path")
+    dplyr::select(
+      "type",
+      "bname",
+      "size",
+      "lastmodified",
+      "localpath",
+      "s3path"
+    )
   tot_size <- d |>
     dplyr::summarise(tot_size = sum(.data$size)) |>
     dplyr::pull(tot_size)
@@ -164,18 +201,36 @@ dr_s3_download <- function(s3dir, outdir, max_objects = 100, pattern = NULL,
         s3key = sub("s3://(.*?)/(.*)", "\\2", .data$s3path),
         dl = list(
           s3$download_file(
-            Bucket = .data$s3bucket, Key = .data$s3key, Filename = .data$localpath
+            Bucket = .data$s3bucket,
+            Key = .data$s3key,
+            Filename = .data$localpath
           )
         ),
         localpath = normalizePath(.data$localpath)
       ) |>
       dplyr::ungroup() |>
-      dplyr::select("type", "bname", "size", "lastmodified", "localpath", "s3path")
+      dplyr::select(
+        "type",
+        "bname",
+        "size",
+        "lastmodified",
+        "localpath",
+        "s3path"
+      )
     return(res)
   } else {
-    cli::cli_alert_info("{date_log()} {e('camera')} Just list relevant files from {.file {s3dir}}")
+    cli::cli_alert_info(
+      "{date_log()} {e('camera')} Just list relevant files from {.file {s3dir}}"
+    )
     d |>
-      dplyr::select("type", "bname", "size", "lastmodified", "s3path", localpath2be = "localpath") |>
+      dplyr::select(
+        "type",
+        "bname",
+        "size",
+        "lastmodified",
+        "s3path",
+        localpath2be = "localpath"
+      ) |>
       as.data.frame() |>
       print()
   }
@@ -240,7 +295,11 @@ s3_search <- function(pat, rows) {
     tibble::as_tibble()
   d |>
     dplyr::mutate(
-      date1 = as.POSIXct(.data$last_modified_date, tz = utc_tz, format = date_fmt),
+      date1 = as.POSIXct(
+        .data$last_modified_date,
+        tz = utc_tz,
+        format = date_fmt
+      ),
       date_aest = lubridate::with_tz(.data$date1, tz = au_tz),
       path = glue("s3://{bucket}/{key}"),
       size = fs::as_fs_bytes(.data$size)

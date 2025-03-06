@@ -23,7 +23,11 @@ dragen_fraglenhist_plot <- function(d, min_count = 10) {
       legend.justification = c(1, 1),
       panel.grid.minor = ggplot2::element_blank(),
       panel.grid.major = ggplot2::element_blank(),
-      plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold")
+      plot.title = ggplot2::element_text(
+        colour = "#2c3e50",
+        size = 14,
+        face = "bold"
+      )
     )
 }
 
@@ -42,6 +46,7 @@ dragen_fraglenhist_plot <- function(d, min_count = 10) {
 dragen_umi_metrics_read <- function(x) {
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("UMI STATISTICS", d0[1]))
+  # fmt: skip
   abbrev_nm <- tibble::tribble(
     ~raw, ~clean, ~target,
     "number of reads", "reads_tot", TRUE,
@@ -83,7 +88,8 @@ dragen_umi_metrics_read <- function(x) {
     tidyr::separate_wider_delim(
       "value",
       names = c("category", "dummy1", "var", "count", "pct"),
-      delim = ",", too_few = "align_start"
+      delim = ",",
+      too_few = "align_start"
     ) |>
     dplyr::mutate(
       var = tolower(.data$var),
@@ -103,7 +109,11 @@ dragen_umi_metrics_read <- function(x) {
   d2 <- d1 |>
     dplyr::filter(!grepl("histo", .data$var)) |>
     dplyr::select("var", "count", "pct") |>
-    tidyr::pivot_longer(c("count", "pct"), names_to = "name", values_to = "value") |>
+    tidyr::pivot_longer(
+      c("count", "pct"),
+      names_to = "name",
+      values_to = "value"
+    ) |>
     dplyr::mutate(
       value = as.numeric(.data$value),
       name = dplyr::if_else(.data$name == "count", "", "_pct"),
@@ -140,7 +150,8 @@ dragen_gc_metrics_read <- function(x) {
     tidyr::separate_wider_delim(
       "value",
       names = c("category", "dummy1", "name", "value", "fraction"),
-      delim = ",", too_few = "align_start"
+      delim = ",",
+      too_few = "align_start"
     )
   abbrev_nm <- c(
     "Window size" = "window_size",
@@ -238,7 +249,8 @@ dragen_cnv_metrics_read <- function(x) {
     tidyr::separate_wider_delim(
       "value",
       names = c("category", "extra", "var", "count", "pct"),
-      delim = ",", too_few = "align_start"
+      delim = ",",
+      too_few = "align_start"
     )
   # in cttso
   sexgt <- d1 |>
@@ -294,7 +306,8 @@ dragen_sv_metrics_read <- function(x) {
     dplyr::filter(!grepl("Total number of structural variants", .data$value)) |>
     tidyr::separate_wider_delim(
       "value",
-      names = c("svsum", "sample", "var", "count", "pct"), delim = ",",
+      names = c("svsum", "sample", "var", "count", "pct"),
+      delim = ",",
       too_few = "align_start"
     ) |>
     dplyr::mutate(
@@ -323,33 +336,38 @@ dragen_trimmer_metrics_read <- function(x) {
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("TRIMMER STATISTICS", d0[1]))
   abbrev_nm <- c(
-    "Total input reads"                              = "reads_tot_input",
-    "Total input bases"                              = "bases_tot",
-    "Total input bases R1"                           = "bases_r1",
-    "Total input bases R2"                           = "bases_r2",
-    "Average input read length"                      = "read_len_avg",
-    "Total trimmed reads"                            = "reads_trimmed_tot",
-    "Total trimmed bases"                            = "bases_trimmed_tot",
-    "Average bases trimmed per read"                 = "bases_trimmed_avg_per_read",
-    "Average bases trimmed per trimmed read"         = "bases_trimmed_avg_per_trimmedread",
-    "Remaining poly-G K-mers R1 3prime"              = "polygkmers3r1_remaining",
-    "Remaining poly-G K-mers R2 3prime"              = "polygkmers3r2_remaining",
+    "Total input reads" = "reads_tot_input",
+    "Total input bases" = "bases_tot",
+    "Total input bases R1" = "bases_r1",
+    "Total input bases R2" = "bases_r2",
+    "Average input read length" = "read_len_avg",
+    "Total trimmed reads" = "reads_trimmed_tot",
+    "Total trimmed bases" = "bases_trimmed_tot",
+    "Average bases trimmed per read" = "bases_trimmed_avg_per_read",
+    "Average bases trimmed per trimmed read" = "bases_trimmed_avg_per_trimmedread",
+    "Remaining poly-G K-mers R1 3prime" = "polygkmers3r1_remaining",
+    "Remaining poly-G K-mers R2 3prime" = "polygkmers3r2_remaining",
     "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trimmed_reads_unfilt_3r1",
     "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trimmed_reads_unfilt_3r2",
-    "Poly-G soft trimmed reads filtered R1 3prime"   = "polyg_soft_trimmed_reads_filt_3r1",
-    "Poly-G soft trimmed reads filtered R2 3prime"   = "polyg_soft_trimmed_reads_filt_3r2",
+    "Poly-G soft trimmed reads filtered R1 3prime" = "polyg_soft_trimmed_reads_filt_3r1",
+    "Poly-G soft trimmed reads filtered R2 3prime" = "polyg_soft_trimmed_reads_filt_3r2",
     "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trimmed_bases_unfilt_3r1",
     "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trimmed_bases_unfilt_3r2",
-    "Poly-G soft trimmed bases filtered R1 3prime"   = "polyg_soft_trimmed_bases_filt_3r1",
-    "Poly-G soft trimmed bases filtered R2 3prime"   = "polyg_soft_trimmed_bases_filt_3r2",
-    "Total filtered reads"                           = "reads_tot_filt",
-    "Reads filtered for minimum read length R1"      = "reads_filt_minreadlenr1",
-    "Reads filtered for minimum read length R2"      = "reads_filt_minreadlenr2"
+    "Poly-G soft trimmed bases filtered R1 3prime" = "polyg_soft_trimmed_bases_filt_3r1",
+    "Poly-G soft trimmed bases filtered R2 3prime" = "polyg_soft_trimmed_bases_filt_3r2",
+    "Total filtered reads" = "reads_tot_filt",
+    "Reads filtered for minimum read length R1" = "reads_filt_minreadlenr1",
+    "Reads filtered for minimum read length R2" = "reads_filt_minreadlenr2"
   )
 
   d1 <- d0 |>
     tibble::as_tibble_col(column_name = "value") |>
-    tidyr::separate_wider_delim("value", names = c("category", "extra", "var", "count", "pct"), delim = ",", too_few = "align_start") |>
+    tidyr::separate_wider_delim(
+      "value",
+      names = c("category", "extra", "var", "count", "pct"),
+      delim = ",",
+      too_few = "align_start"
+    ) |>
     dplyr::mutate(
       count = as.numeric(.data$count),
       pct = round(as.numeric(.data$pct), 2),
@@ -381,6 +399,7 @@ dragen_trimmer_metrics_read <- function(x) {
 #' }
 #' @export
 dragen_vc_metrics_read <- function(x) {
+  # fmt: skip
   abbrev_nm1 <- tibble::tribble(
     ~raw, ~clean, ~region,
     "Total", "var_tot", FALSE,
@@ -419,7 +438,8 @@ dragen_vc_metrics_read <- function(x) {
     tidyr::separate_wider_delim(
       "value",
       names = c("category", "sample", "var", "count", "pct"),
-      delim = ",", too_few = "align_start"
+      delim = ",",
+      too_few = "align_start"
     )
   reg1 <- NULL
   str1 <- NULL
@@ -579,7 +599,8 @@ dragen_mapping_metrics_read <- function(x) {
     tidyr::separate_wider_delim(
       "value",
       names = c("dragen_sample", "RG", "var", "count", "pct"),
-      delim = ",", too_few = "align_start"
+      delim = ",",
+      too_few = "align_start"
     ) |>
     dplyr::mutate(
       count = dplyr::na_if(.data$count, "NA"),
@@ -588,7 +609,11 @@ dragen_mapping_metrics_read <- function(x) {
       var = dplyr::recode(.data$var, !!!abbrev_nm),
       RG = dplyr::if_else(.data$RG == "", "Total", .data$RG),
       dragen_sample = sub(reg1, "", .data$dragen_sample) |> trimws(),
-      dragen_sample = dplyr::if_else(.data$dragen_sample == "", "SINGLE", .data$dragen_sample)
+      dragen_sample = dplyr::if_else(
+        .data$dragen_sample == "",
+        "SINGLE",
+        .data$dragen_sample
+      )
     ) |>
     dplyr::select("dragen_sample", "RG", "var", "count", "pct")
   dirty_names_cleaned(unique(d$var), abbrev_nm, x)
@@ -617,6 +642,7 @@ dragen_mapping_metrics_read <- function(x) {
 #' @export
 dragen_coverage_metrics_read <- function(x) {
   # all rows except 'Aligned bases' and 'Aligned reads' refer to the region
+  # fmt: skip
   abbrev_nm <- tibble::tribble(
     ~raw, ~clean, ~region,
     "Aligned bases", "bases_aligned_tot", FALSE,
@@ -640,7 +666,8 @@ dragen_coverage_metrics_read <- function(x) {
     tibble::as_tibble_col(column_name = "value") |>
     tidyr::separate_wider_delim(
       "value",
-      delim = ",", too_few = "align_start",
+      delim = ",",
+      too_few = "align_start",
       names = c("category", "dummy1", "var", "value", "pct")
     )
   reg1 <- NULL
@@ -685,7 +712,11 @@ dragen_coverage_metrics_read <- function(x) {
       var = gsub("\\[|\\]|\\(|\\)| ", "", .data$var),
       var = gsub("x", "", .data$var)
     ) |>
-    tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
+    tidyr::separate_wider_delim(
+      "var",
+      names = c("start", "end"),
+      delim = ":"
+    ) |>
     dplyr::mutate(var = as.character(glue("cov_pct_{start}_{end}_{reg1}"))) |>
     dplyr::select("var", "value")
   res <- dplyr::bind_rows(res1, res2) |>
@@ -731,7 +762,9 @@ dragen_contig_mean_coverage_plot <- function(d, top_alt_n = 15) {
     unique()
 
   alt_panel2 <- alt_panel |>
-    dplyr::mutate(alt_group = dplyr::if_else(.data$chrom %in% top_alt, "top", "bottom"))
+    dplyr::mutate(
+      alt_group = dplyr::if_else(.data$chrom %in% top_alt, "top", "bottom")
+    )
 
   alt_panel_final <- alt_panel2 |>
     dplyr::group_by(.data$alt_group) |>
@@ -739,14 +772,24 @@ dragen_contig_mean_coverage_plot <- function(d, top_alt_n = 15) {
     dplyr::inner_join(alt_panel2, by = c("alt_group")) |>
     dplyr::mutate(
       chrom = dplyr::if_else(.data$alt_group == "bottom", "OTHER", .data$chrom),
-      coverage = dplyr::if_else(.data$alt_group == "bottom", .data$mean_cov, .data$coverage)
+      coverage = dplyr::if_else(
+        .data$alt_group == "bottom",
+        .data$mean_cov,
+        .data$coverage
+      )
     ) |>
     dplyr::distinct() |>
     dplyr::filter(.data$coverage > min_cvg) |>
     dplyr::ungroup() |>
     dplyr::select("chrom", "coverage", "panel")
 
-  chrom_fac_levels <- c(main_chrom, "chrM", "MT", top_alt[!top_alt %in% c("chrM", "MT")], "OTHER")
+  chrom_fac_levels <- c(
+    main_chrom,
+    "chrM",
+    "MT",
+    top_alt[!top_alt %in% c("chrM", "MT")],
+    "OTHER"
+  )
   d <- dplyr::bind_rows(main_panel, alt_panel_final) |>
     dplyr::mutate(chrom = factor(.data$chrom, levels = chrom_fac_levels))
 
@@ -754,13 +797,17 @@ dragen_contig_mean_coverage_plot <- function(d, top_alt_n = 15) {
     dplyr::mutate(label = "sampleA") |>
     ggplot2::ggplot(
       ggplot2::aes(
-        x = .data$chrom, y = .data$coverage, group = .data$label,
+        x = .data$chrom,
+        y = .data$coverage,
+        group = .data$label,
       )
     ) +
     ggplot2::geom_point() +
     ggplot2::geom_line() +
     ggplot2::scale_y_continuous(
-      limits = c(0, NA), expand = c(0, 0), labels = scales::comma,
+      limits = c(0, NA),
+      expand = c(0, 0),
+      labels = scales::comma,
       breaks = scales::pretty_breaks(n = 8)
     ) +
     ggplot2::theme_minimal() +
@@ -773,8 +820,17 @@ dragen_contig_mean_coverage_plot <- function(d, top_alt_n = 15) {
       panel.grid.major.y = ggplot2::element_blank(),
       strip.background = ggplot2::element_blank(),
       strip.text.x = ggplot2::element_blank(),
-      axis.text.x = ggplot2::element_text(angle = 45, vjust = 1, hjust = 1, size = 6),
-      plot.title = ggplot2::element_text(colour = "#2c3e50", size = 14, face = "bold"),
+      axis.text.x = ggplot2::element_text(
+        angle = 45,
+        vjust = 1,
+        hjust = 1,
+        size = 6
+      ),
+      plot.title = ggplot2::element_text(
+        colour = "#2c3e50",
+        size = 14,
+        face = "bold"
+      ),
       panel.spacing = ggplot2::unit(2, "lines")
     ) +
     ggplot2::facet_wrap(ggplot2::vars(.data$panel), nrow = 2, scales = "free")
@@ -808,7 +864,11 @@ dragen_ploidy_estimation_metrics_read <- function(x) {
   )
   d <- raw |>
     tibble::as_tibble_col(column_name = "value") |>
-    tidyr::separate_wider_delim("value", names = c("dummy1", "dummy2", "var", "value"), delim = ",") |>
+    tidyr::separate_wider_delim(
+      "value",
+      names = c("dummy1", "dummy2", "var", "value"),
+      delim = ","
+    ) |>
     dplyr::select("var", "value") |>
     dplyr::mutate(
       var = dplyr::recode(.data$var, !!!abbrev_nm)
@@ -859,14 +919,20 @@ dragen_ploidy_estimation_metrics_read <- function(x) {
 #' )
 #' }
 #' @export
-dtw_Wf_dragen <- function(path, prefix, outdir,
-                          outdir_tidy = file.path(outdir, "dracarys_tidy"),
-                          format = "rds",
-                          max_files = 1000,
-                          dryrun = FALSE) {
+dtw_Wf_dragen <- function(
+  path,
+  prefix,
+  outdir,
+  outdir_tidy = file.path(outdir, "dracarys_tidy"),
+  format = "rds",
+  max_files = 1000,
+  dryrun = FALSE
+) {
   obj <- Wf_dragen$new(path = path, prefix = prefix)
   d_dl <- obj$download_files(
-    outdir = outdir, max_files = max_files, dryrun = dryrun
+    outdir = outdir,
+    max_files = max_files,
+    dryrun = dryrun
   )
   if (!dryrun) {
     d_tidy <- obj$tidy_files(d_dl)
@@ -923,6 +989,7 @@ Wf_dragen <- R6::R6Class(
       wname <- "dragen"
       pref <- prefix
       tn1 <- "(|_tumor|_normal)"
+      # fmt: skip
       regexes <- tibble::tribble(
         ~regex, ~fun,
         glue("{pref}\\-replay\\.json$"), "read_replay",
@@ -964,6 +1031,7 @@ Wf_dragen <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
+      # fmt: skip
       res <- tibble::tribble(
         ~var, ~value,
         "path", private$.path,
@@ -980,7 +1048,12 @@ Wf_dragen <- R6::R6Class(
       res <- x |>
         jsonlite::read_json(simplifyVector = TRUE) |>
         purrr::map_if(is.data.frame, tibble::as_tibble)
-      req_elements <- c("command_line", "hash_table_build", "dragen_config", "system")
+      req_elements <- c(
+        "command_line",
+        "hash_table_build",
+        "dragen_config",
+        "system"
+      )
       assertthat::assert_that(all(names(res) %in% req_elements))
       res[["system"]] <- res[["system"]] |>
         tibble::as_tibble_row()
@@ -998,7 +1071,11 @@ Wf_dragen <- R6::R6Class(
     #' @param keep_alt Keep ALT contigs.
     read_contigMeanCov = function(x, keep_alt = FALSE) {
       subprefix <- private$dragen_subprefix(x, "_contig_mean_cov")
-      dat <- readr::read_csv(x, col_names = c("chrom", "n_bases", "coverage"), col_types = "cdd") |>
+      dat <- readr::read_csv(
+        x,
+        col_names = c("chrom", "n_bases", "coverage"),
+        col_types = "cdd"
+      ) |>
         dplyr::filter(
           if (!keep_alt) {
             !grepl("chrM|MT|_|Autosomal|HLA-|EBV|GL|hs37d5", .data$chrom)
@@ -1006,14 +1083,20 @@ Wf_dragen <- R6::R6Class(
             TRUE
           }
         )
-      tibble::tibble(name = glue("dragen_contigmeancov_{subprefix}"), data = list(dat[]))
+      tibble::tibble(
+        name = glue("dragen_contigmeancov_{subprefix}"),
+        data = list(dat[])
+      )
     },
     #' @description Read `coverage_metrics.csv` file.
     #' @param x Path to file.
     read_coverageMetrics = function(x) {
       subprefix <- private$dragen_subprefix(x, "_coverage_metrics")
       dat <- dragen_coverage_metrics_read(x)
-      tibble::tibble(name = glue("dragen_covmetrics_{subprefix}"), data = list(dat))
+      tibble::tibble(
+        name = glue("dragen_covmetrics_{subprefix}"),
+        data = list(dat)
+      )
     },
     #' @description Read `fine_hist.csv` file.
     #' @param x Path to file.
@@ -1024,11 +1107,18 @@ Wf_dragen <- R6::R6Class(
       # there's a max Depth of 2000+, so convert to numeric for easier plotting
       dat <- d |>
         dplyr::mutate(
-          Depth = ifelse(grepl("+", .data$Depth), sub("(\\d*)\\+", "\\1", .data$Depth), .data$Depth),
+          Depth = ifelse(
+            grepl("+", .data$Depth),
+            sub("(\\d*)\\+", "\\1", .data$Depth),
+            .data$Depth
+          ),
           Depth = as.integer(.data$Depth)
         ) |>
         dplyr::select(depth = "Depth", n_loci = "Overall")
-      tibble::tibble(name = glue("dragen_finehist_{subprefix}"), data = list(dat))
+      tibble::tibble(
+        name = glue("dragen_finehist_{subprefix}"),
+        data = list(dat)
+      )
     },
     #' @description Read `fragment_length_hist.csv` file.
     #' @param x Path to file.
@@ -1038,7 +1128,11 @@ Wf_dragen <- R6::R6Class(
       dat <- d |>
         tibble::enframe(name = "name", value = "value") |>
         dplyr::filter(!grepl("#Sample: |FragmentLength,Count", .data$value)) |>
-        tidyr::separate_wider_delim(cols = "value", names = c("fragment_length", "count"), delim = ",") |>
+        tidyr::separate_wider_delim(
+          cols = "value",
+          names = c("fragment_length", "count"),
+          delim = ","
+        ) |>
         dplyr::mutate(
           count = as.numeric(.data$count),
           fragmentLength = as.numeric(.data$fragment_length)
@@ -1064,7 +1158,11 @@ Wf_dragen <- R6::R6Class(
           var = gsub("x", "", .data$var),
           var = gsub("inf", "Inf", .data$var)
         ) |>
-        tidyr::separate_wider_delim("var", names = c("start", "end"), delim = ":") |>
+        tidyr::separate_wider_delim(
+          "var",
+          names = c("start", "end"),
+          delim = ":"
+        ) |>
         dplyr::mutate(
           start = as.numeric(.data$start),
           end = as.numeric(.data$end),
@@ -1078,7 +1176,9 @@ Wf_dragen <- R6::R6Class(
     read_timeMetrics = function(x) {
       cn <- c("dummy1", "dummy2", "Step", "time_hrs", "time_sec")
       ct <- readr::cols(
-        .default = "c", time_hrs = readr::col_time(format = "%T"), time_sec = "d"
+        .default = "c",
+        time_hrs = readr::col_time(format = "%T"),
+        time_sec = "d"
       )
       d <- readr::read_csv(x, col_names = cn, col_types = ct)
       assertthat::assert_that(d$dummy1[1] == "RUN TIME", is.na(d$dummy2[1]))
@@ -1099,7 +1199,10 @@ Wf_dragen <- R6::R6Class(
     read_vcMetrics = function(x) {
       subprefix <- private$dragen_subprefix(x, "_metrics")
       dat <- dragen_vc_metrics_read(x)
-      tibble::tibble(name = glue("dragen_vcmetrics_{subprefix}"), data = list(dat[]))
+      tibble::tibble(
+        name = glue("dragen_vcmetrics_{subprefix}"),
+        data = list(dat[])
+      )
     },
     #' @description Read `trimmer_metrics.csv` file.
     #' @param x Path to file.

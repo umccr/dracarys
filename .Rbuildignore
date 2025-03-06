@@ -12,6 +12,7 @@
 ^\.github$
 ^\.pre-commit-config\.yaml$
 ^_pkgdown\.yaml$
+^air\.toml$
 ^conda$
 ^data-raw$
 ^docs$

@@ -36,7 +36,11 @@ dragen_fastqc_metrics_read <- function(x) {
   # the value is an accumulation, so divide by number of grains
   pos_base_cont <- d |>
     dplyr::filter(.data$section == "POSITIONAL BASE CONTENT") |>
-    tidyr::separate_wider_delim("metric", delim = " ", names = c("readpos", "pos", "base", "bases")) |>
+    tidyr::separate_wider_delim(
+      "metric",
+      delim = " ",
+      names = c("readpos", "pos", "base", "bases")
+    ) |>
     dplyr::mutate(
       is_binned = grepl("-", .data$pos), # for debugging
       bin_group = dplyr::row_number()
@@ -59,7 +63,11 @@ dragen_fastqc_metrics_read <- function(x) {
   # the value is an avg, so keep same between grains
   pos_base_mean_qual <- d |>
     dplyr::filter(.data$section == "POSITIONAL BASE MEAN QUALITY") |>
-    tidyr::separate_wider_delim("metric", delim = " ", names = c("readpos", "pos", "base", "avg", "qual")) |>
+    tidyr::separate_wider_delim(
+      "metric",
+      delim = " ",
+      names = c("readpos", "pos", "base", "avg", "qual")
+    ) |>
     tidyr::separate_longer_delim("pos", delim = "-") |>
     dplyr::mutate(pos = as.integer(.data$pos), value = round(.data$value, 2)) |>
     dplyr::select("mate", "pos", "base", "value")
@@ -68,28 +76,50 @@ dragen_fastqc_metrics_read <- function(x) {
   # keep same value between grains
   pos_qual <- d |>
     dplyr::filter(.data$section == "POSITIONAL QUALITY") |>
-    tidyr::separate_wider_delim("metric", delim = " ", names = c("readpos", "pos", "pct", "quant", "qv")) |>
+    tidyr::separate_wider_delim(
+      "metric",
+      delim = " ",
+      names = c("readpos", "pos", "pct", "quant", "qv")
+    ) |>
     tidyr::separate_longer_delim("pos", delim = "-") |>
-    dplyr::mutate(pct = as.integer(sub("%", "", .data$pct)), pos = as.integer(.data$pos)) |>
+    dplyr::mutate(
+      pct = as.integer(sub("%", "", .data$pct)),
+      pos = as.integer(.data$pos)
+    ) |>
     dplyr::select("mate", "pos", "pct", "value")
 
   gc_cont <- d |>
     dplyr::filter(.data$section == "READ GC CONTENT") |>
-    tidyr::separate_wider_delim("metric", delim = " ", names = c("pct", "GC", "reads")) |>
+    tidyr::separate_wider_delim(
+      "metric",
+      delim = " ",
+      names = c("pct", "GC", "reads")
+    ) |>
     dplyr::mutate(pct = as.integer(sub("%", "", .data$pct))) |>
     dplyr::select("mate", "pct", "value")
 
   gc_cont_qual <- d |>
     dplyr::filter(.data$section == "READ GC CONTENT QUALITY") |>
-    tidyr::separate_wider_delim("metric", delim = " ", names = c("pct", "GC", "reads", "avg", "qual")) |>
-    dplyr::mutate(pct = as.integer(sub("%", "", .data$pct)), value = round(.data$value, 2)) |>
+    tidyr::separate_wider_delim(
+      "metric",
+      delim = " ",
+      names = c("pct", "GC", "reads", "avg", "qual")
+    ) |>
+    dplyr::mutate(
+      pct = as.integer(sub("%", "", .data$pct)),
+      value = round(.data$value, 2)
+    ) |>
     dplyr::select("mate", "pct", "value")
 
   # there are binned bp e.g. "149-150"
   # the value is an accumulation, so divide by number of grains
   read_len <- d |>
     dplyr::filter(.data$section == "READ LENGTHS") |>
-    tidyr::separate_wider_delim("metric", delim = " ", names = c("bp", "len", "reads")) |>
+    tidyr::separate_wider_delim(
+      "metric",
+      delim = " ",
+      names = c("bp", "len", "reads")
+    ) |>
     dplyr::mutate(
       bp = sub("bp", "", .data$bp),
       is_binned = grepl("-", .data$bp), # for debugging
@@ -105,7 +135,11 @@ dragen_fastqc_metrics_read <- function(x) {
 
   read_mean_qual <- d |>
     dplyr::filter(.data$section == "READ MEAN QUALITY") |>
-    tidyr::separate_wider_delim("metric", delim = " ", names = c("q", "reads")) |>
+    tidyr::separate_wider_delim(
+      "metric",
+      delim = " ",
+      names = c("q", "reads")
+    ) |>
     dplyr::mutate(q = as.integer(sub("Q", "", .data$q))) |>
     dplyr::select("mate", "q", "value")
 
@@ -113,7 +147,11 @@ dragen_fastqc_metrics_read <- function(x) {
   # keep same value between grains
   seq_pos <- d |>
     dplyr::filter(.data$section == "SEQUENCE POSITIONS") |>
-    tidyr::separate_wider_delim("metric", delim = " ", names = c("seq", "bp", "starts")) |>
+    tidyr::separate_wider_delim(
+      "metric",
+      delim = " ",
+      names = c("seq", "bp", "starts")
+    ) |>
     dplyr::mutate(bp = sub("bp", "", .data$bp)) |>
     tidyr::separate_longer_delim("bp", delim = "-") |>
     dplyr::mutate(bp = as.integer(.data$bp)) |>
