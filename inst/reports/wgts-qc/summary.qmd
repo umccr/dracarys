@@ -22,9 +22,9 @@ format:
     code-block-border-left: true
     smooth-scroll: true
     grid:
-      body-width: 1700px
+      body-width: 2800px
 params:
-  tidy_data: "~/projects/dracarys/inst/reports/wgts-qc/nogit/tidy_data_rds/2024-12-17_wgts.rds"
+  tidy_data: "~/projects/dracarys/inst/reports/wgts-qc/nogit/tidy_data_rds/2025-01-14_wgts.rds"
 ---
 
 ```{r}

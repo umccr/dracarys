@@ -17,9 +17,9 @@ c("AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION") |>
   stopifnot()
 token <- rportal::orca_jwt() |>
   rportal::jwt_validate()
-dates <- c(
-  "2024-12-1"
-) |>
+date_start <- "2024-12-21"
+date_end <- "2025-01-15"
+dates <- seq(from = as.Date(date_start), to = as.Date(date_end), by = "day") |>
   stringr::str_remove_all("-") |>
   paste(collapse = "|")
 wf0 <- rportal::orca_workflow_list(wf_name = "wgts-qc", token = token, page_size = 50)
@@ -121,7 +121,7 @@ data_tidy <- wf_lims |>
   ungroup()
 
 outdir1 <- fs::dir_create("inst/reports/wgts-qc/nogit/tidy_data_rds")
-date1 <- "2024-12-17"
+date1 <- "2025-01-14"
 data_tidy |>
   saveRDS(here(glue("{outdir1}/{date1}_wgts.rds")))
 

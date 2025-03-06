@@ -39,6 +39,12 @@ Downloads files from the \code{dragen} workflow and writes them in a tidy format
 \examples{
 \dontrun{
 #---- Local ----#
+path <- file.path(
+  "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
+  "analysis/wgts-qc/20241123ffa837c4/L2401621_dragen_alignment"
+)
+prefix <- "L2401621"
+outdir <- path
 
 #---- S3 ----#
 path <- file.path(

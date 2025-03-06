@@ -77,7 +77,7 @@ Wf <- R6::R6Class(
       wnames <- c(
         "bcl_convert",
         "tso_ctdna_tumor_only",
-        "tso_ctdna_tumor_only_v2",
+        "cttsov2",
         "wgs_alignment_qc",
         "wts_alignment_qc",
         "wts_tumor_only",
