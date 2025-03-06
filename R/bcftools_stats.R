@@ -25,10 +25,21 @@ BcftoolsStatsFile <- R6::R6Class(
       ln <- readr::read_lines(x)
       d <- ln[grepl("QUAL", ln)]
       # line1 ignore, line2 is colnames, just clean those up
-      cnames <- c("QUAL_dummy", "id", "qual", "snps", "transi", "transv", "indels")
+      cnames <- c(
+        "QUAL_dummy",
+        "id",
+        "qual",
+        "snps",
+        "transi",
+        "transv",
+        "indels"
+      )
       d[3:length(d)] |>
         I() |>
-        readr::read_tsv(col_names = cnames, col_types = readr::cols(.default = "d", "QUAL_dummy" = "c")) |>
+        readr::read_tsv(
+          col_names = cnames,
+          col_types = readr::cols(.default = "d", "QUAL_dummy" = "c")
+        ) |>
         dplyr::select(-"QUAL_dummy")
     },
     #' @description
@@ -40,11 +51,22 @@ BcftoolsStatsFile <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+    write = function(
+      d,
+      out_dir = NULL,
+      prefix,
+      out_format = "tsv",
+      drid = NULL
+    ) {
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
+      write_dracarys(
+        obj = d,
+        prefix = prefix,
+        out_format = out_format,
+        drid = drid
+      )
     }
   )
 )

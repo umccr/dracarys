@@ -46,7 +46,13 @@ MultiqcFile <- R6::R6Class(
     #' @param out_format Format of output file(s) (one of 'tsv' (def.),
     #' 'parquet', 'both').
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+    write = function(
+      d,
+      out_dir = NULL,
+      prefix,
+      out_format = "tsv",
+      drid = NULL
+    ) {
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
@@ -54,7 +60,12 @@ MultiqcFile <- R6::R6Class(
       # only write plots if output format is rds, else need to destructure the whole thing...
       has_plots_and_not_rds <- !inherits(d, "data.frame") && out_format != "rds"
       assertthat::assert_that(!has_plots_and_not_rds)
-      write_dracarys(obj = d, prefix = prefix, out_format = out_format, drid = drid)
+      write_dracarys(
+        obj = d,
+        prefix = prefix,
+        out_format = out_format,
+        drid = drid
+      )
     }
   )
 )
@@ -100,7 +111,12 @@ multiqc_tidy_json <- function(j) {
       config_creation_date = cdate,
       umccr_workflow = workflow
     ) |>
-    dplyr::select("umccr_id", "umccr_workflow", "config_creation_date", dplyr::everything())
+    dplyr::select(
+      "umccr_id",
+      "umccr_workflow",
+      "config_creation_date",
+      dplyr::everything()
+    )
 
   if (workflow == "dragen_transcriptome") {
     # discard Ref_X control samples
@@ -110,7 +126,10 @@ multiqc_tidy_json <- function(j) {
   } else if (workflow %in% c("dragen_umccrise", "bcbio_umccrise")) {
     # discard Alice, Bob etc. control samples
     um_ref_samples <- c("Alice", "Bob", "Chen", "Elon", "Dakota")
-    um_ref_samples <- paste0(um_ref_samples, rep(c("_T", "_B", ""), each = length(um_ref_samples)))
+    um_ref_samples <- paste0(
+      um_ref_samples,
+      rep(c("_T", "_B", ""), each = length(um_ref_samples))
+    )
     d <- d |>
       dplyr::filter(!.data$umccr_id %in% um_ref_samples)
   }
@@ -119,10 +138,15 @@ multiqc_tidy_json <- function(j) {
 
 multiqc_rename_cols <- function(d) {
   umccr_workflows <- c(
-    "dragen_alignment", "dragen_somatic",
-    "dragen_transcriptome", "dragen_umccrise",
-    "dragen_ctdna", "dragen_sash",
-    "bcbio_umccrise", "bcbio_wgs", "bcbio_wts"
+    "dragen_alignment",
+    "dragen_somatic",
+    "dragen_transcriptome",
+    "dragen_umccrise",
+    "dragen_ctdna",
+    "dragen_sash",
+    "bcbio_umccrise",
+    "bcbio_wgs",
+    "bcbio_wts"
   )
 
   w <- unique(d[["umccr_workflow"]])
@@ -151,7 +175,9 @@ multiqc_rename_cols <- function(d) {
 }
 
 .multiqc_guess_workflow <- function(p) {
-  assertthat::assert_that(all(c("config_title", "report_data_sources") %in% names(p)))
+  assertthat::assert_that(all(
+    c("config_title", "report_data_sources") %in% names(p)
+  ))
   config_title <- p[["config_title"]] %||% "Unknown"
   ds <- names(p[["report_data_sources"]])
   # bcbio
@@ -161,7 +187,9 @@ multiqc_rename_cols <- function(d) {
       return("bcbio_wts")
     } else if (all(c("PURPLE", "Conpair", "mosdepth") %in% ds)) {
       return("bcbio_umccrise")
-    } else if (all(c("Samtools", "Bcftools (somatic)", "Bcftools (germline)") %in% ds)) {
+    } else if (
+      all(c("Samtools", "Bcftools (somatic)", "Bcftools (germline)") %in% ds)
+    ) {
       return("bcbio_wgs")
     } else {
       warning(glue(
@@ -177,7 +205,11 @@ multiqc_rename_cols <- function(d) {
     if (all(c("PURPLE", "Conpair", "mosdepth") %in% ds)) {
       return("dragen_umccrise")
     } else if (grepl("^UMCCR MultiQC Dragen", config_title)) {
-      w <- tolower(sub("UMCCR MultiQC Dragen (.*) Report for .*", "\\1", config_title))
+      w <- tolower(sub(
+        "UMCCR MultiQC Dragen (.*) Report for .*",
+        "\\1",
+        config_title
+      ))
       if (w == "somatic and germline") {
         w <- "somatic"
       }
@@ -188,9 +220,12 @@ multiqc_rename_cols <- function(d) {
     } else if (
       all(
         c(
-          "PURPLE", "DRAGEN-FastQC",
-          "Bcftools stats (somatic)", "Bcftools stats (germline)"
-        ) %in% ds
+          "PURPLE",
+          "DRAGEN-FastQC",
+          "Bcftools stats (somatic)",
+          "Bcftools stats (germline)"
+        ) %in%
+          ds
       )
     ) {
       return("dragen_sash")
@@ -269,23 +304,38 @@ multiqc_parse_raw <- function(p) {
 multiqc_parse_raw_interop <- function(p) {
   x <- p[["report_saved_raw_data"]]
   tool_nms <- names(x)
-  assertthat::assert_that(length(tool_nms) == 1, tool_nms == "interop_runsummary")
+  assertthat::assert_that(
+    length(tool_nms) == 1,
+    tool_nms == "interop_runsummary"
+  )
   res <- list()
   d <- x[[tool_nms]]
   assertthat::assert_that(length(d) == 1, names(d) == "interop")
   d <- d[["interop"]]
-  assertthat::assert_that(length(d) == 2, all(names(d) %in% c("summary", "details")))
+  assertthat::assert_that(
+    length(d) == 2,
+    all(names(d) %in% c("summary", "details"))
+  )
   # read metrics summary
   d_sumy <- d[["summary"]] |>
     purrr::map(\(x) unlist(x) |> tibble::as_tibble_row()) |>
     dplyr::bind_rows(.id = "Read")
   # read metrics per lane
   dbl_cols <- c(
-    "Tiles", "Density", "Cluster PF",
-    "Reads", "Reads PF", "%>=Q30",
-    "Yield", "Aligned", "Error",
-    "Error (35)", "Error (75)", "Error (100)",
-    "% Occupied", "Intensity C1"
+    "Tiles",
+    "Density",
+    "Cluster PF",
+    "Reads",
+    "Reads PF",
+    "%>=Q30",
+    "Yield",
+    "Aligned",
+    "Error",
+    "Error (35)",
+    "Error (75)",
+    "Error (100)",
+    "% Occupied",
+    "Intensity C1"
   )
   d_det <- d[["details"]] |>
     purrr::discard(\(x) length(x) == 0) |>
@@ -296,7 +346,10 @@ multiqc_parse_raw_interop <- function(p) {
     dplyr::bind_rows(.id = "Lane-Read") |>
     dplyr::arrange(.data$`Lane-Read`) |>
     dplyr::mutate(dplyr::across(dplyr::all_of(dbl_cols), .fns = as.numeric)) |>
-    dplyr::mutate(dplyr::across(dplyr::all_of(dbl_cols), ~ replace(.x, is.nan(.x), NA_real_)))
+    dplyr::mutate(dplyr::across(
+      dplyr::all_of(dbl_cols),
+      ~ replace(.x, is.nan(.x), NA_real_)
+    ))
   list(
     summary = d_sumy,
     per_lane = d_det
@@ -316,7 +369,10 @@ multiqc_kv_map <- function(l, func, map_keys = FALSE) {
 # Tibble with three columns: workflow name, raw and cleaned multiqc metric name.
 # For consistency, make sure that names are in snake_case and that the tool that
 # generates them is added as the suffix e.g. awesome_metric_tool1.
-MULTIQC_COLUMNS <- system.file("extdata/multiqc_column_map.tsv", package = "dracarys") |>
+MULTIQC_COLUMNS <- system.file(
+  "extdata/multiqc_column_map.tsv",
+  package = "dracarys"
+) |>
   readr::read_tsv(col_types = "ccc")
 
 
@@ -414,7 +470,9 @@ multiqc_parse_plots <- function(j, plot_names = NULL) {
     dplyr::rowwise() |>
     dplyr::mutate(
       input = list(plot_data[[.data$plot_nm]]),
-      plot_res = list(dr_func_eval(f = funcs[.data$plot_type], v = funcs)(.data$input))
+      plot_res = list(dr_func_eval(f = funcs[.data$plot_type], v = funcs)(
+        .data$input
+      ))
     ) |>
     dplyr::ungroup() |>
     dplyr::select(dplyr::all_of(final_cols))
@@ -433,12 +491,18 @@ multiqc_parse_plots <- function(j, plot_names = NULL) {
 #' @export
 multiqc_parse_xyline_plot <- function(dat) {
   assertthat::assert_that(dat[["plot_type"]] == "xy_line")
-  if (dat[["config"]][["id"]] %in% c("dragen_coverage_per_contig", "dragen_coverage_per_non_main_contig")) {
+  if (
+    dat[["config"]][["id"]] %in%
+      c("dragen_coverage_per_contig", "dragen_coverage_per_non_main_contig")
+  ) {
     return(multiqc_parse_xyline_plot_contig_cvg(dat))
   }
   # some empty fastqc_adapter_content_plot - see https://github.com/umccr/dracarys/issues/104
   # also empty fastqc_per_base_sequence_quality_plot
-  if (length(dat[["datasets"]][[1]]) == 0 || length(dat$datasets[[1]][["data"]]) == 0) {
+  if (
+    length(dat[["datasets"]][[1]]) == 0 ||
+      length(dat$datasets[[1]][["data"]]) == 0
+  ) {
     return(NULL)
   }
   dat[["datasets"]][[1]] |>
@@ -447,7 +511,12 @@ multiqc_parse_xyline_plot <- function(dat) {
         name <- nm_data[["name"]]
         d <- nm_data[["data"]] |>
           # handle NULLs in raw JSON
-          purrr::map(~ tibble::tibble(x = unlist(.x[1]) %||% NA_real_, y = unlist(.x[2]) %||% NA_real_)) |>
+          purrr::map(
+            ~ tibble::tibble(
+              x = unlist(.x[1]) %||% NA_real_,
+              y = unlist(.x[2]) %||% NA_real_
+            )
+          ) |>
           dplyr::bind_rows()
         tibble::tibble(name = name, x = d[["x"]], y = d[["y"]])
       }
@@ -465,7 +534,8 @@ multiqc_parse_xyline_plot <- function(dat) {
 multiqc_parse_xyline_plot_contig_cvg <- function(dat) {
   assertthat::assert_that(dat[["plot_type"]] == "xy_line")
   assertthat::assert_that(
-    dat[["config"]][["id"]] %in% c("dragen_coverage_per_contig", "dragen_coverage_per_non_main_contig")
+    dat[["config"]][["id"]] %in%
+      c("dragen_coverage_per_contig", "dragen_coverage_per_non_main_contig")
   )
   contig <- dat[["config"]][["categories"]]
   dat[["datasets"]][[1]] |>

@@ -45,11 +45,16 @@ Wf_umccrise <- R6::R6Class(
     #' @param SubjectID The SubjectID of the sample.
     #' @param SampleID_tumor The SampleID of the tumor sample.
     #' @param SampleID_normal The SampleID of the normal sample.
-    initialize = function(path = NULL, SubjectID = NULL,
-                          SampleID_tumor = NULL, SampleID_normal = NULL) {
+    initialize = function(
+      path = NULL,
+      SubjectID = NULL,
+      SampleID_tumor = NULL,
+      SampleID_normal = NULL
+    ) {
       wname <- "umccrise"
       pref <- glue("{SubjectID}__{SampleID_tumor}")
       crep <- "cancer_report_tables"
+      # fmt: skip
       regexes <- tibble::tribble(
         ~regex, ~fun,
         glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "read_hrdChord",
@@ -78,6 +83,7 @@ Wf_umccrise <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
+      # fmt: skip
       res <- tibble::tribble(
         ~var, ~value,
         "path", private$.path,
@@ -151,29 +157,55 @@ Wf_umccrise <- R6::R6Class(
         tidyr::pivot_wider(names_from = "variable", values_from = "value") |>
         dplyr::rename(MSI_mb_tmp = "MSI (indels/Mb)") |>
         dplyr::mutate(
-          purity_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Purity) |> as.numeric(),
-          ploidy_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Ploidy) |> as.numeric(),
-          hrd_chord = sub("CHORD: (.*); HRDetect: (.*)", "\\1", .data$HRD) |> as.numeric(),
+          purity_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Purity) |>
+            as.numeric(),
+          ploidy_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Ploidy) |>
+            as.numeric(),
+          hrd_chord = sub("CHORD: (.*); HRDetect: (.*)", "\\1", .data$HRD) |>
+            as.numeric(),
           hrd_hrdetect = sub("CHORD: (.*); HRDetect: (.*)", "\\2", .data$HRD),
           # handle HRDetect NA
-          hrd_hrdetect = ifelse(.data$hrd_hrdetect == "NA", NA_real_, as.numeric(.data$hrd_hrdetect)),
-          msi_mb_hmf = sub(".* \\((.*)\\)", "\\1", .data$MSI_mb_tmp) |> as.numeric(),
+          hrd_hrdetect = ifelse(
+            .data$hrd_hrdetect == "NA",
+            NA_real_,
+            as.numeric(.data$hrd_hrdetect)
+          ),
+          msi_mb_hmf = sub(".* \\((.*)\\)", "\\1", .data$MSI_mb_tmp) |>
+            as.numeric(),
           contamination_hmf = as.numeric(.data$Contamination),
           deleted_genes_hmf = as.numeric(.data$DeletedGenes),
           msi_hmf = sub("(.*) \\(.*\\)", "\\1", .data$MSI_mb_tmp),
           tmb_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TMB) |> as.numeric(),
           tml_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TML) |> as.numeric(),
-          hypermutated = ifelse("Hypermutated" %in% d$variable, .data[["Hypermutated"]], NA) |> as.character(),
-          bpi_enabled = ifelse("BPI Enabled" %in% d$variable, .data[["BPI Enabled"]], NA) |> as.character(),
+          hypermutated = ifelse(
+            "Hypermutated" %in% d$variable,
+            .data[["Hypermutated"]],
+            NA
+          ) |>
+            as.character(),
+          bpi_enabled = ifelse(
+            "BPI Enabled" %in% d$variable,
+            .data[["BPI Enabled"]],
+            NA
+          ) |>
+            as.character(),
         ) |>
         dplyr::select(
           qc_status_hmf = "QC_Status",
           sex_hmf = "Gender",
-          "purity_hmf", "ploidy_hmf", "msi_hmf", "msi_mb_hmf",
-          "hrd_chord", "hrd_hrdetect", "contamination_hmf",
-          "deleted_genes_hmf", "tmb_hmf", "tml_hmf",
+          "purity_hmf",
+          "ploidy_hmf",
+          "msi_hmf",
+          "msi_mb_hmf",
+          "hrd_chord",
+          "hrd_hrdetect",
+          "contamination_hmf",
+          "deleted_genes_hmf",
+          "tmb_hmf",
+          "tml_hmf",
           wgd_hmf = "WGD",
-          "hypermutated", "bpi_enabled"
+          "hypermutated",
+          "bpi_enabled"
         )
       tibble::tibble(name = glue("qcsum"), data = list(dat[]))
     },
@@ -181,18 +213,30 @@ Wf_umccrise <- R6::R6Class(
     #' @param x Path to file.
     read_conpair = function(x) {
       um_ref_samples <- c("Alice", "Bob", "Chen", "Elon", "Dakota")
-      um_ref_samples <- paste0(um_ref_samples, rep(c("_T", "_B", ""), each = length(um_ref_samples)))
+      um_ref_samples <- paste0(
+        um_ref_samples,
+        rep(c("_T", "_B", ""), each = length(um_ref_samples))
+      )
       cnames <- list(
         old = c(
-          "Sample", "concordance_concordance", "concordance_used_markers",
-          "concordance_total_markers", "concordance_marker_threshold",
-          "concordance_min_mapping_quality", "concordance_min_base_quality",
+          "Sample",
+          "concordance_concordance",
+          "concordance_used_markers",
+          "concordance_total_markers",
+          "concordance_marker_threshold",
+          "concordance_min_mapping_quality",
+          "concordance_min_base_quality",
           "contamination"
         ),
         new = c(
-          "sampleid", "contamination", "concordance", "markers_used",
-          "markers_total", "marker_threshold",
-          "mapq_min", "baseq_min"
+          "sampleid",
+          "contamination",
+          "concordance",
+          "markers_used",
+          "markers_total",
+          "marker_threshold",
+          "mapq_min",
+          "baseq_min"
         )
       )
       ctypes <- list(
@@ -202,7 +246,10 @@ Wf_umccrise <- R6::R6Class(
       if (!file.exists(x)) {
         return(empty_tbl(cnames$new, ctypes$new))
       }
-      d1 <- readr::read_tsv(x, col_types = readr::cols(.default = "d", Sample = "c"))
+      d1 <- readr::read_tsv(
+        x,
+        col_types = readr::cols(.default = "d", Sample = "c")
+      )
       assertthat::assert_that(all(colnames(d1) == cnames$old))
       dat <- d1 |>
         dplyr::filter(!.data$Sample %in% um_ref_samples) |>
@@ -245,16 +292,26 @@ Wf_umccrise <- R6::R6Class(
 #' )
 #' }
 #' @export
-Wf_umccrise_download_tidy_write <- function(path, SubjectID,
-                                            SampleID_tumor, SampleID_normal,
-                                            outdir, format = "rds", max_files = 1000,
-                                            dryrun = FALSE) {
+Wf_umccrise_download_tidy_write <- function(
+  path,
+  SubjectID,
+  SampleID_tumor,
+  SampleID_normal,
+  outdir,
+  format = "rds",
+  max_files = 1000,
+  dryrun = FALSE
+) {
   um <- Wf_umccrise$new(
-    path = path, SubjectID = SubjectID,
-    SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+    path = path,
+    SubjectID = SubjectID,
+    SampleID_tumor = SampleID_tumor,
+    SampleID_normal = SampleID_normal
   )
   d_dl <- um$download_files(
-    outdir = outdir, max_files = max_files, dryrun = dryrun
+    outdir = outdir,
+    max_files = max_files,
+    dryrun = dryrun
   )
   if (!dryrun) {
     d_tidy <- um$tidy_files(d_dl)

@@ -26,22 +26,32 @@
 #' }
 #'
 #' @export
-db_test <- function(path, prefix, outdir, prid, max_files, dbname = "nemo", dbuser = "orcabus") {
+db_test <- function(
+  path,
+  prefix,
+  outdir,
+  prid,
+  max_files,
+  dbname = "nemo",
+  dbuser = "orcabus"
+) {
   # TODO: add workflow type dispatcher
   obj <- Wf_dragen$new(path = path, prefix = prefix)
   d_dl <- obj$download_files(
-    outdir = outdir, max_files = max_files
+    outdir = outdir,
+    max_files = max_files
   )
   d_tidy <- obj$tidy_files(d_dl) |>
     # add ID column at the beginning
     dplyr::mutate(
       data = purrr::map(
         .data$data,
-        \(x) tibble::add_column(
-          x,
-          dracarys_id = as.character(prid),
-          .before = 1
-        )
+        \(x)
+          tibble::add_column(
+            x,
+            dracarys_id = as.character(prid),
+            .before = 1
+          )
       )
     )
   con <- DBI::dbConnect(
@@ -55,7 +65,11 @@ db_test <- function(path, prefix, outdir, prid, max_files, dbname = "nemo", dbus
     dplyr::mutate(
       write_tbl = list(
         DBI::dbWriteTable(
-          conn = con, name = .data$name, value = .data$data, append = T, overwrite = F
+          conn = con,
+          name = .data$name,
+          value = .data$data,
+          append = T,
+          overwrite = F
         )
       )
     ) |>
@@ -82,7 +96,8 @@ schema2django <- function(schema, out) {
   assertthat::assert_that(tibble::is_tibble(schema))
   assertthat::assert_that(
     all(
-      c("table_name", "column_name", "data_type", "primary_key") %in% colnames(schema)
+      c("table_name", "column_name", "data_type", "primary_key") %in%
+        colnames(schema)
     )
   )
 
@@ -90,20 +105,27 @@ schema2django <- function(schema, out) {
   models <- schema |>
     # dplyr::group_by(.data$table_name) |>
     dplyr::mutate(
-      fields = glue("    {.data$column_name} = models.{.data$data_type}({dplyr::if_else(.data$primary_key, 'primary_key=True', '')})")
+      fields = glue(
+        "    {.data$column_name} = models.{.data$data_type}({dplyr::if_else(.data$primary_key, 'primary_key=True', '')})"
+      )
     ) |>
     dplyr::mutate(code = paste(.data$fields, collapse = "\n")) |>
     dplyr::select("table_name", "code") |>
     dplyr::distinct() |>
-    dplyr::mutate(code = paste0(
-      glue("class {.data$table_name}(models.Model):"),
-      "\n",
-      .data$code,
-      collapse = "\n"
-    )) |>
+    dplyr::mutate(
+      code = paste0(
+        glue("class {.data$table_name}(models.Model):"),
+        "\n",
+        .data$code,
+        collapse = "\n"
+      )
+    ) |>
     dplyr::pull(code)
 
   # Write to file
-  model_code <- paste0("from django.db import models\n\n", paste0(models, collapse = "\n\n"))
+  model_code <- paste0(
+    "from django.db import models\n\n",
+    paste0(models, collapse = "\n\n")
+  )
   readr::write_lines(model_code, out)
 }

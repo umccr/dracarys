@@ -84,23 +84,38 @@ Wf_cttsov2 <- R6::R6Class(
       li <- "Logs_Intermediates"
       dc <- glue("{li}/DragenCaller/{pref}")
       path <- sub("/$", "", path) # remove potential trailing slash
-      self$dragenObj <- Wf_dragen$new(path = file.path(path, dc), prefix = glue("{dc}/{prefix}"))
+      self$dragenObj <- Wf_dragen$new(
+        path = file.path(path, dc),
+        prefix = glue("{dc}/{prefix}")
+      )
       # Results
       regexes <- tibble::tribble(
-        ~regex, ~fun,
-        glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"), "read_cnv",
-        glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-cnvvcfi",
-        glue("{res}/{pref}\\.exon_cov_report\\.tsv$"), "read_cvgrepe",
-        glue("{res}/{pref}\\.gene_cov_report\\.tsv$"), "read_cvgrepg",
-        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$"), "read_hardfilt",
-        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-hardfiltvcfi",
+        ~regex,
+        ~fun,
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"),
+        "read_cnv",
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$"),
+        "DOWNLOAD_ONLY-cnvvcfi",
+        glue("{res}/{pref}\\.exon_cov_report\\.tsv$"),
+        "read_cvgrepe",
+        glue("{res}/{pref}\\.gene_cov_report\\.tsv$"),
+        "read_cvgrepg",
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$"),
+        "read_hardfilt",
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$"),
+        "DOWNLOAD_ONLY-hardfiltvcfi",
         # glue("{res}/{pref}\\.microsat_output\\.json$"), "msi", # in DragenCaller
-        glue("{res}/{pref}\\.tmb.trace\\.tsv$"), "read_tmbt",
-        glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"), "read_cvo",
-        glue("{res}/{pref}_Fusions\\.csv$"), "read_fus",
-        glue("{res}/{pref}_MetricsOutput\\.tsv$"), "DOWNLOAD_ONLY-metricsoutput",
+        glue("{res}/{pref}\\.tmb.trace\\.tsv$"),
+        "read_tmbt",
+        glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"),
+        "read_cvo",
+        glue("{res}/{pref}_Fusions\\.csv$"),
+        "read_fus",
+        glue("{res}/{pref}_MetricsOutput\\.tsv$"),
+        "DOWNLOAD_ONLY-metricsoutput",
         # glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY-smallvannjson",
-        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"), "read_sar"
+        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"),
+        "read_sar"
       )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$prefix <- prefix
@@ -109,11 +124,16 @@ Wf_cttsov2 <- R6::R6Class(
     #' @param ... (ignored).
     print = function(...) {
       res <- tibble::tribble(
-        ~var, ~value,
-        "path", private$.path,
-        "wname", private$.wname,
-        "filesystem", private$.filesystem,
-        "prefix", self$prefix
+        ~var,
+        ~value,
+        "path",
+        private$.path,
+        "wname",
+        private$.wname,
+        "filesystem",
+        private$.filesystem,
+        "prefix",
+        self$prefix
       )
       print(res)
       invisible(self)
@@ -145,9 +165,14 @@ Wf_cttsov2 <- R6::R6Class(
     #' @param x Path to file.
     read_cvgrepe = function(x) {
       ctypes <- list(
-        chr = "c", start = "d", end = "d", gene = "c",
-        mean_coverage = "d", median_coverage = "d",
-        min_coverage = "d", max_coverage = "d"
+        chr = "c",
+        start = "d",
+        end = "d",
+        gene = "c",
+        mean_coverage = "d",
+        median_coverage = "d",
+        min_coverage = "d",
+        max_coverage = "d"
       )
       dat <- x |>
         readr::read_tsv(col_types = ctypes)
@@ -157,8 +182,13 @@ Wf_cttsov2 <- R6::R6Class(
     #' @param x Path to file.
     read_cvgrepg = function(x) {
       ctypes <- list(
-        chr = "c", start = "d", end = "d", gene = "c",
-        mean_coverage = "d", min_coverage = "d", max_coverage = "d"
+        chr = "c",
+        start = "d",
+        end = "d",
+        gene = "c",
+        mean_coverage = "d",
+        min_coverage = "d",
+        max_coverage = "d"
       )
       dat <- x |>
         readr::read_tsv(col_types = ctypes)
@@ -228,17 +258,25 @@ Wf_cttsov2 <- R6::R6Class(
 #' )
 #' }
 #' @export
-dtw_Wf_cttsov2 <- function(path, prefix, outdir,
-                           outdir_tidy = file.path(outdir, "dracarys_tidy"),
-                           format = "rds",
-                           max_files = 1000,
-                           dryrun = FALSE) {
+dtw_Wf_cttsov2 <- function(
+  path,
+  prefix,
+  outdir,
+  outdir_tidy = file.path(outdir, "dracarys_tidy"),
+  format = "rds",
+  max_files = 1000,
+  dryrun = FALSE
+) {
   obj <- Wf_cttsov2$new(path = path, prefix = prefix)
   d_dl1 <- obj$download_files(
-    outdir = outdir, max_files = max_files, dryrun = dryrun
+    outdir = outdir,
+    max_files = max_files,
+    dryrun = dryrun
   )
   d_dl2 <- obj$dragenObj$download_files(
-    outdir = outdir, max_files = max_files, dryrun = dryrun
+    outdir = outdir,
+    max_files = max_files,
+    dryrun = dryrun
   )
   if (!dryrun) {
     d_tidy1 <- obj$tidy_files(d_dl1)

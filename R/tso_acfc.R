@@ -28,7 +28,12 @@ tso_acfc_read <- function(x) {
   }
   j <- read_jsongz_rjsonio(x, simplify = FALSE)
   secs <- list(
-    s1 = c("MappingAligningPerRg", "MappingAligningSummary", "TrimmerStatistics", "CoverageSummary"),
+    s1 = c(
+      "MappingAligningPerRg",
+      "MappingAligningSummary",
+      "TrimmerStatistics",
+      "CoverageSummary"
+    ),
     s2 = c("UmiStatistics", "SvSummary", "RunTime")
   )
   s1_new <- c(
@@ -51,11 +56,19 @@ tso_acfc_read <- function(x) {
     if (sec %in% names(d)) {
       new_nm <- s1_new[sec]
       d[[new_nm]] <- d[[sec]] |>
-        tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
+        tidyr::pivot_longer(
+          cols = c("value", "percent"),
+          names_to = "name1",
+          values_to = "value1"
+        ) |>
         dplyr::filter(!is.na(.data$value1)) |>
         dplyr::mutate(
           value = as.numeric(.data$value1),
-          name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
+          name = dplyr::if_else(
+            .data$name1 == "percent",
+            paste0(.data$name, " pct"),
+            .data$name
+          )
         ) |>
         dplyr::select("name", "value") |>
         tidyr::pivot_wider(names_from = "name", values_from = "value") |>
@@ -69,11 +82,19 @@ tso_acfc_read <- function(x) {
     # handle non-hist data
     d[["acfc_umistats"]] <- d[["UmiStatistics"]] |>
       dplyr::filter(!grepl("Hist", .data$name)) |>
-      tidyr::pivot_longer(cols = c("value", "percent"), names_to = "name1", values_to = "value1") |>
+      tidyr::pivot_longer(
+        cols = c("value", "percent"),
+        names_to = "name1",
+        values_to = "value1"
+      ) |>
       dplyr::filter(!is.na(.data$value1)) |>
       dplyr::mutate(
         value = as.numeric(.data$value1),
-        name = dplyr::if_else(.data$name1 == "percent", paste0(.data$name, " pct"), .data$name)
+        name = dplyr::if_else(
+          .data$name1 == "percent",
+          paste0(.data$name, " pct"),
+          .data$name
+        )
       ) |>
       dplyr::select("name", "value") |>
       tidyr::pivot_wider(names_from = "name", values_from = "value") |>
@@ -174,7 +195,9 @@ tso_acfc_plot <- function(d, max_num = 15) {
       labels = scales::label_number(scale_cut = scales::cut_short_scale())
     ) +
     ggplot2::theme_bw() +
-    ggplot2::labs(title = "Number of positions with 0/1/2/3... UMI sequences.") +
+    ggplot2::labs(
+      title = "Number of positions with 0/1/2/3... UMI sequences."
+    ) +
     ggplot2::xlab("Positions") +
     ggplot2::ylab("UMI Sequences")
   list(

@@ -20,7 +20,10 @@ bcftools_installed <- function() {
 #' @export
 bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
   assertthat::assert_that(is.logical(only_pass), length(only_pass) == 1)
-  assertthat::assert_that(bcftools_installed(), msg = "bcftools needs to be on the PATH.")
+  assertthat::assert_that(
+    bcftools_installed(),
+    msg = "bcftools needs to be on the PATH."
+  )
   if (is_url(vcf)) {
     vcf <- glue("'{vcf}'")
   }
@@ -35,7 +38,8 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
       msg <- paste(c(main, "INFO", "FORMAT"), collapse = ", ")
       stop(
         "What on earth. Check that your VCF has the following VCF columns, followed by sample columns:\n",
-        msg, "\nCall me if everything seems fine on 1800-OMG-LOL."
+        msg,
+        "\nCall me if everything seems fine on 1800-OMG-LOL."
       )
     }
     samples <- x[-(1:main_len)]
@@ -58,7 +62,12 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
       tibble::as_tibble_col(column_name = "x") |>
       dplyr::mutate(x = sub(pat, "", .data$x)) |>
       # Description is likely to have a comma
-      tidyr::separate_wider_delim("x", delim = ",", names = c("ID", "Number", "Type", "Description"), too_many = "merge") |>
+      tidyr::separate_wider_delim(
+        "x",
+        delim = ",",
+        names = c("ID", "Number", "Type", "Description"),
+        too_many = "merge"
+      ) |>
       dplyr::mutate(
         ID = sub("ID=", "", .data$ID),
         Number = sub("Number=", "", .data$Number),
@@ -87,7 +96,12 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
   )
   # handle empty VCF - fread warns about size 0
   suppressWarnings({
-    first_row <- data.table::fread(cmd = cmd_body, sep = "\t", na.strings = ".", nrows = 1)
+    first_row <- data.table::fread(
+      cmd = cmd_body,
+      sep = "\t",
+      na.strings = ".",
+      nrows = 1
+    )
   })
   if (nrow(first_row) == 0) {
     return(empty_tbl(cnames = cnames))
@@ -125,7 +139,10 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
 #' @export
 bcftools_parse_vcf_regions <- function(vcf, r, only_pass = TRUE) {
   assertthat::assert_that(is.character(r))
-  assertthat::assert_that(bcftools_installed(), msg = "bcftools needs to be on the PATH.")
+  assertthat::assert_that(
+    bcftools_installed(),
+    msg = "bcftools needs to be on the PATH."
+  )
   if (is_url(vcf)) {
     vcf <- glue("'{vcf}'")
   }

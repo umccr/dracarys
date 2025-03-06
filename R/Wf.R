@@ -108,6 +108,7 @@ Wf <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
+      # fmt: skip
       res <- tibble::tribble(
         ~var, ~value,
         "path", private$.path,
@@ -133,16 +134,25 @@ Wf <- R6::R6Class(
     #' @param path Path with raw results.
     #' @param max_files Max number of files to list.
     #' @param ... Passed on to `s3_list_files_filter_relevant`.
-    list_files_filter_relevant = function(path = private$.path, max_files = 1000, ...) {
+    list_files_filter_relevant = function(
+      path = private$.path,
+      max_files = 1000,
+      ...
+    ) {
       regexes <- private$.regexes
       assertthat::assert_that(!is.null(regexes))
       if (private$.filesystem == "s3") {
         d <- s3_list_files_filter_relevant(
-          s3dir = path, regexes = regexes, max_objects = max_files, ...
+          s3dir = path,
+          regexes = regexes,
+          max_objects = max_files,
+          ...
         )
       } else {
         d <- local_list_files_filter_relevant(
-          localdir = path, regexes = regexes, max_files = max_files
+          localdir = path,
+          regexes = regexes,
+          max_files = max_files
         )
       }
       d
@@ -162,20 +172,31 @@ Wf <- R6::R6Class(
     #' @param max_files Max number of files to list.
     #' @param dryrun If TRUE, just list the files that will be downloaded (don't
     #' download them).
-    download_files = function(path = private$.path, outdir, max_files = 1000, dryrun = FALSE) {
+    download_files = function(
+      path = private$.path,
+      outdir,
+      max_files = 1000,
+      dryrun = FALSE
+    ) {
       regexes <- private$.regexes
       assertthat::assert_that(!is.null(regexes))
       if (private$.filesystem == "s3") {
         d <- dr_s3_download(
-          s3dir = path, outdir = outdir, regexes = regexes,
-          max_objects = max_files, dryrun = dryrun
+          s3dir = path,
+          outdir = outdir,
+          regexes = regexes,
+          max_objects = max_files,
+          dryrun = dryrun
         )
         if (!dryrun) {
           private$.filesystem <- "local"
           private$.path <- outdir
         }
       } else {
-        d <- self$list_files_filter_relevant(regexes = regexes, max_files = max_files)
+        d <- self$list_files_filter_relevant(
+          regexes = regexes,
+          max_files = max_files
+        )
       }
       return(d)
     },
@@ -192,7 +213,13 @@ Wf <- R6::R6Class(
     #' @param prefix Prefix of output files.
     #' @param format Format of output files.
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(x, outdir = NULL, prefix = NULL, format = "tsv", drid = NULL) {
+    write = function(
+      x,
+      outdir = NULL,
+      prefix = NULL,
+      format = "tsv",
+      drid = NULL
+    ) {
       assertthat::assert_that(!is.null(prefix))
       assertthat::assert_that(all(c("name", "data") %in% colnames(x)))
       if (!is.null(outdir)) {
@@ -208,7 +235,12 @@ Wf <- R6::R6Class(
           ),
           out = ifelse(
             !grepl("DOWNLOAD_ONLY", .data$name),
-            list(write_dracarys(obj = .data$data, prefix = .data$p, out_format = format, drid = drid)),
+            list(write_dracarys(
+              obj = .data$data,
+              prefix = .data$p,
+              out_format = format,
+              drid = drid
+            )),
             list(.data$data)
           )
         ) |>

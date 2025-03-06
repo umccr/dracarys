@@ -44,12 +44,16 @@ tidy_files <- function(x, envir = parent.frame()) {
         !grepl("DOWNLOAD_ONLY", .data$type),
         list(
           dr_func_eval(
-            f = .data$type, v = .data$type, envir = envir
+            f = .data$type,
+            v = .data$type,
+            envir = envir
           )(.data$localpath)
         ),
         list(
           dr_func_eval(
-            f = "DOWNLOAD_ONLY", v = "DOWNLOAD_ONLY", envir = envir
+            f = "DOWNLOAD_ONLY",
+            v = "DOWNLOAD_ONLY",
+            envir = envir
           )(.data$localpath, extract_download_suffix(.data$type))
         )
       )
@@ -97,9 +101,16 @@ tidy_files <- function(x, envir = parent.frame()) {
 #' umccr_tidy(in_dir = in_dir, out_dir = out_dir, prefix = prefix, dryrun = F)
 #' }
 #' @export
-umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
-                       local_dir = NULL, out_format = "tsv",
-                       dryrun = FALSE, pattern = NULL, regexes = DR_FILE_REGEX) {
+umccr_tidy <- function(
+  in_dir = NULL,
+  out_dir = NULL,
+  prefix = NULL,
+  local_dir = NULL,
+  out_format = "tsv",
+  dryrun = FALSE,
+  pattern = NULL,
+  regexes = DR_FILE_REGEX
+) {
   assertthat::assert_that(!is.null(in_dir), !is.null(out_dir), !is.null(prefix))
   dr_output_format_valid(out_format)
   e <- emojifont::emoji
@@ -107,11 +118,14 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
   if (grepl("^s3://", in_dir)) {
     # in_dir is s3
     cloud_type <- "s3"
-    local_dir <- local_dir %||% file.path(out_dir, glue("dracarys_{cloud_type}_sync"))
+    local_dir <- local_dir %||%
+      file.path(out_dir, glue("dracarys_{cloud_type}_sync"))
     pat <- pattern %||% ".*" # keep all recognisable files
     dr_s3_download(
-      s3dir = in_dir, outdir = local_dir,
-      pattern = pat, dryrun = dryrun
+      s3dir = in_dir,
+      outdir = local_dir,
+      pattern = pat,
+      dryrun = dryrun
     )
     # Now use the downloaded results
     in_dir <- local_dir
@@ -125,14 +139,19 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
     }
   }
   if (dryrun) {
-    cli::cli_inform("{e('camel')} You have specified 'dryrun' - just listing files!")
+    cli::cli_inform(
+      "{e('camel')} You have specified 'dryrun' - just listing files!"
+    )
     return(NULL)
   } else {
     d <- fs::dir_ls(in_dir, recurse = TRUE) |>
       tibble::as_tibble_col(column_name = "path") |>
       dplyr::mutate(
         bname = basename(.data$path),
-        type = purrr::map_chr(.data$bname, \(x) match_regex(x, regexes = regexes))
+        type = purrr::map_chr(
+          .data$bname,
+          \(x) match_regex(x, regexes = regexes)
+        )
       ) |>
       dplyr::filter(!is.na(.data$type))
 
@@ -148,12 +167,18 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
     }
     dups <- dup_ftypes(d)
     if (dups$has_dup_ftypes) {
-      cli::cli_alert_danger("Aborting - the input dir {.file {in_dir}} contains duplicated file types. See JSON below:")
+      cli::cli_alert_danger(
+        "Aborting - the input dir {.file {in_dir}} contains duplicated file types. See JSON below:"
+      )
       print(dups$msg_json)
-      cli::cli_abort("Aborting - the input dir {.file {in_dir}} contains duplicated file types. See JSON above!")
+      cli::cli_abort(
+        "Aborting - the input dir {.file {in_dir}} contains duplicated file types. See JSON above!"
+      )
     }
   }
-  cli::cli_alert_info("{date_log()} {e('dragon')} {.emph {prefix}}: Start tidying UMCCR dir: {.file {in_dir}}")
+  cli::cli_alert_info(
+    "{date_log()} {e('dragon')} {.emph {prefix}}: Start tidying UMCCR dir: {.file {in_dir}}"
+  )
   res <- d |>
     dplyr::select("type", "path", "bname") |>
     dplyr::filter(!.data$type %in% FILES_DOWNLOAD_BUT_IGNORE) |>
@@ -166,20 +191,32 @@ umccr_tidy <- function(in_dir = NULL, out_dir = NULL, prefix = NULL,
         .data$type == "MultiqcFile",
         list(.data$obj$read(plot = TRUE, plot_names = "everything")),
         ifelse(
-          .data$type %in% c(
-            "TsoMergedSmallVariantsVcfFile",
-            "TsoMergedSmallVariantsGenomeVcfFile",
-            "TsoCopyNumberVariantsVcfFile"
-          ),
+          .data$type %in%
+            c(
+              "TsoMergedSmallVariantsVcfFile",
+              "TsoMergedSmallVariantsGenomeVcfFile",
+              "TsoCopyNumberVariantsVcfFile"
+            ),
           list(.data$obj$read(only_pass = FALSE)),
           list(.data$obj$read())
         )
       ),
-      obj_parsed2 = list(.data$obj$write(.data$obj_parsed, out_dir = out_dir, prefix = glue("{prefix}_{.data$type}"), out_format = out_format)),
-      plot = ifelse(.data$has_plot, list(.data$obj$plot(.data$obj_parsed)), list(NULL))
+      obj_parsed2 = list(.data$obj$write(
+        .data$obj_parsed,
+        out_dir = out_dir,
+        prefix = glue("{prefix}_{.data$type}"),
+        out_format = out_format
+      )),
+      plot = ifelse(
+        .data$has_plot,
+        list(.data$obj$plot(.data$obj_parsed)),
+        list(NULL)
+      )
     ) |>
     dplyr::select("type", "path", "obj", dat = "obj_parsed", "plot")
-  cli::cli_alert_success("{date_log()} {e('tada')} {.emph {prefix}}: UMCCR tidy results at: {.file {out_dir}}")
+  cli::cli_alert_success(
+    "{date_log()} {e('tada')} {.emph {prefix}}: UMCCR tidy results at: {.file {out_dir}}"
+  )
   return(invisible(res))
 }
 

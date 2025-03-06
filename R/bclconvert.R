@@ -72,12 +72,23 @@ BclconvertReports <- R6::R6Class(
     read_adaptercyclemetrics = function(x) {
       cnames <- list(
         old = c(
-          "Lane", "Sample_ID", "index", "index2", "ReadNumber", "Cycle",
-          "NumClustersWithAdapterAtCycle", "% At Cycle"
+          "Lane",
+          "Sample_ID",
+          "index",
+          "index2",
+          "ReadNumber",
+          "Cycle",
+          "NumClustersWithAdapterAtCycle",
+          "% At Cycle"
         ),
         new = c(
-          "lane", "sampleid", "indexes", "read", "cycle",
-          "cluster_n", "cluster_pct"
+          "lane",
+          "sampleid",
+          "indexes",
+          "read",
+          "cycle",
+          "cluster_n",
+          "cluster_pct"
         )
       )
       ctypes <- list(
@@ -110,12 +121,23 @@ BclconvertReports <- R6::R6Class(
     read_adaptermetrics = function(x) {
       cnames <- list(
         old = c(
-          "Lane", "Sample_ID", "index", "index2", "ReadNumber",
-          "AdapterBases", "SampleBases", "% Adapter Bases"
+          "Lane",
+          "Sample_ID",
+          "index",
+          "index2",
+          "ReadNumber",
+          "AdapterBases",
+          "SampleBases",
+          "% Adapter Bases"
         ),
         new = c(
-          "lane", "sampleid", "indexes", "readnum", "adapter_bases",
-          "sample_bases", "adapter_bases_pct"
+          "lane",
+          "sampleid",
+          "indexes",
+          "readnum",
+          "adapter_bases",
+          "sample_bases",
+          "adapter_bases_pct"
         )
       )
       ctypes <- list(
@@ -128,9 +150,13 @@ BclconvertReports <- R6::R6Class(
       d <- readr::read_csv(x, col_types = ctypes$old)
       assertthat::assert_that(all(colnames(d) == cnames$old))
       d |>
-        dplyr::mutate(indexes = ifelse(
-          is.na(.data$index), NA_character_, paste0(.data$index, "-", .data$index2)
-        )) |>
+        dplyr::mutate(
+          indexes = ifelse(
+            is.na(.data$index),
+            NA_character_,
+            paste0(.data$index, "-", .data$index2)
+          )
+        ) |>
         dplyr::select(-c("index", "index2")) |>
         dplyr::relocate("indexes", .after = "Sample_ID") |>
         rlang::set_names(cnames$new)
@@ -154,16 +180,30 @@ BclconvertReports <- R6::R6Class(
     read_demultiplexstats = function(x) {
       cnames <- list(
         old = c(
-          "Lane", "SampleID", "Index", "# Reads", "# Perfect Index Reads",
-          "# One Mismatch Index Reads", "# Two Mismatch Index Reads",
-          "% Reads", "% Perfect Index Reads", "% One Mismatch Index Reads",
+          "Lane",
+          "SampleID",
+          "Index",
+          "# Reads",
+          "# Perfect Index Reads",
+          "# One Mismatch Index Reads",
+          "# Two Mismatch Index Reads",
+          "% Reads",
+          "% Perfect Index Reads",
+          "% One Mismatch Index Reads",
           "% Two Mismatch Index Reads"
         ),
         new = c(
-          "lane", "sampleid", "indexes", "reads_n", "perfect_idxreads_n",
-          "one_mismatch_idxreads_n", "two_mismatch_idxreads_n",
-          "reads_pct", "perfect_idxreads_pct",
-          "one_mismatch_idxreads_pct", "two_mismatch_idxreads_pct"
+          "lane",
+          "sampleid",
+          "indexes",
+          "reads_n",
+          "perfect_idxreads_n",
+          "one_mismatch_idxreads_n",
+          "two_mismatch_idxreads_n",
+          "reads_pct",
+          "perfect_idxreads_pct",
+          "one_mismatch_idxreads_pct",
+          "two_mismatch_idxreads_pct"
         )
       )
       ctypes <- list(
@@ -223,12 +263,27 @@ BclconvertReports <- R6::R6Class(
     read_qualitymetrics = function(x) {
       cnames <- list(
         old = c(
-          "Lane", "SampleID", "index", "index2", "ReadNumber", "Yield",
-          "YieldQ30", "QualityScoreSum", "Mean Quality Score (PF)", "% Q30"
+          "Lane",
+          "SampleID",
+          "index",
+          "index2",
+          "ReadNumber",
+          "Yield",
+          "YieldQ30",
+          "QualityScoreSum",
+          "Mean Quality Score (PF)",
+          "% Q30"
         ),
         new = c(
-          "lane", "sampleid", "indexes", "readnum", "yield",
-          "yieldq30", "qscore_sum", "qscore_mean_pf", "q30_pct"
+          "lane",
+          "sampleid",
+          "indexes",
+          "readnum",
+          "yield",
+          "yieldq30",
+          "qscore_sum",
+          "qscore_mean_pf",
+          "q30_pct"
         )
       )
       ctypes <- list(
@@ -247,7 +302,6 @@ BclconvertReports <- R6::R6Class(
         rlang::set_names(cnames$new)
     },
 
-
     #' @description Read Quality_Tile_Metrics.csv file.
     #'
     #' - lane: lane number.
@@ -265,12 +319,29 @@ BclconvertReports <- R6::R6Class(
     read_qualitytilemetrics = function(x) {
       cnames <- list(
         old = c(
-          "Lane", "SampleID", "index", "index2", "ReadNumber", "Tile", "Yield",
-          "YieldQ30", "QualityScoreSum", "Mean Quality Score (PF)", "% Q30"
+          "Lane",
+          "SampleID",
+          "index",
+          "index2",
+          "ReadNumber",
+          "Tile",
+          "Yield",
+          "YieldQ30",
+          "QualityScoreSum",
+          "Mean Quality Score (PF)",
+          "% Q30"
         ),
         new = c(
-          "lane", "sampleid", "indexes", "readnum", "tile", "yield",
-          "yieldq30", "qscore_sum", "qscore_mean_pf", "q30_pct"
+          "lane",
+          "sampleid",
+          "indexes",
+          "readnum",
+          "tile",
+          "yield",
+          "yieldq30",
+          "qscore_sum",
+          "qscore_mean_pf",
+          "q30_pct"
         )
       )
       ctypes <- list(
@@ -302,12 +373,21 @@ BclconvertReports <- R6::R6Class(
     read_indexhoppingcounts = function(x) {
       cnames <- list(
         old = c(
-          "Lane", "SampleID", "index", "index2", "# Reads",
-          "% of Hopped Reads", "% of All Reads"
+          "Lane",
+          "SampleID",
+          "index",
+          "index2",
+          "# Reads",
+          "% of Hopped Reads",
+          "% of All Reads"
         ),
         new = c(
-          "lane", "sampleid", "indexes",
-          "reads_n", "reads_hopped_pct", "reads_pct"
+          "lane",
+          "sampleid",
+          "indexes",
+          "reads_n",
+          "reads_hopped_pct",
+          "reads_pct"
         )
       )
       ctypes <- list(
@@ -336,7 +416,14 @@ BclconvertReports <- R6::R6Class(
     #'   Path to Top_Unknown_Barcodes.csv file.
     read_topunknownbarcodes = function(x) {
       cnames <- list(
-        old = c("Lane", "index", "index2", "# Reads", "% of Unknown Barcodes", "% of All Reads"),
+        old = c(
+          "Lane",
+          "index",
+          "index2",
+          "# Reads",
+          "% of Unknown Barcodes",
+          "% of All Reads"
+        ),
         new = c("lane", "indexes", "reads_n", "unknownbcodes_pct", "reads_pct")
       )
       ctypes <- list(
@@ -380,7 +467,11 @@ BclconvertReports <- R6::R6Class(
       d <- readr::read_csv(x, col_types = ctypes$old)
       assertthat::assert_that(all(colnames(d) == cnames$old))
       d |>
-        tidyr::pivot_longer(c("Read1File", "Read2File"), names_to = "readnum", values_to = "filepath") |>
+        tidyr::pivot_longer(
+          c("Read1File", "Read2File"),
+          names_to = "readnum",
+          values_to = "filepath"
+        ) |>
         dplyr::mutate(readnum = sub("Read(.)File", "\\1", .data$readnum)) |>
         rlang::set_names(cnames$new)
     },
@@ -394,14 +485,38 @@ BclconvertReports <- R6::R6Class(
       # now return all as list elements
       p <- self$path
       list(
-        adapter_cycle_metrics = self$read_adaptercyclemetrics(file.path(p, "Adapter_Cycle_Metrics.csv")),
-        adapter_metrics = self$read_adaptermetrics(file.path(p, "Adapter_Metrics.csv")),
-        demultiplex_stats = self$read_demultiplexstats(file.path(p, "Demultiplex_Stats.csv")),
-        demultiplex_tile_stats = self$read_demultiplextilestats(file.path(p, "Demultiplex_Tile_Stats.csv")),
-        quality_metrics = self$read_qualitymetrics(file.path(p, "Quality_Metrics.csv")),
-        quality_tile_metrics = self$read_qualitytilemetrics(file.path(p, "Quality_Tile_Metrics.csv")),
-        index_hopping_counts = self$read_indexhoppingcounts(file.path(p, "Index_Hopping_Counts.csv")),
-        top_unknown_barcodes = self$read_topunknownbarcodes(file.path(p, "Top_Unknown_Barcodes.csv")),
+        adapter_cycle_metrics = self$read_adaptercyclemetrics(file.path(
+          p,
+          "Adapter_Cycle_Metrics.csv"
+        )),
+        adapter_metrics = self$read_adaptermetrics(file.path(
+          p,
+          "Adapter_Metrics.csv"
+        )),
+        demultiplex_stats = self$read_demultiplexstats(file.path(
+          p,
+          "Demultiplex_Stats.csv"
+        )),
+        demultiplex_tile_stats = self$read_demultiplextilestats(file.path(
+          p,
+          "Demultiplex_Tile_Stats.csv"
+        )),
+        quality_metrics = self$read_qualitymetrics(file.path(
+          p,
+          "Quality_Metrics.csv"
+        )),
+        quality_tile_metrics = self$read_qualitytilemetrics(file.path(
+          p,
+          "Quality_Tile_Metrics.csv"
+        )),
+        index_hopping_counts = self$read_indexhoppingcounts(file.path(
+          p,
+          "Index_Hopping_Counts.csv"
+        )),
+        top_unknown_barcodes = self$read_topunknownbarcodes(file.path(
+          p,
+          "Top_Unknown_Barcodes.csv"
+        )),
         fastq_list = self$read_fastqlist(file.path(p, "fastq_list.csv"))
       )
     },
@@ -414,7 +529,13 @@ BclconvertReports <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+    write = function(
+      d,
+      out_dir = NULL,
+      prefix,
+      out_format = "tsv",
+      drid = NULL
+    ) {
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
@@ -424,7 +545,12 @@ BclconvertReports <- R6::R6Class(
         dplyr::mutate(
           section_low = tolower(.data$section),
           p = glue("{prefix}_{.data$section_low}"),
-          out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
+          out = list(write_dracarys(
+            obj = .data$value,
+            prefix = .data$p,
+            out_format = out_format,
+            drid = drid
+          ))
         ) |>
         dplyr::ungroup() |>
         dplyr::select("section", "value") |>
@@ -499,12 +625,25 @@ BclconvertReports375 <- R6::R6Class(
     read_adaptermetrics = function(x) {
       cnames <- list(
         old = c(
-          "Lane", "Sample_ID", "index", "index2", "R1_AdapterBases",
-          "R1_SampleBases", "R2_AdapterBases", "R2_SampleBases", "# Reads"
+          "Lane",
+          "Sample_ID",
+          "index",
+          "index2",
+          "R1_AdapterBases",
+          "R1_SampleBases",
+          "R2_AdapterBases",
+          "R2_SampleBases",
+          "# Reads"
         ),
         new = c(
-          "lane", "sampleid", "indexes", "adapter_bases_r1", "sample_bases_r1",
-          "adapter_bases_r2", "sample_bases_r2", "reads_n"
+          "lane",
+          "sampleid",
+          "indexes",
+          "adapter_bases_r1",
+          "sample_bases_r1",
+          "adapter_bases_r2",
+          "sample_bases_r2",
+          "reads_n"
         )
       )
       ctypes <- list(
@@ -517,9 +656,13 @@ BclconvertReports375 <- R6::R6Class(
       d <- readr::read_csv(x, col_types = ctypes$old)
       assertthat::assert_that(all(colnames(d) == cnames$old))
       d |>
-        dplyr::mutate(indexes = ifelse(
-          is.na(.data$index), NA_character_, paste0(.data$index, "-", .data$index2)
-        )) |>
+        dplyr::mutate(
+          indexes = ifelse(
+            is.na(.data$index),
+            NA_character_,
+            paste0(.data$index, "-", .data$index2)
+          )
+        ) |>
         dplyr::select(-c("index", "index2")) |>
         dplyr::relocate("indexes", .after = "Sample_ID") |>
         rlang::set_names(cnames$new)
@@ -532,13 +675,24 @@ BclconvertReports375 <- R6::R6Class(
     read_demultiplexstats = function(x) {
       cnames <- list(
         old = c(
-          "Lane", "SampleID", "Index", "# Reads", "# Perfect Index Reads",
-          "# One Mismatch Index Reads", "# of >= Q30 Bases (PF)",
+          "Lane",
+          "SampleID",
+          "Index",
+          "# Reads",
+          "# Perfect Index Reads",
+          "# One Mismatch Index Reads",
+          "# of >= Q30 Bases (PF)",
           "Mean Quality Score (PF)"
         ),
         new = c(
-          "lane", "sampleid", "indexes", "reads_n", "perfect_idxreads_n",
-          "one_mismatch_idxreads_n", "q30_bases_n", "qscore_mean_pf"
+          "lane",
+          "sampleid",
+          "indexes",
+          "reads_n",
+          "perfect_idxreads_n",
+          "one_mismatch_idxreads_n",
+          "q30_bases_n",
+          "qscore_mean_pf"
         )
       )
       ctypes <- list(
@@ -629,7 +783,11 @@ BclconvertReports375 <- R6::R6Class(
       d <- readr::read_csv(x, col_types = ctypes$old)
       assertthat::assert_that(all(colnames(d) == cnames$old))
       d |>
-        tidyr::pivot_longer(c("Read1File", "Read2File"), names_to = "readnum", values_to = "filepath") |>
+        tidyr::pivot_longer(
+          c("Read1File", "Read2File"),
+          names_to = "readnum",
+          values_to = "filepath"
+        ) |>
         dplyr::mutate(readnum = sub("Read(.)File", "\\1", .data$readnum)) |>
         rlang::set_names(cnames$new)
     },
@@ -643,10 +801,22 @@ BclconvertReports375 <- R6::R6Class(
       # now return all as list elements
       p <- self$path
       list(
-        adapter_metrics = self$read_adaptermetrics(file.path(p, "Adapter_Metrics.csv")),
-        demultiplex_stats = self$read_demultiplexstats(file.path(p, "Demultiplex_Stats.csv")),
-        index_hopping_counts = self$read_indexhoppingcounts(file.path(p, "Index_Hopping_Counts.csv")),
-        top_unknown_barcodes = self$read_topunknownbarcodes(file.path(p, "Top_Unknown_Barcodes.csv")),
+        adapter_metrics = self$read_adaptermetrics(file.path(
+          p,
+          "Adapter_Metrics.csv"
+        )),
+        demultiplex_stats = self$read_demultiplexstats(file.path(
+          p,
+          "Demultiplex_Stats.csv"
+        )),
+        index_hopping_counts = self$read_indexhoppingcounts(file.path(
+          p,
+          "Index_Hopping_Counts.csv"
+        )),
+        top_unknown_barcodes = self$read_topunknownbarcodes(file.path(
+          p,
+          "Top_Unknown_Barcodes.csv"
+        )),
         fastq_list = self$read_fastqlist(file.path(p, "fastq_list.csv"))
       )
     },
@@ -659,7 +829,13 @@ BclconvertReports375 <- R6::R6Class(
     #' @param out_dir Output directory.
     #' @param out_format Format of output file(s).
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
-    write = function(d, out_dir = NULL, prefix, out_format = "tsv", drid = NULL) {
+    write = function(
+      d,
+      out_dir = NULL,
+      prefix,
+      out_format = "tsv",
+      drid = NULL
+    ) {
       if (!is.null(out_dir)) {
         prefix <- file.path(out_dir, prefix)
       }
@@ -669,7 +845,12 @@ BclconvertReports375 <- R6::R6Class(
         dplyr::mutate(
           section_low = tolower(.data$section),
           p = glue("{prefix}_{.data$section_low}"),
-          out = list(write_dracarys(obj = .data$value, prefix = .data$p, out_format = out_format, drid = drid))
+          out = list(write_dracarys(
+            obj = .data$value,
+            prefix = .data$p,
+            out_format = out_format,
+            drid = drid
+          ))
         ) |>
         dplyr::ungroup() |>
         dplyr::select("section", "value") |>
