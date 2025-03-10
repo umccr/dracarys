@@ -28,7 +28,7 @@ path <- file.path(
   "analysis/cttsov2/20250117c5b9baa8"
 )
 prefix <- "L2500039" # tsov2
-prefix <- "L2401621"
+prefix <- "L2401621" # alignqc
 outdir <- path
 max_files <- 1000
 prid <- "abcd1234"
