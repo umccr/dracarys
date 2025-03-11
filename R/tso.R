@@ -88,7 +88,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @param x Path to file.
     read_tmbt = function(x) {
       dat <- tso_tmbt_read(x)
-      tibble::tibble(name = "tmbtrace", data = list(dat))
+      tibble::tibble(name = "tso_tmbtrace", data = list(dat))
     },
     #' @description Read `AlignCollapseFusionCaller_metrics.json.gz` file.
     #' @param x Path to file.
@@ -99,25 +99,25 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @param x Path to file.
     read_msv = function(x) {
       dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
-      tibble::tibble(name = "mergedsmallv", data = list(dat))
+      tibble::tibble(name = "tso_mergedsmallv", data = list(dat))
     },
     #' @description Read `MergedSmallVariants.genome.vcf.gz` file.
     #' @param x Path to file.
     read_msvg = function(x) {
       dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
-      tibble::tibble(name = "mergedsmallvg", data = list(dat))
+      tibble::tibble(name = "tso_mergedsmallvg", data = list(dat))
     },
     #' @description Read `CombinedVariantOutput.tsv` file.
     #' @param x Path to file.
     read_cvo = function(x) {
       dat <- tso_combinedvaro_smallv_read(x)
-      tibble::tibble(name = "combinedvaro", data = list(dat))
+      tibble::tibble(name = "tso_combinedvaro", data = list(dat))
     },
     #' @description Read `CopyNumberVariants.vcf.gz` file.
     #' @param x Path to file.
     read_cnv = function(x) {
       dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
-      tibble::tibble(name = "cnv", data = list(dat))
+      tibble::tibble(name = "tso_cnv", data = list(dat))
     },
     #' @description Read `fragment_length_hist.json.gz` file.
     #' @param x Path to file.
@@ -134,13 +134,13 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
       dat <- j |>
         purrr::map(tibble::as_tibble) |>
         dplyr::bind_rows()
-      tibble::tibble(name = "fraglenhist", data = list(dat))
+      tibble::tibble(name = "tso_fraglenhist", data = list(dat))
     },
     #' @description Read `TargetRegionCoverage.json.gz` file.
     #' @param x Path to file.
     read_trc = function(x) {
       dat <- tso_targetregcvg_read(x)
-      tibble::tibble(name = "targetcvg", data = list(dat))
+      tibble::tibble(name = "tso_targetcvg", data = list(dat))
     },
     #' @description Read `tmb.json.gz` file.
     #' @param x Path to file.
@@ -152,19 +152,19 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
       j <- lapply(j, function(x) ifelse(is.null(x), NA_real_, x))
       dat <- tibble::as_tibble_row(j) |>
         dplyr::mutate(dplyr::across(dplyr::everything(), as.numeric))
-      tibble::tibble(name = "tmb", data = list(dat))
+      tibble::tibble(name = "tso_tmb", data = list(dat))
     },
     #' @description Read `msi.json.gz` file.
     #' @param x Path to file.
     read_msi = function(x) {
       dat <- tso_msi_read(x)
-      tibble::tibble(name = "msi", data = list(dat))
+      tibble::tibble(name = "tso_msi", data = list(dat))
     },
     #' @description Read `Fusions.csv` file.
     #' @param x Path to file.
     read_fus = function(x) {
       dat <- tso_fusions_read(x)
-      tibble::tibble(name = "fusions", data = list(dat))
+      tibble::tibble(name = "tso_fusions", data = list(dat))
     }
   ) # end public
 )

@@ -132,19 +132,19 @@ Wf_cttsov2 <- R6::R6Class(
     #' @param x Path to file.
     read_tmbt = function(x) {
       dat <- tso_tmbt_read(x)
-      tibble::tibble(name = "tmbtrace", data = list(dat))
+      tibble::tibble(name = "tso_tmbtrace", data = list(dat))
     },
     #' @description Read `CombinedVariantOutput.tsv` file.
     #' @param x Path to file.
     read_cvo = function(x) {
       dat <- tso_combinedvaro_smallv_read(x)
-      tibble::tibble(name = "combinedvaro", data = list(dat))
+      tibble::tibble(name = "tso_combinedvaro", data = list(dat))
     },
     #' @description Read `cnv.vcf` file.
     #' @param x Path to file.
     read_cnv = function(x) {
       dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
-      tibble::tibble(name = "cnv", data = list(dat))
+      tibble::tibble(name = "tso_cnv", data = list(dat))
     },
     #' @description Read `exon_cov_report.tsv` file.
     #' @param x Path to file.
@@ -161,7 +161,7 @@ Wf_cttsov2 <- R6::R6Class(
       )
       dat <- x |>
         readr::read_tsv(col_types = ctypes)
-      tibble::tibble(name = "cvgrepe", data = list(dat[]))
+      tibble::tibble(name = "tso_cvgrepe", data = list(dat[]))
     },
     #' @description Read `gene_cov_report.tsv` file.
     #' @param x Path to file.
@@ -177,25 +177,25 @@ Wf_cttsov2 <- R6::R6Class(
       )
       dat <- x |>
         readr::read_tsv(col_types = ctypes)
-      tibble::tibble(name = "cvgrepg", data = list(dat[]))
+      tibble::tibble(name = "tso_cvgrepg", data = list(dat[]))
     },
     #' @description Read `hard-filtered.vcf` file.
     #' @param x Path to file.
     read_hardfilt = function(x) {
       dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
-      tibble::tibble(name = "hardfilt", data = list(dat))
+      tibble::tibble(name = "tso_hardfilt", data = list(dat))
     },
     #' @description Read `microsat_output.json` file.
     #' @param x Path to file.
     read_msi = function(x) {
       dat <- tso_msi_read(x)
-      tibble::tibble(name = "msi", data = list(dat))
+      tibble::tibble(name = "tso_msi", data = list(dat))
     },
     #' @description Read `Fusions.csv` file.
     #' @param x Path to file.
     read_fus = function(x) {
       dat <- tso_fusions_read(x)
-      tibble::tibble(name = "fusions", data = list(dat))
+      tibble::tibble(name = "tso_fusions", data = list(dat))
     }
   ) # end public
 )
