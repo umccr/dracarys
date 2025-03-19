@@ -35,13 +35,13 @@
 #' )
 #'
 #' #---- S3 ----#
-#' p <- file.path(
+#' path <- file.path(
 #'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
 #'   "analysis/cttsov2/20250117c5b9baa8"
 #' )
 #' prefix <- "L2500039"
-#' outdir <- sub("s3:/", "~/s3", p)
-#' t2 <- Wf_cttsov2$new(path = p, prefix = prefix)
+#' outdir <- sub("s3:/", "~/s3", path)
+#' t2 <- Wf_cttsov2$new(path = path, prefix = prefix)
 #' t2$list_files(max_files = 500)
 #' t2$list_files_filter_relevant(max_files = 500)
 #' t2$dragenObj$list_files_filter_relevant(max_files = 300)
@@ -86,7 +86,7 @@ Wf_cttsov2 <- R6::R6Class(
       path <- sub("/$", "", path) # remove potential trailing slash
       self$dragenObj <- Wf_dragen$new(
         path = file.path(path, dc),
-        prefix = glue("{dc}/{prefix}")
+        prefix = prefix
       )
       # Results
       # fmt: skip
@@ -132,19 +132,19 @@ Wf_cttsov2 <- R6::R6Class(
     #' @param x Path to file.
     read_tmbt = function(x) {
       dat <- tso_tmbt_read(x)
-      tibble::tibble(name = "tmbtrace", data = list(dat))
+      tibble::tibble(name = "tso_tmbtrace", data = list(dat))
     },
     #' @description Read `CombinedVariantOutput.tsv` file.
     #' @param x Path to file.
     read_cvo = function(x) {
       dat <- tso_combinedvaro_smallv_read(x)
-      tibble::tibble(name = "combinedvaro", data = list(dat))
+      tibble::tibble(name = "tso_combinedvaro", data = list(dat))
     },
     #' @description Read `cnv.vcf` file.
     #' @param x Path to file.
     read_cnv = function(x) {
       dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
-      tibble::tibble(name = "cnv", data = list(dat))
+      tibble::tibble(name = "tso_cnv", data = list(dat))
     },
     #' @description Read `exon_cov_report.tsv` file.
     #' @param x Path to file.
@@ -161,7 +161,7 @@ Wf_cttsov2 <- R6::R6Class(
       )
       dat <- x |>
         readr::read_tsv(col_types = ctypes)
-      tibble::tibble(name = "cvgrepe", data = list(dat[]))
+      tibble::tibble(name = "tso_cvgrepe", data = list(dat[]))
     },
     #' @description Read `gene_cov_report.tsv` file.
     #' @param x Path to file.
@@ -177,25 +177,25 @@ Wf_cttsov2 <- R6::R6Class(
       )
       dat <- x |>
         readr::read_tsv(col_types = ctypes)
-      tibble::tibble(name = "cvgrepg", data = list(dat[]))
+      tibble::tibble(name = "tso_cvgrepg", data = list(dat[]))
     },
     #' @description Read `hard-filtered.vcf` file.
     #' @param x Path to file.
     read_hardfilt = function(x) {
       dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
-      tibble::tibble(name = "hardfilt", data = list(dat))
+      tibble::tibble(name = "tso_hardfilt", data = list(dat))
     },
     #' @description Read `microsat_output.json` file.
     #' @param x Path to file.
     read_msi = function(x) {
       dat <- tso_msi_read(x)
-      tibble::tibble(name = "msi", data = list(dat))
+      tibble::tibble(name = "tso_msi", data = list(dat))
     },
     #' @description Read `Fusions.csv` file.
     #' @param x Path to file.
     read_fus = function(x) {
       dat <- tso_fusions_read(x)
-      tibble::tibble(name = "fusions", data = list(dat))
+      tibble::tibble(name = "tso_fusions", data = list(dat))
     }
   ) # end public
 )
@@ -218,29 +218,24 @@ Wf_cttsov2 <- R6::R6Class(
 #' @examples
 #' \dontrun{
 #' #---- Local ----#
-#' p <- file.path(
+#' path <- file.path(
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20240915ff0295ed"
+#'   "analysis/cttsov2/20250117c5b9baa8"
 #' )
-#' prefix <- "L2401290"
-#' outdir <- file.path(p, "dracarys_tidy")
+#' prefix <- "L2500039"
+#' outdir <- file.path(path, "dracarys_tidy")
 #' d <- dtw_Wf_cttsov2(
 #'   path = p, prefix = prefix, outdir = outdir,
 #'   format = "tsv",
 #'   dryrun = F
 #' )
-#'
-#' p <- file.path(
+#' path <- file.path(
 #'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20240915ff0295ed"
+#'   "analysis/cttsov2/20250117c5b9baa8"
 #' )
-#' prefix <- "L2401290"
-#' outdir <- sub("s3:/", "~/s3", p)
-#' d <- dtw_Wf_cttsov2(
-#'   path = p, prefix = prefix, outdir = outdir,
-#'   format = "tsv",
-#'   dryrun = F
-#' )
+#' outdir <- sub("s3:/", "~/s3", path)
+#' prefix <- "L2500039"
+#' x <- dtw_Wf_cttsov2(path = path, prefix = prefix, outdir = outdir)
 #' }
 #' @export
 dtw_Wf_cttsov2 <- function(
@@ -258,8 +253,9 @@ dtw_Wf_cttsov2 <- function(
     max_files = max_files,
     dryrun = dryrun
   )
+  dc <- glue("Logs_Intermediates/DragenCaller/{prefix}")
   d_dl2 <- obj$dragenObj$download_files(
-    outdir = outdir,
+    outdir = file.path(outdir, dc),
     max_files = max_files,
     dryrun = dryrun
   )

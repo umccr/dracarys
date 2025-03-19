@@ -1135,7 +1135,7 @@ Wf_dragen <- R6::R6Class(
         ) |>
         dplyr::mutate(
           count = as.numeric(.data$count),
-          fragmentLength = as.numeric(.data$fragment_length)
+          fragment_length = as.numeric(.data$fragment_length)
         ) |>
         dplyr::select("fragment_length", "count")
       tibble::tibble(name = "dragen_fraglen", data = list(dat))

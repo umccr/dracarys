@@ -38,13 +38,13 @@ d_write2 <- t1$dragenObj$write(
 )
 
 #---- S3 ----#
-p <- file.path(
+path <- file.path(
   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
   "analysis/cttsov2/20250117c5b9baa8"
 )
 prefix <- "L2500039"
-outdir <- sub("s3:/", "~/s3", p)
-t2 <- Wf_cttsov2$new(path = p, prefix = prefix)
+outdir <- sub("s3:/", "~/s3", path)
+t2 <- Wf_cttsov2$new(path = path, prefix = prefix)
 t2$list_files(max_files = 500)
 t2$list_files_filter_relevant(max_files = 500)
 t2$dragenObj$list_files_filter_relevant(max_files = 300)

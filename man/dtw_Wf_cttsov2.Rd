@@ -40,28 +40,23 @@ Downloads files from the \code{cttsov2} workflow and writes them in a tidy forma
 \examples{
 \dontrun{
 #---- Local ----#
-p <- file.path(
+path <- file.path(
   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-  "analysis/cttsov2/20240915ff0295ed"
+  "analysis/cttsov2/20250117c5b9baa8"
 )
-prefix <- "L2401290"
-outdir <- file.path(p, "dracarys_tidy")
+prefix <- "L2500039"
+outdir <- file.path(path, "dracarys_tidy")
 d <- dtw_Wf_cttsov2(
   path = p, prefix = prefix, outdir = outdir,
   format = "tsv",
   dryrun = F
 )
-
-p <- file.path(
+path <- file.path(
   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-  "analysis/cttsov2/20240915ff0295ed"
+  "analysis/cttsov2/20250117c5b9baa8"
 )
-prefix <- "L2401290"
-outdir <- sub("s3:/", "~/s3", p)
-d <- dtw_Wf_cttsov2(
-  path = p, prefix = prefix, outdir = outdir,
-  format = "tsv",
-  dryrun = F
-)
+outdir <- sub("s3:/", "~/s3", path)
+prefix <- "L2500039"
+x <- dtw_Wf_cttsov2(path = path, prefix = prefix, outdir = outdir)
 }
 }
