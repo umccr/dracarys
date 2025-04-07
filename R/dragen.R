@@ -1084,15 +1084,33 @@ Wf_dragen <- R6::R6Class(
         "system"
       )
       assertthat::assert_that(all(names(res) %in% req_elements))
-      res[["system"]] <- res[["system"]] |>
-        tibble::as_tibble_row()
-      res[["hash_table_build"]] <- res[["hash_table_build"]] |>
-        tibble::as_tibble_row()
-      # we don't care if the columns are characters, no analysis likely to be done on dragen options
-      # (though never say never!)
-      res[["dragen_config"]] <- res[["dragen_config"]] |>
-        tidyr::pivot_wider(names_from = "name", values_from = "value")
-      dat <- dplyr::bind_cols(res)
+      key1 <- "key1"
+      fun1 <- function(x, y, key = key1) {
+        x |>
+          tibble::enframe() |>
+          tidyr::unnest("value") |>
+          dplyr::mutate(name = paste0(y, "_", .data$name)) |>
+          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+          dplyr::mutate(drkey1 = key)
+      }
+      res[["system"]] <- fun1(res[["system"]], "sys")
+      res[["hash_table_build"]] <- fun1(res[["hash_table_build"]], "hashbld")
+      # ignore the dragen config, way too many
+      # res[["dragen_config"]] <- res[["dragen_config"]] |>
+      #   dplyr::mutate(
+      #     name = gsub("\\.|-", "_", .data$name),
+      #     name = tolower(.data$name)
+      #   ) |>
+      #   tibble::deframe() |>
+      #   as.list() |>
+      #   jsonlite::toJSON(auto_unbox = TRUE) |>
+      #   tibble::as_tibble_col() |>
+      #   dplyr::mutate(drkey1 = key1)
+
+      dat <- res$system |>
+        dplyr::left_join(res$hash_table_build, by = "drkey1") |>
+        dplyr::select(-"drkey1")
+
       tibble::tibble(name = "dragen_replay", data = list(dat))
     },
     #' @description Read `contig_mean_cov.csv` file.
