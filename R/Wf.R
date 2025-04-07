@@ -213,12 +213,14 @@ Wf <- R6::R6Class(
     #' @param prefix Prefix of output files.
     #' @param format Format of output files.
     #' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+    #' @param dbconn Database connection object.
     write = function(
       x,
       outdir = NULL,
       prefix = NULL,
       format = "tsv",
-      drid = NULL
+      drid = NULL,
+      dbconn = NULL
     ) {
       assertthat::assert_that(!is.null(prefix))
       assertthat::assert_that(all(c("name", "data") %in% colnames(x)))
@@ -227,11 +229,16 @@ Wf <- R6::R6Class(
       }
       d_write <- x |>
         dplyr::rowwise() |>
+        # for db we want the tibble name
         dplyr::mutate(
           p = ifelse(
-            !grepl("DOWNLOAD_ONLY", .data$name),
-            as.character(glue("{prefix}_{.data$name}")),
-            as.character(.data$data |> dplyr::pull("input_path"))
+            grepl("DOWNLOAD_ONLY", .data$name),
+            as.character(.data$data |> dplyr::pull("input_path")),
+            ifelse(
+              format == "db",
+              as.character(.data$name),
+              as.character(glue("{prefix}_{.data$name}"))
+            )
           ),
           out = ifelse(
             !grepl("DOWNLOAD_ONLY", .data$name),
@@ -239,7 +246,8 @@ Wf <- R6::R6Class(
               obj = .data$data,
               prefix = .data$p,
               out_format = format,
-              drid = drid
+              drid = drid,
+              dbconn = dbconn
             )),
             list(.data$data)
           )

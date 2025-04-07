@@ -144,6 +144,7 @@ Wf_cttsov2 <- R6::R6Class(
     #' @param x Path to file.
     read_cnv = function(x) {
       dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
+      colnames(dat) <- tolower(colnames(dat))
       tibble::tibble(name = "tso_cnv", data = list(dat))
     },
     #' @description Read `exon_cov_report.tsv` file.
@@ -183,13 +184,8 @@ Wf_cttsov2 <- R6::R6Class(
     #' @param x Path to file.
     read_hardfilt = function(x) {
       dat <- bcftools_parse_vcf(x, only_pass = FALSE, alias = TRUE)
+      colnames(dat) <- tolower(colnames(dat))
       tibble::tibble(name = "tso_hardfilt", data = list(dat))
-    },
-    #' @description Read `microsat_output.json` file.
-    #' @param x Path to file.
-    read_msi = function(x) {
-      dat <- tso_msi_read(x)
-      tibble::tibble(name = "tso_msi", data = list(dat))
     },
     #' @description Read `Fusions.csv` file.
     #' @param x Path to file.
@@ -213,6 +209,8 @@ Wf_cttsov2 <- R6::R6Class(
 #' @param max_files Max number of files to list.
 #' @param dryrun If TRUE, just list the files that will be downloaded (don't
 #' download them).
+#' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`).
+#' @param dbconn Database connection object.
 #' @return Tibble of tidy tibbles.
 #'
 #' @examples
@@ -220,22 +218,24 @@ Wf_cttsov2 <- R6::R6Class(
 #' #---- Local ----#
 #' path <- file.path(
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20250117c5b9baa8"
+#'   "analysis/cttsov2/20250308f448d4e0"
 #' )
-#' prefix <- "L2500039"
+#' prefix <- "L2500183"
 #' outdir <- file.path(path, "dracarys_tidy")
+#' drid <- "abcde123"
+#' drid <- "fghij456"
+#' dbconn <- DBI::dbConnect(
+#'   drv = RPostgres::Postgres(),
+#'   dbname = "nemo",
+#'   user = "orcabus"
+#' )
 #' d <- dtw_Wf_cttsov2(
-#'   path = p, prefix = prefix, outdir = outdir,
-#'   format = "tsv",
-#'   dryrun = F
+#'   path = path, prefix = prefix, outdir = outdir,
+#'   format = "db",
+#'   dryrun = F,
+#'   drid = drid,
+#'   dbconn = dbconn
 #' )
-#' path <- file.path(
-#'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20250117c5b9baa8"
-#' )
-#' outdir <- sub("s3:/", "~/s3", path)
-#' prefix <- "L2500039"
-#' x <- dtw_Wf_cttsov2(path = path, prefix = prefix, outdir = outdir)
 #' }
 #' @export
 dtw_Wf_cttsov2 <- function(
@@ -245,7 +245,9 @@ dtw_Wf_cttsov2 <- function(
   outdir_tidy = file.path(outdir, "dracarys_tidy"),
   format = "rds",
   max_files = 1000,
-  dryrun = FALSE
+  dryrun = FALSE,
+  drid = NULL,
+  dbconn = NULL
 ) {
   obj <- Wf_cttsov2$new(path = path, prefix = prefix)
   d_dl1 <- obj$download_files(
@@ -266,13 +268,17 @@ dtw_Wf_cttsov2 <- function(
       d_tidy1,
       outdir = outdir_tidy,
       prefix = prefix,
-      format = format
+      format = format,
+      drid = drid,
+      dbconn = dbconn
     )
     d_write2 <- obj$dragenObj$write(
       d_tidy2,
       outdir = outdir_tidy,
       prefix = prefix,
-      format = format
+      format = format,
+      drid = drid,
+      dbconn = dbconn
     )
     return(dplyr::bind_rows(d_write1, d_write2))
   }

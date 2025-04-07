@@ -8,13 +8,13 @@
 #' )
 #' path <- file.path(
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20250117c5b9baa8"
+#'   "analysis/cttsov2/20250308f448d4e0"
 #' )
-#' prefix <- "L2500039" # tsov2
+#' prefix <- "L2500183" # tsov2
 #' prefix <- "L2401621" # alignqc
 #' outdir <- path
 #' max_files <- 1000
-#' prid <- "abcd1234"
+#' prid <- "20250308f448d4e0"
 #' prid <- "efgh5678"
 #' dbname <- "nemo"
 #' dbuser <- "orcabus"
@@ -36,7 +36,7 @@ db_test <- function(
   dbuser = "orcabus"
 ) {
   # TODO: add workflow type dispatcher
-  obj <- Wf_dragen$new(path = path, prefix = prefix)
+  obj <- Wf_cttsov2$new(path = path, prefix = prefix)
   d_dl <- obj$download_files(
     outdir = outdir,
     max_files = max_files
@@ -60,7 +60,7 @@ db_test <- function(
     user = dbuser
   )
   # now write each table to db
-  fin <- d_tidy |>
+  res <- d_tidy |>
     dplyr::rowwise() |>
     dplyr::mutate(
       write_tbl = list(
@@ -75,7 +75,7 @@ db_test <- function(
     ) |>
     dplyr::ungroup()
   DBI::dbDisconnect(con)
-  return(fin)
+  return(res)
 }
 
 #' Generate Django Models from a Schema Tibble

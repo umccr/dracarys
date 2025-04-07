@@ -70,7 +70,7 @@ session_info_tbls <- function(pkgs = NULL) {
 #' @param x Output format.
 #' @export
 dr_output_format_valid <- function(x) {
-  format_choices <- c("tsv", "parquet", "delta", "rds")
+  format_choices <- c("tsv", "parquet", "delta", "rds", "db")
   assertthat::assert_that(
     is.null(x) | all(x %in% format_choices),
     msg = paste0(
@@ -109,9 +109,31 @@ rdf2tab <- function(rdf, outpath, drid = NULL, ...) {
   SparkR::write.df(sdf, path = outpath, mode = "append", ...)
 }
 
-write_dracarys <- function(obj, prefix, out_format, drid = NULL) {
+write_dracarys <- function(
+  obj,
+  prefix,
+  out_format,
+  drid = NULL,
+  dbconn = NULL
+) {
   prefix <- as.character(prefix) # glue is error prone in Spark
   dr_output_format_valid(out_format)
+  if ("db" %in% out_format) {
+    assertthat::assert_that(
+      !is.null(dbconn),
+      is.data.frame(obj),
+      !is.null(drid)
+    )
+    tab <- obj |>
+      tibble::add_column(dracarys_id = as.character(drid), .before = 1)
+    DBI::dbWriteTable(
+      conn = dbconn,
+      name = prefix,
+      value = tab,
+      append = TRUE,
+      overwrite = FALSE
+    )
+  }
   if ("delta" %in% out_format) {
     rdf2tab(rdf = obj, outpath = prefix, drid = drid)
     return(invisible(obj)) # skip other outputs

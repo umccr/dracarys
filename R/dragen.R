@@ -1,3 +1,32 @@
+#' Read DRAGEN `microsat_output.json`` File
+#'
+#' Reads `msi.json.gz` file output from the TSO500 workflow.
+#'
+#' @param x Path to file
+dragen_msi_read <- function(x) {
+  j <- read_jsongz_jsonlite(x)
+  # not interested in Settings element
+  j[["Settings"]] <- NULL
+  j[["ResultMessage"]] <- j[["ResultMessage"]] %||% NA_character_
+  if (j[["PercentageUnstableSites"]] == "NaN") {
+    j[["PercentageUnstableSites"]] <- NA_real_
+  }
+  num_cols <- c(
+    "TotalMicrosatelliteSitesAssessed",
+    "TotalMicrosatelliteSitesUnstable",
+    "PercentageUnstableSites",
+    "SumDistance",
+    "SumJsd"
+  )
+  dat <- tibble::as_tibble_row(j) |>
+    dplyr::mutate(
+      dplyr::across(dplyr::any_of(num_cols), as.numeric),
+      ResultIsValid = as.character(.data$ResultIsValid),
+    )
+  colnames(dat) <- tolower(colnames(dat))
+  dat
+}
+
 #' DRAGEN Fragment Length Hist Plot
 #'
 #' Plots the fragment length distributions as given in the
@@ -1055,15 +1084,33 @@ Wf_dragen <- R6::R6Class(
         "system"
       )
       assertthat::assert_that(all(names(res) %in% req_elements))
-      res[["system"]] <- res[["system"]] |>
-        tibble::as_tibble_row()
-      res[["hash_table_build"]] <- res[["hash_table_build"]] |>
-        tibble::as_tibble_row()
-      # we don't care if the columns are characters, no analysis likely to be done on dragen options
-      # (though never say never!)
-      res[["dragen_config"]] <- res[["dragen_config"]] |>
-        tidyr::pivot_wider(names_from = "name", values_from = "value")
-      dat <- dplyr::bind_cols(res)
+      key1 <- "key1"
+      fun1 <- function(x, y, key = key1) {
+        x |>
+          tibble::enframe() |>
+          tidyr::unnest("value") |>
+          dplyr::mutate(name = paste0(y, "_", .data$name)) |>
+          tidyr::pivot_wider(names_from = "name", values_from = "value") |>
+          dplyr::mutate(drkey1 = key)
+      }
+      res[["system"]] <- fun1(res[["system"]], "sys")
+      res[["hash_table_build"]] <- fun1(res[["hash_table_build"]], "hashbld")
+      # ignore the dragen config, way too many
+      # res[["dragen_config"]] <- res[["dragen_config"]] |>
+      #   dplyr::mutate(
+      #     name = gsub("\\.|-", "_", .data$name),
+      #     name = tolower(.data$name)
+      #   ) |>
+      #   tibble::deframe() |>
+      #   as.list() |>
+      #   jsonlite::toJSON(auto_unbox = TRUE) |>
+      #   tibble::as_tibble_col() |>
+      #   dplyr::mutate(drkey1 = key1)
+
+      dat <- res$system |>
+        dplyr::left_join(res$hash_table_build, by = "drkey1") |>
+        dplyr::select(-"drkey1")
+
       tibble::tibble(name = "dragen_replay", data = list(dat))
     },
     #' @description Read `contig_mean_cov.csv` file.
@@ -1249,14 +1296,35 @@ Wf_dragen <- R6::R6Class(
     #' @description Read `microsat_output.json` file.
     #' @param x Path to file.
     read_msi = function(x) {
-      dat <- tso_msi_read(x)
+      dat <- dragen_msi_read(x)
       tibble::tibble(name = "dragen_msi", data = list(dat[]))
     },
     #' @description Read `microsat_diffs.txt` file.
     #' @param x Path to file.
     read_msiDiffs = function(x) {
-      dat <- readr::read_tsv(x, col_types = "cdccddc") |>
-        dplyr::rename(Chromosome = "#Chromosome")
+      cnames <- list(
+        old = c(
+          "#Chromosome",
+          "Start",
+          "RepeatUnit",
+          "Assessed",
+          "Distance",
+          "PValue",
+          "PassFilter"
+        ),
+        new = c(
+          "chrom",
+          "start",
+          "repeat_unit",
+          "assessed",
+          "distance",
+          "pvalue",
+          "pass_filter"
+        )
+      )
+      dat <- readr::read_tsv(x, col_types = "cdccddc")
+      assertthat::assert_that(all(colnames(dat) == cnames$old))
+      colnames(dat) <- cnames$new
       tibble::tibble(name = "dragen_msidiffs", data = list(dat[]))
     }
   ), # end public

@@ -157,7 +157,7 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Read `msi.json.gz` file.
     #' @param x Path to file.
     read_msi = function(x) {
-      dat <- tso_msi_read(x)
+      dat <- dragen_msi_read(x)
       tibble::tibble(name = "tso_msi", data = list(dat))
     },
     #' @description Read `Fusions.csv` file.
@@ -340,6 +340,7 @@ tso_tmbt_read <- function(x) {
     ct <- ct2
   }
   d <- readr::read_tsv(x, col_types = ct)
+  colnames(d) <- tolower(colnames(d))
   d[]
 }
 
@@ -461,39 +462,9 @@ tso_fusions_read <- function(x) {
   }
   res <- readr::read_csv(x, col_types = ct, comment = "#")
   if (nrow(res) == 0) {
+    names(ct) <- tolower(names(ct))
     return(empty_tbl(cnames = names(ct), ctypes = ct))
   }
+  colnames(res) <- tolower(colnames(res))
   return(res[])
-}
-
-#' Read TSO MSI JSON File
-#'
-#' Reads `msi.json.gz` file output from the TSO500 workflow.
-#'
-#' @param x Path to file.
-#'
-#' @examples
-#' x <- system.file("extdata/tso/sample705.msi.json.gz", package = "dracarys")
-#' tso_msi_read(x)
-#' @export
-tso_msi_read <- function(x) {
-  j <- read_jsongz_jsonlite(x)
-  # not interested in Settings element
-  j[["Settings"]] <- NULL
-  j[["ResultMessage"]] <- j[["ResultMessage"]] %||% NA_character_
-  if (j[["PercentageUnstableSites"]] == "NaN") {
-    j[["PercentageUnstableSites"]] <- NA_real_
-  }
-  num_cols <- c(
-    "TotalMicrosatelliteSitesAssessed",
-    "TotalMicrosatelliteSitesUnstable",
-    "PercentageUnstableSites",
-    "SumDistance",
-    "SumJsd"
-  )
-  tibble::as_tibble_row(j) |>
-    dplyr::mutate(
-      dplyr::across(dplyr::any_of(num_cols), as.numeric),
-      ResultIsValid = as.character(.data$ResultIsValid),
-    )
 }
