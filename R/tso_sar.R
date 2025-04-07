@@ -132,6 +132,7 @@ tso_sar_read <- function(x) {
   }
 
   snvs <- tso_sar_snv(dat[["variants"]][["smallVariants"]])
+  colnames(snvs) <- tolower(colnames(snvs))
   if (nrow(snvs) == 0) {
     snvs <- c(
       "chrom",
@@ -144,40 +145,41 @@ tso_sar_read <- function(x) {
       "dp_alt",
       "transcript",
       "source",
-      "bioType",
-      "aminoAcids",
-      "cdnaPos",
+      "biotype",
+      "aminoacids",
+      "cdnapos",
       "codons",
-      "cdsPos",
+      "cdspos",
       "exons",
-      "geneId",
+      "geneid",
       "hgnc",
       "hgvsc",
       "hgvsp",
-      "isCanonical",
-      "polyPhenScore",
-      "polyPhenPrediction",
-      "proteinId",
-      "proteinPos",
-      "siftScore",
-      "siftPrediction",
+      "iscanonical",
+      "polyphenscore",
+      "polyphenprediction",
+      "proteinid",
+      "proteinpos",
+      "siftscore",
+      "siftprediction",
       "consequence",
       "introns"
     ) |>
       empty_tbl2()
   }
   cnvs <- dat[["variants"]][["copyNumberVariants"]] |>
-    purrr::map(tibble::as_tibble) |>
+    purrr::map(tibble::as_tibble_row) |>
     dplyr::bind_rows()
+  colnames(cnvs) <- tolower(colnames(cnvs))
   if (nrow(cnvs) == 0) {
     cnvs <- c(
-      "foldChange",
+      "foldchange",
       "qual",
-      "copyNumberType",
+      "copynumbertype",
       "gene",
       "chromosome",
-      "startPosition",
-      "endPosition"
+      "startposition",
+      "endposition"
     ) |>
       empty_tbl2()
   }
