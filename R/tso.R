@@ -340,6 +340,7 @@ tso_tmbt_read <- function(x) {
     ct <- ct2
   }
   d <- readr::read_tsv(x, col_types = ct)
+  colnames(d) <- tolower(colnames(d))
   d[]
 }
 
@@ -461,7 +462,8 @@ tso_fusions_read <- function(x) {
   }
   res <- readr::read_csv(x, col_types = ct, comment = "#")
   if (nrow(res) == 0) {
-    return(empty_tbl(cnames = tolower(names(ct)), ctypes = ct))
+    names(ct) <- tolower(names(ct))
+    return(empty_tbl(cnames = names(ct), ctypes = ct))
   }
   colnames(res) <- tolower(colnames(res))
   return(res[])

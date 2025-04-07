@@ -225,7 +225,14 @@ Tidy given files.
 \subsection{Method \code{write()}}{
 Write tidy data.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf$write(x, outdir = NULL, prefix = NULL, format = "tsv", drid = NULL)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf$write(
+  x,
+  outdir = NULL,
+  prefix = NULL,
+  format = "tsv",
+  drid = NULL,
+  dbconn = NULL
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -240,6 +247,8 @@ Write tidy data.
 \item{\code{format}}{Format of output files.}
 
 \item{\code{drid}}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+
+\item{\code{dbconn}}{Database connection object.}
 }
 \if{html}{\out{</div>}}
 }

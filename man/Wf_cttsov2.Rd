@@ -92,7 +92,6 @@ d_write <- t2$write(
 \item \href{#method-Wf_cttsov2-read_cvgrepe}{\code{Wf_cttsov2$read_cvgrepe()}}
 \item \href{#method-Wf_cttsov2-read_cvgrepg}{\code{Wf_cttsov2$read_cvgrepg()}}
 \item \href{#method-Wf_cttsov2-read_hardfilt}{\code{Wf_cttsov2$read_hardfilt()}}
-\item \href{#method-Wf_cttsov2-read_msi}{\code{Wf_cttsov2$read_msi()}}
 \item \href{#method-Wf_cttsov2-read_fus}{\code{Wf_cttsov2$read_fus()}}
 \item \href{#method-Wf_cttsov2-clone}{\code{Wf_cttsov2$clone()}}
 }
@@ -255,23 +254,6 @@ Read \code{gene_cov_report.tsv} file.
 Read \code{hard-filtered.vcf} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_cttsov2$read_hardfilt(x)}\if{html}{\out{</div>}}
-}
-
-\subsection{Arguments}{
-\if{html}{\out{<div class="arguments">}}
-\describe{
-\item{\code{x}}{Path to file.}
-}
-\if{html}{\out{</div>}}
-}
-}
-\if{html}{\out{<hr>}}
-\if{html}{\out{<a id="method-Wf_cttsov2-read_msi"></a>}}
-\if{latex}{\out{\hypertarget{method-Wf_cttsov2-read_msi}{}}}
-\subsection{Method \code{read_msi()}}{
-Read \code{microsat_output.json} file.
-\subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_cttsov2$read_msi(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

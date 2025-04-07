@@ -25,13 +25,13 @@ path <- file.path(
 )
 path <- file.path(
   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-  "analysis/cttsov2/20250117c5b9baa8"
+  "analysis/cttsov2/20250308f448d4e0"
 )
-prefix <- "L2500039" # tsov2
+prefix <- "L2500183" # tsov2
 prefix <- "L2401621" # alignqc
 outdir <- path
 max_files <- 1000
-prid <- "abcd1234"
+prid <- "20250308f448d4e0"
 prid <- "efgh5678"
 dbname <- "nemo"
 dbuser <- "orcabus"

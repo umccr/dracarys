@@ -104,7 +104,10 @@ tso_sar_read <- function(x) {
   smet_em <- smet[["expandedMetrics"]][[1]][["metrics"]] |>
     purrr::map(tibble::as_tibble_row) |>
     dplyr::bind_rows() |>
-    dplyr::mutate(name = tolower(.data$name))
+    dplyr::mutate(
+      name = tolower(.data$name),
+      name = sub("\\.", "", .data$name)
+    )
   if (!"value" %in% colnames(smet_em)) {
     # edge case
     smet_em <- smet_em |>
@@ -192,6 +195,10 @@ tso_sar_read <- function(x) {
     tso_sar_snv = snvs,
     tso_sar_cnv = cnvs
   ) |>
+    purrr::map(\(x) {
+      colnames(x) <- tolower(colnames(x))
+      x
+    }) |>
     tibble::enframe(name = "name", value = "data")
 }
 

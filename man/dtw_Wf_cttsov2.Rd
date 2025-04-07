@@ -11,7 +11,9 @@ dtw_Wf_cttsov2(
   outdir_tidy = file.path(outdir, "dracarys_tidy"),
   format = "rds",
   max_files = 1000,
-  dryrun = FALSE
+  dryrun = FALSE,
+  drid = NULL,
+  dbconn = NULL
 )
 }
 \arguments{
@@ -30,6 +32,10 @@ local filesystem).}
 
 \item{dryrun}{If TRUE, just list the files that will be downloaded (don't
 download them).}
+
+\item{drid}{dracarys ID to use for the dataset (e.g. \code{wfrid.123}, \code{prid.456}).}
+
+\item{dbconn}{Database connection object.}
 }
 \value{
 Tibble of tidy tibbles.
@@ -42,21 +48,23 @@ Downloads files from the \code{cttsov2} workflow and writes them in a tidy forma
 #---- Local ----#
 path <- file.path(
   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-  "analysis/cttsov2/20250117c5b9baa8"
+  "analysis/cttsov2/20250308f448d4e0"
 )
-prefix <- "L2500039"
+prefix <- "L2500183"
 outdir <- file.path(path, "dracarys_tidy")
+drid <- "abcde123"
+drid <- "fghij456"
+dbconn <- DBI::dbConnect(
+  drv = RPostgres::Postgres(),
+  dbname = "nemo",
+  user = "orcabus"
+)
 d <- dtw_Wf_cttsov2(
-  path = p, prefix = prefix, outdir = outdir,
-  format = "tsv",
-  dryrun = F
+  path = path, prefix = prefix, outdir = outdir,
+  format = "db",
+  dryrun = F,
+  drid = drid,
+  dbconn = dbconn
 )
-path <- file.path(
-  "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-  "analysis/cttsov2/20250117c5b9baa8"
-)
-outdir <- sub("s3:/", "~/s3", path)
-prefix <- "L2500039"
-x <- dtw_Wf_cttsov2(path = path, prefix = prefix, outdir = outdir)
 }
 }

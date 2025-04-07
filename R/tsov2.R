@@ -223,6 +223,7 @@ Wf_cttsov2 <- R6::R6Class(
 #' prefix <- "L2500183"
 #' outdir <- file.path(path, "dracarys_tidy")
 #' drid <- "abcde123"
+#' drid <- "fghij456"
 #' dbconn <- DBI::dbConnect(
 #'   drv = RPostgres::Postgres(),
 #'   dbname = "nemo",
@@ -232,20 +233,9 @@ Wf_cttsov2 <- R6::R6Class(
 #'   path = path, prefix = prefix, outdir = outdir,
 #'   format = "db",
 #'   dryrun = F,
-#'   drid = "abcde123",
+#'   drid = drid,
 #'   dbconn = dbconn
 #' )
-#' path <- file.path(
-#'   "s3://pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
-#'   "analysis/cttsov2/20250117c5b9baa8"
-#' )
-#' outdir <- sub("s3:/", "~/s3", path)
-#' prefix <- "L2500039"
-#'
-#'
-#'
-#' x <- dtw_Wf_cttsov2(path = path, prefix = prefix, outdir = outdir)
-#'
 #' }
 #' @export
 dtw_Wf_cttsov2 <- function(
