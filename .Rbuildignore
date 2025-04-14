@@ -11,6 +11,7 @@
 ^\.dvcignore$
 ^\.github$
 ^\.pre-commit-config\.yaml$
+^\.vscode$
 ^_pkgdown\.yaml$
 ^air\.toml$
 ^conda$
