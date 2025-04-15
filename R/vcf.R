@@ -37,7 +37,7 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
     if (length(x) <= main_len) {
       msg <- paste(c(main, "INFO", "FORMAT"), collapse = ", ")
       stop(
-        "What on earth. Check that your VCF has the following VCF columns, followed by sample columns:\n",
+        "Check the following VCF columns, followed by sample columns:\n",
         msg,
         "\nCall me if everything seems fine on 1800-OMG-LOL."
       )
@@ -56,7 +56,7 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
     )
   }
   samp <- get_samples()
-  # splits header sections into tbls, mostly to grab available FORMAT/INFO fields
+  # splits header sections into tbls, mostly for available FORMAT/INFO fields
   split_hdr <- function(pat) {
     h[grepl(pat, h)] |>
       tibble::as_tibble_col(column_name = "x") |>
@@ -79,7 +79,11 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
   info <- split_hdr("##INFO=<") |> dplyr::pull(.data$ID)
   main_cols <- paste0("%", main) |>
     paste(collapse = "\\t")
-  info_cols <- paste0("%INFO/", info, collapse = "\\t")
+  info_cols <- dplyr::if_else(
+    length(info) == 0,
+    "",
+    paste0("%INFO/", info, collapse = "\\t")
+  )
   fmt_cols <- paste0("[\\t", paste0(paste0("%", fmt), collapse = "\\t"), "]\\n")
   q <- paste0(main_cols, "\\t", info_cols, fmt_cols)
   include_pass <- ""
@@ -91,7 +95,7 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
   # columns, and a S1/2/.._X prefix for the sample columns.
   cnames <- c(
     main,
-    paste0("INFO_", info),
+    paste0("INFO", ifelse(length(info) == 0, "", "_"), info),
     paste0(rep(samp$aliases, each = length(fmt)), "_", fmt)
   )
   # handle empty VCF - fread warns about size 0
@@ -112,7 +116,8 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
     sep = "\t",
     col.names = cnames,
     data.table = FALSE,
-    na.strings = "."
+    na.strings = ".",
+    dec = "."
   ) |>
     tibble::as_tibble()
 }
