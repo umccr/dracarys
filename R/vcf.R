@@ -116,7 +116,8 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
     sep = "\t",
     col.names = cnames,
     data.table = FALSE,
-    na.strings = "."
+    na.strings = ".",
+    dec = "."
   ) |>
     tibble::as_tibble()
 }
