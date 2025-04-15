@@ -95,7 +95,7 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
   # columns, and a S1/2/.._X prefix for the sample columns.
   cnames <- c(
     main,
-    paste0("INFO_", info),
+    paste0("INFO", ifelse(length(info) == 0, "", "_"), info),
     paste0(rep(samp$aliases, each = length(fmt)), "_", fmt)
   )
   # handle empty VCF - fread warns about size 0
