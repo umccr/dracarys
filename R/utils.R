@@ -70,7 +70,7 @@ session_info_tbls <- function(pkgs = NULL) {
 #' @param x Output format.
 #' @export
 dr_output_format_valid <- function(x) {
-  format_choices <- c("tsv", "parquet", "delta", "rds", "db")
+  format_choices <- c("tsv", "parquet", "rds", "db")
   assertthat::assert_that(
     is.null(x) | all(x %in% format_choices),
     msg = paste0(
@@ -81,34 +81,6 @@ dr_output_format_valid <- function(x) {
   )
 }
 
-#' Write Local R Dataframe to Spark-backed Table
-#'
-#' First converts local R dataframe to Spark DataFrame using SparkR,
-#' then _appends_ it to the specified table.
-#'
-#' @param rdf Local R dataframe
-#' @param outpath Path to output table.
-#' @param drid dracarys ID to use for the dataset (e.g. `wfrid.123`, `prid.456`)
-#' @param ... Additional arguments for `SparkR::write.df`.
-#' @export
-#' @examples
-#' \dontrun{
-#' rdf <- mtcars
-#' rdf2tab(rdf, "dev.wf1.mtcars", drid = "wfr.123")
-#' }
-rdf2tab <- function(rdf, outpath, drid = NULL, ...) {
-  assertthat::assert_that(!is.null(drid))
-  if (nrow(rdf) == 0) {
-    # don't write empty dataframes
-    return(NULL)
-  }
-  rdf <- rdf |>
-    dplyr::mutate(dr_id = drid) |>
-    dplyr::select("dr_id", dplyr::everything())
-  sdf <- SparkR::createDataFrame(rdf)
-  SparkR::write.df(sdf, path = outpath, mode = "append", ...)
-}
-
 write_dracarys <- function(
   obj,
   prefix,
@@ -116,7 +88,7 @@ write_dracarys <- function(
   drid = NULL,
   dbconn = NULL
 ) {
-  prefix <- as.character(prefix) # glue is error prone in Spark
+  prefix <- as.character(prefix)
   dr_output_format_valid(out_format)
   if ("db" %in% out_format) {
     assertthat::assert_that(
@@ -133,10 +105,6 @@ write_dracarys <- function(
       append = TRUE,
       overwrite = FALSE
     )
-  }
-  if ("delta" %in% out_format) {
-    rdf2tab(rdf = obj, outpath = prefix, drid = drid)
-    return(invisible(obj)) # skip other outputs
   }
   if ("tsv" %in% out_format) {
     fs::dir_create(dirname(prefix))
