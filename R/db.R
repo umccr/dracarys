@@ -1,5 +1,12 @@
 #' Test DB
 #'
+#' @param path A character string specifying the file path.
+#' @param prefix A character string specifying the prefix for the output files.
+#' @param outdir A character string specifying the output directory path.
+#' @param prid A unique identifier for the process or project.
+#' @param max_files Maximum number of files to process.
+#' @param dbname Name of the database.
+#' @param dbuser Database user.
 #' @examples
 #' \dontrun{
 #' path <- file.path(
@@ -46,12 +53,13 @@ db_test <- function(
     dplyr::mutate(
       data = purrr::map(
         .data$data,
-        \(x)
+        \(x) {
           tibble::add_column(
             x,
             dracarys_id = as.character(prid),
             .before = 1
           )
+        }
       )
     )
   con <- DBI::dbConnect(

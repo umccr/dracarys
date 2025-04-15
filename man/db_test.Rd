@@ -14,6 +14,21 @@ db_test(
   dbuser = "orcabus"
 )
 }
+\arguments{
+\item{path}{A character string specifying the file path.}
+
+\item{prefix}{A character string specifying the prefix for the output files.}
+
+\item{outdir}{A character string specifying the output directory path.}
+
+\item{prid}{A unique identifier for the process or project.}
+
+\item{max_files}{Maximum number of files to process.}
+
+\item{dbname}{Name of the database.}
+
+\item{dbuser}{Database user.}
+}
 \description{
 Test DB
 }
