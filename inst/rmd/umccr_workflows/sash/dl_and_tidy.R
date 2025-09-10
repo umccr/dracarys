@@ -12,10 +12,10 @@
 
 query_workflow_sash <- function(start_date, end_date) {
   q1 <- glue(
-    "WHERE \"type_name\" = 'sash' ",
-    "AND \"start\" >= date(\'{start_date}\') ",
-    "AND \"end\" <= date(\'{end_date}\') ",
-    "ORDER BY \"start\" DESC;"
+    "WHERE \"workflow_name\" = 'sash' ",
+    "AND \"workflow_start\" >= date(\'{start_date}\') ",
+    "AND \"workflow_end\" <= date(\'{end_date}\') ",
+    "ORDER BY \"workflow_start\" DESC;"
   )
   rportal::portaldb_query_workflow(q1)
 }
@@ -29,8 +29,8 @@ query_limsrow_libids <- function(libids) {
 }
 
 # first read in the workflows table, extract metadata, then join with lims
-start_date <- "2024-08-29"
-end_date <- "2024-09-07"
+start_date <- "2025-03-30"
+end_date <- "2025-03-31"
 meta_raw <- query_workflow_sash(start_date, end_date)
 meta <- meta_raw |>
   rportal::meta_sash()

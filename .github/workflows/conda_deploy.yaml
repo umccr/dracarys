@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Code checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Micromamba setup
         uses: mamba-org/setup-micromamba@v1
         with:
@@ -80,7 +80,7 @@ jobs:
 
       # work with tag from above
       - name: Code checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: v${{ env.VERSION }}
       - name: 🏰 QEMU setup
