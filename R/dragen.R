@@ -75,32 +75,31 @@ dragen_fraglenhist_plot <- function(d, min_count = 10) {
 dragen_umi_metrics_read <- function(x) {
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("UMI STATISTICS", d0[1]))
-  # fmt: skip
   abbrev_nm <- tibble::tribble(
-    ~raw, ~clean, ~target,
-    "number of reads", "reads_tot", TRUE,
-    "number of reads with valid or correctable umis", "reads_umi_valid_correctable", TRUE,
-    "number of reads in discarded families", "reads_discarded_families", TRUE,
-    "reads filtered out", "reads_filtered_out", FALSE,
-    "reads with all-g umis filtered out", "reads_filtered_out_all_g_umis", FALSE,
-    "reads with uncorrectable umis", "reads_uncorrectable_umis", FALSE,
-    "total number of families", "families_tot", FALSE,
-    "families contextually corrected", "families_contextually_corrected", FALSE,
-    "families shifted", "families_shifted", FALSE,
-    "families discarded", "families_discarded_tot", TRUE,
-    "families discarded by min-support-reads", "families_discarded_minsupportreads", TRUE,
-    "families discarded by duplex/simplex", "families_discarded_duplexsimplex", TRUE,
-    "families with ambiguous correction", "families_ambiguous_correction", TRUE,
-    "duplex families", "duplex_families", TRUE,
-    "consensus pairs emitted", "consensus_pairs_emitted", FALSE,
-    "mean family depth", "avg_family_depth", TRUE,
-    "number of collapsible regions", "collapsible_regions_tot", FALSE,
-    "min collapsible region size (num reads)", "collapsible_region_size_min", FALSE,
-    "max collapsible region size (num reads)", "collapsible_region_size_max", FALSE,
-    "mean collapsible region size (num reads)", "collapsible_region_size_mean", FALSE,
-    "collapsible region size standard deviation", "collapsible_region_size_sd", FALSE,
-    "histogram of num supporting fragments", "histo_num_supporting_fragments", TRUE,
-    "histogram of unique umis per fragment position", "histo_unique_umis", FALSE
+    ~raw                                             , ~clean                               , ~target ,
+    "number of reads"                                , "reads_tot"                          , TRUE    ,
+    "number of reads with valid or correctable umis" , "reads_umi_valid_correctable"        , TRUE    ,
+    "number of reads in discarded families"          , "reads_discarded_families"           , TRUE    ,
+    "reads filtered out"                             , "reads_filtered_out"                 , FALSE   ,
+    "reads with all-g umis filtered out"             , "reads_filtered_out_all_g_umis"      , FALSE   ,
+    "reads with uncorrectable umis"                  , "reads_uncorrectable_umis"           , FALSE   ,
+    "total number of families"                       , "families_tot"                       , FALSE   ,
+    "families contextually corrected"                , "families_contextually_corrected"    , FALSE   ,
+    "families shifted"                               , "families_shifted"                   , FALSE   ,
+    "families discarded"                             , "families_discarded_tot"             , TRUE    ,
+    "families discarded by min-support-reads"        , "families_discarded_minsupportreads" , TRUE    ,
+    "families discarded by duplex/simplex"           , "families_discarded_duplexsimplex"   , TRUE    ,
+    "families with ambiguous correction"             , "families_ambiguous_correction"      , TRUE    ,
+    "duplex families"                                , "duplex_families"                    , TRUE    ,
+    "consensus pairs emitted"                        , "consensus_pairs_emitted"            , FALSE   ,
+    "mean family depth"                              , "avg_family_depth"                   , TRUE    ,
+    "number of collapsible regions"                  , "collapsible_regions_tot"            , FALSE   ,
+    "min collapsible region size (num reads)"        , "collapsible_region_size_min"        , FALSE   ,
+    "max collapsible region size (num reads)"        , "collapsible_region_size_max"        , FALSE   ,
+    "mean collapsible region size (num reads)"       , "collapsible_region_size_mean"       , FALSE   ,
+    "collapsible region size standard deviation"     , "collapsible_region_size_sd"         , FALSE   ,
+    "histogram of num supporting fragments"          , "histo_num_supporting_fragments"     , TRUE    ,
+    "histogram of unique umis per fragment position" , "histo_unique_umis"                  , FALSE
   )
   abbrev_nm_target <- abbrev_nm |>
     dplyr::filter(.data$target) |>
@@ -428,36 +427,35 @@ dragen_trimmer_metrics_read <- function(x) {
 #' }
 #' @export
 dragen_vc_metrics_read <- function(x) {
-  # fmt: skip
   abbrev_nm1 <- tibble::tribble(
-    ~raw, ~clean, ~region,
-    "Total", "var_tot", FALSE,
-    "Biallelic", "var_biallelic", FALSE,
-    "Multiallelic", "var_multiallelic", FALSE,
-    "SNPs", "var_snp", FALSE,
-    "Insertions (Hom)", "var_ins_hom", FALSE,
-    "Insertions (Het)", "var_ins_het", FALSE,
-    "Deletions (Hom)", "var_del_hom", FALSE,
-    "Deletions (Het)", "var_del_het", FALSE,
-    "Indels (Het)", "var_indel_het", FALSE,
-    "Chr X number of SNPs over ", "var_snp_x_over_", TRUE,
-    "Chr Y number of SNPs over ", "var_snp_y_over_", TRUE,
-    "(Chr X SNPs)/(chr Y SNPs) ratio over ", "var_x_over_y_snp_ratio_over_", TRUE,
-    "SNP Transitions", "var_snp_transitions", FALSE,
-    "SNP Transversions", "var_snp_transversions", FALSE,
-    "Ti/Tv ratio", "var_ti_tv_ratio", FALSE,
-    "Heterozygous", "var_heterozygous", FALSE,
-    "Homozygous", "var_homozygous", FALSE,
-    "Het/Hom ratio", "var_het_hom_ratio", FALSE,
-    "In dbSNP", "var_in_dbsnp", FALSE,
-    "Not in dbSNP", "var_nin_dbsnp", FALSE,
-    "Percent Callability", "callability_pct", FALSE,
-    "Percent Autosome Callability", "callability_auto_pct", FALSE,
-    "Number of samples", "sample_num", FALSE,
-    "Reads Processed", "reads_processed", FALSE,
-    "Child Sample", "sample_child", FALSE,
-    "Percent QC Region Callability in Region 1", "qc_region_callability_pct_region1", FALSE,
-    "Percent QC Region Callability in Region 2", "qc_region_callability_pct_region2", FALSE
+    ~raw                                        , ~clean                              , ~region ,
+    "Total"                                     , "var_tot"                           , FALSE   ,
+    "Biallelic"                                 , "var_biallelic"                     , FALSE   ,
+    "Multiallelic"                              , "var_multiallelic"                  , FALSE   ,
+    "SNPs"                                      , "var_snp"                           , FALSE   ,
+    "Insertions (Hom)"                          , "var_ins_hom"                       , FALSE   ,
+    "Insertions (Het)"                          , "var_ins_het"                       , FALSE   ,
+    "Deletions (Hom)"                           , "var_del_hom"                       , FALSE   ,
+    "Deletions (Het)"                           , "var_del_het"                       , FALSE   ,
+    "Indels (Het)"                              , "var_indel_het"                     , FALSE   ,
+    "Chr X number of SNPs over "                , "var_snp_x_over_"                   , TRUE    ,
+    "Chr Y number of SNPs over "                , "var_snp_y_over_"                   , TRUE    ,
+    "(Chr X SNPs)/(chr Y SNPs) ratio over "     , "var_x_over_y_snp_ratio_over_"      , TRUE    ,
+    "SNP Transitions"                           , "var_snp_transitions"               , FALSE   ,
+    "SNP Transversions"                         , "var_snp_transversions"             , FALSE   ,
+    "Ti/Tv ratio"                               , "var_ti_tv_ratio"                   , FALSE   ,
+    "Heterozygous"                              , "var_heterozygous"                  , FALSE   ,
+    "Homozygous"                                , "var_homozygous"                    , FALSE   ,
+    "Het/Hom ratio"                             , "var_het_hom_ratio"                 , FALSE   ,
+    "In dbSNP"                                  , "var_in_dbsnp"                      , FALSE   ,
+    "Not in dbSNP"                              , "var_nin_dbsnp"                     , FALSE   ,
+    "Percent Callability"                       , "callability_pct"                   , FALSE   ,
+    "Percent Autosome Callability"              , "callability_auto_pct"              , FALSE   ,
+    "Number of samples"                         , "sample_num"                        , FALSE   ,
+    "Reads Processed"                           , "reads_processed"                   , FALSE   ,
+    "Child Sample"                              , "sample_child"                      , FALSE   ,
+    "Percent QC Region Callability in Region 1" , "qc_region_callability_pct_region1" , FALSE   ,
+    "Percent QC Region Callability in Region 2" , "qc_region_callability_pct_region2" , FALSE
   )
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("VARIANT CALLER", d0[1]))
@@ -671,22 +669,21 @@ dragen_mapping_metrics_read <- function(x) {
 #' @export
 dragen_coverage_metrics_read <- function(x) {
   # all rows except 'Aligned bases' and 'Aligned reads' refer to the region
-  # fmt: skip
   abbrev_nm <- tibble::tribble(
-    ~raw, ~clean, ~region,
-    "Aligned bases", "bases_aligned_tot", FALSE,
-    "Aligned reads", "reads_aligned_tot", FALSE,
-    "Aligned bases in ", "bases_aligned_", TRUE,
-    "Average alignment coverage over ", "cov_alignment_avg_over_", TRUE,
-    "Uniformity of coverage (PCT > 0.2*mean) over ", "cov_uniformity_pct_gt02mean_", TRUE,
-    "Uniformity of coverage (PCT > 0.4*mean) over ", "cov_uniformity_pct_gt04mean_", TRUE,
-    "Average chr X coverage over ", "cov_avg_x_over_", TRUE,
-    "Average chr Y coverage over ", "cov_avg_y_over_", TRUE,
-    "Average mitochondrial coverage over ", "cov_avg_mt_over_", TRUE,
-    "Average autosomal coverage over ", "cov_avg_auto_over_", TRUE,
-    "Median autosomal coverage over ", "cov_median_auto_over_", TRUE,
-    "Mean/Median autosomal coverage ratio over ", "cov_mean_median_auto_ratio_over_", TRUE,
-    "Aligned reads in ", "reads_aligned_in_", TRUE
+    ~raw                                            , ~clean                             , ~region ,
+    "Aligned bases"                                 , "bases_aligned_tot"                , FALSE   ,
+    "Aligned reads"                                 , "reads_aligned_tot"                , FALSE   ,
+    "Aligned bases in "                             , "bases_aligned_"                   , TRUE    ,
+    "Average alignment coverage over "              , "cov_alignment_avg_over_"          , TRUE    ,
+    "Uniformity of coverage (PCT > 0.2*mean) over " , "cov_uniformity_pct_gt02mean_"     , TRUE    ,
+    "Uniformity of coverage (PCT > 0.4*mean) over " , "cov_uniformity_pct_gt04mean_"     , TRUE    ,
+    "Average chr X coverage over "                  , "cov_avg_x_over_"                  , TRUE    ,
+    "Average chr Y coverage over "                  , "cov_avg_y_over_"                  , TRUE    ,
+    "Average mitochondrial coverage over "          , "cov_avg_mt_over_"                 , TRUE    ,
+    "Average autosomal coverage over "              , "cov_avg_auto_over_"               , TRUE    ,
+    "Median autosomal coverage over "               , "cov_median_auto_over_"            , TRUE    ,
+    "Mean/Median autosomal coverage ratio over "    , "cov_mean_median_auto_ratio_over_" , TRUE    ,
+    "Aligned reads in "                             , "reads_aligned_in_"                , TRUE
   )
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("COVERAGE SUMMARY", d0[1]))
@@ -1018,40 +1015,39 @@ Wf_dragen <- R6::R6Class(
       wname <- "dragen"
       pref <- prefix
       tn1 <- "(|_tumor|_normal)"
-      # fmt: skip
       regexes <- tibble::tribble(
-        ~regex, ~fun,
-        glue("{pref}\\-replay\\.json$"), "read_replay",
-        glue("{pref}\\.cnv_metrics.csv$"), "read_cnvMetrics",
-        glue("{pref}\\.exon_contig_mean_cov\\.csv$"), "read_contigMeanCov",
-        glue("{pref}\\.target_bed_contig_mean_cov\\.csv$"), "read_contigMeanCov",
-        glue("{pref}\\.tmb_contig_mean_cov\\.csv$"), "read_contigMeanCov",
-        glue("{pref}\\.wgs_contig_mean_cov{tn1}\\.csv$"), "read_contigMeanCov",
-        glue("{pref}\\.exon_coverage_metrics\\.csv$"), "read_coverageMetrics",
-        glue("{pref}\\.target_bed_coverage_metrics\\.csv$"), "read_coverageMetrics",
-        glue("{pref}\\.tmb_coverage_metrics\\.csv$"), "read_coverageMetrics",
-        glue("{pref}\\.wgs_coverage_metrics{tn1}\\.csv$"), "read_coverageMetrics",
-        glue("{pref}\\.exon_fine_hist\\.csv$"), "read_fineHist",
-        glue("{pref}\\.target_bed_fine_hist\\.csv$"), "read_fineHist",
-        glue("{pref}\\.tmb_fine_hist\\.csv$"), "read_fineHist",
-        glue("{pref}\\.wgs_fine_hist{tn1}\\.csv$"), "read_fineHist",
-        glue("{pref}\\.exon_hist\\.csv$"), "read_hist",
-        glue("{pref}\\.target_bed_hist\\.csv$"), "read_hist",
-        glue("{pref}\\.tmb_hist\\.csv$"), "read_hist",
-        glue("{pref}\\.wgs_hist{tn1}\\.csv$"), "read_hist",
-        glue("{pref}\\.fastqc_metrics\\.csv$"), "read_fastqcMetrics",
-        glue("{pref}\\.fragment_length_hist\\.csv$"), "read_fragmentLengthHist",
-        glue("{pref}\\.gc_metrics\\.csv$"), "read_gcMetrics",
-        glue("{pref}\\.gvcf_metrics\\.csv$"), "read_vcMetrics",
-        glue("{pref}\\.mapping_metrics\\.csv$"), "read_mappingMetrics",
-        glue("{pref}\\.microsat_diffs\\.txt$"), "read_msiDiffs",
-        glue("{pref}\\.microsat_output\\.json$"), "read_msi",
-        glue("{pref}\\.sv_metrics\\.csv$"), "read_svMetrics",
-        glue("{pref}\\.time_metrics\\.csv$"), "read_timeMetrics",
-        glue("{pref}\\.trimmer_metrics\\.csv$"), "read_trimmerMetrics",
-        glue("{pref}\\.umi_metrics\\.csv$"), "read_umiMetrics",
-        glue("{pref}\\.vc_metrics\\.csv$"), "read_vcMetrics",
-        glue("{pref}\\.ploidy_estimation_metrics\\.csv$"), "read_ploidyMetrics"
+        ~regex                                              , ~fun                      ,
+        glue("{pref}\\-replay\\.json$")                     , "read_replay"             ,
+        glue("{pref}\\.cnv_metrics.csv$")                   , "read_cnvMetrics"         ,
+        glue("{pref}\\.exon_contig_mean_cov\\.csv$")        , "read_contigMeanCov"      ,
+        glue("{pref}\\.target_bed_contig_mean_cov\\.csv$")  , "read_contigMeanCov"      ,
+        glue("{pref}\\.tmb_contig_mean_cov\\.csv$")         , "read_contigMeanCov"      ,
+        glue("{pref}\\.wgs_contig_mean_cov{tn1}\\.csv$")    , "read_contigMeanCov"      ,
+        glue("{pref}\\.exon_coverage_metrics\\.csv$")       , "read_coverageMetrics"    ,
+        glue("{pref}\\.target_bed_coverage_metrics\\.csv$") , "read_coverageMetrics"    ,
+        glue("{pref}\\.tmb_coverage_metrics\\.csv$")        , "read_coverageMetrics"    ,
+        glue("{pref}\\.wgs_coverage_metrics{tn1}\\.csv$")   , "read_coverageMetrics"    ,
+        glue("{pref}\\.exon_fine_hist\\.csv$")              , "read_fineHist"           ,
+        glue("{pref}\\.target_bed_fine_hist\\.csv$")        , "read_fineHist"           ,
+        glue("{pref}\\.tmb_fine_hist\\.csv$")               , "read_fineHist"           ,
+        glue("{pref}\\.wgs_fine_hist{tn1}\\.csv$")          , "read_fineHist"           ,
+        glue("{pref}\\.exon_hist\\.csv$")                   , "read_hist"               ,
+        glue("{pref}\\.target_bed_hist\\.csv$")             , "read_hist"               ,
+        glue("{pref}\\.tmb_hist\\.csv$")                    , "read_hist"               ,
+        glue("{pref}\\.wgs_hist{tn1}\\.csv$")               , "read_hist"               ,
+        glue("{pref}\\.fastqc_metrics\\.csv$")              , "read_fastqcMetrics"      ,
+        glue("{pref}\\.fragment_length_hist\\.csv$")        , "read_fragmentLengthHist" ,
+        glue("{pref}\\.gc_metrics\\.csv$")                  , "read_gcMetrics"          ,
+        glue("{pref}\\.gvcf_metrics\\.csv$")                , "read_vcMetrics"          ,
+        glue("{pref}\\.mapping_metrics\\.csv$")             , "read_mappingMetrics"     ,
+        glue("{pref}\\.microsat_diffs\\.txt$")              , "read_msiDiffs"           ,
+        glue("{pref}\\.microsat_output\\.json$")            , "read_msi"                ,
+        glue("{pref}\\.sv_metrics\\.csv$")                  , "read_svMetrics"          ,
+        glue("{pref}\\.time_metrics\\.csv$")                , "read_timeMetrics"        ,
+        glue("{pref}\\.trimmer_metrics\\.csv$")             , "read_trimmerMetrics"     ,
+        glue("{pref}\\.umi_metrics\\.csv$")                 , "read_umiMetrics"         ,
+        glue("{pref}\\.vc_metrics\\.csv$")                  , "read_vcMetrics"          ,
+        glue("{pref}\\.ploidy_estimation_metrics\\.csv$")   , "read_ploidyMetrics"
       )
 
       super$initialize(path = path, wname = wname, regexes = regexes)
@@ -1060,13 +1056,12 @@ Wf_dragen <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
-      # fmt: skip
       res <- tibble::tribble(
-        ~var, ~value,
-        "path", private$.path,
-        "wname", private$.wname,
-        "filesystem", private$.filesystem,
-        "prefix", self$prefix
+        ~var         , ~value              ,
+        "path"       , private$.path       ,
+        "wname"      , private$.wname      ,
+        "filesystem" , private$.filesystem ,
+        "prefix"     , self$prefix
       )
       print(res)
       invisible(self)

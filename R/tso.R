@@ -38,28 +38,31 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     initialize = function(path = NULL, prefix = NULL) {
       wname <- "tso_ctdna_tumor_only"
       pref <- prefix
-      # fmt: skip
       regexes <- tibble::tribble(
-        ~regex, ~fun,
-        glue("{pref}/{pref}.SampleAnalysisResults\\.json\\.gz$"), "sar",
-        glue("{pref}/{pref}_TMB_Trace\\.tsv$"), "tmbt",
-        glue("{pref}/{pref}.AlignCollapseFusionCaller_metrics\\.json\\.gz$"), "acfc",
-        glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz$"), "msv",
-        glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
+        ~regex                                                               , ~fun            ,
+        glue("{pref}/{pref}.SampleAnalysisResults\\.json\\.gz$")             , "sar"           ,
+        glue("{pref}/{pref}_TMB_Trace\\.tsv$")                               , "tmbt"          ,
+        glue("{pref}/{pref}.AlignCollapseFusionCaller_metrics\\.json\\.gz$") , "acfc"          ,
+        glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz$")                , "msv"           ,
+        glue("{pref}/{pref}_MergedSmallVariants\\.vcf\\.gz\\.tbi$")          , "DOWNLOAD_ONLY" ,
         # glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz$"), "DOWNLOAD_ONLY",
         # glue("{pref}/{pref}_MergedSmallVariants\\.genome\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{pref}/{pref}_CombinedVariantOutput\\.tsv$"), "cvo",
-        glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz$"), "cnv",
-        glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY",
-        glue("{pref}/{pref}.fragment_length_hist\\.json\\.gz$"), "flh",
-        glue("{pref}/{pref}.TargetRegionCoverage\\.json\\.gz$"), "trc",
-        glue("{pref}/{pref}.tmb\\.json\\.gz$"), "tmb",
-        glue("{pref}/{pref}.msi\\.json\\.gz$"), "msi",
-        glue("{pref}/{pref}_Fusions\\.csv$"), "fus"
+        glue("{pref}/{pref}_CombinedVariantOutput\\.tsv$")                   , "cvo"           ,
+        glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz$")                 , "cnv"           ,
+        glue("{pref}/{pref}_CopyNumberVariants\\.vcf\\.gz\\.tbi$")           , "DOWNLOAD_ONLY" ,
+        glue("{pref}/{pref}.fragment_length_hist\\.json\\.gz$")              , "flh"           ,
+        glue("{pref}/{pref}.TargetRegionCoverage\\.json\\.gz$")              , "trc"           ,
+        glue("{pref}/{pref}.tmb\\.json\\.gz$")                               , "tmb"           ,
+        glue("{pref}/{pref}.msi\\.json\\.gz$")                               , "msi"           ,
+        glue("{pref}/{pref}_Fusions\\.csv$")                                 , "fus"
       ) |>
         dplyr::mutate(
           fun = paste0("read_", .data$fun),
-          fun = ifelse(.data$fun == "read_DOWNLOAD_ONLY", "DOWNLOAD_ONLY", .data$fun)
+          fun = ifelse(
+            .data$fun == "read_DOWNLOAD_ONLY",
+            "DOWNLOAD_ONLY",
+            .data$fun
+          )
         )
 
       super$initialize(path = path, wname = wname, regexes = regexes)
@@ -68,13 +71,12 @@ Wf_tso_ctdna_tumor_only <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
-      # fmt: skip
       res <- tibble::tribble(
-        ~var, ~value,
-        "path", self$path,
-        "wname", self$wname,
-        "filesystem", self$filesystem,
-        "prefix", self$prefix
+        ~var         , ~value          ,
+        "path"       , self$path       ,
+        "wname"      , self$wname      ,
+        "filesystem" , self$filesystem ,
+        "prefix"     , self$prefix
       )
       print(res)
       invisible(self)

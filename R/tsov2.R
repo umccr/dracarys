@@ -89,22 +89,21 @@ Wf_cttsov2 <- R6::R6Class(
         prefix = prefix
       )
       # Results
-      # fmt: skip
       regexes <- tibble::tribble(
-        ~regex, ~fun,
-        glue("{res}/{pref}\\.cnv\\.vcf\\.gz$"), "read_cnv",
-        glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-cnvvcfi",
-        glue("{res}/{pref}\\.exon_cov_report\\.tsv$"), "read_cvgrepe",
-        glue("{res}/{pref}\\.gene_cov_report\\.tsv$"), "read_cvgrepg",
-        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$"), "read_hardfilt",
-        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-hardfiltvcfi",
+        ~regex                                                                  , ~fun                          ,
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz$")                                  , "read_cnv"                    ,
+        glue("{res}/{pref}\\.cnv\\.vcf\\.gz\\.tbi$")                            , "DOWNLOAD_ONLY-cnvvcfi"       ,
+        glue("{res}/{pref}\\.exon_cov_report\\.tsv$")                           , "read_cvgrepe"                ,
+        glue("{res}/{pref}\\.gene_cov_report\\.tsv$")                           , "read_cvgrepg"                ,
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz$")                        , "read_hardfilt"               ,
+        glue("{res}/{pref}\\.hard-filtered\\.vcf\\.gz\\.tbi$")                  , "DOWNLOAD_ONLY-hardfiltvcfi"  ,
         # glue("{res}/{pref}\\.microsat_output\\.json$"), "msi", # in DragenCaller
-        glue("{res}/{pref}\\.tmb.trace\\.tsv$"), "read_tmbt",
-        glue("{res}/{pref}_CombinedVariantOutput\\.tsv$"), "read_cvo",
-        glue("{res}/{pref}_Fusions\\.csv$"), "read_fus",
-        glue("{res}/{pref}_MetricsOutput\\.tsv$"), "DOWNLOAD_ONLY-metricsoutput",
+        glue("{res}/{pref}\\.tmb.trace\\.tsv$")                                 , "read_tmbt"                   ,
+        glue("{res}/{pref}_CombinedVariantOutput\\.tsv$")                       , "read_cvo"                    ,
+        glue("{res}/{pref}_Fusions\\.csv$")                                     , "read_fus"                    ,
+        glue("{res}/{pref}_MetricsOutput\\.tsv$")                               , "DOWNLOAD_ONLY-metricsoutput" ,
         # glue("{res}/{pref}_SmallVariants_Annotated\\.json\\.gz$"), "DOWNLOAD_ONLY-smallvannjson",
-        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$"), "read_sar"
+        glue("{li}/SampleAnalysisResults/{pref}_SampleAnalysisResults\\.json$") , "read_sar"
       )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$prefix <- prefix
@@ -112,13 +111,12 @@ Wf_cttsov2 <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
-      # fmt: skip
       res <- tibble::tribble(
-        ~var, ~value,
-        "path", private$.path,
-        "wname", private$.wname,
-        "filesystem", private$.filesystem,
-        "prefix", self$prefix
+        ~var         , ~value              ,
+        "path"       , private$.path       ,
+        "wname"      , private$.wname      ,
+        "filesystem" , private$.filesystem ,
+        "prefix"     , self$prefix
       )
       print(res)
       invisible(self)
