@@ -108,13 +108,12 @@ Wf <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
-      # fmt: skip
       res <- tibble::tribble(
-        ~var, ~value,
-        "path", private$.path,
-        "wname", private$.wname,
-        "filesystem", private$.filesystem,
-        "nregexes", as.character(nrow(private$.regexes))
+        ~var         , ~value                               ,
+        "path"       , private$.path                        ,
+        "wname"      , private$.wname                       ,
+        "filesystem" , private$.filesystem                  ,
+        "nregexes"   , as.character(nrow(private$.regexes))
       )
       print(res)
       invisible(self)

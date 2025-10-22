@@ -89,27 +89,26 @@ Wf_sash <- R6::R6Class(
       wname <- "sash"
       pref <- glue("{SubjectID}_{SampleID_tumor}")
       crep <- "cancer_report/cancer_report_tables"
-      # fmt: skip
       regexes <- tibble::tribble(
-        ~regex, ~fun,
-        glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$"), "read_hrdChord",
-        glue("{path}/{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$"), "read_hrdHrdetect",
-        glue("{path}/{pref}/{crep}/hrd/{pref}-dragen\\.tsv\\.gz$"), "read_hrdDragen",
-        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$"), "read_sigsTsv",
-        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$"), "read_sigsTsv",
-        glue("{path}/{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$"), "read_sigsTsv",
-        glue("{path}/{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$"), "read_sigsTsv",
-        glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$"), "read_qcSum",
-        glue("{path}/{pref}/purple/{SampleID_tumor}\\.purple\\.cnv\\.gene\\.tsv$"), "DOWNLOAD_ONLY-purplegene",
-        glue("{path}/{pref}/smlv_somatic/filter/{SampleID_tumor}\\.pass\\.vcf\\.gz$"), "DOWNLOAD_ONLY-smlvfiltvcf",
-        glue("{path}/{pref}/smlv_somatic/filter/{SampleID_tumor}\\.pass\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-smlvfiltvcfi",
-        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$"), "read_pcgrJson",
-        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz$"), "DOWNLOAD_ONLY-pcgrvcf",
-        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-pcgrvcfi",
-        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.snvs_indels\\.tiers\\.tsv$"), "DOWNLOAD_ONLY-pcgrtiers",
-        # glue("{path}/{pref}/smlv_somatic/report/{SampleID_tumor}\\.somatic\\.variant_counts_process\\.json$"), "smlvSomCounts",
-        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz$"), "DOWNLOAD_ONLY-cpsrvcf",
-        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz\\.tbi$"), "DOWNLOAD_ONLY-cpsrvcfi",
+        ~regex                                                                                                            , ~fun                         ,
+        glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$")                                                         , "read_hrdChord"              ,
+        glue("{path}/{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$")                                                      , "read_hrdHrdetect"           ,
+        glue("{path}/{pref}/{crep}/hrd/{pref}-dragen\\.tsv\\.gz$")                                                        , "read_hrdDragen"             ,
+        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$")                                                     , "read_sigsTsv"               ,
+        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$")                                                     , "read_sigsTsv"               ,
+        glue("{path}/{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$")                                                          , "read_sigsTsv"               ,
+        glue("{path}/{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$")                                                        , "read_sigsTsv"               ,
+        glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$")                                                        , "read_qcSum"                 ,
+        glue("{path}/{pref}/purple/{SampleID_tumor}\\.purple\\.cnv\\.gene\\.tsv$")                                        , "DOWNLOAD_ONLY-purplegene"   ,
+        glue("{path}/{pref}/smlv_somatic/filter/{SampleID_tumor}\\.pass\\.vcf\\.gz$")                                     , "DOWNLOAD_ONLY-smlvfiltvcf"  ,
+        glue("{path}/{pref}/smlv_somatic/filter/{SampleID_tumor}\\.pass\\.vcf\\.gz\\.tbi$")                               , "DOWNLOAD_ONLY-smlvfiltvcfi" ,
+        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")                 , "read_pcgrJson"              ,
+        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz$")                  , "DOWNLOAD_ONLY-pcgrvcf"      ,
+        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz\\.tbi$")            , "DOWNLOAD_ONLY-pcgrvcfi"     ,
+        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.snvs_indels\\.tiers\\.tsv$") , "DOWNLOAD_ONLY-pcgrtiers"    ,
+        # glue("{path}/{pref}/smlv_somatic/report/{SampleID_tumor}\\.somatic\\.variant_counts_process\\.json$")             , "smlvSomCounts"              ,
+        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz$")                     , "DOWNLOAD_ONLY-cpsrvcf"      ,
+        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz\\.tbi$")               , "DOWNLOAD_ONLY-cpsrvcfi"     ,
       )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$SubjectID <- SubjectID
@@ -119,16 +118,15 @@ Wf_sash <- R6::R6Class(
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
-      # fmt: skip
       res <- tibble::tribble(
-        ~var, ~value,
-        "path", private$.path,
-        "wname", private$.wname,
-        "filesystem", private$.filesystem,
-        "nregexes", as.character(nrow(private$.regexes)),
-        "SubjectID", self$SubjectID,
-        "SampleID_tumor", self$SampleID_tumor,
-        "SampleID_normal", self$SampleID_normal
+        ~var              , ~value                               ,
+        "path"            , private$.path                        ,
+        "wname"           , private$.wname                       ,
+        "filesystem"      , private$.filesystem                  ,
+        "nregexes"        , as.character(nrow(private$.regexes)) ,
+        "SubjectID"       , self$SubjectID                       ,
+        "SampleID_tumor"  , self$SampleID_tumor                  ,
+        "SampleID_normal" , self$SampleID_normal
       )
       print(res)
       invisible(self)

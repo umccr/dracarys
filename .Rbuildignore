@@ -17,13 +17,9 @@
 ^conda$
 ^data-raw$
 ^docs$
-^dracarys$
 ^dracarys\.Rproj$
 ^nogit$
 ^pkgdown$
-^pyproject\.toml$
-^setup\.cfg$
-^setup\.py$
 ^vignettes$
 inst/reports/wgts-qc/nogit
 inst/rmd/umccr_portal/html

@@ -20,11 +20,6 @@ serialize = [
 ]
 
 [[tool.bumpversion.files]]
-filename = "dracarys/VERSION.txt"
-search = "{current_version}"
-replace = "{new_version}"
-
-[[tool.bumpversion.files]]
 filename = "DESCRIPTION"
 search = "Version: {current_version}"
 replace = "Version: {new_version}"
