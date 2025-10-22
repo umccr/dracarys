@@ -1,30 +1,22 @@
 ---
-output:
-  github_document:
-    toc: true
+format: gfm
+knitr:
+  opts_chunk:
+    collapse: true
+    comment: ''
+    fig.path: "man/figures/README-"
 ---
 
-<!-- README.md is generated from README.Rmd. Please edit that file -->
+<!-- README.md is generated from README.qmd. Please edit that file -->
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "",
-  fig.path = "man/figures/README-",
-  out.width = "100%"
-)
-knitr::knit_hooks$set(
-  prompt = function(before, options, envir) {
-    options(prompt = if (options$engine %in% c("sh", "bash")) "$ " else "R> ")
-  }
-)
+```{r}
+#| label: pkg_load
+#| echo: false
+#| message: false
+use("dracarys")
 ```
 
-```{r pkg_load, warning=FALSE, message=FALSE, echo=FALSE}
-require(dracarys)
-```
-
-# 🔥 dracarys - UMCCR Workflow Tidying
+# 🔥 dracarys - DRAGEN Workflow Tidying
 
 ![](https://emojis.slackmojis.com/emojis/images/1643515659/16823/flying_dragon.gif?1643515659 "Dragon Flying")
 
@@ -36,93 +28,29 @@ require(dracarys)
 
 ## 🏆 Aim
 
-Given a directory with results from a DRAGEN/UMCCR workflow,
+Given a directory with results from a DRAGEN workflow,
 {dracarys} will grab files of interest and transform them into 'tidier'
 structures for output into TSV/Parquet/RDS format for downstream ingestion
 into a database/data lake.
-See supported [workflows](#supported-workflows), [running](#running) examples,
-and [CLI](#cli) options in the sections below.
 
 ## 🍕 Installation
-
-<details>
-<summary>R</summary>
-
-```r
-remotes::install_github("umccr/dracarys@vX.X.X") # for vX.X.X Release/Tag
-```
-
-</details>
-
-<details>
-<summary>Conda</summary>
-
-- Linux & MacOS (non-M1)
-
-```bash
-mamba create \
-  -n dracarys_env \
-  -c umccr -c bioconda -c conda-forge \
-  r-dracarys==X.X.X
-
-conda activate dracarys_env
-```
-
-- MacOS M1
-
-```bash
-CONDA_SUBDIR=osx-64 \
-  mamba create \
-  -n dracarys_env \
-  -c umccr -c bioconda -c conda-forge \
-  r-dracarys==X.X.X
-
-conda activate dracarys_env
-```
-
-</details>
-
-<details>
-<summary>Docker</summary>
-
-```bash
-docker pull --platform linux/amd64 ghcr.io/umccr/dracarys:X.X.X
-```
-
-</details>
-
-<a name="supported-workflows"></a>
 
 ## ✨ Supported Workflows
 
 
-{dracarys} supports most outputs from the following DRAGEN/UMCCR workflows:
+{dracarys} supports most outputs from the following DRAGEN workflows:
 
 | Workflow   | Description |
 |------------|-------------|
 | bcl_convert | [BCLConvert][bclconvert-web] workflow |
 | tso_ctdna_tumor_only | [ctDNA TSO500][cttso-web] workflow |
 | wgs_alignment_qc | [DRAGEN DNA][dragen-web] (alignment) workflow |
-| wts_alignment_qc | [DRAGEN RNA][dragen-web] (alignment) workflow |
 | wts_tumor_only | [DRAGEN RNA][dragen-web] workflow |
 | wgs_tumor_normal | [DRAGEN Tumor/Normal][dragen-web] workflow |
-| umccrise | [umccrise][umccrise-web] workflow |
-| rnasum | [RNAsum][rnasum-web] workflow |
-| sash | [sash][sash-web] workflow |
-| oncoanalyser | [oncoanalyser][oa-web] workflow |
 
 [dragen-web]: <https://support-docs.illumina.com/SW/DRAGEN_v40/Content/SW/DRAGEN/GPipelineIntro_fDG.htm>
 [cttso-web]: <https://support-docs.illumina.com/SW/DRAGEN_TSO500_ctDNA_v2.1/Content/SW/TSO500/WorkflowDiagram_appT500ctDNAlocal.htm>
-[umccrise-web]: <https://github.com/umccr/umccrise>
-[rnasum-web]: <https://github.com/umccr/RNAsum>
-[sash-web]: <https://github.com/scwatts/sash>
-[oa-web]: <https://github.com/nf-core/oncoanalyser>
 [bclconvert-web]: <https://emea.support.illumina.com/sequencing/sequencing_software/bcl-convert.html>
-
-See which output files from these workflows are supported in
-[Supported Files](https://umccr.github.io/dracarys/articles/files.html).
-
-<a name="cli"></a>
 
 ## 🌀 CLI
 
@@ -158,9 +86,8 @@ echo ""
 ## 🚕 Running
 
 {dracarys} takes as input (`--in_dir`) a directory with results from one of the
-UMCCR [workflows](#supported-workflows). It will recursively scan that directory
-for [supported files](https://umccr.github.io/dracarys/articles/files.html),
-download those into a local directory (`--gds_local_dir`), and then it will
+DRAGEN workflows. It will recursively scan that directory
+for supported files, and then it will
 parse, transform and write the tidied versions into the specified output
 directory (`--out_dir`). A prefix (`--prefix`) is prepended to each of the tidied
 files. The output file format (`--format`) can be tsv, parquet, or both.
