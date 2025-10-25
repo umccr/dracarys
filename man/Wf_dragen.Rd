@@ -65,6 +65,7 @@ d_write <- d1$write(
 \item \href{#method-Wf_dragen-read_hist}{\code{Wf_dragen$read_hist()}}
 \item \href{#method-Wf_dragen-read_timeMetrics}{\code{Wf_dragen$read_timeMetrics()}}
 \item \href{#method-Wf_dragen-read_vcMetrics}{\code{Wf_dragen$read_vcMetrics()}}
+\item \href{#method-Wf_dragen-read_tmbMetrics}{\code{Wf_dragen$read_tmbMetrics()}}
 \item \href{#method-Wf_dragen-read_trimmerMetrics}{\code{Wf_dragen$read_trimmerMetrics()}}
 \item \href{#method-Wf_dragen-read_svMetrics}{\code{Wf_dragen$read_svMetrics()}}
 \item \href{#method-Wf_dragen-read_cnvMetrics}{\code{Wf_dragen$read_cnvMetrics()}}
@@ -288,6 +289,23 @@ Read \code{time_metrics.csv} file.
 Read \code{vc_metrics.csv}/\code{gvcf_metrics.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_vcMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_tmbMetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_tmbMetrics}{}}}
+\subsection{Method \code{read_tmbMetrics()}}{
+Read \code{tmb.metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_tmbMetrics(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

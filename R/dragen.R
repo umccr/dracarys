@@ -1,3 +1,37 @@
+#' Read DRAGEN `tmb.metrics.csv` File
+#'
+#' Reads tmb metrics file.
+#'
+#' @param x Path to file
+dragen_tmb_metrics_read <- function(x) {
+  d <- readr::read_lines(x)
+  stopifnot("First line not starting with TMB SUMMARY" = grepl("TMB SUMMARY", d[1]))
+  abbrev_nm <- c(
+    "Total Input Variant Count" = "vars_tot_input",
+    "Total Input Variant Count in TMB region" = "vars_tot_input_tmbregion",
+    "Filtered Variant Count" = "vars_filt",
+    "Filtered Nonsyn Variant Count" = "vars_filt_nonsyn",
+    "Eligible Region (MB)" = "region_eligible_mb",
+    "TMB" = "tmb",
+    "Nonsyn TMB" = "tmb_nonsyn"
+  )
+  res <- d |>
+    tibble::as_tibble_col(column_name = "value") |>
+    tidyr::separate_wider_delim(
+      "value",
+      names = c("tmbsum", "sample", "var", "value"),
+      delim = ","
+    ) |>
+    dplyr::mutate(
+      value = as.numeric(.data$value),
+      var = dplyr::recode(.data$var, !!!abbrev_nm)
+    ) |>
+    dplyr::select("var", "value") |>
+    tidyr::pivot_wider(names_from = "var", values_from = "value")
+  dirty_names_cleaned(colnames(res), abbrev_nm, x)
+  res
+}
+
 #' Read DRAGEN `microsat_output.json` File
 #'
 #' Reads microsat json file.
@@ -1087,6 +1121,7 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.microsat_output\\.json$")          , "read_msi"                ,
         glue("{pref}\\.sv_metrics\\.csv$")                , "read_svMetrics"          ,
         glue("{pref}\\.time_metrics\\.csv$")              , "read_timeMetrics"        ,
+        glue("{pref}\\.tmb\\.metrics\\.csv$")             , "read_tmbMetrics"         ,
         glue("{pref}\\.trimmer_metrics\\.csv$")           , "read_trimmerMetrics"     ,
         glue("{pref}\\.umi_metrics\\.csv$")               , "read_umiMetrics"         ,
         glue("{pref}\\.vc_metrics\\.csv$")                , "read_vcMetrics"          ,
@@ -1297,6 +1332,12 @@ Wf_dragen <- R6::R6Class(
         name = glue("dragen_vcmetrics_{subprefix}"),
         data = list(dat[])
       )
+    },
+    #' @description Read `tmb.metrics.csv` file.
+    #' @param x Path to file.
+    read_tmbMetrics = function(x) {
+      dat <- dragen_tmb_metrics_read(x)
+      tibble::tibble(name = "dragen_tmbmetrics", data = list(dat[]))
     },
     #' @description Read `trimmer_metrics.csv` file.
     #' @param x Path to file.
