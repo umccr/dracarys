@@ -10,7 +10,12 @@ Reads and writes tidy versions of files from the \code{dragen} workflow.
 \dontrun{
 
 #---- Local ----#
-prefix <- "L2401290"
+prefix <- "L2300943"
+p <- file.path(
+  "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2",
+  "project-wgs-accreditation/analysis/dragen-wgts-dna/20250909a5dda91e",
+  "L2300943__L2300950__hg38__linear__dragen_wgts_dna_somatic_variant_calling"
+)
 p <- file.path(
   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
   "analysis/cttsov2/20240915ff0295ed/Logs_Intermediates/DragenCaller",

@@ -3,7 +3,7 @@ dirty_names_cleaned <- function(dirty, clean, fname = NULL) {
     rlang::is_atomic(dirty),
     rlang::is_atomic(clean)
   )
-  are_dirty <- dirty[!dirty %in% clean]
+  are_dirty <- dirty[!dirty %in% clean] |> unique()
   msg <- paste(
     "Following columns are dirty:",
     paste(are_dirty, collapse = ", "),
