@@ -1,6 +1,6 @@
-#' Read DRAGEN `microsat_output.json`` File
+#' Read DRAGEN `microsat_output.json` File
 #'
-#' Reads `msi.json.gz` file output from the TSO500 workflow.
+#' Reads microsat json file.
 #'
 #' @param x Path to file
 dragen_msi_read <- function(x) {
@@ -1025,10 +1025,16 @@ dtw_Wf_dragen <- function(
 #'
 #' #---- Local ----#
 #' prefix <- "L2300943"
+#' prefix <- "L2000458"
 #' p <- file.path(
 #'   "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2",
 #'   "project-wgs-accreditation/analysis/dragen-wgts-dna/20250909a5dda91e",
 #'   "L2300943__L2300950__hg38__linear__dragen_wgts_dna_somatic_variant_calling"
+#' )
+#' p <- file.path(
+#'   "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2",
+#'   "project-wgs-accreditation/analysis/dragen-wgts-dna/20250910ec71d94a",
+#'   "L2000458__L2000457__hg38__linear__dragen_wgts_dna_somatic_variant_calling"
 #' )
 #' p <- file.path(
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
@@ -1062,39 +1068,29 @@ Wf_dragen <- R6::R6Class(
       wname <- "dragen"
       pref <- prefix
       tn1 <- "(|_tumor|_normal)"
+      # keep more specific regexes at the top
       regexes <- tibble::tribble(
-        ~regex                                              , ~fun                      ,
-        glue("{pref}\\-replay\\.json$")                     , "read_replay"             ,
-        glue("{pref}\\.cnv_metrics.csv$")                   , "read_cnvMetrics"         ,
-        glue("{pref}\\.exon_contig_mean_cov\\.csv$")        , "read_contigMeanCov"      ,
-        glue("{pref}\\.target_bed_contig_mean_cov\\.csv$")  , "read_contigMeanCov"      ,
-        glue("{pref}\\.tmb_contig_mean_cov\\.csv$")         , "read_contigMeanCov"      ,
-        glue("{pref}\\.wgs_contig_mean_cov{tn1}\\.csv$")    , "read_contigMeanCov"      ,
-        glue("{pref}\\.exon_coverage_metrics\\.csv$")       , "read_coverageMetrics"    ,
-        glue("{pref}\\.target_bed_coverage_metrics\\.csv$") , "read_coverageMetrics"    ,
-        glue("{pref}\\.tmb_coverage_metrics\\.csv$")        , "read_coverageMetrics"    ,
-        glue("{pref}\\.wgs_coverage_metrics{tn1}\\.csv$")   , "read_coverageMetrics"    ,
-        glue("{pref}\\.exon_fine_hist\\.csv$")              , "read_fineHist"           ,
-        glue("{pref}\\.target_bed_fine_hist\\.csv$")        , "read_fineHist"           ,
-        glue("{pref}\\.tmb_fine_hist\\.csv$")               , "read_fineHist"           ,
-        glue("{pref}\\.wgs_fine_hist{tn1}\\.csv$")          , "read_fineHist"           ,
-        glue("{pref}\\.exon_hist\\.csv$")                   , "read_hist"               ,
-        glue("{pref}\\.target_bed_hist\\.csv$")             , "read_hist"               ,
-        glue("{pref}\\.tmb_hist\\.csv$")                    , "read_hist"               ,
-        glue("{pref}\\.wgs_hist{tn1}\\.csv$")               , "read_hist"               ,
-        glue("{pref}\\.fastqc_metrics\\.csv$")              , "read_fastqcMetrics"      ,
-        glue("{pref}\\.fragment_length_hist\\.csv$")        , "read_fragmentLengthHist" ,
-        glue("{pref}\\.gc_metrics\\.csv$")                  , "read_gcMetrics"          ,
-        glue("{pref}\\.gvcf_metrics\\.csv$")                , "read_vcMetrics"          ,
-        glue("{pref}\\.mapping_metrics\\.csv$")             , "read_mappingMetrics"     ,
-        glue("{pref}\\.microsat_diffs\\.txt$")              , "read_msiDiffs"           ,
-        glue("{pref}\\.microsat_output\\.json$")            , "read_msi"                ,
-        glue("{pref}\\.sv_metrics\\.csv$")                  , "read_svMetrics"          ,
-        glue("{pref}\\.time_metrics\\.csv$")                , "read_timeMetrics"        ,
-        glue("{pref}\\.trimmer_metrics\\.csv$")             , "read_trimmerMetrics"     ,
-        glue("{pref}\\.umi_metrics\\.csv$")                 , "read_umiMetrics"         ,
-        glue("{pref}\\.vc_metrics\\.csv$")                  , "read_vcMetrics"          ,
-        glue("{pref}\\.ploidy_estimation_metrics\\.csv$")   , "read_ploidyMetrics"
+        ~regex                                            , ~fun                      ,
+        glue("{pref}\\..*_contig_mean_cov{tn1}\\.csv$")   , "read_contigMeanCov"      ,
+        glue("{pref}\\..*_coverage_metrics{tn1}\\.csv$")  , "read_coverageMetrics"    ,
+        glue("{pref}\\..*_fine_hist{tn1}\\.csv$")         , "read_fineHist"           ,
+        glue("{pref}\\.fragment_length_hist\\.csv$")      , "read_fragmentLengthHist" ,
+        glue("{pref}\\..*_hist{tn1}\\.csv$")              , "read_hist"               ,
+        glue("{pref}\\-replay\\.json$")                   , "read_replay"             ,
+        glue("{pref}\\.cnv_metrics.csv$")                 , "read_cnvMetrics"         ,
+        glue("{pref}\\.hrdscore\\.csv$")                  , "read_hrdscore"           ,
+        glue("{pref}\\.fastqc_metrics\\.csv$")            , "read_fastqcMetrics"      ,
+        glue("{pref}\\.gc_metrics\\.csv$")                , "read_gcMetrics"          ,
+        glue("{pref}\\.gvcf_metrics\\.csv$")              , "read_vcMetrics"          ,
+        glue("{pref}\\.mapping_metrics\\.csv$")           , "read_mappingMetrics"     ,
+        glue("{pref}\\.microsat_diffs\\.txt$")            , "read_msiDiffs"           ,
+        glue("{pref}\\.microsat_output\\.json$")          , "read_msi"                ,
+        glue("{pref}\\.sv_metrics\\.csv$")                , "read_svMetrics"          ,
+        glue("{pref}\\.time_metrics\\.csv$")              , "read_timeMetrics"        ,
+        glue("{pref}\\.trimmer_metrics\\.csv$")           , "read_trimmerMetrics"     ,
+        glue("{pref}\\.umi_metrics\\.csv$")               , "read_umiMetrics"         ,
+        glue("{pref}\\.vc_metrics\\.csv$")                , "read_vcMetrics"          ,
+        glue("{pref}\\.ploidy_estimation_metrics\\.csv$") , "read_ploidyMetrics"
       )
 
       super$initialize(path = path, wname = wname, regexes = regexes)
