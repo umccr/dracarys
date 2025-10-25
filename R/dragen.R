@@ -1109,6 +1109,15 @@ Wf_dragen <- R6::R6Class(
       print(res)
       invisible(self)
     },
+    #' @description Read `hrdscore.csv` file.
+    #' @param x Path to file.
+    read_hrdscore = function(x) {
+      dat <- readr::read_csv(x, col_types = "cdddd") |>
+        purrr::set_names(
+          c("sample", "loh_score", "tai_score", "lst_score", "hrd_score")
+        )
+      tibble::tibble(name = "dragen_hrdscore", data = list(dat[]))
+    },
     #' @description Read `replay.json` file.
     #' @param x Path to file.
     read_replay = function(x) {

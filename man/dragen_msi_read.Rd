@@ -2,7 +2,7 @@
 % Please edit documentation in R/dragen.R
 \name{dragen_msi_read}
 \alias{dragen_msi_read}
-\title{Read DRAGEN `microsat_output.json`` File}
+\title{Read DRAGEN \code{microsat_output.json} File}
 \usage{
 dragen_msi_read(x)
 }
@@ -10,5 +10,5 @@ dragen_msi_read(x)
 \item{x}{Path to file}
 }
 \description{
-Reads \code{msi.json.gz} file output from the TSO500 workflow.
+Reads microsat json file.
 }

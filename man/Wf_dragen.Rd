@@ -11,10 +11,16 @@ Reads and writes tidy versions of files from the \code{dragen} workflow.
 
 #---- Local ----#
 prefix <- "L2300943"
+prefix <- "L2000458"
 p <- file.path(
   "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2",
   "project-wgs-accreditation/analysis/dragen-wgts-dna/20250909a5dda91e",
   "L2300943__L2300950__hg38__linear__dragen_wgts_dna_somatic_variant_calling"
+)
+p <- file.path(
+  "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2",
+  "project-wgs-accreditation/analysis/dragen-wgts-dna/20250910ec71d94a",
+  "L2000458__L2000457__hg38__linear__dragen_wgts_dna_somatic_variant_calling"
 )
 p <- file.path(
   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
@@ -49,6 +55,7 @@ d_write <- d1$write(
 \itemize{
 \item \href{#method-Wf_dragen-new}{\code{Wf_dragen$new()}}
 \item \href{#method-Wf_dragen-print}{\code{Wf_dragen$print()}}
+\item \href{#method-Wf_dragen-read_hrdscore}{\code{Wf_dragen$read_hrdscore()}}
 \item \href{#method-Wf_dragen-read_replay}{\code{Wf_dragen$read_replay()}}
 \item \href{#method-Wf_dragen-read_contigMeanCov}{\code{Wf_dragen$read_contigMeanCov()}}
 \item \href{#method-Wf_dragen-read_coverageMetrics}{\code{Wf_dragen$read_coverageMetrics()}}
@@ -115,6 +122,23 @@ Print details about the Workflow.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_hrdscore"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_hrdscore}{}}}
+\subsection{Method \code{read_hrdscore()}}{
+Read \code{hrdscore.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_hrdscore(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }
