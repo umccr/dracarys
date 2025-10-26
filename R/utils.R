@@ -216,7 +216,8 @@ read_jsongz_rjsonio <- function(x, ...) {
 #' Grep File Pattern
 #'
 #' @param path Path to look for file.
-#' @param regexp A regular expression (e.g. [.]csv$) passed on to `grep()` to filter paths.
+#' @param regexp A regular expression (e.g. `[.]csv$`) passed on to `grep()`
+#' to filter paths.
 #'
 #' @return The path to the file or an empty string if no match is found.
 #' @export
