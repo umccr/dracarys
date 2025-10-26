@@ -10,5 +10,5 @@ dragen_covreportbed_read(x)
 \item{x}{Path to file}
 }
 \description{
-Reads coveraage report file.
+Reads coverage report file.
 }

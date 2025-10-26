@@ -1,6 +1,6 @@
 #' Read DRAGEN `read_cov_report.bed` File
 #'
-#' Reads coveraage report file.
+#' Reads coverage report file.
 #'
 #' @param x Path to file
 dragen_covreportbed_read <- function(x) {
