@@ -1,3 +1,13 @@
+#' Read DRAGEN `read_cov_report.bed` File
+#'
+#' Reads coveraage report file.
+#'
+#' @param x Path to file
+dragen_covreportbed_read <- function(x) {
+  readr::read_tsv(x, col_types = "cddccddd") |>
+    dplyr::rename(chrom = "#chrom")
+}
+
 #' Read DRAGEN `tmb.metrics.csv` File
 #'
 #' Reads tmb metrics file.
@@ -1105,6 +1115,7 @@ Wf_dragen <- R6::R6Class(
       # keep more specific regexes at the top
       regexes <- tibble::tribble(
         ~regex                                            , ~fun                      ,
+        glue("{pref}\\..*_read_cov_report{tn1}\\.bed$")   , "read_covReport"          ,
         glue("{pref}\\..*_contig_mean_cov{tn1}\\.csv$")   , "read_contigMeanCov"      ,
         glue("{pref}\\..*_coverage_metrics{tn1}\\.csv$")  , "read_coverageMetrics"    ,
         glue("{pref}\\..*_fine_hist{tn1}\\.csv$")         , "read_fineHist"           ,
@@ -1143,6 +1154,12 @@ Wf_dragen <- R6::R6Class(
       )
       print(res)
       invisible(self)
+    },
+    #' @description Read `read_cov_report.bed` file.
+    #' @param x Path to file.
+    read_covReport = function(x) {
+      dat <- dragen_covreportbed_read(x)
+      tibble::tibble(name = "dragen_covreport", data = list(dat[]))
     },
     #' @description Read `hrdscore.csv` file.
     #' @param x Path to file.

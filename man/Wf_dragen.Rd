@@ -55,6 +55,7 @@ d_write <- d1$write(
 \itemize{
 \item \href{#method-Wf_dragen-new}{\code{Wf_dragen$new()}}
 \item \href{#method-Wf_dragen-print}{\code{Wf_dragen$print()}}
+\item \href{#method-Wf_dragen-read_covReport}{\code{Wf_dragen$read_covReport()}}
 \item \href{#method-Wf_dragen-read_hrdscore}{\code{Wf_dragen$read_hrdscore()}}
 \item \href{#method-Wf_dragen-read_replay}{\code{Wf_dragen$read_replay()}}
 \item \href{#method-Wf_dragen-read_contigMeanCov}{\code{Wf_dragen$read_contigMeanCov()}}
@@ -123,6 +124,23 @@ Print details about the Workflow.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_covReport"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_covReport}{}}}
+\subsection{Method \code{read_covReport()}}{
+Read \code{read_cov_report.bed} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_covReport(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }
