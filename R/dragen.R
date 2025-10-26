@@ -1,6 +1,50 @@
-#' Read DRAGEN `microsat_output.json`` File
+#' Read DRAGEN `read_cov_report.bed` File
 #'
-#' Reads `msi.json.gz` file output from the TSO500 workflow.
+#' Reads coverage report file.
+#'
+#' @param x Path to file
+dragen_covreportbed_read <- function(x) {
+  readr::read_tsv(x, col_types = "cddccddd") |>
+    dplyr::rename(chrom = "#chrom")
+}
+
+#' Read DRAGEN `tmb.metrics.csv` File
+#'
+#' Reads tmb metrics file.
+#'
+#' @param x Path to file
+dragen_tmb_metrics_read <- function(x) {
+  d <- readr::read_lines(x)
+  stopifnot("First line not starting with TMB SUMMARY" = grepl("TMB SUMMARY", d[1]))
+  abbrev_nm <- c(
+    "Total Input Variant Count" = "vars_tot_input",
+    "Total Input Variant Count in TMB region" = "vars_tot_input_tmbregion",
+    "Filtered Variant Count" = "vars_filt",
+    "Filtered Nonsyn Variant Count" = "vars_filt_nonsyn",
+    "Eligible Region (MB)" = "region_eligible_mb",
+    "TMB" = "tmb",
+    "Nonsyn TMB" = "tmb_nonsyn"
+  )
+  res <- d |>
+    tibble::as_tibble_col(column_name = "value") |>
+    tidyr::separate_wider_delim(
+      "value",
+      names = c("tmbsum", "sample", "var", "value"),
+      delim = ","
+    ) |>
+    dplyr::mutate(
+      value = as.numeric(.data$value),
+      var = dplyr::recode(.data$var, !!!abbrev_nm)
+    ) |>
+    dplyr::select("var", "value") |>
+    tidyr::pivot_wider(names_from = "var", values_from = "value")
+  dirty_names_cleaned(colnames(res), abbrev_nm, x)
+  res
+}
+
+#' Read DRAGEN `microsat_output.json` File
+#'
+#' Reads microsat json file.
 #'
 #' @param x Path to file
 dragen_msi_read <- function(x) {
@@ -258,6 +302,9 @@ dragen_cnv_metrics_read <- function(x) {
     "Number of filtered records (duplicates)" = "n_filtered_records_dup",
     "Number of filtered records (MAPQ)" = "n_filtered_records_mapq",
     "Number of filtered records (unmapped)" = "n_filtered_records_unmap",
+    "PMAD" = "pmad",
+    "OutlierBafFraction" = "outlier_baf_fraction",
+    "Homozygosity index" = "homozygosity_index",
     "Coverage MAD" = "coverage_mad",
     "Gene Scaled MAD" = "gene_scaled_mad",
     "Median Bin Count" = "median_bin_count",
@@ -369,20 +416,28 @@ dragen_trimmer_metrics_read <- function(x) {
     "Total input bases R1" = "bases_r1",
     "Total input bases R2" = "bases_r2",
     "Average input read length" = "read_len_avg",
-    "Total trimmed reads" = "reads_trimmed_tot",
-    "Total trimmed bases" = "bases_trimmed_tot",
-    "Average bases trimmed per read" = "bases_trimmed_avg_per_read",
-    "Average bases trimmed per trimmed read" = "bases_trimmed_avg_per_trimmedread",
+    "Total trimmed reads" = "reads_trim_tot",
+    "Total trimmed bases" = "bases_trim_tot",
+    "Average bases trimmed per read" = "bases_trim_avg_per_read",
+    "Average bases trimmed per trimmed read" = "bases_trim_avg_per_trimread",
     "Remaining poly-G K-mers R1 3prime" = "polygkmers3r1_remaining",
     "Remaining poly-G K-mers R2 3prime" = "polygkmers3r2_remaining",
-    "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trimmed_reads_unfilt_3r1",
-    "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trimmed_reads_unfilt_3r2",
-    "Poly-G soft trimmed reads filtered R1 3prime" = "polyg_soft_trimmed_reads_filt_3r1",
-    "Poly-G soft trimmed reads filtered R2 3prime" = "polyg_soft_trimmed_reads_filt_3r2",
-    "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trimmed_bases_unfilt_3r1",
-    "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trimmed_bases_unfilt_3r2",
-    "Poly-G soft trimmed bases filtered R1 3prime" = "polyg_soft_trimmed_bases_filt_3r1",
-    "Poly-G soft trimmed bases filtered R2 3prime" = "polyg_soft_trimmed_bases_filt_3r2",
+    "Poly-G soft trimmed reads unfiltered R1 3prime" = "polyg_soft_trim_reads_unfilt_3r1",
+    "Poly-G soft trimmed reads unfiltered R2 3prime" = "polyg_soft_trim_reads_unfilt_3r2",
+    "Poly-G soft trimmed reads unfiltered R1 5prime" = "polyg_soft_trim_reads_unfilt_5r1",
+    "Poly-G soft trimmed reads unfiltered R2 5prime" = "polyg_soft_trim_reads_unfilt_5r2",
+    "Poly-G soft trimmed reads filtered R1 3prime" = "polyg_soft_trim_reads_filt_3r1",
+    "Poly-G soft trimmed reads filtered R2 3prime" = "polyg_soft_trim_reads_filt_3r2",
+    "Poly-G soft trimmed reads filtered R1 5prime" = "polyg_soft_trim_reads_filt_5r1",
+    "Poly-G soft trimmed reads filtered R2 5prime" = "polyg_soft_trim_reads_filt_5r2",
+    "Poly-G soft trimmed bases unfiltered R1 3prime" = "polyg_soft_trim_bases_unfilt_3r1",
+    "Poly-G soft trimmed bases unfiltered R2 3prime" = "polyg_soft_trim_bases_unfilt_3r2",
+    "Poly-G soft trimmed bases unfiltered R1 5prime" = "polyg_soft_trim_bases_unfilt_5r1",
+    "Poly-G soft trimmed bases unfiltered R2 5prime" = "polyg_soft_trim_bases_unfilt_5r2",
+    "Poly-G soft trimmed bases filtered R1 3prime" = "polyg_soft_trim_bases_filt_3r1",
+    "Poly-G soft trimmed bases filtered R2 3prime" = "polyg_soft_trim_bases_filt_3r2",
+    "Poly-G soft trimmed bases filtered R1 5prime" = "polyg_soft_trim_bases_filt_5r1",
+    "Poly-G soft trimmed bases filtered R2 5prime" = "polyg_soft_trim_bases_filt_5r2",
     "Total filtered reads" = "reads_tot_filt",
     "Reads filtered for minimum read length R1" = "reads_filt_minreadlenr1",
     "Reads filtered for minimum read length R2" = "reads_filt_minreadlenr2"
@@ -432,9 +487,14 @@ dragen_vc_metrics_read <- function(x) {
     "Total"                                     , "var_tot"                           , FALSE   ,
     "Biallelic"                                 , "var_biallelic"                     , FALSE   ,
     "Multiallelic"                              , "var_multiallelic"                  , FALSE   ,
+    "Single allelic"                            , "var_singleallelic"                 , FALSE   ,
     "SNPs"                                      , "var_snp"                           , FALSE   ,
+    "Insertions"                                , "var_ins"                           , FALSE   ,
+    "Insertions (Hap)"                          , "var_ins_hap"                       , FALSE   ,
     "Insertions (Hom)"                          , "var_ins_hom"                       , FALSE   ,
     "Insertions (Het)"                          , "var_ins_het"                       , FALSE   ,
+    "Deletions"                                 , "var_del"                           , FALSE   ,
+    "Deletions (Hap)"                           , "var_del_hap"                       , FALSE   ,
     "Deletions (Hom)"                           , "var_del_hom"                       , FALSE   ,
     "Deletions (Het)"                           , "var_del_het"                       , FALSE   ,
     "Indels (Het)"                              , "var_indel_het"                     , FALSE   ,
@@ -443,6 +503,8 @@ dragen_vc_metrics_read <- function(x) {
     "(Chr X SNPs)/(chr Y SNPs) ratio over "     , "var_x_over_y_snp_ratio_over_"      , TRUE    ,
     "SNP Transitions"                           , "var_snp_transitions"               , FALSE   ,
     "SNP Transversions"                         , "var_snp_transversions"             , FALSE   ,
+    "SNP Mosaics"                               , "var_snp_mosaics"                   , FALSE   ,
+    "Indel Mosaics"                             , "var_indel_mosaics"                 , FALSE   ,
     "Ti/Tv ratio"                               , "var_ti_tv_ratio"                   , FALSE   ,
     "Heterozygous"                              , "var_heterozygous"                  , FALSE   ,
     "Homozygous"                                , "var_homozygous"                    , FALSE   ,
@@ -612,7 +674,23 @@ dragen_mapping_metrics_read <- function(x) {
     "Reads with splice junction" = "reads_splicejunc",
     "Average sequenced coverage over genome" = "cov_avg_seq_over_genome",
     "Filtered rRNA reads" = "reads_rrna_filtered",
-    "Mitochondrial reads excluded" = "reads_mito_excl"
+    "Mitochondrial reads excluded" = "reads_mito_excl",
+    "Mapped reads to pop-alt insertions (PAI)" = "reads_mapped_pai",
+    "Mapped reads to non-ref decoys (NRD)" = "reads_mapped_nrd",
+    "Mapped reads to ref-external sequences (PAI or NRD)" = "reads_mapped_pai_nrd",
+    "Mapped reads (RNA) to rRNA and filtered" = "reads_mapped_rna_rrna_filt",
+    "Mapped reads (RNA) to chrM and excluded from metrics" = "reads_mapped_rna_chrm_excl",
+    "Mapped reads including ref-external or filtered or excluded" = "reads_mapped_incl_refext_filt_excl",
+    "Unmapped reads minus ref-external mappings" = "reads_unmapped_minus_refext",
+    "Unmapped reads minus filtered mappings" = "reads_unmapped_minus_filt",
+    "Unmapped reads minus excluded mappings" = "reads_unmapped_minus_excl",
+    "Unmapped reads minus ref-external or filtered or excluded" = "reads_unmapped_minus_refext_filt_excl",
+    "Linked alignments from proximity-aware mapping" = "alignments_linked_proxaware_map",
+    "Remapped alignments from proximity-aware mapping" = "alignments_remapped_proxaware_map",
+    "Total input reads for fractional downsampling" = "reads_tot_input_fracsamp",
+    "Reads kept by fractional downsampling [% of input reads]" = "reads_kept_fracsamp_pct",
+    "Input bases divided by reference genome size" = "bases_input_div_refgenome_size",
+    "Input bases divided by target bed size" = "bases_input_div_targetbed_size"
   )
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("MAPPING/ALIGNING", d0[1]))
@@ -670,20 +748,22 @@ dragen_mapping_metrics_read <- function(x) {
 dragen_coverage_metrics_read <- function(x) {
   # all rows except 'Aligned bases' and 'Aligned reads' refer to the region
   abbrev_nm <- tibble::tribble(
-    ~raw                                            , ~clean                             , ~region ,
-    "Aligned bases"                                 , "bases_aligned_tot"                , FALSE   ,
-    "Aligned reads"                                 , "reads_aligned_tot"                , FALSE   ,
-    "Aligned bases in "                             , "bases_aligned_"                   , TRUE    ,
-    "Average alignment coverage over "              , "cov_alignment_avg_over_"          , TRUE    ,
-    "Uniformity of coverage (PCT > 0.2*mean) over " , "cov_uniformity_pct_gt02mean_"     , TRUE    ,
-    "Uniformity of coverage (PCT > 0.4*mean) over " , "cov_uniformity_pct_gt04mean_"     , TRUE    ,
-    "Average chr X coverage over "                  , "cov_avg_x_over_"                  , TRUE    ,
-    "Average chr Y coverage over "                  , "cov_avg_y_over_"                  , TRUE    ,
-    "Average mitochondrial coverage over "          , "cov_avg_mt_over_"                 , TRUE    ,
-    "Average autosomal coverage over "              , "cov_avg_auto_over_"               , TRUE    ,
-    "Median autosomal coverage over "               , "cov_median_auto_over_"            , TRUE    ,
-    "Mean/Median autosomal coverage ratio over "    , "cov_mean_median_auto_ratio_over_" , TRUE    ,
-    "Aligned reads in "                             , "reads_aligned_in_"                , TRUE
+    ~raw                                              , ~clean                             , ~region ,
+    "Aligned bases"                                   , "bases_aligned_tot"                , FALSE   ,
+    "Aligned reads"                                   , "reads_aligned_tot"                , FALSE   ,
+    "Aligned bases in "                               , "bases_aligned_"                   , TRUE    ,
+    "Average alignment coverage over "                , "cov_alignment_avg_over_"          , TRUE    ,
+    "Uniformity of coverage (PCT > 0.2*mean) over "   , "cov_uniformity_pct_gt02mean_"     , TRUE    ,
+    "Uniformity of coverage (PCT > 0.4*mean) over "   , "cov_uniformity_pct_gt04mean_"     , TRUE    ,
+    "Average chr X coverage over "                    , "cov_avg_x_over_"                  , TRUE    ,
+    "Average chr Y coverage over "                    , "cov_avg_y_over_"                  , TRUE    ,
+    "Average mitochondrial coverage over "            , "cov_avg_mt_over_"                 , TRUE    ,
+    "Average autosomal coverage over "                , "cov_avg_auto_over_"               , TRUE    ,
+    "Median autosomal coverage over "                 , "cov_median_auto_over_"            , TRUE    ,
+    "Mean/Median autosomal coverage ratio over "      , "cov_mean_median_auto_ratio_over_" , TRUE    ,
+    "Median chr X coverage (ignore 0x regions) over " , "cov_median_x_ign0_over_"          , TRUE    ,
+    "Median chr Y coverage (ignore 0x regions) over " , "cov_median_y_ign0_over_"          , TRUE    ,
+    "Aligned reads in "                               , "reads_aligned_in_"                , TRUE
   )
   d0 <- readr::read_lines(x)
   assertthat::assert_that(grepl("COVERAGE SUMMARY", d0[1]))
@@ -871,22 +951,28 @@ dragen_contig_mean_coverage_plot <- function(d, top_alt_n = 15) {
 dragen_ploidy_estimation_metrics_read <- function(x) {
   raw <- readr::read_lines(x)
   assertthat::assert_that(grepl("PLOIDY ESTIMATION", raw[1]))
-  fun1 <- function(x) {
+  fun1 <- function(x, median = TRUE) {
+    s1 <- ifelse(median, " median", "")
+    s2 <- ifelse(median, "median", "ratio")
     purrr::set_names(
-      as.character(glue("cov_{tolower(x)}_div_auto_median")),
-      as.character(glue("{x} median / Autosomal median"))
+      as.character(glue("cov_{tolower(x)}_div_auto")),
+      as.character(glue("{x}{s1} / Autosomal {s2}"))
     )
   }
-  fun2 <- function(x) {
+  fun2 <- function(x, median = TRUE) {
+    s2 <- ifelse(median, "median coverage", "coverage percentile")
     purrr::set_names(
-      as.character(glue("cov_{tolower(x)}_median")),
-      as.character(glue("{x} median coverage"))
+      as.character(glue("cov_{tolower(x)}")),
+      as.character(glue("{x} {s2}"))
     )
   }
   abbrev_nm <- c(
     "Ploidy estimation" = "ploidy_est",
+    "Coverage skewness" = "cov_skewness",
     fun2(c("X", "Y", "Autosomal")),
-    fun1(c(1:22, "X", "Y"))
+    fun2(c("X", "Y", "Autosomal"), median = FALSE),
+    fun1(c(1:22, "X", "Y")),
+    fun1(c(1:22, "X", "Y"), median = FALSE)
   )
   d <- raw |>
     tibble::as_tibble_col(column_name = "value") |>
@@ -982,7 +1068,18 @@ dtw_Wf_dragen <- function(
 #' \dontrun{
 #'
 #' #---- Local ----#
-#' prefix <- "L2401290"
+#' prefix <- "L2300943"
+#' prefix <- "L2000458"
+#' p <- file.path(
+#'   "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2",
+#'   "project-wgs-accreditation/analysis/dragen-wgts-dna/20250909a5dda91e",
+#'   "L2300943__L2300950__hg38__linear__dragen_wgts_dna_somatic_variant_calling"
+#' )
+#' p <- file.path(
+#'   "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2",
+#'   "project-wgs-accreditation/analysis/dragen-wgts-dna/20250910ec71d94a",
+#'   "L2000458__L2000457__hg38__linear__dragen_wgts_dna_somatic_variant_calling"
+#' )
 #' p <- file.path(
 #'   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
 #'   "analysis/cttsov2/20240915ff0295ed/Logs_Intermediates/DragenCaller",
@@ -1015,39 +1112,31 @@ Wf_dragen <- R6::R6Class(
       wname <- "dragen"
       pref <- prefix
       tn1 <- "(|_tumor|_normal)"
+      # keep more specific regexes at the top
       regexes <- tibble::tribble(
-        ~regex                                              , ~fun                      ,
-        glue("{pref}\\-replay\\.json$")                     , "read_replay"             ,
-        glue("{pref}\\.cnv_metrics.csv$")                   , "read_cnvMetrics"         ,
-        glue("{pref}\\.exon_contig_mean_cov\\.csv$")        , "read_contigMeanCov"      ,
-        glue("{pref}\\.target_bed_contig_mean_cov\\.csv$")  , "read_contigMeanCov"      ,
-        glue("{pref}\\.tmb_contig_mean_cov\\.csv$")         , "read_contigMeanCov"      ,
-        glue("{pref}\\.wgs_contig_mean_cov{tn1}\\.csv$")    , "read_contigMeanCov"      ,
-        glue("{pref}\\.exon_coverage_metrics\\.csv$")       , "read_coverageMetrics"    ,
-        glue("{pref}\\.target_bed_coverage_metrics\\.csv$") , "read_coverageMetrics"    ,
-        glue("{pref}\\.tmb_coverage_metrics\\.csv$")        , "read_coverageMetrics"    ,
-        glue("{pref}\\.wgs_coverage_metrics{tn1}\\.csv$")   , "read_coverageMetrics"    ,
-        glue("{pref}\\.exon_fine_hist\\.csv$")              , "read_fineHist"           ,
-        glue("{pref}\\.target_bed_fine_hist\\.csv$")        , "read_fineHist"           ,
-        glue("{pref}\\.tmb_fine_hist\\.csv$")               , "read_fineHist"           ,
-        glue("{pref}\\.wgs_fine_hist{tn1}\\.csv$")          , "read_fineHist"           ,
-        glue("{pref}\\.exon_hist\\.csv$")                   , "read_hist"               ,
-        glue("{pref}\\.target_bed_hist\\.csv$")             , "read_hist"               ,
-        glue("{pref}\\.tmb_hist\\.csv$")                    , "read_hist"               ,
-        glue("{pref}\\.wgs_hist{tn1}\\.csv$")               , "read_hist"               ,
-        glue("{pref}\\.fastqc_metrics\\.csv$")              , "read_fastqcMetrics"      ,
-        glue("{pref}\\.fragment_length_hist\\.csv$")        , "read_fragmentLengthHist" ,
-        glue("{pref}\\.gc_metrics\\.csv$")                  , "read_gcMetrics"          ,
-        glue("{pref}\\.gvcf_metrics\\.csv$")                , "read_vcMetrics"          ,
-        glue("{pref}\\.mapping_metrics\\.csv$")             , "read_mappingMetrics"     ,
-        glue("{pref}\\.microsat_diffs\\.txt$")              , "read_msiDiffs"           ,
-        glue("{pref}\\.microsat_output\\.json$")            , "read_msi"                ,
-        glue("{pref}\\.sv_metrics\\.csv$")                  , "read_svMetrics"          ,
-        glue("{pref}\\.time_metrics\\.csv$")                , "read_timeMetrics"        ,
-        glue("{pref}\\.trimmer_metrics\\.csv$")             , "read_trimmerMetrics"     ,
-        glue("{pref}\\.umi_metrics\\.csv$")                 , "read_umiMetrics"         ,
-        glue("{pref}\\.vc_metrics\\.csv$")                  , "read_vcMetrics"          ,
-        glue("{pref}\\.ploidy_estimation_metrics\\.csv$")   , "read_ploidyMetrics"
+        ~regex                                            , ~fun                      ,
+        glue("{pref}\\..*_read_cov_report{tn1}\\.bed$")   , "read_covReport"          ,
+        glue("{pref}\\..*_contig_mean_cov{tn1}\\.csv$")   , "read_contigMeanCov"      ,
+        glue("{pref}\\..*_coverage_metrics{tn1}\\.csv$")  , "read_coverageMetrics"    ,
+        glue("{pref}\\..*_fine_hist{tn1}\\.csv$")         , "read_fineHist"           ,
+        glue("{pref}\\.fragment_length_hist\\.csv$")      , "read_fragmentLengthHist" ,
+        glue("{pref}\\..*_hist{tn1}\\.csv$")              , "read_hist"               ,
+        glue("{pref}\\-replay\\.json$")                   , "read_replay"             ,
+        glue("{pref}\\.cnv_metrics.csv$")                 , "read_cnvMetrics"         ,
+        glue("{pref}\\.hrdscore\\.csv$")                  , "read_hrdscore"           ,
+        glue("{pref}\\.fastqc_metrics\\.csv$")            , "read_fastqcMetrics"      ,
+        glue("{pref}\\.gc_metrics\\.csv$")                , "read_gcMetrics"          ,
+        glue("{pref}\\.gvcf_metrics\\.csv$")              , "read_vcMetrics"          ,
+        glue("{pref}\\.mapping_metrics\\.csv$")           , "read_mappingMetrics"     ,
+        glue("{pref}\\.microsat_diffs\\.txt$")            , "read_msiDiffs"           ,
+        glue("{pref}\\.microsat_output\\.json$")          , "read_msi"                ,
+        glue("{pref}\\.sv_metrics\\.csv$")                , "read_svMetrics"          ,
+        glue("{pref}\\.time_metrics\\.csv$")              , "read_timeMetrics"        ,
+        glue("{pref}\\.tmb\\.metrics\\.csv$")             , "read_tmbMetrics"         ,
+        glue("{pref}\\.trimmer_metrics\\.csv$")           , "read_trimmerMetrics"     ,
+        glue("{pref}\\.umi_metrics\\.csv$")               , "read_umiMetrics"         ,
+        glue("{pref}\\.vc_metrics\\.csv$")                , "read_vcMetrics"          ,
+        glue("{pref}\\.ploidy_estimation_metrics\\.csv$") , "read_ploidyMetrics"
       )
 
       super$initialize(path = path, wname = wname, regexes = regexes)
@@ -1065,6 +1154,21 @@ Wf_dragen <- R6::R6Class(
       )
       print(res)
       invisible(self)
+    },
+    #' @description Read `read_cov_report.bed` file.
+    #' @param x Path to file.
+    read_covReport = function(x) {
+      dat <- dragen_covreportbed_read(x)
+      tibble::tibble(name = "dragen_covreport", data = list(dat[]))
+    },
+    #' @description Read `hrdscore.csv` file.
+    #' @param x Path to file.
+    read_hrdscore = function(x) {
+      dat <- readr::read_csv(x, col_types = "cdddd") |>
+        purrr::set_names(
+          c("sample", "loh_score", "tai_score", "lst_score", "hrd_score")
+        )
+      tibble::tibble(name = "dragen_hrdscore", data = list(dat[]))
     },
     #' @description Read `replay.json` file.
     #' @param x Path to file.
@@ -1245,6 +1349,12 @@ Wf_dragen <- R6::R6Class(
         name = glue("dragen_vcmetrics_{subprefix}"),
         data = list(dat[])
       )
+    },
+    #' @description Read `tmb.metrics.csv` file.
+    #' @param x Path to file.
+    read_tmbMetrics = function(x) {
+      dat <- dragen_tmb_metrics_read(x)
+      tibble::tibble(name = "dragen_tmbmetrics", data = list(dat[]))
     },
     #' @description Read `trimmer_metrics.csv` file.
     #' @param x Path to file.

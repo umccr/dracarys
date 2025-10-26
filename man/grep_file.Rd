@@ -9,7 +9,8 @@ grep_file(path = ".", regexp)
 \arguments{
 \item{path}{Path to look for file.}
 
-\item{regexp}{A regular expression (e.g. \link{.}csv$) passed on to \code{grep()} to filter paths.}
+\item{regexp}{A regular expression (e.g. \verb{[.]csv$}) passed on to \code{grep()}
+to filter paths.}
 }
 \value{
 The path to the file or an empty string if no match is found.

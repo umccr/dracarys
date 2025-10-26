@@ -3,7 +3,7 @@ dirty_names_cleaned <- function(dirty, clean, fname = NULL) {
     rlang::is_atomic(dirty),
     rlang::is_atomic(clean)
   )
-  are_dirty <- dirty[!dirty %in% clean]
+  are_dirty <- dirty[!dirty %in% clean] |> unique()
   msg <- paste(
     "Following columns are dirty:",
     paste(are_dirty, collapse = ", "),
@@ -216,7 +216,8 @@ read_jsongz_rjsonio <- function(x, ...) {
 #' Grep File Pattern
 #'
 #' @param path Path to look for file.
-#' @param regexp A regular expression (e.g. [.]csv$) passed on to `grep()` to filter paths.
+#' @param regexp A regular expression (e.g. `[.]csv$`) passed on to `grep()`
+#' to filter paths.
 #'
 #' @return The path to the file or an empty string if no match is found.
 #' @export

@@ -10,7 +10,18 @@ Reads and writes tidy versions of files from the \code{dragen} workflow.
 \dontrun{
 
 #---- Local ----#
-prefix <- "L2401290"
+prefix <- "L2300943"
+prefix <- "L2000458"
+p <- file.path(
+  "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2",
+  "project-wgs-accreditation/analysis/dragen-wgts-dna/20250909a5dda91e",
+  "L2300943__L2300950__hg38__linear__dragen_wgts_dna_somatic_variant_calling"
+)
+p <- file.path(
+  "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2",
+  "project-wgs-accreditation/analysis/dragen-wgts-dna/20250910ec71d94a",
+  "L2000458__L2000457__hg38__linear__dragen_wgts_dna_somatic_variant_calling"
+)
 p <- file.path(
   "~/s3/pipeline-prod-cache-503977275616-ap-southeast-2/byob-icav2/production",
   "analysis/cttsov2/20240915ff0295ed/Logs_Intermediates/DragenCaller",
@@ -44,6 +55,8 @@ d_write <- d1$write(
 \itemize{
 \item \href{#method-Wf_dragen-new}{\code{Wf_dragen$new()}}
 \item \href{#method-Wf_dragen-print}{\code{Wf_dragen$print()}}
+\item \href{#method-Wf_dragen-read_covReport}{\code{Wf_dragen$read_covReport()}}
+\item \href{#method-Wf_dragen-read_hrdscore}{\code{Wf_dragen$read_hrdscore()}}
 \item \href{#method-Wf_dragen-read_replay}{\code{Wf_dragen$read_replay()}}
 \item \href{#method-Wf_dragen-read_contigMeanCov}{\code{Wf_dragen$read_contigMeanCov()}}
 \item \href{#method-Wf_dragen-read_coverageMetrics}{\code{Wf_dragen$read_coverageMetrics()}}
@@ -53,6 +66,7 @@ d_write <- d1$write(
 \item \href{#method-Wf_dragen-read_hist}{\code{Wf_dragen$read_hist()}}
 \item \href{#method-Wf_dragen-read_timeMetrics}{\code{Wf_dragen$read_timeMetrics()}}
 \item \href{#method-Wf_dragen-read_vcMetrics}{\code{Wf_dragen$read_vcMetrics()}}
+\item \href{#method-Wf_dragen-read_tmbMetrics}{\code{Wf_dragen$read_tmbMetrics()}}
 \item \href{#method-Wf_dragen-read_trimmerMetrics}{\code{Wf_dragen$read_trimmerMetrics()}}
 \item \href{#method-Wf_dragen-read_svMetrics}{\code{Wf_dragen$read_svMetrics()}}
 \item \href{#method-Wf_dragen-read_cnvMetrics}{\code{Wf_dragen$read_cnvMetrics()}}
@@ -110,6 +124,40 @@ Print details about the Workflow.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_covReport"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_covReport}{}}}
+\subsection{Method \code{read_covReport()}}{
+Read \code{read_cov_report.bed} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_covReport(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_hrdscore"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_hrdscore}{}}}
+\subsection{Method \code{read_hrdscore()}}{
+Read \code{hrdscore.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_hrdscore(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }
@@ -259,6 +307,23 @@ Read \code{time_metrics.csv} file.
 Read \code{vc_metrics.csv}/\code{gvcf_metrics.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_vcMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_tmbMetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_tmbMetrics}{}}}
+\subsection{Method \code{read_tmbMetrics()}}{
+Read \code{tmb.metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_tmbMetrics(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

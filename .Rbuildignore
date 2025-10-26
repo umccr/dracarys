@@ -1,7 +1,7 @@
 ^CODE_OF_CONDUCT\.md$
 ^Dockerfile$
 ^LICENSE\.md$
-^README\.Rmd$
+^README\.qmd$
 ^TODO\.md$
 ^\.DS_Store$
 ^\.Rproj\.user$
