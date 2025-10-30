@@ -9,6 +9,9 @@ dragen_tmb_metrics_read(x)
 \arguments{
 \item{x}{Path to file}
 }
+\value{
+Tibble.
+}
 \description{
 Reads tmb metrics file.
 }
