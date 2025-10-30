@@ -7,7 +7,10 @@
 dragen_covreportbed_read(x)
 }
 \arguments{
-\item{x}{Path to file}
+\item{x}{Path to file.}
+}
+\value{
+Tibble.
 }
 \description{
 Reads coverage report file.

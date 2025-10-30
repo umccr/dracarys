@@ -9,6 +9,9 @@ dragen_msi_read(x)
 \arguments{
 \item{x}{Path to file}
 }
+\value{
+Tibble.
+}
 \description{
 Reads microsat json file.
 }
