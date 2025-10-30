@@ -70,6 +70,7 @@ d_write <- d1$write(
 \item \href{#method-Wf_dragen-read_vcMetrics}{\code{Wf_dragen$read_vcMetrics()}}
 \item \href{#method-Wf_dragen-read_targetedVcf}{\code{Wf_dragen$read_targetedVcf()}}
 \item \href{#method-Wf_dragen-read_tmbMetrics}{\code{Wf_dragen$read_tmbMetrics()}}
+\item \href{#method-Wf_dragen-read_tmbTrace}{\code{Wf_dragen$read_tmbTrace()}}
 \item \href{#method-Wf_dragen-read_trimmerMetrics}{\code{Wf_dragen$read_trimmerMetrics()}}
 \item \href{#method-Wf_dragen-read_svMetrics}{\code{Wf_dragen$read_svMetrics()}}
 \item \href{#method-Wf_dragen-read_cnvMetrics}{\code{Wf_dragen$read_cnvMetrics()}}
@@ -362,7 +363,7 @@ Read \code{vc_metrics.csv}/\code{gvcf_metrics.csv} file.
 \subsection{Method \code{read_targetedVcf()}}{
 Read \code{targeted.vcf.gz} file.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_targetedVcf()}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_targetedVcf(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -380,6 +381,23 @@ Read \code{targeted.vcf.gz} file.
 Read \code{tmb.metrics.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_tmbMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_tmbTrace"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_tmbTrace}{}}}
+\subsection{Method \code{read_tmbTrace()}}{
+Read \code{tmb.trace.tsv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_tmbTrace(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{

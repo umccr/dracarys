@@ -290,7 +290,6 @@ dragen_hethomratio_read <- function(x) {
     ) |>
     dplyr::select("varcall", "chrom", "var", "value") |>
     tidyr::pivot_wider(names_from = "var", values_from = "value")
-  dirty_names_cleaned(colnames(res), abbrev_nm, x)
   res
 }
 
@@ -1274,13 +1273,14 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.ploidy_estimation_metrics\\.csv$") , "read_ploidyMetrics"      ,
         glue("{pref}\\.ploidy\\.vcf\\.gz$")               , "read_ploidyVcf"          ,
         glue("{pref}\\-replay\\.json$")                   , "read_replay"             ,
-        glue("{pref}\\roh\\.bed$")                        , "read_rohBed"             ,
-        glue("{pref}\\roh_metrics\\.csv$")                , "read_rohMetrics"         ,
+        glue("{pref}\\.roh\\.bed$")                       , "read_rohBed"             ,
+        glue("{pref}\\.roh_metrics\\.csv$")               , "read_rohMetrics"         ,
         glue("{pref}\\.sv_metrics\\.csv$")                , "read_svMetrics"          ,
         glue("{pref}\\.targeted\\.vcf\\.gz$")             , "read_targetedVcf"        ,
         glue("{pref}\\.time_metrics\\.csv$")              , "read_timeMetrics"        ,
         glue("{pref}\\.tmb\\.metrics\\.csv$")             , "read_tmbMetrics"         ,
         glue("{pref}\\.trimmer_metrics\\.csv$")           , "read_trimmerMetrics"     ,
+        glue("{pref}\\.tmb.trace\\.tsv$")                 , "read_tmbTrace"           ,
         glue("{pref}\\.umi_metrics\\.csv$")               , "read_umiMetrics"         ,
         glue("{pref}\\.vc_metrics\\.csv$")                , "read_vcMetrics"
       )
@@ -1316,8 +1316,9 @@ Wf_dragen <- R6::R6Class(
     #' @description Read `read_cov_report.bed` file.
     #' @param x Path to file.
     read_covReport = function(x) {
+      subprefix <- private$dragen_subprefix(x, "_read_cov_report")
       dat <- dragen_covreportbed_read(x)
-      tibble::tibble(name = "dragen_covreport", data = list(dat[]))
+      tibble::tibble(name = glue("dragen_covreport_{subprefix}"), data = list(dat[]))
     },
     #' @description Read `hrdscore.csv` file.
     #' @param x Path to file.
@@ -1510,7 +1511,7 @@ Wf_dragen <- R6::R6Class(
     },
     #' @description Read `targeted.vcf.gz` file.
     #' @param x Path to file.
-    read_targetedVcf = function() {
+    read_targetedVcf = function(x) {
       dat <- dragen_targeted_vcf_read(x)
       tibble::tibble(name = "dragen_targetedvcf", data = list(dat[]))
     },
@@ -1519,6 +1520,12 @@ Wf_dragen <- R6::R6Class(
     read_tmbMetrics = function(x) {
       dat <- dragen_tmb_metrics_read(x)
       tibble::tibble(name = "dragen_tmbmetrics", data = list(dat[]))
+    },
+    #' @description Read `tmb.trace.tsv` file.
+    #' @param x Path to file.
+    read_tmbTrace = function(x) {
+      dat <- tso_tmbt_read(x)
+      tibble::tibble(name = "dragen_tmbtrace", data = list(dat))
     },
     #' @description Read `trimmer_metrics.csv` file.
     #' @param x Path to file.
