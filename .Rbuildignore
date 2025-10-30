@@ -18,6 +18,9 @@
 ^data-raw$
 ^docs$
 ^dracarys\.Rproj$
+^inst/reports/tn/\.quarto$
+^inst/reports/tn/\_site$
+^inst/reports/tn/nogit$
 ^nogit$
 ^pkgdown$
 ^vignettes$

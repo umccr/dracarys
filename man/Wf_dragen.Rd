@@ -68,6 +68,7 @@ d_write <- d1$write(
 \item \href{#method-Wf_dragen-read_hist}{\code{Wf_dragen$read_hist()}}
 \item \href{#method-Wf_dragen-read_timeMetrics}{\code{Wf_dragen$read_timeMetrics()}}
 \item \href{#method-Wf_dragen-read_vcMetrics}{\code{Wf_dragen$read_vcMetrics()}}
+\item \href{#method-Wf_dragen-read_targetedVcf}{\code{Wf_dragen$read_targetedVcf()}}
 \item \href{#method-Wf_dragen-read_tmbMetrics}{\code{Wf_dragen$read_tmbMetrics()}}
 \item \href{#method-Wf_dragen-read_trimmerMetrics}{\code{Wf_dragen$read_trimmerMetrics()}}
 \item \href{#method-Wf_dragen-read_svMetrics}{\code{Wf_dragen$read_svMetrics()}}
@@ -79,6 +80,7 @@ d_write <- d1$write(
 \item \href{#method-Wf_dragen-read_ploidyVcf}{\code{Wf_dragen$read_ploidyVcf()}}
 \item \href{#method-Wf_dragen-read_msi}{\code{Wf_dragen$read_msi()}}
 \item \href{#method-Wf_dragen-read_msiDiffs}{\code{Wf_dragen$read_msiDiffs()}}
+\item \href{#method-Wf_dragen-read_hethomRatio}{\code{Wf_dragen$read_hethomRatio()}}
 \item \href{#method-Wf_dragen-clone}{\code{Wf_dragen$clone()}}
 }
 }
@@ -355,6 +357,23 @@ Read \code{vc_metrics.csv}/\code{gvcf_metrics.csv} file.
 }
 }
 \if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_targetedVcf"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_targetedVcf}{}}}
+\subsection{Method \code{read_targetedVcf()}}{
+Read \code{targeted.vcf.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_targetedVcf()}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
 \if{html}{\out{<a id="method-Wf_dragen-read_tmbMetrics"></a>}}
 \if{latex}{\out{\hypertarget{method-Wf_dragen-read_tmbMetrics}{}}}
 \subsection{Method \code{read_tmbMetrics()}}{
@@ -531,6 +550,23 @@ Read \code{microsat_output.json} file.
 Read \code{microsat_diffs.txt} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_msiDiffs(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_hethomRatio"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_hethomRatio}{}}}
+\subsection{Method \code{read_hethomRatio()}}{
+Read \code{vc_hethom_ratio_metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_hethomRatio(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
