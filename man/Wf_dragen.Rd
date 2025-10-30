@@ -55,6 +55,8 @@ d_write <- d1$write(
 \itemize{
 \item \href{#method-Wf_dragen-new}{\code{Wf_dragen$new()}}
 \item \href{#method-Wf_dragen-print}{\code{Wf_dragen$print()}}
+\item \href{#method-Wf_dragen-read_rohBed}{\code{Wf_dragen$read_rohBed()}}
+\item \href{#method-Wf_dragen-read_rohMetrics}{\code{Wf_dragen$read_rohMetrics()}}
 \item \href{#method-Wf_dragen-read_covReport}{\code{Wf_dragen$read_covReport()}}
 \item \href{#method-Wf_dragen-read_hrdscore}{\code{Wf_dragen$read_hrdscore()}}
 \item \href{#method-Wf_dragen-read_replay}{\code{Wf_dragen$read_replay()}}
@@ -74,6 +76,7 @@ d_write <- d1$write(
 \item \href{#method-Wf_dragen-read_gcMetrics}{\code{Wf_dragen$read_gcMetrics()}}
 \item \href{#method-Wf_dragen-read_umiMetrics}{\code{Wf_dragen$read_umiMetrics()}}
 \item \href{#method-Wf_dragen-read_ploidyMetrics}{\code{Wf_dragen$read_ploidyMetrics()}}
+\item \href{#method-Wf_dragen-read_ploidyVcf}{\code{Wf_dragen$read_ploidyVcf()}}
 \item \href{#method-Wf_dragen-read_msi}{\code{Wf_dragen$read_msi()}}
 \item \href{#method-Wf_dragen-read_msiDiffs}{\code{Wf_dragen$read_msiDiffs()}}
 \item \href{#method-Wf_dragen-clone}{\code{Wf_dragen$clone()}}
@@ -124,6 +127,40 @@ Print details about the Workflow.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_rohBed"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_rohBed}{}}}
+\subsection{Method \code{read_rohBed()}}{
+Read \code{roh.bed} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_rohBed(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_rohMetrics"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_rohMetrics}{}}}
+\subsection{Method \code{read_rohMetrics()}}{
+Read \code{roh_metrics.csv} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_rohMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }
@@ -443,6 +480,23 @@ Read \code{umi_metrics.csv} file.
 Read \code{ploidy_estimation_metrics.csv} file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_ploidyMetrics(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_dragen-read_ploidyVcf"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_dragen-read_ploidyVcf}{}}}
+\subsection{Method \code{read_ploidyVcf()}}{
+Read \code{ploidy.vcf.gz} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_dragen$read_ploidyVcf(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
