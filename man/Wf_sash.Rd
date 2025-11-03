@@ -10,27 +10,12 @@ Reads and writes tidy versions of files from the \code{sash} workflow
 \dontrun{
 
 #---- Local ----#
-p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ02862/sash"
-p2 <- "20240830ece6b0b7/L2201449_L2201450"
+p1 <- "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2"
+p2 <- "project-wgs-accreditation/analysis/sash/20250919121765d8"
 p <- normalizePath(file.path(p1, p2))
-SubjectID <- "SBJ02862"
-SampleID_tumor <- "PRJ222112"
-SampleID_normal <- "PRJ222114"
-prefix <- glue("{SubjectID}_{SampleID_tumor}")
-s1 <- Wf_sash$new(
-  path = p, SubjectID = SubjectID,
-  SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
-)
-#-- test regexes active binding
-counts1 <- glue(
-  "{p}/{prefix}/smlv_somatic/report/",
-  "{SampleID_tumor}\\\\.somatic\\\\.variant_counts_process\\\\.json$"
-)
-regexes1 <- tibble::tribble(
-  ~regex, ~fun,
-  counts1, "read_smlvSomCounts"
-)
-s1$regexes <- regexes1
+libid_tumor <- "L2300943"
+libid_normal <- "L2300950"
+s1 <- Wf_sash$new(path = p, libid_tumor = libid_tumor, libid_normal = libid_normal)
 s1$list_files(max_files = 20)
 s1$list_files_filter_relevant(max_files = 300)
 d <- s1$download_files(max_files = 1000, dryrun = F)
@@ -38,7 +23,7 @@ d_tidy <- s1$tidy_files(d)
 d_write <- s1$write(
   d_tidy,
   outdir = file.path(p, "dracarys_tidy"),
-  prefix = glue("{SubjectID}_{SampleID_tumor}"),
+  prefix = glue("{libid_normal}_{libid_tumor}"),
   format = "tsv"
 )
 
@@ -46,12 +31,11 @@ d_write <- s1$write(
 p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ02862/sash"
 p2 <- "20240830ece6b0b7/L2201449_L2201450"
 p <- file.path(p1, p2)
-SubjectID <- "SBJ02862"
-SampleID_tumor <- "PRJ222112"
-SampleID_normal <- "PRJ222114"
+libid_tumor <- "PRJ222112"
+libid_normal <- "PRJ222114"
 s1 <- Wf_sash$new(
-  path = p, SubjectID = SubjectID,
-  SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+  path = p,
+  libid_tumor = libid_tumor, libid_normal = libid_normal
 )
 s1$list_files(max_files = 20)
 s1$list_files_filter_relevant()
@@ -61,7 +45,7 @@ d_tidy <- s1$tidy_files(d)
 d_write <- s1$write(
   d_tidy,
   outdir = file.path(p, "dracarys_tidy"),
-  prefix = glue("{SubjectID}__{SampleID_tumor}"),
+  prefix = glue("__{libid_tumor}"),
   format = "tsv"
 )
 }
@@ -73,11 +57,9 @@ d_write <- s1$write(
 \section{Public fields}{
 \if{html}{\out{<div class="r6-fields">}}
 \describe{
-\item{\code{SubjectID}}{The SubjectID of the sample.}
+\item{\code{libid_tumor}}{The LibraryID of the tumor sample.}
 
-\item{\code{SampleID_tumor}}{The SampleID of the tumor sample.}
-
-\item{\code{SampleID_normal}}{The SampleID of the normal sample.}
+\item{\code{libid_normal}}{The LibraryID of the normal sample.}
 }
 \if{html}{\out{</div>}}
 }
@@ -114,12 +96,7 @@ d_write <- s1$write(
 \subsection{Method \code{new()}}{
 Create a new Wf_sash object.
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$new(
-  path = NULL,
-  SubjectID = NULL,
-  SampleID_tumor = NULL,
-  SampleID_normal = NULL
-)}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$new(path = NULL, libid_tumor = NULL, libid_normal = NULL)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -128,11 +105,9 @@ Create a new Wf_sash object.
 \item{\code{path}}{Path to directory with raw workflow results (from S3 or
 local filesystem).}
 
-\item{\code{SubjectID}}{The SubjectID of the sample.}
+\item{\code{libid_tumor}}{The LibraryID of the tumor sample.}
 
-\item{\code{SampleID_tumor}}{The SampleID of the tumor sample.}
-
-\item{\code{SampleID_normal}}{The SampleID of the normal sample.}
+\item{\code{libid_normal}}{The LibraryID of the normal sample.}
 }
 \if{html}{\out{</div>}}
 }

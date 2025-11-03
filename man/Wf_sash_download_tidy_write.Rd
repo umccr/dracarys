@@ -6,9 +6,8 @@
 \usage{
 Wf_sash_download_tidy_write(
   path,
-  SubjectID,
-  SampleID_tumor,
-  SampleID_normal,
+  libid_tumor,
+  libid_normal,
   outdir,
   format = "rds",
   max_files = 1000,
@@ -20,11 +19,9 @@ Wf_sash_download_tidy_write(
 \item{path}{Path to directory with raw workflow results (from S3 or
 local filesystem).}
 
-\item{SubjectID}{The SubjectID of the sample.}
+\item{libid_tumor}{The LibraryID of the tumor sample.}
 
-\item{SampleID_tumor}{The SampleID of the tumor sample.}
-
-\item{SampleID_normal}{The SampleID of the normal sample.}
+\item{libid_normal}{The LibraryID of the normal sample.}
 
 \item{outdir}{Path to output directory.}
 
@@ -46,13 +43,12 @@ Downloads files from the \code{sash} workflow and writes them in a tidy format.
 }
 \examples{
 \dontrun{
-SubjectID <- "SBJ03043"
-SampleID_tumor <- "PRJ230004"
-p1_gds <- glue("gds://production/analysis_data/{SubjectID}/umccrise")
+libid_tumor <- "PRJ230004"
+p1_gds <- glue("gds://production/analysis_data/umccrise")
 p <- file.path(p1_gds, "20240830ec648f40/L2300064__L2300063")
 outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 d <- Wf_sash_download_tidy_write(
-  path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor,
+  path = p, libid_tumor = libid_tumor,
   outdir = outdir,
   dryrun = F
 )

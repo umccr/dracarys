@@ -13,16 +13,6 @@
 #' libid_tumor <- "L2300943"
 #' libid_normal <- "L2300950"
 #' s1 <- Wf_sash$new(path = p, libid_tumor = libid_tumor, libid_normal = libid_normal)
-#' #-- test regexes active binding
-#' counts1 <- glue(
-#'   "{p}/{prefix}/smlv_somatic/report/",
-#'   "{libid_tumor}\\.somatic\\.variant_counts_process\\.json$"
-#' )
-#' regexes1 <- tibble::tribble(
-#'   ~regex, ~fun,
-#'   counts1, "read_smlvSomCounts"
-#' )
-#' s1$regexes <- regexes1
 #' s1$list_files(max_files = 20)
 #' s1$list_files_filter_relevant(max_files = 300)
 #' d <- s1$download_files(max_files = 1000, dryrun = F)
@@ -30,7 +20,7 @@
 #' d_write <- s1$write(
 #'   d_tidy,
 #'   outdir = file.path(p, "dracarys_tidy"),
-#'   prefix = glue("{}_{libid_tumor}"),
+#'   prefix = glue("{libid_normal}_{libid_tumor}"),
 #'   format = "tsv"
 #' )
 #'
@@ -77,25 +67,26 @@ Wf_sash <- R6::R6Class(
       pref <- glue("{batch}_{libid_tumor}")
       crep <- "cancer_report/cancer_report_tables"
       regexes <- tibble::tribble(
-        ~regex                                                                                                          , ~fun                         ,
-        glue("{path}/{batch}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$")                                                   , "read_hrdHrdetect"           ,
-        glue("{path}/{batch}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$")                                                  , "read_sigsTsv"               ,
-        glue("{path}/{batch}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$")                                                  , "read_sigsTsv"               ,
-        glue("{path}/{batch}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$")                                                       , "read_sigsTsv"               ,
-        glue("{path}/{batch}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$")                                                     , "read_sigsTsv"               ,
-        glue("{path}/{batch}/{crep}/{pref}-qc_summary\\.tsv\\.gz$")                                                     , "read_qcSum"                 ,
-        glue("{path}/{batch}/{crep}/{pref}\\.purple_cnv_som_gene\\.tsv\\.gz$")                                          , "DOWNLOAD_ONLY-purplegene"   ,
-        glue("{path}/{batch}/{crep}/{pref}\\.purple_cnv_som\\.tsv\\.gz$")                                               , "DOWNLOAD_ONLY-purplesom"    ,
-        glue("{path}/{batch}/smlv_somatic/filter/{libid_tumor}\\.pass\\.vcf\\.gz$")                                     , "DOWNLOAD_ONLY-smlvfiltvcf"  ,
-        glue("{path}/{batch}/smlv_somatic/filter/{libid_tumor}\\.pass\\.vcf\\.gz\\.tbi$")                               , "DOWNLOAD_ONLY-smlvfiltvcfi" ,
-        glue("{path}/{batch}/smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")                 , "read_pcgrJson"              ,
-        glue("{path}/{batch}/smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz$")                  , "DOWNLOAD_ONLY-pcgrvcf"      ,
-        glue("{path}/{batch}/smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz\\.tbi$")            , "DOWNLOAD_ONLY-pcgrvcfi"     ,
-        glue("{path}/{batch}/smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.snvs_indels\\.tiers\\.tsv$") , "DOWNLOAD_ONLY-pcgrtiers"    ,
-        glue("{path}/{batch}/smlv_germline/report/cpsr/{libid_normal}\\.cpsr\\.grch38\\.vcf\\.gz$")                     , "DOWNLOAD_ONLY-cpsrvcf"      ,
-        glue("{path}/{batch}/smlv_germline/report/cpsr/{libid_normal}\\.cpsr\\.grch38\\.vcf\\.gz\\.tbi$")               , "DOWNLOAD_ONLY-cpsrvcfi"     ,
-        glue("{path}/{batch}/sv_somatic/prioritise/{libid_tumor}\\.sv\\.prioritised\\.vcf\\.gz$")                       , "DOWNLOAD_ONLY-svpriovcf"    ,
-        glue("{path}/{batch}/sv_somatic/prioritise/{libid_tumor}\\.sv\\.prioritised\\.vcf\\.gz\\.tbi$")                 , "DOWNLOAD_ONLY-svpriovcfi"   ,
+        ~regex                                                                                           , ~fun                         ,
+        glue("{crep}/{pref}-qc_summary\\.tsv\\.gz$")                                                     , "read_qcSum"                 ,
+        glue("{crep}/purple/{pref}-purple_cnv_som_gene\\.tsv\\.gz$")                                     , "DOWNLOAD_ONLY-purplegene"   ,
+        glue("{crep}/purple/{pref}-purple_cnv_som\\.tsv\\.gz$")                                          , "DOWNLOAD_ONLY-purplesom"    ,
+        glue("{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$")                                                   , "read_hrdHrdetect"           ,
+        glue("{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$")                                                  , "read_sigsTsv"               ,
+        glue("{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$")                                                  , "read_sigsTsv"               ,
+        glue("{crep}/sigs/{pref}-dbs\\.tsv\\.gz$")                                                       , "read_sigsTsv"               ,
+        glue("{crep}/sigs/{pref}-indel\\.tsv\\.gz$")                                                     , "read_sigsTsv"               ,
+        glue("smlv_somatic/filter/{libid_tumor}\\.pass\\.vcf\\.gz$")                                     , "DOWNLOAD_ONLY-smlvfiltvcf"  ,
+        glue("smlv_somatic/filter/{libid_tumor}\\.pass\\.vcf\\.gz\\.tbi$")                               , "DOWNLOAD_ONLY-smlvfiltvcfi" ,
+        glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")                 , "read_pcgrJson"              ,
+        glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.variant_counts_process\\.json$")             , "read_smlvSomCounts"         ,
+        # glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz$")                  , "DOWNLOAD_ONLY-pcgrvcf"      ,
+        # glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz\\.tbi$")            , "DOWNLOAD_ONLY-pcgrvcfi"     ,
+        glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.snvs_indels\\.tiers\\.tsv$") , "DOWNLOAD_ONLY-pcgrtiers"    ,
+        # glue("smlv_germline/report/cpsr/{libid_normal}\\.cpsr\\.grch38\\.vcf\\.gz$")                     , "DOWNLOAD_ONLY-cpsrvcf"      ,
+        # glue("smlv_germline/report/cpsr/{libid_normal}\\.cpsr\\.grch38\\.vcf\\.gz\\.tbi$")               , "DOWNLOAD_ONLY-cpsrvcfi"     ,
+        glue("sv_somatic/prioritise/{libid_tumor}\\.sv\\.prioritised\\.vcf\\.gz$")                       , "DOWNLOAD_ONLY-svpriovcf"    ,
+        glue("sv_somatic/prioritise/{libid_tumor}\\.sv\\.prioritised\\.vcf\\.gz\\.tbi$")                 , "DOWNLOAD_ONLY-svpriovcfi"   ,
       )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$libid_tumor <- libid_tumor
@@ -158,6 +149,8 @@ Wf_sash <- R6::R6Class(
       )
       dat <- read_tsvgz(x, col_types = ct) |>
         dplyr::select(-c("sample"))
+      colnames(dat) <- tolower(colnames(dat))
+      colnames(dat) <- gsub("\\.", "_", colnames(dat))
       tibble::tibble(name = "hrdhrdetect", data = list(dat[]))
     },
     #' @description Read signature cancer report file.
@@ -187,42 +180,13 @@ Wf_sash <- R6::R6Class(
       d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
       dat <- d |>
         dplyr::select("variable", "value") |>
-        tidyr::pivot_wider(names_from = "variable", values_from = "value") |>
-        dplyr::rename(MSI_mb_tmp = "MSI (indels/Mb)") |>
         dplyr::mutate(
-          purity_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Purity) |>
-            as.numeric(),
-          ploidy_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Ploidy) |>
-            as.numeric(),
-          msi_mb_hmf = sub(".* \\((.*)\\)", "\\1", .data$MSI_mb_tmp) |>
-            as.numeric(),
-          contamination_hmf = as.numeric(.data$Contamination),
-          deleted_genes_hmf = as.numeric(.data$DeletedGenes),
-          msi_hmf = sub("(.*) \\(.*\\)", "\\1", .data$MSI_mb_tmp),
-          tmb_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TMB) |> as.numeric(),
-          tml_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TML) |> as.numeric(),
-          hypermutated = ifelse(
-            "Hypermutated" %in% d$variable,
-            .data[["Hypermutated"]],
-            NA
-          ) |>
-            as.character()
+          variable = tolower(.data$variable),
+          variable = gsub("\\(|\\)", "", .data$variable),
+          variable = gsub(" |-", "_", .data$variable)
         ) |>
-        dplyr::select(
-          qc_status_hmf = "QC_Status",
-          sex_hmf = "Gender",
-          "purity_hmf",
-          "ploidy_hmf",
-          "msi_hmf",
-          "msi_mb_hmf",
-          "contamination_hmf",
-          "deleted_genes_hmf",
-          "tmb_hmf",
-          "tml_hmf",
-          wgd_hmf = "WGD",
-          "hypermutated"
-        )
-      tibble::tibble(name = glue("qcsum"), data = list(dat[]))
+        tidyr::pivot_wider(names_from = "variable", values_from = "value")
+      tibble::tibble(name = "qcsum", data = list(dat[]))
     }
   ) # end public
 )
