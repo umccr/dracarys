@@ -23,7 +23,7 @@ pcgr_json_read <- function(x) {
   msi <- msi %||% list(fracIndels = NA, predicted_class = NA)
   msi <- purrr::flatten(msi) |>
     tibble::as_tibble_row() |>
-    dplyr::select("fracIndels", "predicted_class")
+    dplyr::select(indel_fraction = "fracIndels", "predicted_class")
   metrics <- dplyr::bind_cols(msi, tmb)
   return(metrics)
 }
