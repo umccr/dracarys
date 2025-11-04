@@ -45,7 +45,7 @@ d_tidy <- s1$tidy_files(d)
 d_write <- s1$write(
   d_tidy,
   outdir = file.path(p, "dracarys_tidy"),
-  prefix = glue("__{libid_tumor}"),
+  prefix = glue("{libid_tumor}__{libid_normal}"),
   format = "tsv"
 )
 }

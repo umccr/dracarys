@@ -42,7 +42,7 @@
 #' d_write <- s1$write(
 #'   d_tidy,
 #'   outdir = file.path(p, "dracarys_tidy"),
-#'   prefix = glue("__{libid_tumor}"),
+#'   prefix = glue("{libid_tumor}__{libid_normal}"),
 #'   format = "tsv"
 #' )
 #' }
@@ -67,26 +67,15 @@ Wf_sash <- R6::R6Class(
       pref <- glue("{batch}_{libid_tumor}")
       crep <- "cancer_report/cancer_report_tables"
       regexes <- tibble::tribble(
-        ~regex                                                                                           , ~fun                         ,
-        glue("{crep}/{pref}-qc_summary\\.tsv\\.gz$")                                                     , "read_qcSum"                 ,
-        glue("{crep}/purple/{pref}-purple_cnv_som_gene\\.tsv\\.gz$")                                     , "DOWNLOAD_ONLY-purplegene"   ,
-        glue("{crep}/purple/{pref}-purple_cnv_som\\.tsv\\.gz$")                                          , "DOWNLOAD_ONLY-purplesom"    ,
-        glue("{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$")                                                   , "read_hrdHrdetect"           ,
-        glue("{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$")                                                  , "read_sigsTsv"               ,
-        glue("{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$")                                                  , "read_sigsTsv"               ,
-        glue("{crep}/sigs/{pref}-dbs\\.tsv\\.gz$")                                                       , "read_sigsTsv"               ,
-        glue("{crep}/sigs/{pref}-indel\\.tsv\\.gz$")                                                     , "read_sigsTsv"               ,
-        glue("smlv_somatic/filter/{libid_tumor}\\.pass\\.vcf\\.gz$")                                     , "DOWNLOAD_ONLY-smlvfiltvcf"  ,
-        glue("smlv_somatic/filter/{libid_tumor}\\.pass\\.vcf\\.gz\\.tbi$")                               , "DOWNLOAD_ONLY-smlvfiltvcfi" ,
-        glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")                 , "read_pcgrJson"              ,
-        glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.variant_counts_process\\.json$")             , "read_smlvSomCounts"         ,
-        # glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz$")                  , "DOWNLOAD_ONLY-pcgrvcf"      ,
-        # glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz\\.tbi$")            , "DOWNLOAD_ONLY-pcgrvcfi"     ,
-        glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.snvs_indels\\.tiers\\.tsv$") , "DOWNLOAD_ONLY-pcgrtiers"    ,
-        # glue("smlv_germline/report/cpsr/{libid_normal}\\.cpsr\\.grch38\\.vcf\\.gz$")                     , "DOWNLOAD_ONLY-cpsrvcf"      ,
-        # glue("smlv_germline/report/cpsr/{libid_normal}\\.cpsr\\.grch38\\.vcf\\.gz\\.tbi$")               , "DOWNLOAD_ONLY-cpsrvcfi"     ,
-        glue("sv_somatic/prioritise/{libid_tumor}\\.sv\\.prioritised\\.vcf\\.gz$")                       , "DOWNLOAD_ONLY-svpriovcf"    ,
-        glue("sv_somatic/prioritise/{libid_tumor}\\.sv\\.prioritised\\.vcf\\.gz\\.tbi$")                 , "DOWNLOAD_ONLY-svpriovcfi"   ,
+        ~regex                                                                               , ~fun                 ,
+        glue("{crep}/{pref}-qc_summary\\.tsv\\.gz$")                                         , "read_qcSum"         ,
+        glue("{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$")                                       , "read_hrdHrdetect"   ,
+        glue("{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$")                                      , "read_sigsTsv"       ,
+        glue("{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$")                                      , "read_sigsTsv"       ,
+        glue("{crep}/sigs/{pref}-dbs\\.tsv\\.gz$")                                           , "read_sigsTsv"       ,
+        glue("{crep}/sigs/{pref}-indel\\.tsv\\.gz$")                                         , "read_sigsTsv"       ,
+        glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")     , "read_pcgrJson"      ,
+        glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.variant_counts_process\\.json$") , "read_smlvSomCounts" ,
       )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$libid_tumor <- libid_tumor
@@ -251,7 +240,7 @@ Wf_sash_download_tidy_write <- function(
     d_write <- s$write(
       d_tidy,
       outdir = file.path(outdir, "dracarys_tidy"),
-      prefix = glue("__{libid_tumor}"),
+      prefix = glue("{libid_tumor}__{libid_normal}"),
       format = format
     )
     return(d_write)
