@@ -7,27 +7,12 @@
 #' \dontrun{
 #'
 #' #---- Local ----#
-#' p1 <- "~/s3/org.umccr.data.oncoanalyser/analysis_data/SBJ02862/sash"
-#' p2 <- "20240830ece6b0b7/L2201449_L2201450"
+#' p1 <- "~/s3/project-data-889522050439-ap-southeast-2/byob-icav2"
+#' p2 <- "project-wgs-accreditation/analysis/sash/20250919121765d8"
 #' p <- normalizePath(file.path(p1, p2))
-#' SubjectID <- "SBJ02862"
-#' SampleID_tumor <- "PRJ222112"
-#' SampleID_normal <- "PRJ222114"
-#' prefix <- glue("{SubjectID}_{SampleID_tumor}")
-#' s1 <- Wf_sash$new(
-#'   path = p, SubjectID = SubjectID,
-#'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
-#' )
-#' #-- test regexes active binding
-#' counts1 <- glue(
-#'   "{p}/{prefix}/smlv_somatic/report/",
-#'   "{SampleID_tumor}\\.somatic\\.variant_counts_process\\.json$"
-#' )
-#' regexes1 <- tibble::tribble(
-#'   ~regex, ~fun,
-#'   counts1, "read_smlvSomCounts"
-#' )
-#' s1$regexes <- regexes1
+#' libid_tumor <- "L2300943"
+#' libid_normal <- "L2300950"
+#' s1 <- Wf_sash$new(path = p, libid_tumor = libid_tumor, libid_normal = libid_normal)
 #' s1$list_files(max_files = 20)
 #' s1$list_files_filter_relevant(max_files = 300)
 #' d <- s1$download_files(max_files = 1000, dryrun = F)
@@ -35,7 +20,7 @@
 #' d_write <- s1$write(
 #'   d_tidy,
 #'   outdir = file.path(p, "dracarys_tidy"),
-#'   prefix = glue("{SubjectID}_{SampleID_tumor}"),
+#'   prefix = glue("{libid_normal}_{libid_tumor}"),
 #'   format = "tsv"
 #' )
 #'
@@ -43,12 +28,11 @@
 #' p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ02862/sash"
 #' p2 <- "20240830ece6b0b7/L2201449_L2201450"
 #' p <- file.path(p1, p2)
-#' SubjectID <- "SBJ02862"
-#' SampleID_tumor <- "PRJ222112"
-#' SampleID_normal <- "PRJ222114"
+#' libid_tumor <- "PRJ222112"
+#' libid_normal <- "PRJ222114"
 #' s1 <- Wf_sash$new(
-#'   path = p, SubjectID = SubjectID,
-#'   SampleID_tumor = SampleID_tumor, SampleID_normal = SampleID_normal
+#'   path = p,
+#'   libid_tumor = libid_tumor, libid_normal = libid_normal
 #' )
 #' s1$list_files(max_files = 20)
 #' s1$list_files_filter_relevant()
@@ -58,7 +42,7 @@
 #' d_write <- s1$write(
 #'   d_tidy,
 #'   outdir = file.path(p, "dracarys_tidy"),
-#'   prefix = glue("{SubjectID}__{SampleID_tumor}"),
+#'   prefix = glue("{libid_tumor}__{libid_normal}"),
 #'   format = "tsv"
 #' )
 #' }
@@ -68,65 +52,46 @@ Wf_sash <- R6::R6Class(
   "Wf_sash",
   inherit = Wf,
   public = list(
-    #' @field SubjectID The SubjectID of the sample.
-    #' @field SampleID_tumor The SampleID of the tumor sample.
-    #' @field SampleID_normal The SampleID of the normal sample.
-    SubjectID = NULL,
-    SampleID_tumor = NULL,
-    SampleID_normal = NULL,
+    #' @field libid_tumor The LibraryID of the tumor sample.
+    #' @field libid_normal The LibraryID of the normal sample.
+    libid_tumor = NULL,
+    libid_normal = NULL,
     #' @description Create a new Wf_sash object.
     #' @param path Path to directory with raw workflow results (from S3 or
     #' local filesystem).
-    #' @param SubjectID The SubjectID of the sample.
-    #' @param SampleID_tumor The SampleID of the tumor sample.
-    #' @param SampleID_normal The SampleID of the normal sample.
-    initialize = function(
-      path = NULL,
-      SubjectID = NULL,
-      SampleID_tumor = NULL,
-      SampleID_normal = NULL
-    ) {
+    #' @param libid_tumor The LibraryID of the tumor sample.
+    #' @param libid_normal The LibraryID of the normal sample.
+    initialize = function(path = NULL, libid_tumor = NULL, libid_normal = NULL) {
       wname <- "sash"
-      pref <- glue("{SubjectID}_{SampleID_tumor}")
+      batch <- glue("{libid_tumor}__{libid_normal}")
+      pref <- glue("{batch}_{libid_tumor}")
       crep <- "cancer_report/cancer_report_tables"
       regexes <- tibble::tribble(
-        ~regex                                                                                                            , ~fun                         ,
-        glue("{path}/{pref}/{crep}/hrd/{pref}-chord\\.tsv\\.gz$")                                                         , "read_hrdChord"              ,
-        glue("{path}/{pref}/{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$")                                                      , "read_hrdHrdetect"           ,
-        glue("{path}/{pref}/{crep}/hrd/{pref}-dragen\\.tsv\\.gz$")                                                        , "read_hrdDragen"             ,
-        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$")                                                     , "read_sigsTsv"               ,
-        glue("{path}/{pref}/{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$")                                                     , "read_sigsTsv"               ,
-        glue("{path}/{pref}/{crep}/sigs/{pref}-dbs\\.tsv\\.gz$")                                                          , "read_sigsTsv"               ,
-        glue("{path}/{pref}/{crep}/sigs/{pref}-indel\\.tsv\\.gz$")                                                        , "read_sigsTsv"               ,
-        glue("{path}/{pref}/{crep}/{pref}-qc_summary\\.tsv\\.gz$")                                                        , "read_qcSum"                 ,
-        glue("{path}/{pref}/purple/{SampleID_tumor}\\.purple\\.cnv\\.gene\\.tsv$")                                        , "DOWNLOAD_ONLY-purplegene"   ,
-        glue("{path}/{pref}/smlv_somatic/filter/{SampleID_tumor}\\.pass\\.vcf\\.gz$")                                     , "DOWNLOAD_ONLY-smlvfiltvcf"  ,
-        glue("{path}/{pref}/smlv_somatic/filter/{SampleID_tumor}\\.pass\\.vcf\\.gz\\.tbi$")                               , "DOWNLOAD_ONLY-smlvfiltvcfi" ,
-        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")                 , "read_pcgrJson"              ,
-        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz$")                  , "DOWNLOAD_ONLY-pcgrvcf"      ,
-        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.vcf\\.gz\\.tbi$")            , "DOWNLOAD_ONLY-pcgrvcfi"     ,
-        glue("{path}/{pref}/smlv_somatic/report/pcgr/{SampleID_tumor}\\.pcgr_acmg\\.grch38\\.snvs_indels\\.tiers\\.tsv$") , "DOWNLOAD_ONLY-pcgrtiers"    ,
-        # glue("{path}/{pref}/smlv_somatic/report/{SampleID_tumor}\\.somatic\\.variant_counts_process\\.json$")             , "smlvSomCounts"              ,
-        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz$")                     , "DOWNLOAD_ONLY-cpsrvcf"      ,
-        glue("{path}/{pref}/smlv_germline/report/cpsr/{SampleID_normal}\\.cpsr\\.grch38\\.vcf\\.gz\\.tbi$")               , "DOWNLOAD_ONLY-cpsrvcfi"     ,
+        ~regex                                                                               , ~fun                 ,
+        glue("{crep}/{pref}-qc_summary\\.tsv\\.gz$")                                         , "read_qcSum"         ,
+        glue("{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$")                                       , "read_hrdHrdetect"   ,
+        glue("{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$")                                      , "read_sigsTsv"       ,
+        glue("{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$")                                      , "read_sigsTsv"       ,
+        glue("{crep}/sigs/{pref}-dbs\\.tsv\\.gz$")                                           , "read_sigsTsv"       ,
+        glue("{crep}/sigs/{pref}-indel\\.tsv\\.gz$")                                         , "read_sigsTsv"       ,
+        glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")     , "read_pcgrJson"      ,
+        glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.variant_counts_process\\.json$") , "read_smlvSomCounts" ,
       )
       super$initialize(path = path, wname = wname, regexes = regexes)
-      self$SubjectID <- SubjectID
-      self$SampleID_tumor <- SampleID_tumor
-      self$SampleID_normal <- SampleID_normal
+      self$libid_tumor <- libid_tumor
+      self$libid_normal <- libid_normal
     },
     #' @description Print details about the Workflow.
     #' @param ... (ignored).
     print = function(...) {
       res <- tibble::tribble(
-        ~var              , ~value                               ,
-        "path"            , private$.path                        ,
-        "wname"           , private$.wname                       ,
-        "filesystem"      , private$.filesystem                  ,
-        "nregexes"        , as.character(nrow(private$.regexes)) ,
-        "SubjectID"       , self$SubjectID                       ,
-        "SampleID_tumor"  , self$SampleID_tumor                  ,
-        "SampleID_normal" , self$SampleID_normal
+        ~var           , ~value                               ,
+        "path"         , private$.path                        ,
+        "wname"        , private$.wname                       ,
+        "filesystem"   , private$.filesystem                  ,
+        "nregexes"     , as.character(nrow(private$.regexes)) ,
+        "libid_tumor"  , self$libid_tumor                     ,
+        "libid_normal" , self$libid_normal
       )
       print(res)
       invisible(self)
@@ -173,6 +138,8 @@ Wf_sash <- R6::R6Class(
       )
       dat <- read_tsvgz(x, col_types = ct) |>
         dplyr::select(-c("sample"))
+      colnames(dat) <- tolower(colnames(dat))
+      colnames(dat) <- gsub("\\.", "_", colnames(dat))
       tibble::tibble(name = "hrdhrdetect", data = list(dat[]))
     },
     #' @description Read signature cancer report file.
@@ -202,42 +169,13 @@ Wf_sash <- R6::R6Class(
       d <- read_tsvgz(x, col_types = readr::cols(.default = "c"))
       dat <- d |>
         dplyr::select("variable", "value") |>
-        tidyr::pivot_wider(names_from = "variable", values_from = "value") |>
-        dplyr::rename(MSI_mb_tmp = "MSI (indels/Mb)") |>
         dplyr::mutate(
-          purity_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Purity) |>
-            as.numeric(),
-          ploidy_hmf = sub("(.*) \\(.*\\)", "\\1", .data$Ploidy) |>
-            as.numeric(),
-          msi_mb_hmf = sub(".* \\((.*)\\)", "\\1", .data$MSI_mb_tmp) |>
-            as.numeric(),
-          contamination_hmf = as.numeric(.data$Contamination),
-          deleted_genes_hmf = as.numeric(.data$DeletedGenes),
-          msi_hmf = sub("(.*) \\(.*\\)", "\\1", .data$MSI_mb_tmp),
-          tmb_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TMB) |> as.numeric(),
-          tml_hmf = sub("(.*) \\(.*\\)", "\\1", .data$TML) |> as.numeric(),
-          hypermutated = ifelse(
-            "Hypermutated" %in% d$variable,
-            .data[["Hypermutated"]],
-            NA
-          ) |>
-            as.character()
+          variable = tolower(.data$variable),
+          variable = gsub("\\(|\\)", "", .data$variable),
+          variable = gsub(" |-", "_", .data$variable)
         ) |>
-        dplyr::select(
-          qc_status_hmf = "QC_Status",
-          sex_hmf = "Gender",
-          "purity_hmf",
-          "ploidy_hmf",
-          "msi_hmf",
-          "msi_mb_hmf",
-          "contamination_hmf",
-          "deleted_genes_hmf",
-          "tmb_hmf",
-          "tml_hmf",
-          wgd_hmf = "WGD",
-          "hypermutated"
-        )
-      tibble::tibble(name = glue("qcsum"), data = list(dat[]))
+        tidyr::pivot_wider(names_from = "variable", values_from = "value")
+      tibble::tibble(name = "qcsum", data = list(dat[]))
     }
   ) # end public
 )
@@ -248,9 +186,8 @@ Wf_sash <- R6::R6Class(
 #'
 #' @param path Path to directory with raw workflow results (from S3 or
 #' local filesystem).
-#' @param SubjectID The SubjectID of the sample.
-#' @param SampleID_tumor The SampleID of the tumor sample.
-#' @param SampleID_normal The SampleID of the normal sample.
+#' @param libid_tumor The LibraryID of the tumor sample.
+#' @param libid_normal The LibraryID of the normal sample.
 #' @param outdir Path to output directory.
 #' @param format Format of output files.
 #' @param max_files Max number of files to list.
@@ -264,13 +201,12 @@ Wf_sash <- R6::R6Class(
 #'
 #' @examples
 #' \dontrun{
-#' SubjectID <- "SBJ03043"
-#' SampleID_tumor <- "PRJ230004"
-#' p1_gds <- glue("gds://production/analysis_data/{SubjectID}/umccrise")
+#' libid_tumor <- "PRJ230004"
+#' p1_gds <- glue("gds://production/analysis_data/umccrise")
 #' p <- file.path(p1_gds, "20240830ec648f40/L2300064__L2300063")
 #' outdir <- file.path(sub("gds:/", "~/icav1/g", p))
 #' d <- Wf_sash_download_tidy_write(
-#'   path = p, SubjectID = SubjectID, SampleID_tumor = SampleID_tumor,
+#'   path = p, libid_tumor = libid_tumor,
 #'   outdir = outdir,
 #'   dryrun = F
 #' )
@@ -278,9 +214,8 @@ Wf_sash <- R6::R6Class(
 #' @export
 Wf_sash_download_tidy_write <- function(
   path,
-  SubjectID,
-  SampleID_tumor,
-  SampleID_normal,
+  libid_tumor,
+  libid_normal,
   outdir,
   format = "rds",
   max_files = 1000,
@@ -289,9 +224,8 @@ Wf_sash_download_tidy_write <- function(
 ) {
   s <- Wf_sash$new(
     path = path,
-    SubjectID = SubjectID,
-    SampleID_tumor = SampleID_tumor,
-    SampleID_normal = SampleID_normal
+    libid_tumor = libid_tumor,
+    libid_normal = libid_normal
   )
   if (!is.null(regexes)) {
     s$regexes <- regexes
@@ -306,7 +240,7 @@ Wf_sash_download_tidy_write <- function(
     d_write <- s$write(
       d_tidy,
       outdir = file.path(outdir, "dracarys_tidy"),
-      prefix = glue("{SubjectID}__{SampleID_tumor}"),
+      prefix = glue("{libid_tumor}__{libid_normal}"),
       format = format
     )
     return(d_write)
