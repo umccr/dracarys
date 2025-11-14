@@ -17,6 +17,12 @@ bcftools_installed <- function() {
 #'
 #' @return A tibble with all the main, FORMAT, and INFO fields detected in
 #' the VCF header as columns.
+#' @examples
+#' \dontrun{
+#' vcf <- ""
+#' only_pass <- TRUE
+#' alias <- TRUE
+#' }
 #' @export
 bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
   assertthat::assert_that(is.logical(only_pass), length(only_pass) == 1)
@@ -100,7 +106,7 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
   cnames <- c(
     main,
     paste0("INFO", ifelse(length(info) == 0, "", "_"), info),
-    paste0(rep(samp$aliases, each = length(fmt)), "_", fmt)
+    paste0(rep(samp$aliases, each = length(fmt)), ifelse(length(fmt) == 0, "X", "_"), fmt)
   )
   # handle empty VCF - fread warns about size 0
   suppressWarnings({
