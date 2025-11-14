@@ -84,7 +84,11 @@ bcftools_parse_vcf <- function(vcf, only_pass = TRUE, alias = TRUE) {
     "",
     paste0("%INFO/", info, collapse = "\\t")
   )
-  fmt_cols <- paste0("[\\t", paste0(paste0("%", fmt), collapse = "\\t"), "]\\n")
+  fmt_cols <- dplyr::if_else(
+    length(fmt) == 0,
+    "",
+    paste0("[\\t", paste0(paste0("%", fmt), collapse = "\\t"), "]\\n")
+  )
   q <- paste0(main_cols, "\\t", info_cols, fmt_cols)
   include_pass <- ""
   if (only_pass) {
