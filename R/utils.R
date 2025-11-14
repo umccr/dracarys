@@ -240,3 +240,15 @@ dummy1 <- function() {
   argparse::ArgumentParser
   here::here
 }
+
+# Source - https://stackoverflow.com/a/36239701
+# Posted by jangorecki, modified by community. See post 'Timeline' for change history
+# Retrieved 2025-11-14, License - CC BY-SA 4.0
+as_numeric_na <- function(x, na.strings = "NA") {
+  stopifnot(is.character(x))
+  na = x %in% na.strings
+  x[na] = "0"
+  x = as.numeric(x)
+  x[na] = NA_real_
+  x
+}

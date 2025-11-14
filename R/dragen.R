@@ -433,7 +433,7 @@ dragen_cnv_metrics_read <- function(x) {
   d2 <- d1 |>
     dplyr::filter(!.data$category == "SEX GENOTYPER") |>
     dplyr::mutate(
-      count = as.numeric(.data$count),
+      count = as_numeric_na(.data$count), # see issue181
       pct = round(as.numeric(.data$pct), 2),
       var = dplyr::recode(.data$var, !!!abbrev_nm)
     )
@@ -1127,19 +1127,25 @@ dragen_targeted_vcf_read <- function(x) {
   colnames(dat) <- tolower(colnames(dat))
   colnames(dat) <- sub("^s1_", "", colnames(dat))
   colnames(dat) <- sub("^info_", "", colnames(dat))
+  cols <- c(
+    "chrom",
+    "pos",
+    "ref",
+    "alt",
+    "gt",
+    "allele_id",
+    "qual",
+    "dp",
+    "ad",
+    "af",
+    "targetedcaller"
+  )
+  if (nrow(dat) == 0) {
+    return(empty_tbl(cols))
+  }
   dat |>
     dplyr::select(
-      "chrom",
-      "pos",
-      "ref",
-      "alt",
-      "gt",
-      "allele_id",
-      "qual",
-      "dp",
-      "ad",
-      "af",
-      "targetedcaller",
+      dplyr::all_of(cols),
       dplyr::everything()
     )
 }
@@ -1291,6 +1297,7 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.time_metrics\\.csv$")              , "read_timeMetrics"        ,
         glue("{pref}\\.trimmer_metrics\\.csv$")           , "read_trimmerMetrics"     ,
         glue("{pref}\\.tmb\\.trace\\.tsv$")               , "read_tmbTrace"           ,
+        glue("{pref}\\.tmb\\.metrics\\.csv$")             , "read_tmbMetrics"         ,
         glue("{pref}\\.umi_metrics\\.csv$")               , "read_umiMetrics"         ,
         glue("{pref}\\.vc_metrics\\.csv$")                , "read_vcMetrics"
       )

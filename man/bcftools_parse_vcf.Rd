@@ -26,3 +26,10 @@ then converts the parsed character vector to a tibble.
 For VCFs with 0 variants, returns a tibble with 0 rows and proper number of
 columns.
 }
+\examples{
+\dontrun{
+vcf <- ""
+only_pass <- TRUE
+alias <- TRUE
+}
+}
