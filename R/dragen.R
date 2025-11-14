@@ -1127,19 +1127,25 @@ dragen_targeted_vcf_read <- function(x) {
   colnames(dat) <- tolower(colnames(dat))
   colnames(dat) <- sub("^s1_", "", colnames(dat))
   colnames(dat) <- sub("^info_", "", colnames(dat))
+  cols <- c(
+    "chrom",
+    "pos",
+    "ref",
+    "alt",
+    "gt",
+    "allele_id",
+    "qual",
+    "dp",
+    "ad",
+    "af",
+    "targetedcaller"
+  )
+  if (nrow(dat) == 0) {
+    return(empty_tbl(cols))
+  }
   dat |>
     dplyr::select(
-      "chrom",
-      "pos",
-      "ref",
-      "alt",
-      "gt",
-      "allele_id",
-      "qual",
-      "dp",
-      "ad",
-      "af",
-      "targetedcaller",
+      dplyr::all_of(cols),
       dplyr::everything()
     )
 }
