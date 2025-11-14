@@ -433,7 +433,7 @@ dragen_cnv_metrics_read <- function(x) {
   d2 <- d1 |>
     dplyr::filter(!.data$category == "SEX GENOTYPER") |>
     dplyr::mutate(
-      count = as.numeric(.data$count),
+      count = as_numeric_na(.data$count), # see issue181
       pct = round(as.numeric(.data$pct), 2),
       var = dplyr::recode(.data$var, !!!abbrev_nm)
     )
