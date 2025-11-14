@@ -1291,6 +1291,7 @@ Wf_dragen <- R6::R6Class(
         glue("{pref}\\.time_metrics\\.csv$")              , "read_timeMetrics"        ,
         glue("{pref}\\.trimmer_metrics\\.csv$")           , "read_trimmerMetrics"     ,
         glue("{pref}\\.tmb\\.trace\\.tsv$")               , "read_tmbTrace"           ,
+        glue("{pref}\\.tmb\\.metrics\\.csv$")             , "read_tmbMetrics"         ,
         glue("{pref}\\.umi_metrics\\.csv$")               , "read_umiMetrics"         ,
         glue("{pref}\\.vc_metrics\\.csv$")                , "read_vcMetrics"
       )
