@@ -182,16 +182,17 @@ Wf_sash <- R6::R6Class(
     #' @description Read `purple_cnv_som.tsv.gz` cancer report file.
     #' @param x Path to file.
     read_purpleCnvSom = function(x) {
-      readr::read_tsv(
+      d <- readr::read_tsv(
         x,
         col_select = c("Chr", "Start", "End", "CN"),
         col_types = c("c", "i", "i", "d")
       )
+      tibble::tibble(name = "purplecnvsom", data = list(d[]))
     },
     #' @description Read `purple_cnv_som_gene.tsv.gz` cancer report file.
     #' @param x Path to file.
     read_purpleCnvSomGene = function(x) {
-      readr::read_tsv(
+      d <- readr::read_tsv(
         x,
         col_select = c(
           "gene",
@@ -207,6 +208,7 @@ Wf_sash <- R6::R6Class(
         ),
         col_types = c("c", "c", "d", "d", "d", "d", "c", "d", "d", "c")
       )
+      tibble::tibble(name = "purplecnvsomgene", data = list(d[]))
     }
   ) # end public
 )
