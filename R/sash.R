@@ -67,15 +67,17 @@ Wf_sash <- R6::R6Class(
       pref <- glue("{batch}_{libid_tumor}")
       crep <- "cancer_report/cancer_report_tables"
       regexes <- tibble::tribble(
-        ~regex                                                                               , ~fun                 ,
-        glue("{crep}/{pref}-qc_summary\\.tsv\\.gz$")                                         , "read_qcSum"         ,
-        glue("{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$")                                       , "read_hrdHrdetect"   ,
-        glue("{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$")                                      , "read_sigsTsv"       ,
-        glue("{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$")                                      , "read_sigsTsv"       ,
-        glue("{crep}/sigs/{pref}-dbs\\.tsv\\.gz$")                                           , "read_sigsTsv"       ,
-        glue("{crep}/sigs/{pref}-indel\\.tsv\\.gz$")                                         , "read_sigsTsv"       ,
-        glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")     , "read_pcgrJson"      ,
-        glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.variant_counts_process\\.json$") , "read_smlvSomCounts" ,
+        ~regex                                                                               , ~fun                    ,
+        glue("{crep}/{pref}-qc_summary\\.tsv\\.gz$")                                         , "read_qcSum"            ,
+        glue("{crep}/hrd/{pref}-hrdetect\\.tsv\\.gz$")                                       , "read_hrdHrdetect"      ,
+        glue("{crep}/sigs/{pref}-snv_2015\\.tsv\\.gz$")                                      , "read_sigsTsv"          ,
+        glue("{crep}/sigs/{pref}-snv_2020\\.tsv\\.gz$")                                      , "read_sigsTsv"          ,
+        glue("{crep}/sigs/{pref}-dbs\\.tsv\\.gz$")                                           , "read_sigsTsv"          ,
+        glue("{crep}/sigs/{pref}-indel\\.tsv\\.gz$")                                         , "read_sigsTsv"          ,
+        glue("{crep}/purple/{pref}-purple_cnv_som\\.tsv\\.gz$")                              , "read_purpleCnvSom"     ,
+        glue("{crep}/purple/{pref}-purple_cnv_som_gene\\.tsv\\.gz$")                         , "read_purpleCnvSomGene" ,
+        glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")     , "read_pcgrJson"         ,
+        glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.variant_counts_process\\.json$") , "read_smlvSomCounts"    ,
       )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$libid_tumor <- libid_tumor
@@ -176,6 +178,35 @@ Wf_sash <- R6::R6Class(
         ) |>
         tidyr::pivot_wider(names_from = "variable", values_from = "value")
       tibble::tibble(name = "qcsum", data = list(dat[]))
+    },
+    #' @description Read `purple_cnv_som.tsv.gz` cancer report file.
+    #' @param x Path to file.
+    read_purpleCnvSom = function(x) {
+      readr::read_tsv(
+        x,
+        col_select = c("Chr", "Start", "End", "CN"),
+        col_types = c("c", "i", "i", "d")
+      )
+    },
+    #' @description Read `purple_cnv_som_gene.tsv.gz` cancer report file.
+    #' @param x Path to file.
+    read_purpleCnvSomGene = function(x) {
+      readr::read_tsv(
+        x,
+        col_select = c(
+          "gene",
+          "chrom",
+          "start",
+          "end",
+          "minCN",
+          "maxCN",
+          "transcriptID",
+          "somReg",
+          "minReg",
+          "minRegStartEnd"
+        ),
+        col_types = c("c", "c", "d", "d", "d", "d", "c", "d", "d", "c")
+      )
     }
   ) # end public
 )

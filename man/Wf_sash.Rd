@@ -75,6 +75,8 @@ d_write <- s1$write(
 \item \href{#method-Wf_sash-read_hrdHrdetect}{\code{Wf_sash$read_hrdHrdetect()}}
 \item \href{#method-Wf_sash-read_sigsTsv}{\code{Wf_sash$read_sigsTsv()}}
 \item \href{#method-Wf_sash-read_qcSum}{\code{Wf_sash$read_qcSum()}}
+\item \href{#method-Wf_sash-read_purpleCnvSom}{\code{Wf_sash$read_purpleCnvSom()}}
+\item \href{#method-Wf_sash-read_purpleCnvSomGene}{\code{Wf_sash$read_purpleCnvSomGene()}}
 \item \href{#method-Wf_sash-clone}{\code{Wf_sash$clone()}}
 }
 }
@@ -238,6 +240,40 @@ Read signature cancer report file.
 Read \code{qc_summary.tsv.gz} cancer report file.
 \subsection{Usage}{
 \if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_qcSum(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_sash-read_purpleCnvSom"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_purpleCnvSom}{}}}
+\subsection{Method \code{read_purpleCnvSom()}}{
+Read \code{purple_cnv_som.tsv.gz} cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_purpleCnvSom(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_sash-read_purpleCnvSomGene"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_purpleCnvSomGene}{}}}
+\subsection{Method \code{read_purpleCnvSomGene()}}{
+Read \code{purple_cnv_som_gene.tsv.gz} cancer report file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_purpleCnvSomGene(x)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
