@@ -68,6 +68,7 @@ d_write <- s1$write(
 \itemize{
 \item \href{#method-Wf_sash-new}{\code{Wf_sash$new()}}
 \item \href{#method-Wf_sash-print}{\code{Wf_sash$print()}}
+\item \href{#method-Wf_sash-read_bcftoolsStats}{\code{Wf_sash$read_bcftoolsStats()}}
 \item \href{#method-Wf_sash-read_smlvSomCounts}{\code{Wf_sash$read_smlvSomCounts()}}
 \item \href{#method-Wf_sash-read_pcgrJson}{\code{Wf_sash$read_pcgrJson()}}
 \item \href{#method-Wf_sash-read_hrdDragen}{\code{Wf_sash$read_hrdDragen()}}
@@ -127,6 +128,23 @@ Print details about the Workflow.
 \if{html}{\out{<div class="arguments">}}
 \describe{
 \item{\code{...}}{(ignored).}
+}
+\if{html}{\out{</div>}}
+}
+}
+\if{html}{\out{<hr>}}
+\if{html}{\out{<a id="method-Wf_sash-read_bcftoolsStats"></a>}}
+\if{latex}{\out{\hypertarget{method-Wf_sash-read_bcftoolsStats}{}}}
+\subsection{Method \code{read_bcftoolsStats()}}{
+Read \code{bcftools_stats.txt} file.
+\subsection{Usage}{
+\if{html}{\out{<div class="r">}}\preformatted{Wf_sash$read_bcftoolsStats(x)}\if{html}{\out{</div>}}
+}
+
+\subsection{Arguments}{
+\if{html}{\out{<div class="arguments">}}
+\describe{
+\item{\code{x}}{Path to file.}
 }
 \if{html}{\out{</div>}}
 }
