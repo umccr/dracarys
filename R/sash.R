@@ -78,8 +78,7 @@ Wf_sash <- R6::R6Class(
         glue("{crep}/purple/{pref}-purple_cnv_som_gene\\.tsv\\.gz$")                         , "read_purpleCnvSomGene" ,
         glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")     , "read_pcgrJson"         ,
         glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.variant_counts_process\\.json$") , "read_smlvSomCounts"    ,
-        glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.bcftools_stats\\.txt$")          , "read_bcftoolsStats"    ,
-        glue("smlv_germline/report/{libid_normal}\\.germline\\.bcftools_stats\\.txt$")       , "read_bcftoolsStats"
+        glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.bcftools_stats\\.txt$")          , "read_bcftoolsStats"
       )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$libid_tumor <- libid_tumor
