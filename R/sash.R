@@ -78,6 +78,8 @@ Wf_sash <- R6::R6Class(
         glue("{crep}/purple/{pref}-purple_cnv_som_gene\\.tsv\\.gz$")                         , "read_purpleCnvSomGene" ,
         glue("smlv_somatic/report/pcgr/{libid_tumor}\\.pcgr_acmg\\.grch38\\.json\\.gz$")     , "read_pcgrJson"         ,
         glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.variant_counts_process\\.json$") , "read_smlvSomCounts"    ,
+        glue("smlv_somatic/report/{libid_tumor}\\.somatic\\.bcftools_stats\\.txt$")          , "read_bcftoolsStats"    ,
+        glue("smlv_germline/report/{libid_normal}\\.germline\\.bcftools_stats\\.txt$")       , "read_bcftoolsStats"
       )
       super$initialize(path = path, wname = wname, regexes = regexes)
       self$libid_tumor <- libid_tumor
@@ -97,6 +99,39 @@ Wf_sash <- R6::R6Class(
       )
       print(res)
       invisible(self)
+    },
+    #' @description Read `bcftools_stats.txt` file.
+    #' @param x Path to file.
+    read_bcftoolsStats = function(x) {
+      abbrev_nm <- c(
+        "noalts" = "no-ALTs",
+        "snps" = "SNPs",
+        "mnps" = "MNPs",
+        "indels" = "indels",
+        "others" = "others",
+        "multiallelic_sites" = "multiallelic sites",
+        "multiallelic_sites_snp" = "multiallelic SNP sites"
+      )
+      ln <- readr::read_lines(x)
+      d <- ln[grepl("^SN", ln)]
+      cnames <- c(
+        "SN_dummy",
+        "id",
+        "key",
+        "value"
+      )
+      dat <- d |>
+        I() |>
+        readr::read_tsv(
+          col_names = cnames,
+          col_types = "cdcd"
+        ) |>
+        dplyr::mutate(key = sub("number of (.*):", "\\1", .data$key)) |>
+        dplyr::select("key", "value") |>
+        tidyr::pivot_wider(names_from = "key", values_from = "value") |>
+        dplyr::rename(dplyr::all_of(abbrev_nm))
+
+      tibble::tibble(name = "bcftoolsstats", data = list(dat[]))
     },
     #' @description Read `somatic.variant_counts_process.json` file.
     #' @param x Path to file.
