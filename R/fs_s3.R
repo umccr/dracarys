@@ -1,38 +1,59 @@
 #' List Objects in AWS S3 Directory
 #'
-#' Returns some or all (up to 1,000) of the objects in an S3 directory.
+#' Lists all objects in an S3 directory.
 #'
 #' @param s3dir S3 directory.
-#' @param max_objects Maximum objects returned.
+#' @param max_objects Maximum objects returned. By default, iterates by 1000
+#' objects at a time until the bucket/prefix is exhausted.
 #'
 #'
 #' @return A tibble with object basename, size, last modified timestamp, and
 #' full S3 path.
 #' @examples
 #' \dontrun{
-#' p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
-#' p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
-#' s3dir <- file.path(p1, p2, "cancer_report/cancer_report_tables")
+#' p1 <- "s3://project-data-491085415398-ap-southeast-2/byob-icav2"
+#' p2 <- "project-tothill-main/cuppa/analysis/oncoanalyser-wgts-dna/202601077e38c827"
+#' s3dir <- file.path(p1, p2)
 #' s3_list_files_dir(s3dir, max_objects = 15)
 #' }
 #' @export
-s3_list_files_dir <- function(s3dir, max_objects = 1000) {
+s3_list_files_dir <- function(s3dir, max_objects = Inf) {
   assertthat::assert_that(grepl("^s3://", s3dir))
   bucket <- sub("s3://(.*?)/.*", "\\1", s3dir)
   prefix <- sub("s3://(.*?)/(.*)", "\\2", s3dir)
-  s3 <- paws.storage::s3()
-  l <- s3$list_objects_v2(
-    Bucket = bucket,
-    Prefix = prefix,
-    MaxKeys = max_objects
-  )
-  assertthat::assert_that(all(c("Contents", "KeyCount") %in% names(l)))
   cols_sel <- c("bname", "size", "lastmodified", "path")
+  s3 <- paws.storage::s3()
+  all_contents <- list()
+  continuation_token <- NULL
+  total_fetched <- 0
+
+  repeat {
+    keys_to_fetch <- min(1000, max_objects - total_fetched)
+    args <- list(
+      Bucket = bucket,
+      Prefix = prefix,
+      MaxKeys = as.integer(keys_to_fetch)
+    )
+    if (!is.null(continuation_token)) {
+      args$ContinuationToken <- continuation_token
+    }
+    l <- do.call(s3$list_objects_v2, args)
+    if (l[["KeyCount"]] > 0) {
+      all_contents <- c(all_contents, l[["Contents"]])
+    }
+    total_fetched <- length(all_contents)
+
+    # Stop if no more results, not truncated, or we've hit max_objects
+    if (!isTRUE(l[["IsTruncated"]]) || total_fetched >= max_objects) {
+      break
+    }
+    continuation_token <- l[["NextContinuationToken"]]
+  }
   # handle no results
-  if (l[["KeyCount"]] == 0) {
+  if (length(all_contents) == 0) {
     return(empty_tbl(cnames = cols_sel, ctypes = "cccc"))
   }
-  d <- l[["Contents"]] |>
+  d <- all_contents |>
     purrr::map(
       \(x) {
         tibble::tibble(

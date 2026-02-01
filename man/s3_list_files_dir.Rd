@@ -4,25 +4,26 @@
 \alias{s3_list_files_dir}
 \title{List Objects in AWS S3 Directory}
 \usage{
-s3_list_files_dir(s3dir, max_objects = 1000)
+s3_list_files_dir(s3dir, max_objects = Inf)
 }
 \arguments{
 \item{s3dir}{S3 directory.}
 
-\item{max_objects}{Maximum objects returned.}
+\item{max_objects}{Maximum objects returned. By default, iterates by 1000
+objects at a time until the bucket/prefix is exhausted.}
 }
 \value{
 A tibble with object basename, size, last modified timestamp, and
 full S3 path.
 }
 \description{
-Returns some or all (up to 1,000) of the objects in an S3 directory.
+Lists all objects in an S3 directory.
 }
 \examples{
 \dontrun{
-p1 <- "s3://org.umccr.data.oncoanalyser/analysis_data/SBJ05373/sash"
-p2 <- "20240707becde493/L2401018_L2401017/SBJ05373_MDX240220"
-s3dir <- file.path(p1, p2, "cancer_report/cancer_report_tables")
+p1 <- "s3://project-data-491085415398-ap-southeast-2/byob-icav2"
+p2 <- "project-tothill-main/cuppa/analysis/oncoanalyser-wgts-dna/202601077e38c827"
+s3dir <- file.path(p1, p2)
 s3_list_files_dir(s3dir, max_objects = 15)
 }
 }
