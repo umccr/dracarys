@@ -20,8 +20,8 @@ s3_list_files_filter_relevant(
 
 \item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 
-\item{max_objects}{Maximum objects returned. By default, iterates by 1000
-objects at a time until the bucket/prefix is exhausted.}
+\item{max_objects}{Maximum objects returned (def: 1000). For a recursive listing
+use \code{Inf}.}
 
 \item{presign}{Include presigned URLs (def: FALSE).}
 

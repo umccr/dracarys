@@ -4,13 +4,13 @@
 \alias{s3_list_files_dir}
 \title{List Objects in AWS S3 Directory}
 \usage{
-s3_list_files_dir(s3dir, max_objects = Inf)
+s3_list_files_dir(s3dir, max_objects = 1000)
 }
 \arguments{
 \item{s3dir}{S3 directory.}
 
-\item{max_objects}{Maximum objects returned. By default, iterates by 1000
-objects at a time until the bucket/prefix is exhausted.}
+\item{max_objects}{Maximum objects returned (def: 1000). For a recursive listing
+use \code{Inf}.}
 }
 \value{
 A tibble with object basename, size, last modified timestamp, and

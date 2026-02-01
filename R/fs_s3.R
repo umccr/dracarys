@@ -3,9 +3,8 @@
 #' Lists all objects in an S3 directory.
 #'
 #' @param s3dir S3 directory.
-#' @param max_objects Maximum objects returned. By default, iterates by 1000
-#' objects at a time until the bucket/prefix is exhausted.
-#'
+#' @param max_objects Maximum objects returned (def: 1000). For a recursive listing
+#' use `Inf`.
 #'
 #' @return A tibble with object basename, size, last modified timestamp, and
 #' full S3 path.
@@ -17,7 +16,7 @@
 #' s3_list_files_dir(s3dir, max_objects = 15)
 #' }
 #' @export
-s3_list_files_dir <- function(s3dir, max_objects = Inf) {
+s3_list_files_dir <- function(s3dir, max_objects = 1000) {
   assertthat::assert_that(grepl("^s3://", s3dir))
   bucket <- sub("s3://(.*?)/.*", "\\1", s3dir)
   prefix <- sub("s3://(.*?)/(.*)", "\\2", s3dir)

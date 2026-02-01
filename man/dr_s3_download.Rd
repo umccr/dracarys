@@ -18,8 +18,8 @@ dr_s3_download(
 
 \item{outdir}{Path to output directory.}
 
-\item{max_objects}{Maximum objects returned. By default, iterates by 1000
-objects at a time until the bucket/prefix is exhausted.}
+\item{max_objects}{Maximum objects returned (def: 1000). For a recursive listing
+use \code{Inf}.}
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 
