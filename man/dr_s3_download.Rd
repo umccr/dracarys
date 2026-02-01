@@ -18,7 +18,8 @@ dr_s3_download(
 
 \item{outdir}{Path to output directory.}
 
-\item{max_objects}{Maximum objects returned.}
+\item{max_objects}{Maximum objects returned (def: 1000). For a recursive listing
+use \code{Inf}.}
 
 \item{pattern}{Pattern to further filter the returned file type tibble.}
 

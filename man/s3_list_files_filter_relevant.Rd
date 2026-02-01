@@ -20,7 +20,8 @@ s3_list_files_filter_relevant(
 
 \item{regexes}{Tibble with \code{regex} and \code{fun}ction name.}
 
-\item{max_objects}{Maximum objects returned.}
+\item{max_objects}{Maximum objects returned (def: 1000). For a recursive listing
+use \code{Inf}.}
 
 \item{presign}{Include presigned URLs (def: FALSE).}
 
