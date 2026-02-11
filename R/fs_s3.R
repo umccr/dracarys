@@ -327,3 +327,61 @@ s3_search <- function(pat, rows) {
     ) |>
     dplyr::select("path", "size", "date_aest", "id", "unique_hash")
 }
+
+#' AWS S3 Sync Helper
+#'
+#' @param src (`character(1)`)\cr
+#' S3 source path.
+#' @param dest (`character(1)`)\cr
+#' Local destination path.
+#' @param pats (`tibble()`)\cr
+#' Patterns tibble with `inex` ("in" or "ex") and `pat` (pattern) columns.
+#'
+#' @examples
+#' \dontrun{
+#' src <- "s3://my-awesome-bucket/path/to/run1"
+#' dest <- sub("s3:/", "~/s3", src)
+#' s3_sync(src, dest)
+#' }
+#' @export
+s3_sync <- function(src, dest, pats = NULL) {
+  pats_default <- tibble::tribble(
+    ~inex , ~pat                              ,
+    "ex"  , "*"                               ,
+    "in"  , "*_cov_report"                    ,
+    "in"  , "*_contig_mean_cov"               ,
+    "in"  , "*_coverage_metrics"              ,
+    "in"  , "*_fine_hist"                     ,
+    "in"  , "*.fragment_length_hist.csv"      ,
+    "in"  , "*_hist.csv"                      ,
+    "in"  , "*.cnv_metrics.csv"               ,
+    "in"  , "*.fastqc_metrics.csv"            ,
+    "in"  , "*.gc_metrics.csv"                ,
+    "in"  , "*.gvcf_metrics.csv"              ,
+    "in"  , "*.vc_hethom_ratio_metrics.csv"   ,
+    "in"  , "*.hrdscore.csv"                  ,
+    "in"  , "*.mapping_metrics.csv"           ,
+    "in"  , "*.microsat_diffs.txt"            ,
+    "in"  , "*.microsat_output.json"          ,
+    "in"  , "*.ploidy_estimation_metrics.csv" ,
+    "in"  , "*.ploidy.vcf.gz"                 ,
+    "in"  , "*-replay.json"                   ,
+    "in"  , "*.roh.bed"                       ,
+    "in"  , "*.roh_metrics.csv"               ,
+    "in"  , "*.sv_metrics.csv"                ,
+    "in"  , "*.targeted.vcf.gz"               ,
+    "in"  , "*.time_metrics.csv"              ,
+    "in"  , "*.trimmer_metrics.csv"           ,
+    "in"  , "*.tmb.trace.tsv"                 ,
+    "in"  , "*.tmb.metrics.csv"               ,
+    "in"  , "*.umi_metrics.csv"               ,
+    "in"  , "*.vc_metrics.csv"
+  )
+  pats <- pats %||% pats_default
+  cmd_args <- pats |>
+    dplyr::mutate(arg = glue::glue('--{.data$inex}clude "{.data$pat}"')) |>
+    dplyr::pull(.data$arg) |>
+    paste(collapse = " ")
+  cmd <- glue::glue("aws s3 sync {src} {dest} {cmd_args}")
+  system(cmd)
+}
