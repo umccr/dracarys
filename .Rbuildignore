@@ -1,6 +1,7 @@
 ^CODE_OF_CONDUCT\.md$
 ^Dockerfile$
 ^LICENSE\.md$
+^Makefile$
 ^README\.qmd$
 ^TODO\.md$
 ^\.DS_Store$
