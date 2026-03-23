@@ -588,6 +588,7 @@ dragen_vc_metrics_read <- function(x) {
     "Multiallelic"                              , "var_multiallelic"                  , FALSE   ,
     "Single allelic"                            , "var_singleallelic"                 , FALSE   ,
     "SNPs"                                      , "var_snp"                           , FALSE   ,
+    "MNPs"                                      , "var_mnp"                           , FALSE   ,
     "Insertions"                                , "var_ins"                           , FALSE   ,
     "Insertions (Hap)"                          , "var_ins_hap"                       , FALSE   ,
     "Insertions (Hom)"                          , "var_ins_hom"                       , FALSE   ,
